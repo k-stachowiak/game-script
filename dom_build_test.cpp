@@ -1,4 +1,4 @@
-#include "dom.h"
+#include "dom_build.h"
 
 #include <unittest++/UnitTest++.h>
 

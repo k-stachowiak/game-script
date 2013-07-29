@@ -1,15 +1,13 @@
 #include <iterator>
 
-#include "dom.h"
+#include "dom_build.h"
 
 namespace
 {
 
     inline bool is_atom(const std::string& tok)
     {
-        return tok.size() != 1 ||
-                   (tok[0] != '(' &&
-                    tok[0] != ')');
+        return tok.size() != 1 || (tok[0] != '(' && tok[0] != ')');
     }
 
     inline bool is_lopen(const std::string& tok)
@@ -73,4 +71,5 @@ namespace script
 
         return { node_type::list, {}, top_nodes };
     }
+
 }

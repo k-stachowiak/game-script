@@ -24,10 +24,6 @@ namespace script
                std::equal(begin(lhs.list), end(lhs.list), begin(rhs.list));
     }
 
-    // This takes a non-const argument as a phony ")" is appended at the end
-    // of the tokens list for the time of the processing.
-    node build_dom_tree(std::vector<std::string>&);
-
 }
 
 #endif
