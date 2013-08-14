@@ -22,7 +22,6 @@
 
 #include "ast_build.h"
 #include "ast_parse.h"
-#include "dom_pattern.h"
 #include "tok.h"
 
 namespace

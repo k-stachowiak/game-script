@@ -4,10 +4,9 @@ TEST_LD_FLAGS=-lUnitTest++
 
 .PHONY: test clean doc
 
-test: tokenize_test dom_build_test dom_pattern_test ast_build_test
+test: tokenize_test dom_build_test ast_build_test
 	./tokenize_test
 	./dom_build_test
-	./dom_pattern_test
 	./ast_build_test
 
 tokenize_test: tokenize_test.cpp tokenize.cpp tok.h
@@ -15,9 +14,6 @@ tokenize_test: tokenize_test.cpp tokenize.cpp tok.h
 
 dom_build_test: dom_build_test.cpp dom_build.cpp dom_build.h dom.h
 	$(CXX) $(CXX_FLAGS) -o dom_build_test dom_build.cpp dom_build_test.cpp $(TEST_LD_FLAGS)
-
-dom_pattern_test: dom_pattern_test.cpp dom_pattern.h dom.h
-	$(CXX) $(CXX_FLAGS) -o dom_pattern_test dom_pattern_test.cpp $(TEST_LD_FLAGS)
 
 ast_build_test: ast_build_test.cpp ast_build.cpp ast.cpp ast_build.h ast.h
 	$(CXX) $(CXX_FLAGS) -o ast_build_test ast.cpp ast_build_test.cpp $(TEST_LD_FLAGS)
