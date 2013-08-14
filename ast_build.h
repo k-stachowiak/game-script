@@ -17,19 +17,14 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TOK_H
-#define TOK_H
+#ifndef AST_BUILD_H
+#define AST_BUILD_H
+
+#include "dom.h"
+#include "ast.h"
 
 namespace script
 {
-    enum class token_char : char
-    {
-        lopen = '(',        // list opening token
-        lclose = ')',       // list closing token
-        comment = ';',      // comment initializing token
-        strdelim = '"',     // string delimiter
-        strescape = '\\'    // stirng delimiter escape
-    };
 }
 
 #endif

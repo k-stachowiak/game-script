@@ -25,6 +25,7 @@
 
 #include <unittest++/UnitTest++.h>
 
+#include "tokenize.h"
 #include "tok.h"
 
 namespace {
@@ -45,11 +46,32 @@ namespace {
     // Anything but white spaces.
     const std::string ARBITRARY_TOKEN = "ArbitraryToken";
 
+    // String with white space.
+    const std::string WSPACE_STRING = "string with white spaces";
+
+    // The delimiter string.
+    const std::string DELIM(1, static_cast<char>(script::token_char::strdelim));
+
+    // The comment char string.
+    const std::string COMMENT_DELIM(1, static_cast<char>(script::token_char::comment));
+
+    // String with escaped doublequote.
+    const std::string ESC_DQUOTE = "string with escaped '\\" + DELIM + "'";
+
+    // Delimited atom.
+    const std::string DELIMITED_ATOM = DELIM + WSPACE_STRING + DELIM;
+
+    // Delimited atom with escaped delimiter.
+    const std::string DELIMITED_ATOM_WESC = DELIM + ESC_DQUOTE + DELIM;
+
+    // Empty delimited atom.
+    const std::string EMPTY_DELIMITED_ATOM = DELIM + DELIM;
+
     // All white spaces checked by the std::iswspace(...).
     const std::string ALL_WSPACES = " \f\n\r\t\v";
 
     // Anything but new line.
-    const std::string COMMENT_STRING = "; some irrelevant text";
+    const std::string COMMENT_STRING = COMMENT_DELIM + " some irrelevant text";
 
 }
 
@@ -72,6 +94,24 @@ SUITE(TokenizerTestSuite)
         {
             std::vector<std::string> actual_tokens = script::tokenize(ARBITRARY_TOKEN);
             std::vector<std::string> expected_tokens { ARBITRARY_TOKEN };
+            CHECK(vec_equal(actual_tokens, expected_tokens));
+        }
+
+        {
+            std::vector<std::string> actual_tokens = script::tokenize(EMPTY_DELIMITED_ATOM);
+            std::vector<std::string> expected_tokens { std::string {} };
+            CHECK(vec_equal(actual_tokens, expected_tokens));
+        }
+
+        {
+            std::vector<std::string> actual_tokens = script::tokenize(DELIMITED_ATOM);
+            std::vector<std::string> expected_tokens { WSPACE_STRING };
+            CHECK(vec_equal(actual_tokens, expected_tokens));
+        }
+
+        {
+            std::vector<std::string> actual_tokens = script::tokenize(DELIMITED_ATOM_WESC);
+            std::vector<std::string> expected_tokens { ESC_DQUOTE };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
     }

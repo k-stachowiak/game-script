@@ -22,6 +22,9 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <iostream>
+#include <iterator>
 
 namespace script
 {
@@ -34,6 +37,26 @@ namespace script
         std::string atom;
         std::vector<node> list;
     };
+
+    inline std::ostream& operator<<(std::ostream& out, const node& n)
+    {
+        if (n.type == node_type::atom)
+        {
+            out << n.atom;
+        }
+        else
+        {
+            out << "{" << std::endl;
+
+            std::copy(begin(n.list),
+                      end(n.list),
+                      std::ostream_iterator<node>(out, " "));
+
+            out << "}" << std::endl;
+        }
+
+        return out;
+    }
 
     inline bool operator==(const node& lhs, const node& rhs)
     {

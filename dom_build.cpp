@@ -17,8 +17,6 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iterator>
-
 #include "dom_build.h"
 
 namespace

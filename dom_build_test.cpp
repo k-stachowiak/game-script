@@ -18,6 +18,7 @@
  */
 
 #include "dom_build.h"
+#include "tok.h"
 
 #include <unittest++/UnitTest++.h>
 

@@ -17,8 +17,8 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EXPECT_H
-#define EXPECT_H
+#ifndef DOM_PATTERN_H
+#define DOM_PATTERN_H
 
 #include <tuple>
 #include <utility>
@@ -27,59 +27,59 @@
 
 namespace script {
 
-    namespace detail
+
+    // Compound matching.
+    // ------------------
+
+    template<size_t I = 0, typename... Tp>
+    inline typename std::enable_if<I == sizeof...(Tp), bool>::type
+    match(std::tuple<Tp...> const& tup, script::node const&)
     {
-
-        // Tuple helpers.
-        // --------------
-
-        template<size_t I = 0, typename... Tp>
-        inline typename std::enable_if<I == sizeof...(Tp), bool>::type
-        check(std::tuple<Tp...> const& tup, script::node const&)
-        {
-            return true;
-        }
-
-        template<std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if<I < sizeof...(Tp), bool>::type
-        check(std::tuple<Tp...> const& tup, script::node const& n)
-        {
-            return check(std::get<I>(tup), n.list[I]) &&
-                   check<I + 1, Tp...>(tup, n);
-        }
-
+        return true;
     }
+
+    template<std::size_t I = 0, typename... Tp>
+    inline typename std::enable_if<I < sizeof...(Tp), bool>::type
+    match(std::tuple<Tp...> const& tup, script::node const& n)
+    {
+        return match(std::get<I>(tup), n.list[I]) &&
+               match<I + 1, Tp...>(tup, n);
+    }
+
 
     // Expect implementation.
     // ----------------------
+
+    struct pattern_atom
+    {
+        friend bool match(pattern_atom const&, script::node const& n)
+        {
+            return (n.type == script::node_type::atom);
+        }
+    };
             
-    struct expect_atom
+    struct pattern_spec_atom
     {
         std::string expected;
 
-        friend bool check(expect_atom const& exp, script::node const& n)
+        friend bool match(pattern_spec_atom const& exp, script::node const& n)
         {
-            if(n.type != script::node_type::atom)
+            if (n.type != script::node_type::atom)
             {
                 return false;
-            }
-
-            if(exp.expected.empty())
-            {
-                return true;
             }
 
             return n.atom == exp.expected;
         }
     };
 
-    struct expect_atom_cap
+    struct pattern_atom_cap
     {
         std::string& reference;
 
-        friend bool check(expect_atom_cap const& exp, script::node const& n)
+        friend bool match(pattern_atom_cap const& exp, script::node const& n)
         {
-            if(n.type != script::node_type::atom)
+            if (n.type != script::node_type::atom)
             {
                 return false;
             }
@@ -92,34 +92,42 @@ namespace script {
 
 
     template<class Left, class Right, class Op>
-    struct expect_binop
+    struct pattern_binop
     {
         Left left;
         Right right;
 
-        friend bool check(
-                expect_binop<Left, Right, Op> const& exp,
+        friend bool match(
+                pattern_binop<Left, Right, Op> const& exp,
                 script::node const& n)
         {
             Op op;
-            return op(check(exp.left, n), check(exp.right, n));
+            return op(match(exp.left, n), match(exp.right, n));
+        }
+    };
+
+    struct pattern_list
+    {
+        friend bool match(pattern_list const&, script::node const& n)
+        {
+            return (n.type == script::node_type::list);
         }
     };
 
     template<class... Args>
-    struct expect_list
+    struct pattern_list_of
     {
         std::tuple<Args...> elements;
-        friend bool check(
-                expect_list<Args...> const& exp,
+        friend bool match(
+                pattern_list_of<Args...> const& exp,
                 script::node const& n)
         {
-            if(n.type != script::node_type::list)
+            if (n.type != script::node_type::list)
             {
                 return false;
             }
 
-            return detail::check(exp.elements, n);
+            return match(exp.elements, n);
         }
     };
 

@@ -17,19 +17,16 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TOK_H
-#define TOK_H
+#ifndef TOKENIZE_H
+#define TOKENIZE_H
+
+#include <string>
+#include <vector>
 
 namespace script
 {
-    enum class token_char : char
-    {
-        lopen = '(',        // list opening token
-        lclose = ')',       // list closing token
-        comment = ';',      // comment initializing token
-        strdelim = '"',     // string delimiter
-        strescape = '\\'    // stirng delimiter escape
-    };
+    std::vector<std::string> tokenize(const std::string&);
 }
 
 #endif
+

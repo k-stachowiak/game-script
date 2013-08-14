@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "tokenize.h"
 #include "tok.h"
 
 namespace
@@ -45,7 +46,7 @@ namespace
     template<class Iter>
     std::string tok_to_str(const token<Iter>& tok)
     {
-        return std::string{ tok.first, tok.last };
+        return std::string { tok.first, tok.last };
     }
 
     // The generic tokenizer implementation.
@@ -57,6 +58,12 @@ namespace
         // is by the STL algorithms. This minimizes the risk of buffer
         // overrun as we always proceed against an explicit end iterator.
 
+        const char lopen = static_cast<char>(script::token_char::lopen);
+        const char lclose = static_cast<char>(script::token_char::lclose);
+        const char comment = static_cast<char>(script::token_char::comment);
+        const char strdelim = static_cast<char>(script::token_char::strdelim);
+        const char strescape = static_cast<char>(script::token_char::strescape);
+
         auto current = first;
 
         // 1. Skip the initial white spaces.
@@ -67,8 +74,7 @@ namespace
         while (current != last)
         {
             // 2.1. Parenthesis cases.
-            if (*current == static_cast<char>(script::token_char::lopen) ||
-                *current == static_cast<char>(script::token_char::lclose))
+            if (*current == lopen || *current == lclose)
             {
                 *out++ = token<InIter> { current, current + 1 };
                 current = std::find_if_not(current + 1, last, std::iswspace);
@@ -76,7 +82,7 @@ namespace
             }
 
             // 2.2. Comment case.
-            else if (*current == static_cast<char>(script::token_char::comment))
+            else if (*current == comment)
             {
                 auto end_line = std::find(current, last, '\n');
                 // *out++ = { current, end_line };
@@ -84,7 +90,26 @@ namespace
                 if (current == last) return;
             }
 
-            // 2.3. Atom case.
+            // 2.3. Delimited atom case.
+            else if (*current == strdelim)
+            {
+                auto end_atom = current;
+
+                do 
+                {
+                    end_atom = std::find(end_atom + 1, last, strdelim);
+                    if(end_atom == last) return; // FIXME: This is actually an error!
+
+                } while (*(end_atom - 1) == strescape);
+
+                *out++ = { current + 1, end_atom };
+
+                current = std::find_if_not(end_atom + 1, last, std::iswspace);
+
+                if(current == last) return; // FIXME: This is actually an error!
+            }
+
+            // 2.4. Regular atom case.
             else
             {
                 auto end_atom = std::find_if_not(current, last, allowed_in_atom);

@@ -17,7 +17,7 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dom_expect.h"
+#include "dom_pattern.h"
 
 #include <unittest++/UnitTest++.h>
 
@@ -37,15 +37,14 @@ SUITE(DomExpectedTestSuite)
         script::node string_node1 { script::node_type::atom, ARBITRARY_ATOM1, {} };
         script::node string_node2 { script::node_type::atom, ARBITRARY_ATOM2, {} };
 
-        script::expect_atom exp_str { ARBITRARY_ATOM1 };
+        script::pattern_spec_atom exp_str { ARBITRARY_ATOM1 };
 
-        CHECK(check(exp_str, string_node1));
-        CHECK(!check(exp_str, string_node2));
+        CHECK(match(exp_str, string_node1));
+        CHECK(!match(exp_str, string_node2));
     }
 
     TEST(CaptureMatch)
     {
-
         script::node string_node { script::node_type::atom, ARBITRARY_ATOM1, {} };
 
         script::node list_node {
@@ -66,10 +65,10 @@ SUITE(DomExpectedTestSuite)
         };
 
         std::string captured;
-        script::expect_atom_cap exp_cap { captured };
+        script::pattern_atom_cap exp_cap { captured };
 
-        CHECK(!check(exp_cap, list_node));
-        CHECK(check(exp_cap, string_node));
+        CHECK(!match(exp_cap, list_node));
+        CHECK(match(exp_cap, string_node));
         CHECK(captured == ARBITRARY_ATOM1);
     }
 
@@ -93,19 +92,21 @@ SUITE(DomExpectedTestSuite)
             }
         };
 
-        script::expect_atom exp_ast { ARBITRARY_ATOM1 };
-        script::expect_atom exp_any {{}};
+        script::pattern_spec_atom exp_ast { ARBITRARY_ATOM1 };
+        script::pattern_atom exp_any;
 
-        script::expect_list<script::expect_atom, script::expect_atom> exp_list1 {
+        script::pattern_list_of<script::pattern_spec_atom, script::pattern_atom> exp_list1
+        {
            std::make_tuple(exp_ast, exp_any)
         };
         
-        script::expect_list<script::expect_atom, script::expect_atom> exp_list2 {
+        script::pattern_list_of<script::pattern_atom, script::pattern_atom> exp_list2
+        {
             std::make_tuple(exp_any, exp_any)
         };
 
-        CHECK(check(exp_list1, list_node));
-        CHECK(check(exp_list2, list_node));
+        CHECK(match(exp_list1, list_node));
+        CHECK(match(exp_list2, list_node));
     }
 
 }
