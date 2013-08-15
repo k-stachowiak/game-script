@@ -17,17 +17,25 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "environment.h"
+#include <iterator>
+
+#include "env.h"
 
 namespace script
 {
 
     environment::environment(
             const environment* parent,
-            const std::map<std::string, value>& values)
+            const std::map<std::string, value>& values,
+            std::map<std::string, func_def>&& func_defs)
     : m_parent(parent)
     , m_values(values)
-    {}
+    {
+        std::move(begin(func_defs), end(func_defs),
+                  std::inserter(m_func_defs, begin(m_func_defs)));
+    }
+
+    // ACHTUNG: massive duplication below. Go macros? :O
 
     bool environment::has_value(const std::string& symbol) const
     {
@@ -57,6 +65,42 @@ namespace script
         if (m_parent)
         {
             return m_parent->get_value(symbol);
+        }
+        else
+        {
+            // TODO: handle elegantly.
+            throw;
+        }
+    }
+
+    bool environment::has_func_def(const std::string& symbol) const
+    {
+        if (m_func_defs.find(symbol) != end(m_func_defs))
+        {
+            return true;
+        }
+
+        if (m_parent)
+        {
+            return m_parent->has_func_def(symbol);
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    const func_def& environment::get_func_def_reference(const std::string& symbol) const
+    {
+        auto found = m_func_defs.find(symbol);
+        if (found != end(m_func_defs))
+        {
+            return found->second;
+        }
+        
+        if (m_parent)
+        {
+            return m_parent->get_func_def_reference(symbol);
         }
         else
         {

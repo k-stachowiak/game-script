@@ -17,11 +17,8 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AST_BUILD_H
-#define AST_BUILD_H
-
-#include "dom.h"
-#include "ast.h"
+#ifndef ENV_BUILD_H
+#define ENV_BUILD_H
 
 namespace script
 {

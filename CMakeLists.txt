@@ -14,15 +14,24 @@ if (UNITTEST++_FOUND)
     include_directories (${UNITTEST++_INCLUDE_DIR})
 endif ()
 
-add_library (environment environment.cpp)
-
 # Unit tests.
 # -----------
 
-add_executable (test test.cpp
-        tokenize_test.cpp tokenize.cpp
-        dom_build_test.cpp dom_build.cpp
-        ast_build_test.cpp ast_build.cpp ast.cpp ast_build_test.cpp ast_build.cpp ast.cpp)
+add_executable (test
+    env_build.cpp
+    test.cpp
+    env_test.cpp
+    dom_build_test.cpp
+    env_build_test.cpp
+    tokenize.cpp
+    tokenize_test.cpp
+    dom_build.cpp
+    env.cpp
+    env_test.cpp
+    expr.cpp
+    expr_test.cpp
+)
 
-target_link_libraries (test environment ${UNITTEST++_LIBRARY})
+target_link_libraries (test ${UNITTEST++_LIBRARY})
+
 add_custom_command (TARGET test POST_BUILD COMMAND test)

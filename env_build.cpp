@@ -20,9 +20,10 @@
 #include <sstream>
 #include <iostream>
 
-#include "ast_build.h"
-#include "ast_parse.h"
+#include "env_build.h"
+#include "expr.h"
 #include "tok.h"
+#include "dom.h"
 
 namespace
 {

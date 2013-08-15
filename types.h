@@ -38,6 +38,29 @@ namespace script
         std::string string;
     };
 
+    inline bool operator==(const value& lhs, const value& rhs)
+    {
+        if (lhs.type != rhs.type)
+        {
+            return false;
+        }
+
+        switch (lhs.type)
+        {
+            case value_type::integer:
+                return lhs.integer == rhs.integer;
+
+            case value_type::real:
+                return lhs.real == rhs.real;
+
+            case value_type::string:
+                return lhs.string == rhs.string;
+
+            default:
+                // TODO: Handle nicely.
+                throw;
+        }
+    }
 }
 
 #endif

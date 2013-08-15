@@ -17,8 +17,8 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ast_build.h"
-#include "ast_build.cpp"
+#include "env_build.h"
+#include "env_build.cpp"
 
 #include <unittest++/UnitTest++.h>
 

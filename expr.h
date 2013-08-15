@@ -17,42 +17,31 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
+#ifndef EXPR_H
+#define EXPR_H
 
-#include <map>
 #include <string>
-#include <memory>
 #include <vector>
-#include <utility>
+#include <memory>
+#include <functional>
 
 #include "types.h"
 
 namespace script
 {
+    class environment;
 
-    class expression;
-
-    struct func_def
+    struct expression
     {
-        std::vector<std::pair<std::string, value_type>> form_args;
-        std::unique_ptr<expression> expr;
+        virtual ~expression() {}
+        virtual value eval(const environment& env) const = 0;
     };
 
-    class environment
-    {
-        const environment* m_parent;
-
-        std::map<std::string, value> m_values;
-
-    public:
-        environment(const environment*,
-                    const std::map<std::string, value>& values);
-
-        bool has_value(const std::string&) const;
-        value get_value(const std::string&) const;
-    };
-
+    std::unique_ptr<expression> expr_create_literal(value);
+    std::unique_ptr<expression> expr_create_reference(const std::string&);
+    std::unique_ptr<expression> expr_create_func_call(
+            const std::string&,
+            std::vector<std::unique_ptr<expression>>);
 }
 
 #endif
