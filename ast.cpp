@@ -17,24 +17,11 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-#include <algorithm>
-#include <functional>
-using std::placeholders::_1;
-
 #include "ast.h"
+#include "environment.h"
 
 namespace
 {
-
-    // Helpers.
-
-    script::value unpack_eval(const std::unique_ptr<script::expression>& expr,
-                              std::map<std::string, script::value>& bindings,
-                              std::map<std::string, script::func_def>& func_defs)
-    {
-        return expr->eval(bindings, func_defs);
-    }
 
     // Literal expression.
     // -------------------
@@ -44,12 +31,11 @@ namespace
         script::value m_value;
 
     public:
-        literal(script::value v)
+        literal(const script::value& v)
         : m_value(v)
         {}
 
-        script::value eval(std::map<std::string, script::value>&,
-                           std::map<std::string, script::func_def>&) const
+        script::value eval(const script::environment&) const
         {
             return m_value;
         }
@@ -63,12 +49,17 @@ namespace
         std::string m_symbol;
 
     public:
-        reference(std::string symbol) : m_symbol(symbol) {}
+        reference(const std::string& symbol) : m_symbol(symbol) {}
 
-        script::value eval(std::map<std::string, script::value>& bindings,
-                           std::map<std::string, script::func_def>&) const
+        script::value eval(const script::environment& env) const
         {
-            return bindings[m_symbol];
+            if (!env.has_value(m_symbol))
+            {
+                // TODO: Signal error here.
+                throw;
+            }
+
+            return env.get_value(m_symbol);
         }
     };
 
@@ -81,14 +72,13 @@ namespace
         std::vector<std::unique_ptr<script::expression>> m_actual_args;
 
     public:
-        func_call(const std::string symbol,
+        func_call(const std::string& symbol,
                   std::vector<std::unique_ptr<expression>> actual_args)
         : m_symbol(symbol)
         , m_actual_args(std::move(actual_args))
         {}
 
-        script::value eval(std::map<std::string, script::value>& bindings,
-                           std::map<std::string, script::func_def>& func_defs) const
+        script::value eval(const script::environment& env) const
         {
             // TODO: Implement.
             throw;

@@ -173,8 +173,3 @@ SUITE(TokenizerTestSuite)
     }
 }
 
-int main()
-{
-    return UnitTest::RunAllTests();
-}
-

@@ -17,31 +17,10 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AST_H
-#define AST_H
+#include <unittest++/UnitTest++.h>
 
-#include <string>
-#include <vector>
-#include <memory>
-
-#include "types.h"
-
-namespace script
+int main()
 {
-    class environment;
-
-    struct expression
-    {
-        virtual ~expression() {}
-        virtual value eval(const environment& env) const = 0;
-    };
-
-    std::unique_ptr<expression> expr_create_literal(value);
-    std::unique_ptr<expression> expr_create_reference(const std::string&);
-    std::unique_ptr<expression> expr_create_func_call(
-            const std::string&,
-            std::vector<std::unique_ptr<expression>>);
-
+    return UnitTest::RunAllTests();
 }
 
-#endif

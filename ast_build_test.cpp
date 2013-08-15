@@ -142,7 +142,3 @@ SUITE(AstBuilderTestSuite)
 
 }
 
-int main()
-{
-    return UnitTest::RunAllTests();
-}

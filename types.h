@@ -17,30 +17,26 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AST_H
-#define AST_H
-
-#include <string>
-#include <vector>
-#include <memory>
-
-#include "types.h"
+#ifndef TYPES_H
+#define TYPES_H
 
 namespace script
 {
-    class environment;
 
-    struct expression
+    enum class value_type
     {
-        virtual ~expression() {}
-        virtual value eval(const environment& env) const = 0;
+        integer,
+        real,
+        string
     };
 
-    std::unique_ptr<expression> expr_create_literal(value);
-    std::unique_ptr<expression> expr_create_reference(const std::string&);
-    std::unique_ptr<expression> expr_create_func_call(
-            const std::string&,
-            std::vector<std::unique_ptr<expression>>);
+    struct value
+    {
+        value_type type;
+        long integer;
+        double real;
+        std::string string;
+    };
 
 }
 

@@ -101,8 +101,3 @@ SUITE(DomBuilderTestSuite)
     }
 }
 
-int main()
-{
-    return UnitTest::RunAllTests();
-}
-
