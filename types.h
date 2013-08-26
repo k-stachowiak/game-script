@@ -20,6 +20,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <string>
+#include "util.h"
+
 namespace script
 {
 
@@ -61,6 +64,66 @@ namespace script
                 throw;
         }
     }
+
+    template<typename To>
+    struct convert_to;
+
+    template<> struct convert_to<long>
+    {
+        maybe<long> operator()(const value& val)
+        {
+            if (val.type != value_type::integer)
+            {
+                return {};
+            }
+            return { val.integer };
+        }
+    };
+
+    template<> struct convert_to<double>
+    {
+        maybe<double> operator()(const value& val)
+        {
+            if (val.type != value_type::real)
+            {
+                return {};
+            }
+            return { val.real };
+        }
+    };
+
+    template<> struct convert_to<std::string>
+    {
+        maybe<std::string> operator()(const value& val)
+        {
+            if (val.type != value_type::string)
+            {
+                return {};
+            }
+            return { val.string };
+        }
+    };
+
+    inline value convert_from(long val)
+    {
+        return value { value_type::integer, val, 0.0, {} };
+    }
+
+    inline value convert_from(double val)
+    {
+        return value { value_type::real, 0, val, {} };
+    }
+
+    inline value convert_from(const std::string& val)
+    {
+        return value { value_type::string, 0, 0.0, val };
+    }
+
+    template<typename To> struct type_of;
+    template<> struct type_of<int> { static const value_type type; };
+    template<> struct type_of<double> { static const value_type type; };
+    template<> struct type_of<std::string> { static const value_type type; };
+
 }
 
 #endif

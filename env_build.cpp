@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "env_build.h"
+#include "except.h"
 #include "expr.h"
 #include "tok.h"
 #include "dom.h"
@@ -31,10 +32,14 @@ namespace
 
     std::unique_ptr<script::expression> try_parse_literal(const script::node& n)
     {
-        if (n.type != script::node_type::atom ||
-            n.atom.empty()) // Not possible.
+        if (n.type != script::node_type::atom)
         {
             return {};
+        }
+
+        if (n.atom.empty())
+        {
+            throw script::empty_atom_string();
         }
 
         // Attempt at parsing string literal.
@@ -103,11 +108,14 @@ namespace
 
     std::unique_ptr<script::expression> try_parse_reference(const script::node& n)
     {
-        if (n.type != script::node_type::atom ||
-            isdigit(n.atom.front()) ||
-            n.atom.empty()) // Not possible.
+        if (n.type != script::node_type::atom || isdigit(n.atom.front()))
         {
             return {};
+        }
+
+        if (n.atom.empty())
+        {
+            throw script::empty_atom_string();
         }
 
         return script::expr_create_reference(n.atom);

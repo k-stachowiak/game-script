@@ -26,6 +26,16 @@
 #include <iostream>
 #include <iterator>
 
+/*
+ * This module represents the document object model for the script.
+ * At this level the standard expressions tree is considered which
+ * consists of the lists of atoms or lists. It is assumed implicitly
+ * that the contents of the document is inside a list, therefore the
+ * DOM root is a list.
+ *
+ * Test status : not tested (is this even necessary?)
+ */
+
 namespace script
 {
 

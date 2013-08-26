@@ -28,9 +28,24 @@
 
 #include "types.h"
 #include "expr.h"
+#include "util.h"
+
+/*
+ * The environment is a container of symbols and the related expressions.
+ * The two kind of items that may be stored in the environment are values
+ * and functions.
+ * Note that the functions are returned by pointer.
+ * - They cannot be passed by value (or maybe), because they depend on
+ *     the unique_ptr which may only be moved.
+ * - They cannot be passed by reference, because the result may be
+ *     "invalid", which is best represented by a null pointer in this case.
+ *
+ * Test status : Tested.
+ */
 
 namespace script
 {
+    // Function definition - should this be here? (TODO)
     struct func_def
     {
         std::vector<std::string> form_args;
@@ -46,18 +61,21 @@ namespace script
         std::map<std::string, value> m_values;
         std::map<std::string, func_def> m_func_defs;
 
+        bool signature_matches(
+                const func_def& fd,
+                std::vector<value_type> signature);
+
     public:
         environment(const environment*,
                     const std::map<std::string, value>&,
                     std::map<std::string, func_def>&&);
 
-        bool has_value(const std::string&) const;
-        value get_value(const std::string&) const;
+        maybe<value> get_value(const std::string&) const;
 
-        bool has_func_def(const std::string&) const;
-        const func_def& get_func_def_reference(const std::string&) const;
+        const func_def* get_func_def_reference(
+                const std::string&,
+                const std::vector<value_type>&) const;
     };
-
 }
 
 #endif

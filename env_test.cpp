@@ -42,9 +42,12 @@ SUITE(EnvironmentTestSuite)
     {
         script::environment env(nullptr, { { EXISTING_KEY_1, ARBITRARY_VALUE_1 } }, {});
 
-        CHECK(env.has_value(NON_EXISTING_KEY) == false);
-        CHECK(env.has_value(EXISTING_KEY_1) == true);
-        CHECK(env.get_value(EXISTING_KEY_1) == ARBITRARY_VALUE_1);
+        auto no_value = env.get_value(NON_EXISTING_KEY);
+        auto value = env.get_value(EXISTING_KEY_1);
+
+        CHECK(no_value.is_valid() == false);
+        CHECK(value.is_valid() == true);
+        CHECK(value.get() == ARBITRARY_VALUE_1);
     }
 
     TEST(ValuesInComplexStructure)
@@ -52,11 +55,15 @@ SUITE(EnvironmentTestSuite)
         script::environment base(nullptr, { { EXISTING_KEY_1, ARBITRARY_VALUE_1 } }, {});
         script::environment derived(&base, { { EXISTING_KEY_2, ARBITRARY_VALUE_2 } }, {});
 
-        CHECK(derived.has_value(NON_EXISTING_KEY) == false);
-        CHECK(derived.has_value(EXISTING_KEY_1) == true);
-        CHECK(derived.get_value(EXISTING_KEY_1) == ARBITRARY_VALUE_1);
-        CHECK(derived.has_value(EXISTING_KEY_2) == true);
-        CHECK(derived.get_value(EXISTING_KEY_2) == ARBITRARY_VALUE_2);
+        auto no_value = derived.get_value(NON_EXISTING_KEY);
+        auto value_1 = derived.get_value(EXISTING_KEY_1);
+        auto value_2 = derived.get_value(EXISTING_KEY_2);
+
+        CHECK(no_value.is_valid() == false);
+        CHECK(value_1.is_valid() == true);
+        CHECK(value_1.get() == ARBITRARY_VALUE_1);
+        CHECK(value_2.is_valid() == true);
+        CHECK(value_2.get() == ARBITRARY_VALUE_2);
     }
 
 }

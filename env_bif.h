@@ -17,25 +17,23 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOM_BUILD_H
-#define DOM_BUILD_H
+#ifndef ENV_BIF_H
+#define ENV_BIF_H
 
-#include "dom.h"
+#include "env.h"
 
 /*
- * This is the API for the DOM builder. It is supposed to take a tokens stream
- * and translate it into a DOM tree. The token structure routines are hidden
- * in this module.
+ * This module is responsible for the construction of a special environment
+ * providing all the built in resources such as the built in functions.
+ * This include for example the arithmetic operations.
  *
- * Test status : tested.
+ * Test status : not tested.
  */
 
 namespace script
 {
 
-    // This takes a non-const argument as a phony ")" is appended at the end
-    // of the tokens list for the time of the processing.
-    node build_dom_tree(std::vector<std::string>&);
+    environment env_create_bif();
 
 }
 

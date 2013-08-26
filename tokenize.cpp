@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "except.h"
 #include "tokenize.h"
 #include "tok.h"
 
@@ -98,7 +99,10 @@ namespace
                 do 
                 {
                     end_atom = std::find(end_atom + 1, last, strdelim);
-                    if(end_atom == last) return; // FIXME: This is actually an error!
+                    if(end_atom == last)
+                    {
+                        throw script::unclosed_delimited_token(std::distance(first, current));
+                    } 
 
                 } while (*(end_atom - 1) == strescape);
 
@@ -106,7 +110,7 @@ namespace
 
                 current = std::find_if_not(end_atom + 1, last, std::iswspace);
 
-                if(current == last) return; // FIXME: This is actually an error!
+                if(current == last) return;
             }
 
             // 2.4. Regular atom case.

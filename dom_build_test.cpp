@@ -18,19 +18,24 @@
  */
 
 #include "dom_build.h"
+#include "except.h"
 #include "tok.h"
+#include "log.h"
 
+#include <iostream>
 #include <unittest++/UnitTest++.h>
 
 namespace
 {
     const std::string ARBITRARY_ATOM_STRING = "arbitrary_atom_string";
+    const std::string& ANY_ATOM_STRING = ARBITRARY_ATOM_STRING;
 }
 
 SUITE(DomBuilderTestSuite)
 {
     TEST(EmptyList)
     {
+        script::info("Testing dom_builder::empty_list");
         std::vector<std::string> tokens {};
         script::node actual_root = script::build_dom_tree(tokens);
         script::node expected_root { script::node_type::list, {}, {} };
@@ -39,6 +44,7 @@ SUITE(DomBuilderTestSuite)
 
     TEST(SingleAtomList)
     {
+        script::info("Testing dom_builder::atom_list");
         std::vector<std::string> tokens { ARBITRARY_ATOM_STRING };
 
         script::node actual_root = script::build_dom_tree(tokens);
@@ -56,8 +62,20 @@ SUITE(DomBuilderTestSuite)
         CHECK(expected_root == actual_root);
     }
 
+    TEST(UnclosedList)
+    {
+        script::info("Testing dom_builder::unclosed_list");
+        std::vector<std::string> tokens { "(", ANY_ATOM_STRING };
+        CHECK_THROW
+        (
+            script::build_dom_tree(tokens),
+            script::unclosed_dom_list
+        );
+    }
+
     TEST(SubList)
     {
+        script::info("Testing dom_builder::sub_list");
         std::vector<std::string> tokens
         {
             ARBITRARY_ATOM_STRING,

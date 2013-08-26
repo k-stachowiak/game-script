@@ -18,6 +18,7 @@
  */
 
 #include "dom_build.h"
+#include "except.h"
 
 namespace
 {
@@ -67,10 +68,15 @@ namespace script
                 ++current;
                 return current;
             }
+
+            // This should never happen.
+            else
+            {
+                throw script::fatal("Impossible token encountered while parsing list.");
+            }
         }
 
-        // List must always be terminated with a closing parenthesis.
-        exit(1);
+        throw script::unclosed_dom_list();
     }
 
     node build_dom_tree(std::vector<std::string>& tokens)

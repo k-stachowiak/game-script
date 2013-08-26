@@ -35,31 +35,12 @@ namespace script
                   std::inserter(m_func_defs, begin(m_func_defs)));
     }
 
-    // ACHTUNG: massive duplication below. Go macros? :O
-
-    bool environment::has_value(const std::string& symbol) const
-    {
-        if (m_values.find(symbol) != end(m_values))
-        {
-            return true;
-        }
-
-        if (m_parent)
-        {
-            return m_parent->has_value(symbol);
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    value environment::get_value(const std::string& symbol) const
+    maybe<value> environment::get_value(const std::string& symbol) const
     {
         auto found = m_values.find(symbol);
         if (found != end(m_values))
         {
-            return found->second;
+            return { found->second };
         }
         
         if (m_parent)
@@ -68,45 +49,27 @@ namespace script
         }
         else
         {
-            // TODO: handle elegantly.
-            throw;
+            return {};
         }
     }
 
-    bool environment::has_func_def(const std::string& symbol) const
-    {
-        if (m_func_defs.find(symbol) != end(m_func_defs))
-        {
-            return true;
-        }
-
-        if (m_parent)
-        {
-            return m_parent->has_func_def(symbol);
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    const func_def& environment::get_func_def_reference(const std::string& symbol) const
+    const func_def* environment::get_func_def_reference(
+            const std::string& symbol,
+            const std::vector<value_type>& signature) const
     {
         auto found = m_func_defs.find(symbol);
         if (found != end(m_func_defs))
         {
-            return found->second;
+            return &(found->second);
         }
-        
+
         if (m_parent)
         {
-            return m_parent->get_func_def_reference(symbol);
+            return m_parent->get_func_def_reference(symbol, signature);
         }
         else
         {
-            // TODO: handle elegantly.
-            throw;
+            return nullptr;
         }
     }
-
 }

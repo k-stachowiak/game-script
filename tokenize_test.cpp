@@ -27,6 +27,8 @@
 
 #include "tokenize.h"
 #include "tok.h"
+#include "log.h"
+#include "except.h"
 
 namespace {
 
@@ -67,6 +69,9 @@ namespace {
     // Empty delimited atom.
     const std::string EMPTY_DELIMITED_ATOM = DELIM + DELIM;
 
+    // Unclosed delim atom.
+    const std::string UNCLOSED_DELIM_ATOM = DELIM + ARBITRARY_TOKEN;
+
     // All white spaces checked by the std::iswspace(...).
     const std::string ALL_WSPACES = " \f\n\r\t\v";
 
@@ -79,6 +84,8 @@ SUITE(TokenizerTestSuite)
 {
     TEST(SingleTokens)
     {
+        script::info("Testing tokenizer::simple_tokens");
+
         {
             std::vector<std::string> actual_tokens = script::tokenize("(");
             std::vector<std::string> expected_tokens { "(" };
@@ -114,10 +121,17 @@ SUITE(TokenizerTestSuite)
             std::vector<std::string> expected_tokens { ESC_DQUOTE };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
+
+        CHECK_THROW
+        (
+            script::tokenize(UNCLOSED_DELIM_ATOM),
+            script::unclosed_delimited_token
+        );
     }
 
     TEST(SimpleListNoSpaces)
     {
+        script::info("Testing tokenizer::simple_list_no_spaces");
         auto actual_tokens = script::tokenize("(" + ARBITRARY_TOKEN + ")");
         std::vector<std::string> expected_tokens { "(", ARBITRARY_TOKEN, ")" };
         CHECK(vec_equal(actual_tokens, expected_tokens));
@@ -125,6 +139,7 @@ SUITE(TokenizerTestSuite)
 
     TEST(SimpleListAllSpaces)
     {
+        script::info("Testing tokenizer::simple_list_with_spaces");
         auto actual_tokens = script::tokenize(
                     ALL_WSPACES + "(" +
                     ALL_WSPACES + ARBITRARY_TOKEN + 
@@ -138,6 +153,7 @@ SUITE(TokenizerTestSuite)
 
     TEST(CommentInterruption)
     {
+        script::info("Testing tokenizer::comment_interruption");
         {
             auto actual_tokens = script::tokenize(
                     "(" + COMMENT_STRING + "\n)");

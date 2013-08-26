@@ -17,26 +17,9 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DOM_BUILD_H
-#define DOM_BUILD_H
-
-#include "dom.h"
-
-/*
- * This is the API for the DOM builder. It is supposed to take a tokens stream
- * and translate it into a DOM tree. The token structure routines are hidden
- * in this module.
- *
- * Test status : tested.
- */
+#include "log.h"
 
 namespace script
 {
-
-    // This takes a non-const argument as a phony ")" is appended at the end
-    // of the tokens list for the time of the processing.
-    node build_dom_tree(std::vector<std::string>&);
-
+    level global_log_level = LOG_LVL_INFO;
 }
-
-#endif

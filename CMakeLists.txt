@@ -21,6 +21,7 @@ add_executable (test
     env_build.cpp
     test.cpp
     env_test.cpp
+    env_bif_test.cpp
     dom_build_test.cpp
     env_build_test.cpp
     tokenize.cpp
@@ -28,10 +29,14 @@ add_executable (test
     dom_build.cpp
     env.cpp
     env_test.cpp
+    env_bif.cpp
     expr.cpp
     expr_test.cpp
+    types.cpp
+    log.cpp
 )
 
 target_link_libraries (test ${UNITTEST++_LIBRARY})
 
 add_custom_command (TARGET test POST_BUILD COMMAND test)
+

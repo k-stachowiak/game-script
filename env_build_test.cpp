@@ -17,8 +17,9 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "env_build.h"
+#include "except.h"
 #include "env_build.cpp"
+#include "log.h"
 
 #include <unittest++/UnitTest++.h>
 
@@ -60,7 +61,7 @@ namespace
     }
 }
 
-SUITE(AstBuilderTestSuite)
+SUITE(EnvBuilderTestSuite)
 {
 
     // Specific expression parsing tests.
@@ -68,28 +69,33 @@ SUITE(AstBuilderTestSuite)
 
     TEST(LiteralParsing)
     {
+        script::info("Testing env_builder::literal_parsing");
+
         std::unique_ptr<script::expression> expr;
 
-        // 1. Fail on list node.
+        // 1. Fail on empty atom.
+        CHECK_THROW(try_parse_literal(make_atom_node("")), script::empty_atom_string);
+
+        // 2. Fail on list node.
         expr = try_parse_literal(ANY_LIST);
         CHECK(static_cast<bool>(expr) == false);
 
-        // 2. Fail on invalid literal.
+        // 3. Fail on invalid literal.
         expr = try_parse_literal(make_atom_node(ARBITRARY_SYMBOL));
         CHECK(static_cast<bool>(expr) == false);
 
         expr = try_parse_literal(make_atom_node(REAL_LITERAL + ARBITRARY_STRING));
         CHECK(static_cast<bool>(expr) == false);
 
-        // 3. String literal.
+        // 4. String literal.
         expr = try_parse_literal(make_atom_node(STRING_LITERAL));
         CHECK(static_cast<bool>(expr) == true);
 
-        // 4. Integer literal.
+        // 5. Integer literal.
         expr = try_parse_literal(make_atom_node(INTEGER_LITERAL));
         CHECK(static_cast<bool>(expr) == true);
 
-        // 5. Real literal.
+        // 6. Real literal.
         expr = try_parse_literal(make_atom_node(REAL_LITERAL));
         CHECK(static_cast<bool>(expr) == true);
 
@@ -97,23 +103,30 @@ SUITE(AstBuilderTestSuite)
 
     TEST(ReferenceParsing)
     {
+        script::info("Testing env_builder::reference_parsing");
+
         std::unique_ptr<script::expression> expr;
 
-        // 1. Fail on list node. 
+        // 1. Fail on empty string.
+        CHECK_THROW(expr = try_parse_reference(make_atom_node("")), script::empty_atom_string);
+
+        // 2. Fail on list node. 
         expr = try_parse_reference(ANY_LIST);
         CHECK(static_cast<bool>(expr) == false);
 
-        // 2. Fail on atom with digit in front.
+        // 3. Fail on atom with digit in front.
         expr = try_parse_reference(make_atom_node(INTEGER_LITERAL));
         CHECK(static_cast<bool>(expr) == false);
 
-        // 3. Valid reference symbol.
+        // 4. Valid reference symbol.
         expr = try_parse_reference(make_atom_node(ARBITRARY_SYMBOL_1));
         CHECK(static_cast<bool>(expr) == true);
     }
 
     TEST(FunctionCallParsing)
     {
+        script::info("Testing env_builder::func_call_parsing");
+
         std::unique_ptr<script::expression> expr;
 
         // 1. Fail on atom.

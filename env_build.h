@@ -20,6 +20,14 @@
 #ifndef ENV_BUILD_H
 #define ENV_BUILD_H
 
+/*
+ * This module provides an API for the creation of the regular environments
+ * based on the script code. It contains parsers for the language constructs
+ * that generate abstract expression object from the DOM nodes.
+ *
+ * Test status : tested.
+ */
+
 namespace script
 {
 }

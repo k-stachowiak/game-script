@@ -18,6 +18,7 @@
  */
 
 #include <utility>
+#include <functional>
 #include <algorithm>
 
 #include "expr.h"
@@ -38,9 +39,14 @@ namespace
         : m_value(v)
         {}
 
-        script::value eval(const script::environment&) const
+        script::maybe<script::value> eval(const script::environment&) const
         {
-            return m_value;
+            return { m_value };
+        }
+
+        script::maybe<script::value_type> get_type(const script::environment&) const
+        {
+            return { m_value.type };
         }
     };
 
@@ -54,15 +60,23 @@ namespace
     public:
         reference(const std::string& symbol) : m_symbol(symbol) {}
 
-        script::value eval(const script::environment& env) const
+        script::maybe<script::value> eval(const script::environment& env) const
         {
-            if (!env.has_value(m_symbol))
-            {
-                // TODO: Signal error here.
-                throw;
-            }
-
             return env.get_value(m_symbol);
+        }
+
+        // TODO: Is get_type needed if dynamic evaluation?
+        script::maybe<script::value_type> get_type(const script::environment& env) const
+        {
+            auto maybe_value = env.get_value(m_symbol);
+            if (!maybe_value.is_valid())
+            {
+                return {};
+            }
+            else
+            {
+                return maybe_value.get().type;
+            }
         }
     };
 
@@ -74,6 +88,28 @@ namespace
         std::string m_symbol;
         std::vector<std::unique_ptr<script::expression>> m_actual_args;
 
+        std::vector<script::maybe<script::value_type>> get_arg_types(const script::environment& env) const
+        {
+            using namespace std::placeholders;
+            std::vector<script::maybe<script::value_type>> arg_types;
+            std::transform(begin(m_actual_args),
+                           end(m_actual_args),
+                           std::back_inserter(arg_types),
+                           std::bind(&script::expression::get_type, _1, std::ref(env)));
+            return arg_types;
+        }
+
+        std::vector<script::maybe<script::value>> get_arg_values(const script::environment& env) const
+        {
+            using namespace std::placeholders;
+            std::vector<script::maybe<script::value>> arg_values;
+            std::transform(begin(m_actual_args),
+                           end(m_actual_args),
+                           std::back_inserter(arg_values),
+                           std::bind(&script::expression::eval, _1, std::ref(env)));
+            return arg_values;
+        }
+
     public:
         func_call(const std::string& symbol,
                   std::vector<std::unique_ptr<script::expression>> actual_args)
@@ -81,49 +117,110 @@ namespace
         , m_actual_args(std::move(actual_args))
         {}
 
-        script::value eval(const script::environment& env) const
+        script::maybe<script::value> eval(const script::environment& env) const
         {
-            // 1. Evaluate arguments in the current environment.
-            std::vector<script::value> actual_values;
+            using namespace std::placeholders;
+
+            // 1. Determine the types.
+            std::vector<script::maybe<script::value_type>> maybe_arg_types = get_arg_types(env);
+
+            bool types_valid = std::all_of(
+                    begin(maybe_arg_types),
+                    end(maybe_arg_types),
+                    std::bind(&script::maybe<script::value_type>::is_valid, _1));
+
+            if (!types_valid)
+            {
+                return {};
+            }
+
+            std::vector<script::value_type> arg_types;
             std::transform(
-                begin(m_actual_args), end(m_actual_args),
-                std::back_inserter(actual_values),
-                    [&env](const std::unique_ptr<script::expression>& expr)
-                    {
-                        return expr->eval(env);
-                    });
+                    begin(maybe_arg_types),
+                    end(maybe_arg_types),
+                    std::back_inserter(arg_types),
+                    std::bind(&script::maybe<script::value_type>::get, _1));
 
-            // 2. Determine the called function.
-            if (!env.has_func_def(m_symbol))
+            // 2. Evaluate arguments in the current environment.
+            std::vector<script::maybe<script::value>> maybe_arg_values = get_arg_values(env);
+
+            bool values_valid = std::all_of(
+                    begin(maybe_arg_values),
+                    end(maybe_arg_values),
+                    std::bind(&script::maybe<script::value>::is_valid, _1));
+
+            if (!values_valid)
             {
-                // TODO: Handle nicely.
-                throw;
+                return {};
             }
 
-            const auto& func = env.get_func_def_reference(m_symbol);
+            std::vector<script::value> arg_values;
+            std::transform(
+                    begin(maybe_arg_values),
+                    end(maybe_arg_values),
+                    std::back_inserter(arg_values),
+                    std::bind(&script::maybe<script::value>::get, _1));
 
-            if (!func.form_args.size() == actual_values.size())
+            // 3. Find the matching function.
+            const auto* fd = env.get_func_def_reference(m_symbol, arg_types);
+            if (!fd)
             {
-                // TODO: Handle nicely.
-                throw;
+                return {};
             }
 
-            // 3. Derive a new environment.
+            if (fd->form_args.size() != m_actual_args.size())
+            {
+                return {};
+            }
+
+            // 4. Derive a new environment.
             std::map<std::string, script::value> der_env_values;
             std::transform(
-                begin(func.form_args), end(func.form_args),
-                begin(actual_values),
+                begin(fd->form_args),
+                end(fd->form_args),
+                begin(arg_values),
                 std::inserter(der_env_values, begin(der_env_values)),
                     [](const std::string& symbol, const script::value& value)
                     {
                         return std::make_pair(symbol, value);
                     });
 
-            std::map<std::string, script::func_def> empty_func_defs;
-            script::environment der_env(&env, der_env_values, std::move(empty_func_defs));
+            script::environment der_env(&env, der_env_values, {} );
 
-            // 4. Execute the expression.
-            return func.expr->eval(der_env);
+            // 5. Execute the expression.
+            return { fd->expr->eval(der_env) };
+        }
+
+        script::maybe<script::value_type> get_type(const script::environment& env) const
+        {
+            using namespace std::placeholders;
+
+            std::vector<script::maybe<script::value_type>> maybe_arg_types = get_arg_types(env);
+            
+            bool types_valid = std::all_of(
+                    begin(maybe_arg_types),
+                    end(maybe_arg_types),
+                    std::bind(&script::maybe<script::value_type>::is_valid, _1));
+
+            if (!types_valid)
+            {
+                return {};
+            }
+
+            std::vector<script::value_type> arg_types;
+            std::transform(
+                    begin(maybe_arg_types),
+                    end(maybe_arg_types),
+                    std::back_inserter(arg_types),
+                    std::bind(&script::maybe<script::value_type>::get, _1));
+
+            const auto* fd = env.get_func_def_reference(m_symbol, arg_types);
+            if (!fd)
+            {
+                return {};
+            }
+            
+            return { fd->expr->get_type(env) };
         }
     };
 

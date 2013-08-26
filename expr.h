@@ -25,7 +25,16 @@
 #include <memory>
 #include <functional>
 
+#include "util.h"
 #include "types.h"
+
+/*
+ * This module provides the abstract expressions type. The objects representing
+ * the expressions may be created here. Note that all the concrete types are
+ * hidden behind an abstract expression type.
+ *
+ * Test status : almost tested.
+ */
 
 namespace script
 {
@@ -34,7 +43,8 @@ namespace script
     struct expression
     {
         virtual ~expression() {}
-        virtual value eval(const environment& env) const = 0;
+        virtual maybe<value> eval(const environment&) const = 0;
+        virtual maybe<value_type> get_type(const environment&) const = 0;
     };
 
     std::unique_ptr<expression> expr_create_literal(value);
@@ -42,6 +52,9 @@ namespace script
     std::unique_ptr<expression> expr_create_func_call(
             const std::string&,
             std::vector<std::unique_ptr<expression>>);
+
+    // NOTE: There are more implementations of the expression class:
+    // - for the bif implementation.
 }
 
 #endif
