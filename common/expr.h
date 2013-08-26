@@ -25,8 +25,8 @@
 #include <memory>
 #include <functional>
 
-#include "util.h"
-#include "types.h"
+#include "common/util.h"
+#include "common/types.h"
 
 /*
  * This module provides the abstract expressions type. The objects representing

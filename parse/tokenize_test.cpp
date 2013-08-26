@@ -25,10 +25,10 @@
 
 #include <unittest++/UnitTest++.h>
 
+#include "common/log.h"
+#include "common/except.h"
 #include "tokenize.h"
 #include "tok.h"
-#include "log.h"
-#include "except.h"
 
 namespace {
 

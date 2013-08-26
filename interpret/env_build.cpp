@@ -21,10 +21,10 @@
 #include <iostream>
 
 #include "env_build.h"
-#include "except.h"
-#include "expr.h"
-#include "tok.h"
-#include "dom.h"
+#include "common/except.h"
+#include "common/expr.h"
+#include "parse/tok.h"
+#include "parse/dom.h"
 
 namespace
 {

@@ -18,8 +18,8 @@
  */
 
 #include "env_bif.cpp"
-#include "log.h"
-#include "expr.h"
+#include "common/log.h"
+#include "common/expr.h"
 
 #include <unittest++/UnitTest++.h>
 

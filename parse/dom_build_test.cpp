@@ -17,10 +17,10 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "common/except.h"
+#include "common/log.h"
 #include "dom_build.h"
-#include "except.h"
 #include "tok.h"
-#include "log.h"
 
 #include <iostream>
 #include <unittest++/UnitTest++.h>

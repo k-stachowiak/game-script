@@ -26,9 +26,9 @@
 #include <vector>
 #include <utility>
 
-#include "types.h"
-#include "expr.h"
-#include "util.h"
+#include "common/types.h"
+#include "common/util.h"
+#include "common/expr.h"
 
 /*
  * The environment is a container of symbols and the related expressions.

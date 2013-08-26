@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "except.h"
+#include "common/except.h"
 #include "tokenize.h"
 #include "tok.h"
 

@@ -18,8 +18,8 @@
  */
 
 #include "expr.h"
-#include "env.h"
 #include "log.h"
+#include "interpret/env.h"
 
 #include <unittest++/UnitTest++.h>
 

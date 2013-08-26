@@ -17,8 +17,8 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "common/except.h"
 #include "dom_build.h"
-#include "except.h"
 
 namespace
 {

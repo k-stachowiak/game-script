@@ -17,9 +17,9 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "except.h"
+#include "common/except.h"
+#include "common/log.h"
 #include "env_build.cpp"
-#include "log.h"
 
 #include <unittest++/UnitTest++.h>
 

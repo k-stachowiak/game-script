@@ -22,7 +22,7 @@
 #include <algorithm>
 
 #include "expr.h"
-#include "env.h"
+#include "interpret/env.h"
 
 namespace
 {

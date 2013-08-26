@@ -22,8 +22,8 @@
 #include <tuple>
 
 #include "env_bif.h"
-#include "expr.h"
-#include "util.h"
+#include "common/expr.h"
+#include "common/util.h"
 
 namespace // module implementation.
 {
