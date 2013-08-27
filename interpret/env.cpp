@@ -27,7 +27,7 @@ namespace interpret
 {
 
     using namespace moon::common;
-    using namespace moon::types;
+    using namespace moon::lang;
 
     environment::environment(
             const environment* parent,

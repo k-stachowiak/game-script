@@ -26,8 +26,7 @@
 
 namespace
 {
-    using namespace moon::expr;
-    using namespace moon::types;
+    using namespace moon::lang;
     using namespace moon::common;
     using namespace moon::interpret;
 
@@ -150,7 +149,7 @@ namespace
 
 namespace moon 
 {
-namespace expr
+namespace lang
 {
     
     // Concrete expression type constructors.

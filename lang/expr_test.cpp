@@ -25,7 +25,7 @@
 
 namespace
 {
-    using namespace moon::types;
+    using namespace moon::lang;
 
     const double ARBITRARY_REAL_1 = 1.0;
     const double ARBITRARY_REAL_2 = 2.0;
@@ -42,7 +42,7 @@ SUITE(ExpressionsTestSuite)
 {
 
     using namespace moon::interpret;
-    using namespace moon::expr;
+    using namespace moon::lang;
     using namespace moon::log;
     using namespace moon::common;
 

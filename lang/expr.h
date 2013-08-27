@@ -44,20 +44,20 @@ namespace moon
         class environment;
     }
 
-namespace expr
+namespace lang
 {
 
     struct expression
     {
         virtual ~expression() {}
-        virtual moon::common::maybe<moon::types::value> eval(const moon::interpret::environment&) const = 0;
+        virtual moon::common::maybe<moon::lang::value> eval(const moon::interpret::environment&) const = 0;
     };
 
-    std::unique_ptr<moon::expr::expression> expr_create_literal(moon::types::value);
-    std::unique_ptr<moon::expr::expression> expr_create_reference(const std::string&);
-    std::unique_ptr<moon::expr::expression> expr_create_func_call(
+    std::unique_ptr<moon::lang::expression> expr_create_literal(moon::lang::value);
+    std::unique_ptr<moon::lang::expression> expr_create_reference(const std::string&);
+    std::unique_ptr<moon::lang::expression> expr_create_func_call(
             const std::string&,
-            std::vector<std::unique_ptr<moon::expr::expression>>);
+            std::vector<std::unique_ptr<moon::lang::expression>>);
 
     // NOTE: There are more implementations of the expression class:
     // - for the bif implementation.

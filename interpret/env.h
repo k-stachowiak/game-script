@@ -29,6 +29,7 @@
 #include "common/util.h"
 #include "lang/types.h"
 #include "lang/expr.h"
+#include "lang/func_def.h"
 
 /*
  * The environment is a container of symbols and the related expressions.
@@ -47,34 +48,25 @@ namespace moon
 {
 namespace interpret
 {
-    // Function definition - should this be here? (TODO)
-    struct func_def
-    {
-        std::vector<std::string> form_args;
-        std::unique_ptr<moon::expr::expression> expr;
-
-        func_def(func_def&&) = default;
-    };
-
     class environment
     {
         const environment* m_parent;
 
-        std::map<std::string, moon::types::value> m_values;
-        std::map<std::string, func_def> m_func_defs;
+        std::map<std::string, moon::lang::value> m_values;
+        std::map<std::string, moon::lang::func_def> m_func_defs;
 
         bool signature_matches(
-                const func_def& fd,
-                std::vector<moon::types::value_type> signature);
+                const moon::lang::func_def& fd,
+                std::vector<moon::lang::value_type> signature);
 
     public:
         environment(const environment*,
-                    const std::map<std::string, moon::types::value>&,
-                    std::map<std::string, func_def>&&);
+                    const std::map<std::string, moon::lang::value>&,
+                    std::map<std::string, moon::lang::func_def>&&);
 
-        common::maybe<moon::types::value> get_value(const std::string&) const;
+        common::maybe<moon::lang::value> get_value(const std::string&) const;
 
-        const func_def* get_func_def_reference(const std::string&) const;
+        const moon::lang::func_def* get_func_def_reference(const std::string&) const;
     };
 }
 }

@@ -17,14 +17,21 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "types.h"
+#ifndef FUNC_DEF_H
+#define FUNC_DEF_H
 
-namespace moon 
+namespace moon
 {
 namespace lang
 {
-    const value_type type_of<int>::type = value_type::integer;
-    const value_type type_of<double>::type = value_type::real;
-    const value_type type_of<std::string>::type = value_type::string;
+    struct func_def
+    {
+        std::vector<std::string> form_args;
+        std::unique_ptr<moon::lang::expression> expr;
+
+        func_def(func_def&&) = default;
+    };
 }
 }
+
+#endif

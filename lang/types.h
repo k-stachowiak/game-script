@@ -26,7 +26,7 @@
 
 namespace moon 
 {
-namespace types 
+namespace lang
 {
     enum class value_type
     {

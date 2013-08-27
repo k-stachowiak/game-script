@@ -28,10 +28,9 @@
 
 namespace
 {
-    using namespace moon::expr;
+    using namespace moon::lang;
     using namespace moon::parse;
     using namespace moon::except;
-    using namespace moon::types;
 
     std::unique_ptr<expression> try_parse_expression(const node& n);
 

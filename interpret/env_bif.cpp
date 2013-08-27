@@ -27,10 +27,9 @@
 
 namespace // module implementation.
 {
-    using namespace moon::expr;
+    using namespace moon::lang;
     using namespace moon::common;
     using namespace moon::interpret;
-    using namespace moon::types;
 
     template<class Ret, class Arg1, class Arg2>
     struct bif_expression_2 : public expression

@@ -25,7 +25,7 @@
 
 namespace
 {
-    using namespace moon::expr;
+    using namespace moon::lang;
 
     std::unique_ptr<expression> make_bif_call(
             const std::string& symbol,
@@ -42,7 +42,7 @@ namespace
 SUITE(BuiltinFunctionsEnvironmentTestSuite)
 {
     using namespace moon::interpret;
-    using namespace moon::types;
+    using namespace moon::lang;
     using namespace moon::log;
 
     TEST(SimpleArithmetics)

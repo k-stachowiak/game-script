@@ -66,7 +66,7 @@ namespace
 SUITE(EnvBuilderTestSuite)
 {
     using namespace moon::log;
-    using namespace moon::expr;
+    using namespace moon::lang;
     using namespace moon::parse;
 
     // Specific expression parsing tests.
