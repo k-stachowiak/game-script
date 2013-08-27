@@ -20,7 +20,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-namespace script
+namespace moon 
+{
+namespace common 
 {
 
     template<class T>
@@ -35,6 +37,7 @@ namespace script
         const T& get() const { return m_value; }
     };
 
+}
 }
 
 #endif

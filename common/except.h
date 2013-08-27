@@ -24,7 +24,9 @@
 #include <string>
 #include <sstream>
 
-namespace script
+namespace moon 
+{
+namespace except
 {
 
     // Common.
@@ -79,6 +81,7 @@ namespace script
         {}
     };
 
-};
+}
+}
 
 #endif

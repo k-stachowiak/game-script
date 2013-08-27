@@ -33,27 +33,31 @@ namespace
 
 SUITE(DomBuilderTestSuite)
 {
+    using namespace moon::log;
+    using namespace moon::parse;
+    using namespace moon::except;
+
     TEST(EmptyList)
     {
-        script::info("Testing dom_builder::empty_list");
+        info("Testing dom_builder::empty_list");
         std::vector<std::string> tokens {};
-        script::node actual_root = script::build_dom_tree(tokens);
-        script::node expected_root { script::node_type::list, {}, {} };
+        node actual_root = build_dom_tree(tokens);
+        node expected_root { node_type::list, {}, {} };
         CHECK(expected_root == actual_root);
     }
 
     TEST(SingleAtomList)
     {
-        script::info("Testing dom_builder::atom_list");
+        info("Testing dom_builder::atom_list");
         std::vector<std::string> tokens { ARBITRARY_ATOM_STRING };
 
-        script::node actual_root = script::build_dom_tree(tokens);
+        node actual_root = build_dom_tree(tokens);
 
-        script::node expected_root {
-            script::node_type::list,
+        node expected_root {
+            node_type::list,
             {},
             {{
-                script::node_type::atom,
+                node_type::atom,
                 ARBITRARY_ATOM_STRING,
                 {}
             }}
@@ -64,18 +68,18 @@ SUITE(DomBuilderTestSuite)
 
     TEST(UnclosedList)
     {
-        script::info("Testing dom_builder::unclosed_list");
+        info("Testing dom_builder::unclosed_list");
         std::vector<std::string> tokens { "(", ANY_ATOM_STRING };
         CHECK_THROW
         (
-            script::build_dom_tree(tokens),
-            script::unclosed_dom_list
+            build_dom_tree(tokens),
+            unclosed_dom_list
         );
     }
 
     TEST(SubList)
     {
-        script::info("Testing dom_builder::sub_list");
+        info("Testing dom_builder::sub_list");
         std::vector<std::string> tokens
         {
             ARBITRARY_ATOM_STRING,
@@ -85,28 +89,28 @@ SUITE(DomBuilderTestSuite)
             ")"
         };
 
-        script::node actual_root = script::build_dom_tree(tokens);
+        node actual_root = build_dom_tree(tokens);
 
-        script::node expected_root {
-            script::node_type::list,
+        node expected_root {
+            node_type::list,
             {},
             {
                 {
-                    script::node_type::atom,
+                    node_type::atom,
                     ARBITRARY_ATOM_STRING,
                     {}
                 },
                 {
-                    script::node_type::list,
+                    node_type::list,
                     {},
                     {
                         {
-                            script::node_type::atom,
+                            node_type::atom,
                             ARBITRARY_ATOM_STRING,
                             {}
                         },
                         {
-                            script::node_type::atom,
+                            node_type::atom,
                             ARBITRARY_ATOM_STRING,
                             {}
                         },

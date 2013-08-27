@@ -23,9 +23,12 @@
 #include <string>
 #include <vector>
 
-namespace script
+namespace moon
+{
+namespace parse
 {
     std::vector<std::string> tokenize(const std::string&);
+}
 }
 
 #endif

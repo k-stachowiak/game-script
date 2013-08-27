@@ -30,7 +30,9 @@
 #include "tokenize.h"
 #include "tok.h"
 
-namespace {
+namespace
+{
+    using namespace moon::parse;
 
     template<class T1, class T2>
     bool vec_equal(const std::vector<T1>& lhs, const std::vector<T2>& rhs)
@@ -52,10 +54,10 @@ namespace {
     const std::string WSPACE_STRING = "string with white spaces";
 
     // The delimiter string.
-    const std::string DELIM(1, static_cast<char>(script::token_char::strdelim));
+    const std::string DELIM(1, static_cast<char>(token_char::strdelim));
 
     // The comment char string.
-    const std::string COMMENT_DELIM(1, static_cast<char>(script::token_char::comment));
+    const std::string COMMENT_DELIM(1, static_cast<char>(token_char::comment));
 
     // String with escaped doublequote.
     const std::string ESC_DQUOTE = "string with escaped '\\" + DELIM + "'";
@@ -82,65 +84,69 @@ namespace {
 
 SUITE(TokenizerTestSuite)
 {
+    using namespace moon::parse;
+    using namespace moon::log;
+    using namespace moon::except;
+
     TEST(SingleTokens)
     {
-        script::info("Testing tokenizer::simple_tokens");
+        info("Testing tokenizer::simple_tokens");
 
         {
-            std::vector<std::string> actual_tokens = script::tokenize("(");
+            std::vector<std::string> actual_tokens = tokenize("(");
             std::vector<std::string> expected_tokens { "(" };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         {
-            std::vector<std::string> actual_tokens = script::tokenize(")");
+            std::vector<std::string> actual_tokens = tokenize(")");
             std::vector<std::string> expected_tokens { ")" };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         {
-            std::vector<std::string> actual_tokens = script::tokenize(ARBITRARY_TOKEN);
+            std::vector<std::string> actual_tokens = tokenize(ARBITRARY_TOKEN);
             std::vector<std::string> expected_tokens { ARBITRARY_TOKEN };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         {
-            std::vector<std::string> actual_tokens = script::tokenize(EMPTY_DELIMITED_ATOM);
+            std::vector<std::string> actual_tokens = tokenize(EMPTY_DELIMITED_ATOM);
             std::vector<std::string> expected_tokens { std::string {} };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         {
-            std::vector<std::string> actual_tokens = script::tokenize(DELIMITED_ATOM);
+            std::vector<std::string> actual_tokens = tokenize(DELIMITED_ATOM);
             std::vector<std::string> expected_tokens { WSPACE_STRING };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         {
-            std::vector<std::string> actual_tokens = script::tokenize(DELIMITED_ATOM_WESC);
+            std::vector<std::string> actual_tokens = tokenize(DELIMITED_ATOM_WESC);
             std::vector<std::string> expected_tokens { ESC_DQUOTE };
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         CHECK_THROW
         (
-            script::tokenize(UNCLOSED_DELIM_ATOM),
-            script::unclosed_delimited_token
+            tokenize(UNCLOSED_DELIM_ATOM),
+            unclosed_delimited_token
         );
     }
 
     TEST(SimpleListNoSpaces)
     {
-        script::info("Testing tokenizer::simple_list_no_spaces");
-        auto actual_tokens = script::tokenize("(" + ARBITRARY_TOKEN + ")");
+        info("Testing tokenizer::simple_list_no_spaces");
+        auto actual_tokens = tokenize("(" + ARBITRARY_TOKEN + ")");
         std::vector<std::string> expected_tokens { "(", ARBITRARY_TOKEN, ")" };
         CHECK(vec_equal(actual_tokens, expected_tokens));
     }
 
     TEST(SimpleListAllSpaces)
     {
-        script::info("Testing tokenizer::simple_list_with_spaces");
-        auto actual_tokens = script::tokenize(
+        info("Testing tokenizer::simple_list_with_spaces");
+        auto actual_tokens = tokenize(
                     ALL_WSPACES + "(" +
                     ALL_WSPACES + ARBITRARY_TOKEN + 
                     ALL_WSPACES + ")" +
@@ -153,18 +159,15 @@ SUITE(TokenizerTestSuite)
 
     TEST(CommentInterruption)
     {
-        script::info("Testing tokenizer::comment_interruption");
+        info("Testing tokenizer::comment_interruption");
         {
-            auto actual_tokens = script::tokenize(
-                    "(" + COMMENT_STRING + "\n)");
-
+            auto actual_tokens = tokenize("(" + COMMENT_STRING + "\n)");
             std::vector<std::string> expected_tokens { "(", ")" };
-
             CHECK(vec_equal(actual_tokens, expected_tokens));
         }
 
         {
-            auto actual_tokens = script::tokenize(
+            auto actual_tokens = tokenize(
                     ARBITRARY_TOKEN + COMMENT_STRING + "\n(");
 
             std::vector<std::string> expected_tokens { ARBITRARY_TOKEN, "(" };
@@ -173,7 +176,7 @@ SUITE(TokenizerTestSuite)
         }
 
         {
-            auto actual_tokens = script::tokenize( 
+            auto actual_tokens = tokenize( 
                     ARBITRARY_TOKEN +
                     ALL_WSPACES + COMMENT_STRING +
                     ALL_WSPACES + ARBITRARY_TOKEN);

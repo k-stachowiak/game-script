@@ -30,11 +30,12 @@
  * Test status : not tested.
  */
 
-namespace script
+namespace moon
 {
-
+namespace interpret
+{
     environment env_create_bif();
-
+}
 }
 
 #endif

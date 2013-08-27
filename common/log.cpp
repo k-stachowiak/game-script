@@ -19,7 +19,10 @@
 
 #include "log.h"
 
-namespace script
+namespace moon
+{
+namespace log 
 {
     level global_log_level = LOG_LVL_INFO;
+}
 }

@@ -20,7 +20,9 @@
 #ifndef TOK_H
 #define TOK_H
 
-namespace script
+namespace moon
+{
+namespace parse
 {
     enum class token_char : char
     {
@@ -30,6 +32,7 @@ namespace script
         strdelim = '"',     // string delimiter
         strescape = '\\'    // stirng delimiter escape
     };
+}
 }
 
 #endif

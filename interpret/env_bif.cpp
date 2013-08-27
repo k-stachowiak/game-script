@@ -27,8 +27,13 @@
 
 namespace // module implementation.
 {
+    using namespace moon::expr;
+    using namespace moon::common;
+    using namespace moon::interpret;
+    using namespace moon::types;
+
     template<class Ret, class Arg1, class Arg2>
-    struct bif_expression_2 : public script::expression
+    struct bif_expression_2 : public expression
     {
         std::array<std::string, 2> m_actual_args;
         std::function<Ret (Arg1, Arg2)> m_func;
@@ -39,7 +44,7 @@ namespace // module implementation.
         , m_func(func)
         {}
 
-        script::maybe<script::value> eval(const script::environment& env) const
+        maybe<value> eval(const environment& env) const
         {
             const auto arg1_val = env.get_value(m_actual_args[0]);
             if (!arg1_val.is_valid())
@@ -53,13 +58,13 @@ namespace // module implementation.
                 return {};
             }
 
-            const auto maybe_arg1 = script::convert_to<Arg1>()(arg1_val.get());
+            const auto maybe_arg1 = convert_to<Arg1>()(arg1_val.get());
             if (!maybe_arg1.is_valid())
             {
                 return {};
             }
             
-            const auto maybe_arg2 = script::convert_to<Arg2>()(arg2_val.get());
+            const auto maybe_arg2 = convert_to<Arg2>()(arg2_val.get());
             if (!maybe_arg2.is_valid())
             {
                 return {};
@@ -70,31 +75,33 @@ namespace // module implementation.
 
             const Ret ret = m_func(arg1, arg2);
 
-            return script::convert_from(ret);
+            return convert_from(ret);
         }
 
-        script::maybe<script::value_type> get_type(const script::environment&) const
+        maybe<value_type> get_type(const environment&) const
         {
-            return script::type_of<Ret>::type;
+            return type_of<Ret>::type;
         }
     };
 
-    std::pair<std::string, script::func_def> bind_bif(
+    std::pair<std::string, func_def> bind_bif(
             const char* symbol,
             std::vector<std::string> form_args,
-            script::expression* expr)
+            expression* expr)
     {
         return std::make_pair(
                 std::string(symbol),
-                script::func_def {
+                func_def {
                     form_args,
-                    std::unique_ptr<script::expression>(expr)
+                    std::unique_ptr<expression>(expr)
                 });
     }
 
 }
 
-namespace script
+namespace moon
+{
+namespace interpret
 {
 
     inline double op_plus(double lhs, double rhs) { return lhs + rhs; }
@@ -118,4 +125,5 @@ namespace script
         return environment(nullptr, {}, std::move(func_defs));
     }
 
+}
 }

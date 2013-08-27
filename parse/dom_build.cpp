@@ -40,8 +40,11 @@ namespace
 
 }
 
-namespace script
+namespace moon
 {
+namespace parse
+{
+    using namespace moon::except;
 
     template<class InIter, class OutIter>
     InIter read_list(InIter first, InIter last, OutIter out)
@@ -72,11 +75,11 @@ namespace script
             // This should never happen.
             else
             {
-                throw script::fatal("Impossible token encountered while parsing list.");
+                throw fatal("Impossible token encountered while parsing list.");
             }
         }
 
-        throw script::unclosed_dom_list();
+        throw unclosed_dom_list();
     }
 
     node build_dom_tree(std::vector<std::string>& tokens)
@@ -95,4 +98,5 @@ namespace script
         return { node_type::list, {}, top_nodes };
     }
 
+}
 }

@@ -21,8 +21,13 @@
 
 #include "env.h"
 
-namespace script
+namespace moon 
 {
+namespace interpret
+{
+
+    using namespace moon::common;
+    using namespace moon::types;
 
     environment::environment(
             const environment* parent,
@@ -72,4 +77,5 @@ namespace script
             return nullptr;
         }
     }
+}
 }

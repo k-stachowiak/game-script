@@ -36,7 +36,9 @@
  * Test status : not tested (is this even necessary?)
  */
 
-namespace script
+namespace moon 
+{
+namespace parse
 {
 
     enum class node_type { atom, list };
@@ -76,6 +78,7 @@ namespace script
                std::equal(begin(lhs.list), end(lhs.list), begin(rhs.list));
     }
 
+}
 }
 
 #endif

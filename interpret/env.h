@@ -43,13 +43,15 @@
  * Test status : Tested.
  */
 
-namespace script
+namespace moon 
+{
+namespace interpret
 {
     // Function definition - should this be here? (TODO)
     struct func_def
     {
         std::vector<std::string> form_args;
-        std::unique_ptr<expression> expr;
+        std::unique_ptr<moon::expr::expression> expr;
 
         func_def(func_def&&) = default;
     };
@@ -58,24 +60,25 @@ namespace script
     {
         const environment* m_parent;
 
-        std::map<std::string, value> m_values;
+        std::map<std::string, moon::types::value> m_values;
         std::map<std::string, func_def> m_func_defs;
 
         bool signature_matches(
                 const func_def& fd,
-                std::vector<value_type> signature);
+                std::vector<moon::types::value_type> signature);
 
     public:
         environment(const environment*,
-                    const std::map<std::string, value>&,
+                    const std::map<std::string, moon::types::value>&,
                     std::map<std::string, func_def>&&);
 
-        maybe<value> get_value(const std::string&) const;
+        common::maybe<moon::types::value> get_value(const std::string&) const;
 
         const func_def* get_func_def_reference(
                 const std::string&,
-                const std::vector<value_type>&) const;
+                const std::vector<moon::types::value_type>&) const;
     };
+}
 }
 
 #endif

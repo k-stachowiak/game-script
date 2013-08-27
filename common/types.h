@@ -23,9 +23,10 @@
 #include <string>
 #include "util.h"
 
-namespace script
+namespace moon 
 {
-
+namespace types 
+{
     enum class value_type
     {
         integer,
@@ -70,7 +71,7 @@ namespace script
 
     template<> struct convert_to<long>
     {
-        maybe<long> operator()(const value& val)
+        moon::common::maybe<long> operator()(const value& val)
         {
             if (val.type != value_type::integer)
             {
@@ -82,7 +83,7 @@ namespace script
 
     template<> struct convert_to<double>
     {
-        maybe<double> operator()(const value& val)
+        moon::common::maybe<double> operator()(const value& val)
         {
             if (val.type != value_type::real)
             {
@@ -94,7 +95,7 @@ namespace script
 
     template<> struct convert_to<std::string>
     {
-        maybe<std::string> operator()(const value& val)
+        moon::common::maybe<std::string> operator()(const value& val)
         {
             if (val.type != value_type::string)
             {
@@ -124,6 +125,7 @@ namespace script
     template<> struct type_of<double> { static const value_type type; };
     template<> struct type_of<std::string> { static const value_type type; };
 
+}
 }
 
 #endif

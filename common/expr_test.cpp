@@ -25,6 +25,8 @@
 
 namespace
 {
+    using namespace moon::types;
+
     const double ARBITRARY_REAL_1 = 1.0;
     const double ARBITRARY_REAL_2 = 2.0;
 
@@ -32,20 +34,25 @@ namespace
     const std::string ARBITRARY_SYMBOL_2 = "arbitrary-symbol-2";
     const std::string ARBITRARY_SYMBOL_3 = "arbitrary-symbol-3";
 
-    const script::value ARBITRARY_VALUE_1 { script::value_type::real, 0, ARBITRARY_REAL_1, {} };
-    const script::value ARBITRARY_VALUE_2 { script::value_type::real, 0, ARBITRARY_REAL_2, {} };
+    const value ARBITRARY_VALUE_1 { value_type::real, 0, ARBITRARY_REAL_1, {} };
+    const value ARBITRARY_VALUE_2 { value_type::real, 0, ARBITRARY_REAL_2, {} };
 }
 
 SUITE(ExpressionsTestSuite)
 {
 
+    using namespace moon::interpret;
+    using namespace moon::expr;
+    using namespace moon::log;
+    using namespace moon::common;
+
     TEST(LiteralEvaluation)
     {
-        script::info("Testing expressions::literal_evaluation.");
+        info("Testing expressions::literal_evaluation.");
 
-        const script::environment EMPTY_ENVIRONMENT(nullptr, {}, {});
+        const environment EMPTY_ENVIRONMENT(nullptr, {}, {});
 
-        auto lit = script::expr_create_literal(ARBITRARY_VALUE_1);
+        auto lit = expr_create_literal(ARBITRARY_VALUE_1);
         auto maybe_val = lit->eval(EMPTY_ENVIRONMENT);
         CHECK(maybe_val.is_valid());
         CHECK(maybe_val.get() == ARBITRARY_VALUE_1);
@@ -53,14 +60,14 @@ SUITE(ExpressionsTestSuite)
 
     TEST(ReferenceEvaluation)
     {
-        script::info("Testing expressions::reference_evaluation.");
+        info("Testing expressions::reference_evaluation.");
        
-        const script::environment SINGLE_SYMBOL_ENVIRONMENT(
+        const environment SINGLE_SYMBOL_ENVIRONMENT(
             nullptr,
             { { ARBITRARY_SYMBOL_1, ARBITRARY_VALUE_1 } },
             {} );
 
-        auto ref = script::expr_create_reference(ARBITRARY_SYMBOL_1);
+        auto ref = expr_create_reference(ARBITRARY_SYMBOL_1);
         auto maybe_val = ref->eval(SINGLE_SYMBOL_ENVIRONMENT);
         CHECK(maybe_val.is_valid());
         CHECK(maybe_val.get() == ARBITRARY_VALUE_1);
@@ -69,38 +76,38 @@ SUITE(ExpressionsTestSuite)
     TEST(FuncCallEvaluation)
     {
         // ACHTUNG: huge test case model!
-        script::info("Testing expressions::func_call_evaluation.");
+        info("Testing expressions::func_call_evaluation.");
 
-        struct custom_expression : public script::expression
+        struct custom_expression : public expression
         {
-            script::maybe<script::value> eval(const script::environment& env) const
+            maybe<value> eval(const environment& env) const
             {
-                script::value lhs = env.get_value("lhs").get();
-                script::value rhs = env.get_value("rhs").get();
+                value lhs = env.get_value("lhs").get();
+                value rhs = env.get_value("rhs").get();
                 return {{
-                    script::value_type::real,
+                    value_type::real,
                     0,
                     lhs.real + rhs.real,
                     {} }};
             }
 
-            script::maybe<script::value_type> get_type(const script::environment&) const
+            maybe<value_type> get_type(const environment&) const
             {
                 return {{}};
             }
         };
 
-        std::unique_ptr<script::expression> FUNC_EXPR(new custom_expression);
-        script::trace("\tCreated custom expression.");
+        std::unique_ptr<expression> FUNC_EXPR(new custom_expression);
+        trace("\tCreated custom expression.");
 
-        script::func_def FUNC_DEF { { "lhs", "rhs" }, std::move(FUNC_EXPR) };
-        script::trace("\tCreated function definition.");
+        func_def FUNC_DEF { { "lhs", "rhs" }, std::move(FUNC_EXPR) };
+        trace("\tCreated function definition.");
 
-        std::map<std::string, script::func_def> FUNC_BINDINGS;
+        std::map<std::string, func_def> FUNC_BINDINGS;
         FUNC_BINDINGS.insert(std::make_pair(ARBITRARY_SYMBOL_3, std::move(FUNC_DEF)));
-        script::trace("\tCreated function binding.");
+        trace("\tCreated function binding.");
 
-        const script::environment TWO_SYMBOLS_AND_FUNC_ENVIRONMENT(
+        const environment TWO_SYMBOLS_AND_FUNC_ENVIRONMENT(
             nullptr,
             {
                 { ARBITRARY_SYMBOL_1, ARBITRARY_VALUE_1 },
@@ -108,29 +115,29 @@ SUITE(ExpressionsTestSuite)
             },
             std::move(FUNC_BINDINGS)
         );
-        script::trace("\tCreated dummy environment.");
+        trace("\tCreated dummy environment.");
 
-        std::vector<std::unique_ptr<script::expression>> actual_args;
-        actual_args.push_back(script::expr_create_reference(ARBITRARY_SYMBOL_1));
-        actual_args.push_back(script::expr_create_reference(ARBITRARY_SYMBOL_2));
-        script::trace("\tCreated dummy args.");
+        std::vector<std::unique_ptr<expression>> actual_args;
+        actual_args.push_back(expr_create_reference(ARBITRARY_SYMBOL_1));
+        actual_args.push_back(expr_create_reference(ARBITRARY_SYMBOL_2));
+        trace("\tCreated dummy args.");
 
-        auto func_call = script::expr_create_func_call(
+        auto func_call = expr_create_func_call(
                 ARBITRARY_SYMBOL_3,
                 std::move(actual_args));
-        script::trace("\tCreated the function call under test.");
+        trace("\tCreated the function call under test.");
 
-        const script::value expected_value
+        const value expected_value
         {
-            script::value_type::real, 0, ARBITRARY_REAL_1 + ARBITRARY_REAL_2, {}
+            value_type::real, 0, ARBITRARY_REAL_1 + ARBITRARY_REAL_2, {}
         };
-        script::trace("\tCreated expected value.");
+        trace("\tCreated expected value.");
 
         auto maybe_actual_value = func_call->eval(TWO_SYMBOLS_AND_FUNC_ENVIRONMENT);
 
         CHECK(maybe_actual_value.is_valid());
         CHECK(maybe_actual_value.get() == expected_value );
-        script::trace("\tCalled the function in the dummy environment.");
+        trace("\tCalled the function in the dummy environment.");
 
     }
 

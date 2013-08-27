@@ -23,6 +23,8 @@
 
 namespace
 {
+    using namespace moon::types;
+
     const std::string NON_EXISTING_KEY = "non-existing key";
 
     const std::string EXISTING_KEY_1 = "existing-key-1";
@@ -31,16 +33,17 @@ namespace
     const double ARBITRARY_REAL_1 = 1.0;
     const double ARBITRARY_REAL_2 = 2.0;
 
-    const script::value ARBITRARY_VALUE_1 { script::value_type::real, 0, ARBITRARY_REAL_1, {} };
-    const script::value ARBITRARY_VALUE_2 { script::value_type::real, 0, ARBITRARY_REAL_2, {} };
+    const value ARBITRARY_VALUE_1 { value_type::real, 0, ARBITRARY_REAL_1, {} };
+    const value ARBITRARY_VALUE_2 { value_type::real, 0, ARBITRARY_REAL_2, {} };
 }
 
 SUITE(EnvironmentTestSuite)
 {
+    using namespace moon::interpret;
 
     TEST(ValuesInSimpleStructure)
     {
-        script::environment env(nullptr, { { EXISTING_KEY_1, ARBITRARY_VALUE_1 } }, {});
+        environment env(nullptr, { { EXISTING_KEY_1, ARBITRARY_VALUE_1 } }, {});
 
         auto no_value = env.get_value(NON_EXISTING_KEY);
         auto value = env.get_value(EXISTING_KEY_1);
@@ -52,8 +55,8 @@ SUITE(EnvironmentTestSuite)
 
     TEST(ValuesInComplexStructure)
     {
-        script::environment base(nullptr, { { EXISTING_KEY_1, ARBITRARY_VALUE_1 } }, {});
-        script::environment derived(&base, { { EXISTING_KEY_2, ARBITRARY_VALUE_2 } }, {});
+        environment base(nullptr, { { EXISTING_KEY_1, ARBITRARY_VALUE_1 } }, {});
+        environment derived(&base, { { EXISTING_KEY_2, ARBITRARY_VALUE_2 } }, {});
 
         auto no_value = derived.get_value(NON_EXISTING_KEY);
         auto value_1 = derived.get_value(EXISTING_KEY_1);

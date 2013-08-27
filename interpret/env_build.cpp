@@ -28,34 +28,39 @@
 
 namespace
 {
-    std::unique_ptr<script::expression> try_parse_expression(const script::node& n);
+    using namespace moon::expr;
+    using namespace moon::parse;
+    using namespace moon::except;
+    using namespace moon::types;
 
-    std::unique_ptr<script::expression> try_parse_literal(const script::node& n)
+    std::unique_ptr<expression> try_parse_expression(const node& n);
+
+    std::unique_ptr<expression> try_parse_literal(const node& n)
     {
-        if (n.type != script::node_type::atom)
+        if (n.type != node_type::atom)
         {
             return {};
         }
 
         if (n.atom.empty())
         {
-            throw script::empty_atom_string();
+            throw empty_atom_string();
         }
 
         // Attempt at parsing string literal.
 
-        char delim = static_cast<char>(script::token_char::strdelim);
+        char delim = static_cast<char>(token_char::strdelim);
         unsigned length = std::distance(begin(n.atom), end(n.atom));
         if (length >= 2 && // 2 for two delimiters at the ends.
             n.atom.front() == delim &&
             n.atom.back() == delim)
         {
-            return script::expr_create_literal(
-                    {
-                        script::value_type::string,
-                        {}, {},
-                        { n.atom.substr(1, length - 2) }
-                    });
+            return expr_create_literal(
+            {
+                value_type::string,
+                {}, {},
+                { n.atom.substr(1, length - 2) }
+            });
         }
         
         // Attempt at parsing integer literal.
@@ -70,11 +75,11 @@ namespace
             long integer;
             ss >> integer;
 
-            return script::expr_create_literal(
-                    {
-                        script::value_type::integer,
-                        integer, {}, {}
-                    });
+            return expr_create_literal(
+            {
+                value_type::integer,
+                integer, {}, {}
+            });
         }
 
         // Attempt at parsing real literal.
@@ -95,37 +100,37 @@ namespace
             }
             else
             {
-                return script::expr_create_literal(
-                    {
-                        script::value_type::real,
-                        {}, real, {}
-                    });
+                return expr_create_literal(
+                {
+                    value_type::real,
+                    {}, real, {}
+                });
             }
         }
 
         return {};
     }
 
-    std::unique_ptr<script::expression> try_parse_reference(const script::node& n)
+    std::unique_ptr<expression> try_parse_reference(const node& n)
     {
-        if (n.type != script::node_type::atom || isdigit(n.atom.front()))
+        if (n.type != node_type::atom || isdigit(n.atom.front()))
         {
             return {};
         }
 
         if (n.atom.empty())
         {
-            throw script::empty_atom_string();
+            throw empty_atom_string();
         }
 
-        return script::expr_create_reference(n.atom);
+        return expr_create_reference(n.atom);
     }
 
-    std::unique_ptr<script::expression> try_parse_func_call(const script::node& n)
+    std::unique_ptr<expression> try_parse_func_call(const node& n)
     {
         // Assert the general structure.
 
-        if (n.type != script::node_type::list ||
+        if (n.type != node_type::list ||
             n.list.empty())
         {
             return {};
@@ -138,18 +143,18 @@ namespace
         const std::string& symbol = it->atom;
         ++it;
 
-        std::vector<std::unique_ptr<script::expression>> args;
+        std::vector<std::unique_ptr<expression>> args;
         std::transform(
                 it, end(n.list), 
                 std::back_inserter(args),
                 try_parse_expression);
 
-        return script::expr_create_func_call(symbol, std::move(args));
+        return expr_create_func_call(symbol, std::move(args));
     }
 
-    std::unique_ptr<script::expression> try_parse_expression(const script::node& n)
+    std::unique_ptr<expression> try_parse_expression(const node& n)
     {
-        std::unique_ptr<script::expression> result;
+        std::unique_ptr<expression> result;
 
         if (result = try_parse_literal(n))
         {
@@ -171,10 +176,13 @@ namespace
 
 }
 
-namespace script
+namespace moon
+{
+namespace interpret
 {
 
     // The API implementation.
     // =======================
 
+}
 }

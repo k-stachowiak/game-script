@@ -26,6 +26,8 @@
 
 namespace
 {
+    using namespace moon::except;
+    using namespace moon::parse;
 
     // Helper structure for efficient token representation.
     template<class Iter>
@@ -37,9 +39,9 @@ namespace
     // Helper for atom recognition.
     inline bool allowed_in_atom(char c)
     {
-        return c != static_cast<char>(script::token_char::lopen) &&
-               c != static_cast<char>(script::token_char::lclose) &&
-               c != static_cast<char>(script::token_char::comment) &&
+        return c != static_cast<char>(token_char::lopen) &&
+               c != static_cast<char>(token_char::lclose) &&
+               c != static_cast<char>(token_char::comment) &&
                !iswspace(c);
     }
 
@@ -59,11 +61,11 @@ namespace
         // is by the STL algorithms. This minimizes the risk of buffer
         // overrun as we always proceed against an explicit end iterator.
 
-        const char lopen = static_cast<char>(script::token_char::lopen);
-        const char lclose = static_cast<char>(script::token_char::lclose);
-        const char comment = static_cast<char>(script::token_char::comment);
-        const char strdelim = static_cast<char>(script::token_char::strdelim);
-        const char strescape = static_cast<char>(script::token_char::strescape);
+        const char lopen = static_cast<char>(token_char::lopen);
+        const char lclose = static_cast<char>(token_char::lclose);
+        const char comment = static_cast<char>(token_char::comment);
+        const char strdelim = static_cast<char>(token_char::strdelim);
+        const char strescape = static_cast<char>(token_char::strescape);
 
         auto current = first;
 
@@ -101,7 +103,7 @@ namespace
                     end_atom = std::find(end_atom + 1, last, strdelim);
                     if(end_atom == last)
                     {
-                        throw script::unclosed_delimited_token(std::distance(first, current));
+                        throw unclosed_delimited_token(std::distance(first, current));
                     } 
 
                 } while (*(end_atom - 1) == strescape);
@@ -130,7 +132,9 @@ namespace
 
 }
 
-namespace script
+namespace moon
+{
+namespace parse
 {
     // Vector loading adapter.
     // -----------------------
@@ -152,4 +156,5 @@ namespace script
         return result;
     }
 
+}
 }

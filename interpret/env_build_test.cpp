@@ -25,6 +25,8 @@
 
 namespace
 {
+    using namespace moon::parse;
+
     // Mutually different strings without white spaces.
     const std::string ARBITRARY_SYMBOL_1 = "arbitrary-symbol-1";
     const std::string ARBITRARY_SYMBOL_2 = "arbitrary-symbol-2";
@@ -41,40 +43,43 @@ namespace
     const std::string ARBITRARY_STRING = "arbitrary string";
 
     // Equivalent : ()
-    const script::node EMPTY_LIST { script::node_type::list, {}, {} };
+    const node EMPTY_LIST { node_type::list, {}, {} };
 
-    const script::node ANY_LIST = EMPTY_LIST;
+    const node ANY_LIST = EMPTY_LIST;
 
     // Equivalent : arbitrary-symbol-1
-    const script::node ANY_ATOM { script::node_type::atom, ARBITRARY_SYMBOL_1, {} };
+    const node ANY_ATOM { node_type::atom, ARBITRARY_SYMBOL_1, {} };
 
     // Helper constructors.
 
-    script::node make_atom_node(const std::string& str)
+    node make_atom_node(const std::string& str)
     {
-        return script::node { script::node_type::atom, { str }, {} };
+        return node { node_type::atom, { str }, {} };
     }
 
-    script::node make_list_node(const std::vector<script::node>& nodes)
+    node make_list_node(const std::vector<node>& nodes)
     {
-        return script::node { script::node_type::list, {}, nodes };
+        return node { node_type::list, {}, nodes };
     }
 }
 
 SUITE(EnvBuilderTestSuite)
 {
+    using namespace moon::log;
+    using namespace moon::expr;
+    using namespace moon::parse;
 
     // Specific expression parsing tests.
     // ----------------------------------
 
     TEST(LiteralParsing)
     {
-        script::info("Testing env_builder::literal_parsing");
+        info("Testing env_builder::literal_parsing");
 
-        std::unique_ptr<script::expression> expr;
+        std::unique_ptr<expression> expr;
 
         // 1. Fail on empty atom.
-        CHECK_THROW(try_parse_literal(make_atom_node("")), script::empty_atom_string);
+        CHECK_THROW(try_parse_literal(make_atom_node("")), empty_atom_string);
 
         // 2. Fail on list node.
         expr = try_parse_literal(ANY_LIST);
@@ -103,12 +108,12 @@ SUITE(EnvBuilderTestSuite)
 
     TEST(ReferenceParsing)
     {
-        script::info("Testing env_builder::reference_parsing");
+        info("Testing env_builder::reference_parsing");
 
-        std::unique_ptr<script::expression> expr;
+        std::unique_ptr<expression> expr;
 
         // 1. Fail on empty string.
-        CHECK_THROW(expr = try_parse_reference(make_atom_node("")), script::empty_atom_string);
+        CHECK_THROW(expr = try_parse_reference(make_atom_node("")), empty_atom_string);
 
         // 2. Fail on list node. 
         expr = try_parse_reference(ANY_LIST);
@@ -125,9 +130,9 @@ SUITE(EnvBuilderTestSuite)
 
     TEST(FunctionCallParsing)
     {
-        script::info("Testing env_builder::func_call_parsing");
+        info("Testing env_builder::func_call_parsing");
 
-        std::unique_ptr<script::expression> expr;
+        std::unique_ptr<expression> expr;
 
         // 1. Fail on atom.
         expr = try_parse_func_call(ANY_ATOM);

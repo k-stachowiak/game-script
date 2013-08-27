@@ -22,7 +22,9 @@
 
 #include <iostream>
 
-namespace script
+namespace moon
+{
+namespace log 
 {
     enum level
     {
@@ -69,6 +71,7 @@ namespace script
     {
         log(LOG_LVL_FATAL, args...);
     }
+}
 }
 
 #endif

@@ -28,8 +28,11 @@
  * Test status : tested.
  */
 
-namespace script
+namespace moon
 {
+namespace interpret
+{
+}
 }
 
 #endif

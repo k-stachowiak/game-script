@@ -25,56 +25,62 @@
 
 namespace
 {
-    std::unique_ptr<script::expression> make_bif_call(
+    using namespace moon::expr;
+
+    std::unique_ptr<expression> make_bif_call(
             const std::string& symbol,
-            std::unique_ptr<script::expression> lhs,
-            std::unique_ptr<script::expression> rhs)
+            std::unique_ptr<expression> lhs,
+            std::unique_ptr<expression> rhs)
     {
-        std::vector<std::unique_ptr<script::expression>> args;
+        std::vector<std::unique_ptr<expression>> args;
         args.push_back(std::move(lhs));
         args.push_back(std::move(rhs));
-        return script::expr_create_func_call(symbol, std::move(args));
+        return expr_create_func_call(symbol, std::move(args));
     }
 }
 
 SUITE(BuiltinFunctionsEnvironmentTestSuite)
 {
+    using namespace moon::interpret;
+    using namespace moon::types;
+    using namespace moon::log;
+
     TEST(SimpleArithmetics)
     {
-        script::info("Testing env_bif::simple_arithmetics");
+        info("Testing env_bif::simple_arithmetics");
 
-        auto env_base = script::env_create_bif();
+        auto env_base = env_create_bif();
 
         double lhs = 1.2;
         double rhs = 3.4;
 
-        const script::value lhs_val { script::value_type::real, 0, lhs, {} };
-        const script::value rhs_val { script::value_type::real, 0, rhs, {} };
+        const value lhs_val { value_type::real, 0, lhs, {} };
+        const value rhs_val { value_type::real, 0, rhs, {} };
 
-        script::environment env(&env_base, { { "lhs", lhs_val }, { "rhs", rhs_val } }, {});
+        environment env(&env_base, { { "lhs", lhs_val }, { "rhs", rhs_val } }, {});
 
         auto call_add = make_bif_call("+.", expr_create_literal(lhs_val), expr_create_literal(rhs_val));
         auto add_result = call_add->eval(env);
         CHECK(add_result.is_valid());
-        CHECK(add_result.get().type == script::value_type::real);
+        CHECK(add_result.get().type == value_type::real);
         CHECK(add_result.get().real == (lhs + rhs));
 
         auto call_sub = make_bif_call("-.", expr_create_literal(lhs_val), expr_create_literal(rhs_val));
         auto sub_result = call_sub->eval(env);
         CHECK(sub_result.is_valid());
-        CHECK(sub_result.get().type == script::value_type::real);
+        CHECK(sub_result.get().type == value_type::real);
         CHECK(sub_result.get().real == (lhs - rhs));
 
         auto call_mul = make_bif_call("*.", expr_create_literal(lhs_val), expr_create_literal(rhs_val));
         auto mul_result = call_mul->eval(env);
         CHECK(mul_result.is_valid());
-        CHECK(mul_result.get().type == script::value_type::real);
+        CHECK(mul_result.get().type == value_type::real);
         CHECK(mul_result.get().real == (lhs * rhs));
 
         auto call_div = make_bif_call("/.", expr_create_literal(lhs_val), expr_create_literal(rhs_val));
         auto div_result = call_div->eval(env);
         CHECK(div_result.is_valid());
-        CHECK(div_result.get().type == script::value_type::real);
+        CHECK(div_result.get().type == value_type::real);
         CHECK(div_result.get().real == (lhs / rhs));
     }
 }
