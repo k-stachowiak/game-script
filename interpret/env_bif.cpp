@@ -21,9 +21,9 @@
 #include <utility>
 #include <tuple>
 
-#include "env_bif.h"
-#include "common/expr.h"
 #include "common/util.h"
+#include "lang/expr.h"
+#include "env_bif.h"
 
 namespace // module implementation.
 {
@@ -76,11 +76,6 @@ namespace // module implementation.
             const Ret ret = m_func(arg1, arg2);
 
             return convert_from(ret);
-        }
-
-        maybe<value_type> get_type(const environment&) const
-        {
-            return type_of<Ret>::type;
         }
     };
 

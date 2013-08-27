@@ -81,6 +81,15 @@ namespace except
         {}
     };
 
+    // Typesystem related.
+    // ===================
+
+    struct type_mismatch : public std::runtime_error
+    {
+        type_mismatch()
+        : std::runtime_error("Type mismatch")
+        {}
+    };
 }
 }
 

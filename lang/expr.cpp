@@ -47,11 +47,6 @@ namespace
         {
             return { m_value };
         }
-
-        maybe<value_type> get_type(const environment&) const
-        {
-            return { m_value.type };
-        }
     };
 
     // Reference expression.
@@ -68,20 +63,6 @@ namespace
         {
             return env.get_value(m_symbol);
         }
-
-        // TODO: Is get_type needed if dynamic evaluation?
-        maybe<value_type> get_type(const environment& env) const
-        {
-            auto maybe_value = env.get_value(m_symbol);
-            if (!maybe_value.is_valid())
-            {
-                return {};
-            }
-            else
-            {
-                return maybe_value.get().type;
-            }
-        }
     };
 
     // Function call expression.
@@ -91,17 +72,6 @@ namespace
     {
         std::string m_symbol;
         std::vector<std::unique_ptr<expression>> m_actual_args;
-
-        std::vector<maybe<value_type>> get_arg_types(const environment& env) const
-        {
-            using namespace std::placeholders;
-            std::vector<maybe<value_type>> arg_types;
-            std::transform(begin(m_actual_args),
-                           end(m_actual_args),
-                           std::back_inserter(arg_types),
-                           std::bind(&expression::get_type, _1, std::ref(env)));
-            return arg_types;
-        }
 
         std::vector<maybe<value>> get_arg_values(const environment& env) const
         {
@@ -125,27 +95,7 @@ namespace
         {
             using namespace std::placeholders;
 
-            // 1. Determine the types.
-            std::vector<maybe<value_type>> maybe_arg_types = get_arg_types(env);
-
-            bool types_valid = std::all_of(
-                    begin(maybe_arg_types),
-                    end(maybe_arg_types),
-                    std::bind(&maybe<value_type>::is_valid, _1));
-
-            if (!types_valid)
-            {
-                return {};
-            }
-
-            std::vector<value_type> arg_types;
-            std::transform(
-                    begin(maybe_arg_types),
-                    end(maybe_arg_types),
-                    std::back_inserter(arg_types),
-                    std::bind(&maybe<value_type>::get, _1));
-
-            // 2. Evaluate arguments in the current environment.
+            // 1. Evaluate arguments in the current environment.
             std::vector<maybe<value>> maybe_arg_values = get_arg_values(env);
 
             bool values_valid = std::all_of(
@@ -165,8 +115,8 @@ namespace
                     std::back_inserter(arg_values),
                     std::bind(&maybe<value>::get, _1));
 
-            // 3. Find the matching function.
-            const auto* fd = env.get_func_def_reference(m_symbol, arg_types);
+            // 2. Find the matching function.
+            const auto* fd = env.get_func_def_reference(m_symbol);
             if (!fd)
             {
                 return {};
@@ -177,7 +127,7 @@ namespace
                 return {};
             }
 
-            // 4. Derive a new environment.
+            // 3. Derive a new environment.
             std::map<std::string, value> der_env_values;
             std::transform(
                 begin(fd->form_args),
@@ -191,40 +141,8 @@ namespace
 
             environment der_env(&env, der_env_values, {} );
 
-            // 5. Execute the expression.
+            // 4. Execute the expression.
             return { fd->expr->eval(der_env) };
-        }
-
-        maybe<value_type> get_type(const environment& env) const
-        {
-            using namespace std::placeholders;
-
-            std::vector<maybe<value_type>> maybe_arg_types = get_arg_types(env);
-            
-            bool types_valid = std::all_of(
-                    begin(maybe_arg_types),
-                    end(maybe_arg_types),
-                    std::bind(&maybe<value_type>::is_valid, _1));
-
-            if (!types_valid)
-            {
-                return {};
-            }
-
-            std::vector<value_type> arg_types;
-            std::transform(
-                    begin(maybe_arg_types),
-                    end(maybe_arg_types),
-                    std::back_inserter(arg_types),
-                    std::bind(&maybe<value_type>::get, _1));
-
-            const auto* fd = env.get_func_def_reference(m_symbol, arg_types);
-            if (!fd)
-            {
-                return {};
-            }
-            
-            return { fd->expr->get_type(env) };
         }
     };
 

@@ -22,7 +22,7 @@
 
 #include "env_build.h"
 #include "common/except.h"
-#include "common/expr.h"
+#include "lang/expr.h"
 #include "parse/tok.h"
 #include "parse/dom.h"
 

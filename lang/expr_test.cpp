@@ -17,9 +17,9 @@
  * along with gme-script. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "expr.h"
-#include "log.h"
+#include "common/log.h"
 #include "interpret/env.h"
+#include "expr.h"
 
 #include <unittest++/UnitTest++.h>
 
@@ -89,11 +89,6 @@ SUITE(ExpressionsTestSuite)
                     0,
                     lhs.real + rhs.real,
                     {} }};
-            }
-
-            maybe<value_type> get_type(const environment&) const
-            {
-                return {{}};
             }
         };
 

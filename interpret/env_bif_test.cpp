@@ -19,7 +19,7 @@
 
 #include "env_bif.cpp"
 #include "common/log.h"
-#include "common/expr.h"
+#include "lang/expr.h"
 
 #include <unittest++/UnitTest++.h>
 

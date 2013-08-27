@@ -26,9 +26,9 @@
 #include <vector>
 #include <utility>
 
-#include "common/types.h"
 #include "common/util.h"
-#include "common/expr.h"
+#include "lang/types.h"
+#include "lang/expr.h"
 
 /*
  * The environment is a container of symbols and the related expressions.
@@ -74,9 +74,7 @@ namespace interpret
 
         common::maybe<moon::types::value> get_value(const std::string&) const;
 
-        const func_def* get_func_def_reference(
-                const std::string&,
-                const std::vector<moon::types::value_type>&) const;
+        const func_def* get_func_def_reference(const std::string&) const;
     };
 }
 }

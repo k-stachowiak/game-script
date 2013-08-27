@@ -21,7 +21,8 @@
 #define TYPES_H
 
 #include <string>
-#include "util.h"
+#include "common/util.h"
+#include "common/except.h"
 
 namespace moon 
 {
@@ -61,8 +62,7 @@ namespace types
                 return lhs.string == rhs.string;
 
             default:
-                // TODO: Handle nicely.
-                throw;
+                throw moon::except::type_mismatch();
         }
     }
 

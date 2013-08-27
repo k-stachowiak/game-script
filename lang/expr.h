@@ -26,7 +26,7 @@
 #include <functional>
 
 #include "common/util.h"
-#include "common/types.h"
+#include "types.h"
 
 /*
  * This module provides the abstract expressions type. The objects representing
@@ -51,7 +51,6 @@ namespace expr
     {
         virtual ~expression() {}
         virtual moon::common::maybe<moon::types::value> eval(const moon::interpret::environment&) const = 0;
-        virtual moon::common::maybe<moon::types::value_type> get_type(const moon::interpret::environment&) const = 0;
     };
 
     std::unique_ptr<moon::expr::expression> expr_create_literal(moon::types::value);

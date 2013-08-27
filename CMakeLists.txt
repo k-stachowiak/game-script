@@ -18,9 +18,11 @@ endif ()
 # --------------------
 
 add_library (common OBJECT
-    common/expr.cpp
-    common/log.cpp
-    common/types.cpp)
+    common/log.cpp)
+
+add_library (lang OBJECT
+    lang/expr.cpp
+    lang/types.cpp)
 
 add_library (parse OBJECT 
     parse/dom_build.cpp
@@ -34,21 +36,23 @@ add_library (interpret OBJECT
 # Unit tests.
 # -----------
 
-add_executable (common_test
-    common/expr_test.cpp
-    common/common_test.cpp
+add_executable (lang_test
+    lang/expr_test.cpp
+    lang/lang_test.cpp
     $<TARGET_OBJECTS:common>
+    $<TARGET_OBJECTS:lang>
     $<TARGET_OBJECTS:parse>
     $<TARGET_OBJECTS:interpret>)
 
-target_link_libraries (common_test ${UNITTEST++_LIBRARY})
-add_custom_command (TARGET common_test POST_BUILD COMMAND common_test)
+target_link_libraries (lang_test ${UNITTEST++_LIBRARY})
+add_custom_command (TARGET lang_test POST_BUILD COMMAND lang_test)
 
 add_executable (parse_test
     parse/dom_build_test.cpp
     parse/tokenize_test.cpp
     parse/parse_test.cpp
     $<TARGET_OBJECTS:common>
+    $<TARGET_OBJECTS:lang>
     $<TARGET_OBJECTS:parse>
     $<TARGET_OBJECTS:interpret>)
 
@@ -60,6 +64,7 @@ add_executable (interpret_test
     interpret/env_build_test.cpp
     interpret/interpret_test.cpp
     $<TARGET_OBJECTS:common>
+    $<TARGET_OBJECTS:lang>
     $<TARGET_OBJECTS:parse>
     $<TARGET_OBJECTS:interpret>)
 

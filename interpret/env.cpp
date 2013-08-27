@@ -58,9 +58,8 @@ namespace interpret
         }
     }
 
-    const func_def* environment::get_func_def_reference(
-            const std::string& symbol,
-            const std::vector<value_type>& signature) const
+    // TODO: Consider taking the number of the arguments into account.
+    const func_def* environment::get_func_def_reference(const std::string& symbol) const
     {
         auto found = m_func_defs.find(symbol);
         if (found != end(m_func_defs))
@@ -70,7 +69,7 @@ namespace interpret
 
         if (m_parent)
         {
-            return m_parent->get_func_def_reference(symbol, signature);
+            return m_parent->get_func_def_reference(symbol);
         }
         else
         {
