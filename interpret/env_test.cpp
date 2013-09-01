@@ -33,8 +33,8 @@ namespace
     const double ARBITRARY_REAL_1 = 1.0;
     const double ARBITRARY_REAL_2 = 2.0;
 
-    const value ARBITRARY_VALUE_1 { value_type::real, 0, ARBITRARY_REAL_1, {} };
-    const value ARBITRARY_VALUE_2 { value_type::real, 0, ARBITRARY_REAL_2, {} };
+    const value ARBITRARY_VALUE_1 { value_type::real, 0, ARBITRARY_REAL_1, {}, false };
+    const value ARBITRARY_VALUE_2 { value_type::real, 0, ARBITRARY_REAL_2, {}, false };
 }
 
 SUITE(EnvironmentTestSuite)

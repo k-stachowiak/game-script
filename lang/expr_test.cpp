@@ -34,8 +34,8 @@ namespace
     const std::string ARBITRARY_SYMBOL_2 = "arbitrary-symbol-2";
     const std::string ARBITRARY_SYMBOL_3 = "arbitrary-symbol-3";
 
-    const value ARBITRARY_VALUE_1 { value_type::real, 0, ARBITRARY_REAL_1, {} };
-    const value ARBITRARY_VALUE_2 { value_type::real, 0, ARBITRARY_REAL_2, {} };
+    const value ARBITRARY_VALUE_1 { value_type::real, 0, ARBITRARY_REAL_1, {}, false };
+    const value ARBITRARY_VALUE_2 { value_type::real, 0, ARBITRARY_REAL_2, {}, false };
 }
 
 SUITE(ExpressionsTestSuite)
@@ -50,7 +50,7 @@ SUITE(ExpressionsTestSuite)
     {
         info("Testing expressions::literal_evaluation.");
 
-        const environment EMPTY_ENVIRONMENT(nullptr, {}, {});
+        const environment EMPTY_ENVIRONMENT(nullptr, {}, {}, false, {});
 
         auto lit = expr_create_literal(ARBITRARY_VALUE_1);
         auto maybe_val = lit->eval(EMPTY_ENVIRONMENT);
@@ -65,7 +65,9 @@ SUITE(ExpressionsTestSuite)
         const environment SINGLE_SYMBOL_ENVIRONMENT(
             nullptr,
             { { ARBITRARY_SYMBOL_1, ARBITRARY_VALUE_1 } },
-            {} );
+            {},
+            false,
+            {});
 
         auto ref = expr_create_reference(ARBITRARY_SYMBOL_1);
         auto maybe_val = ref->eval(SINGLE_SYMBOL_ENVIRONMENT);
@@ -108,7 +110,9 @@ SUITE(ExpressionsTestSuite)
                 { ARBITRARY_SYMBOL_1, ARBITRARY_VALUE_1 },
                 { ARBITRARY_SYMBOL_2, ARBITRARY_VALUE_2 }
             },
-            std::move(FUNC_BINDINGS)
+            std::move(FUNC_BINDINGS),
+            false,
+            {}
         );
         trace("\tCreated dummy environment.");
 
@@ -124,7 +128,7 @@ SUITE(ExpressionsTestSuite)
 
         const value expected_value
         {
-            value_type::real, 0, ARBITRARY_REAL_1 + ARBITRARY_REAL_2, {}
+            value_type::real, 0, ARBITRARY_REAL_1 + ARBITRARY_REAL_2, {}, false
         };
         trace("\tCreated expected value.");
 

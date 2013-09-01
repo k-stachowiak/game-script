@@ -46,35 +46,33 @@ namespace // module implementation.
         maybe<value> eval(const environment& env) const
         {
             const auto arg1_val = env.get_value(m_actual_args[0]);
-            if (!arg1_val.is_valid())
-            {
-                return {};
-            }
+            if (!arg1_val.is_valid()) return {};
+            const auto maybe_arg1 = convert_to<Arg1>()(arg1_val.get());
+            if (!maybe_arg1.is_valid()) return {};
+            const Arg1 arg1 = maybe_arg1.get();
 
             const auto arg2_val = env.get_value(m_actual_args[1]);
-            if (!arg2_val.is_valid())
-            {
-                return {};
-            }
-
-            const auto maybe_arg1 = convert_to<Arg1>()(arg1_val.get());
-            if (!maybe_arg1.is_valid())
-            {
-                return {};
-            }
-            
+            if (!arg2_val.is_valid()) return {};
             const auto maybe_arg2 = convert_to<Arg2>()(arg2_val.get());
-            if (!maybe_arg2.is_valid())
-            {
-                return {};
-            }
-
-            const Arg1 arg1 = maybe_arg1.get();
+            if (!maybe_arg2.is_valid()) return {};
             const Arg2 arg2 = maybe_arg2.get();
 
             const Ret ret = m_func(arg1, arg2);
 
             return convert_from(ret);
+        }
+    };
+
+    struct construct_tuple : public expression
+    {
+        maybe<value> eval(const environment& env) const
+        {
+            return
+            {{
+                 value_type::tuple,
+                     0, 0.0, {}, false,
+                     env.get_vargs()
+            }};
         }
     };
 
@@ -107,16 +105,24 @@ namespace interpret
     {
         std::map<std::string, func_def> func_defs;
 
-        std::array<std::string, 2> arg_arr {{ "lhs" , "rhs" }};
-        std::vector<std::string> arg_vec { "lhs", "rhs" };
+        // Register binary operators.
+        // --------------------------
+        std::array<std::string, 2> arg_2_arr {{ "lhs" , "rhs" }};
+        std::vector<std::string> arg_2_vec { "lhs", "rhs" };
         typedef bif_expression_2<double, double, double> bif_expr_2;
 
-        func_defs.insert(bind_bif("+.", arg_vec, new bif_expr_2(arg_arr, op_plus)));
-        func_defs.insert(bind_bif("-.", arg_vec, new bif_expr_2(arg_arr, op_minus)));
-        func_defs.insert(bind_bif("*.", arg_vec, new bif_expr_2(arg_arr, op_mul)));
-        func_defs.insert(bind_bif("/.", arg_vec, new bif_expr_2(arg_arr, op_div)));
+        func_defs.insert(bind_bif("+.", arg_2_vec, new bif_expr_2(arg_2_arr, op_plus)));
+        func_defs.insert(bind_bif("-.", arg_2_vec, new bif_expr_2(arg_2_arr, op_minus)));
+        func_defs.insert(bind_bif("*.", arg_2_vec, new bif_expr_2(arg_2_arr, op_mul)));
+        func_defs.insert(bind_bif("/.", arg_2_vec, new bif_expr_2(arg_2_arr, op_div)));
 
-        return environment(nullptr, {}, std::move(func_defs));
+        // Register complex structure constructors.
+        // ----------------------------------------
+
+        std::vector<std::string> varg_vec { "args..." };
+        func_defs.insert(bind_bif("tpl", varg_vec, new construct_tuple)); 
+
+        return environment(nullptr, {}, std::move(func_defs), false, {});
     }
 
 }

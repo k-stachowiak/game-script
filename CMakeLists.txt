@@ -69,5 +69,5 @@ add_executable (interpret_test
     $<TARGET_OBJECTS:interpret>)
 
 target_link_libraries (interpret_test ${UNITTEST++_LIBRARY})
-add_custom_command (TARGET interpret_test POST_BUILD COMMAND interpret_test)
+# add_custom_command (TARGET interpret_test POST_BUILD COMMAND interpret_test)
 

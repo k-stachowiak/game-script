@@ -54,19 +54,25 @@ namespace interpret
 
         std::map<std::string, moon::lang::value> m_values;
         std::map<std::string, moon::lang::func_def> m_func_defs;
-
-        bool signature_matches(
-                const moon::lang::func_def& fd,
-                std::vector<moon::lang::value_type> signature);
+        bool m_has_vargs;
+        std::vector<moon::lang::value> m_vargs;
 
     public:
         environment(const environment*,
                     const std::map<std::string, moon::lang::value>&,
-                    std::map<std::string, moon::lang::func_def>&&);
+                    std::map<std::string, moon::lang::func_def>&&,
+                    bool, const std::vector<moon::lang::value>&);
 
         common::maybe<moon::lang::value> get_value(const std::string&) const;
 
         const moon::lang::func_def* get_func_def_reference(const std::string&) const;
+
+        // Note that these serve the access for the BIF funnctions.
+        // Normal code will access the vargs through the environment's symbols.
+        bool has_vargs() const;
+        unsigned num_vargs() const;
+        const moon::lang::value& get_varg(unsigned) const;
+        const std::vector<moon::lang::value>& get_vargs() const;
     };
 }
 }

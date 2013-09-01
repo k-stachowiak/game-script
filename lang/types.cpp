@@ -26,5 +26,6 @@ namespace lang
     const value_type type_of<int>::type = value_type::integer;
     const value_type type_of<double>::type = value_type::real;
     const value_type type_of<std::string>::type = value_type::string;
+    const value_type type_of<bool>::type = value_type::boolean;
 }
 }

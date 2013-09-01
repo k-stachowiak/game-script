@@ -34,10 +34,18 @@ namespace
     const std::string ARBITRARY_SYMBOL = ARBITRARY_SYMBOL_1;
 
     // Valid primitive literals.
+    const std::string STR_DELIM = std::string() + static_cast<char>(token_char::strdelim);
     const std::string INTEGER_LITERAL = "1";
     const std::string REAL_LITERAL = "2.0e0";
-    const std::string STRING_LITERAL = "\"3\"";
+    const std::string STRING_LITERAL = STR_DELIM + "3" + STR_DELIM;
+    const std::string BOOLEAN_LITERAL_TRUE = moon::lang::boolean_true();
+    const std::string BOOLEAN_LITERAL_FALSE = moon::lang::boolean_false();
     const std::string ANY_LITERAL = INTEGER_LITERAL;
+
+    // Atoms for complex types.
+    const std::string LIST_CONSTRUCTOR_ATOM = moon::lang::list_constructor();
+    const std::string NOT_LIST_CONSTRUCTOR_ATOM =
+        std::string(moon::lang::list_constructor()) + "not";
 
     // Misc.
     const std::string ARBITRARY_STRING = "arbitrary string";
@@ -72,38 +80,40 @@ SUITE(EnvBuilderTestSuite)
     // Specific expression parsing tests.
     // ----------------------------------
 
-    TEST(LiteralParsing)
+    TEST(PrimitiveLiteralParsing)
     {
-        info("Testing env_builder::literal_parsing");
+        info("Testing env_builder::primitive_literal_parsing");
 
         std::unique_ptr<expression> expr;
 
         // 1. Fail on empty atom.
         CHECK_THROW(try_parse_literal(make_atom_node("")), empty_atom_string);
 
-        // 2. Fail on list node.
-        expr = try_parse_literal(ANY_LIST);
-        CHECK(static_cast<bool>(expr) == false);
-
-        // 3. Fail on invalid literal.
+        // 2. Fail on invalid literal.
         expr = try_parse_literal(make_atom_node(ARBITRARY_SYMBOL));
         CHECK(static_cast<bool>(expr) == false);
 
         expr = try_parse_literal(make_atom_node(REAL_LITERAL + ARBITRARY_STRING));
         CHECK(static_cast<bool>(expr) == false);
 
-        // 4. String literal.
+        // 3. String literal.
         expr = try_parse_literal(make_atom_node(STRING_LITERAL));
         CHECK(static_cast<bool>(expr) == true);
 
-        // 5. Integer literal.
+        // 4. Integer literal.
         expr = try_parse_literal(make_atom_node(INTEGER_LITERAL));
         CHECK(static_cast<bool>(expr) == true);
 
-        // 6. Real literal.
+        // 5. Real literal.
         expr = try_parse_literal(make_atom_node(REAL_LITERAL));
         CHECK(static_cast<bool>(expr) == true);
 
+        // 6. Boolean literal.
+        expr = try_parse_literal(make_atom_node(BOOLEAN_LITERAL_TRUE));
+        CHECK(static_cast<bool>(expr) == true);
+
+        expr = try_parse_literal(make_atom_node(BOOLEAN_LITERAL_FALSE));
+        CHECK(static_cast<bool>(expr) == true);
     }
 
     TEST(ReferenceParsing)

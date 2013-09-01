@@ -32,9 +32,10 @@ namespace
     using namespace moon::parse;
     using namespace moon::except;
 
+    // TODO: Move the parsing to the language directory
     std::unique_ptr<expression> try_parse_expression(const node& n);
 
-    std::unique_ptr<expression> try_parse_literal(const node& n)
+    std::unique_ptr<expression> try_parse_literal_boolean(const node& n)
     {
         if (n.type != node_type::atom)
         {
@@ -46,7 +47,30 @@ namespace
             throw empty_atom_string();
         }
 
-        // Attempt at parsing string literal.
+        if (n.atom == boolean_true())
+        {
+            return expr_create_literal({ value_type::boolean, 0, 0.0, {}, true });
+        }
+
+        if (n.atom == boolean_false())
+        {
+            return expr_create_literal({ value_type::boolean, 0, 0.0, {}, false });
+        }
+
+        return {};
+    }
+
+    std::unique_ptr<expression> try_parse_literal_string(const node& n)
+    {
+        if (n.type != node_type::atom)
+        {
+            return {};
+        }
+
+        if (n.atom.empty())
+        {
+            throw empty_atom_string();
+        }
 
         char delim = static_cast<char>(token_char::strdelim);
         unsigned length = std::distance(begin(n.atom), end(n.atom));
@@ -58,11 +82,25 @@ namespace
             {
                 value_type::string,
                 {}, {},
-                { n.atom.substr(1, length - 2) }
+                { n.atom.substr(1, length - 2),
+                false }
             });
         }
         
-        // Attempt at parsing integer literal.
+        return {};
+    }
+
+    std::unique_ptr<expression> try_parse_literal_integer(const node& n)
+    {
+        if (n.type != node_type::atom)
+        {
+            return {};
+        }
+
+        if (n.atom.empty())
+        {
+            throw empty_atom_string();
+        }
 
         auto it = begin(n.atom);
         if ((isdigit(*it) || (*it) == '-' || (*it) == '+') &&
@@ -77,34 +115,68 @@ namespace
             return expr_create_literal(
             {
                 value_type::integer,
-                integer, {}, {}
+                integer, {}, {}, false
             });
         }
 
-        // Attempt at parsing real literal.
+        return {};
+    }
 
+    std::unique_ptr<expression> try_parse_literal_real(const node& n)
+    {
+        if (n.type != node_type::atom)
         {
-            std::stringstream ss;
-            ss << n.atom;
+            return {};
+        }
 
-            double real;
-            ss >> real;
+        if (n.atom.empty())
+        {
+            throw empty_atom_string();
+        }
 
-            std::stringstream after_conv;
-            after_conv << real;
+        std::stringstream ss;
+        ss << n.atom;
 
-            if (!ss.eof())
+        double real;
+        ss >> real;
+
+        std::stringstream after_conv;
+        after_conv << real;
+
+        if (ss.eof())
+        {
+            return expr_create_literal(
             {
-                return {};
-            }
-            else
-            {
-                return expr_create_literal(
-                {
-                    value_type::real,
-                    {}, real, {}
-                });
-            }
+                value_type::real,
+                {}, real, {}, false
+            });
+        }
+
+        return {};
+    }
+
+    std::unique_ptr<expression> try_parse_literal(const node& n)
+    {
+        std::unique_ptr<expression> result;
+
+        if (result = try_parse_literal_boolean(n))
+        {
+            return result;
+        }
+
+        if (result = try_parse_literal_string(n))
+        {
+            return result;
+        }
+
+        if (result = try_parse_literal_integer(n))
+        {
+            return result;
+        }
+
+        if (result = try_parse_literal_real(n))
+        {
+            return result;
         }
 
         return {};
@@ -129,8 +201,7 @@ namespace
     {
         // Assert the general structure.
 
-        if (n.type != node_type::list ||
-            n.list.empty())
+        if (n.type != node_type::list || n.list.empty())
         {
             return {};
         }

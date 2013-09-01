@@ -32,12 +32,38 @@ namespace interpret
     environment::environment(
             const environment* parent,
             const std::map<std::string, value>& values,
-            std::map<std::string, func_def>&& func_defs)
+            std::map<std::string, func_def>&& func_defs,
+            bool has_vargs,
+            const std::vector<value>& vargs)
     : m_parent(parent)
     , m_values(values)
+    , m_has_vargs(has_vargs)
+    , m_vargs(vargs)
     {
         std::move(begin(func_defs), end(func_defs),
                   std::inserter(m_func_defs, begin(m_func_defs)));
+
+        if (has_vargs)
+        {
+            for (unsigned arg_index = 0; arg_index < vargs.size(); ++arg_index)
+            {
+                // TODO: Prevent user defined symbols from starging with "#".
+                std::stringstream symbol;
+                symbol << varg_prefix() << arg_index;
+                m_values.insert({ symbol.str(), vargs[arg_index] });
+            }
+            
+            std::string argc_symbol = varg_prefix();
+            argc_symbol.append("n");
+
+            m_values.insert({ argc_symbol, {
+                    value_type::integer,
+                    static_cast<long>(vargs.size()),
+                    0.0,
+                    {},
+                    false,
+                    {} }});
+        }
     }
 
     maybe<value> environment::get_value(const std::string& symbol) const
@@ -76,5 +102,40 @@ namespace interpret
             return nullptr;
         }
     }
+
+    bool environment::has_vargs() const
+    {
+        return m_has_vargs;
+    }
+
+    unsigned environment::num_vargs() const
+    {
+        if (!m_has_vargs)
+        {
+            throw; // TODO: handle nicely
+        }
+
+        return m_vargs.size();
+    }
+
+    const moon::lang::value& environment::get_varg(unsigned index) const
+    {
+        if (index >= m_vargs.size())
+        {
+            throw; // TODO: handle nicely;
+        }
+
+        return m_vargs[index];
+    }
+
+    const std::vector<moon::lang::value>& environment::get_vargs() const
+    {
+        if (!m_has_vargs)
+        {
+            throw; // TODO: handle nicely;
+        }
+        return m_vargs;
+    }
+
 }
 }

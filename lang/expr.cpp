@@ -121,16 +121,29 @@ namespace
                 return {};
             }
 
-            if (fd->form_args.size() != m_actual_args.size())
+            bool has_vargs = fd->form_args.back() == varg_suffix();
+            if (has_vargs)
             {
-                return {};
+                if (arg_values.size() < (fd->form_args.size() - 1))
+                {
+                    return {};
+                }
+            }
+            else
+            {
+                if (arg_values.size() != fd->form_args.size())
+                {
+                    return {};
+                }
             }
 
             // 3. Derive a new environment.
+
+            // 3.1. Prepare the normal arguments.
             std::map<std::string, value> der_env_values;
             std::transform(
                 begin(fd->form_args),
-                end(fd->form_args),
+                end(fd->form_args) - (has_vargs ? 1 : 0),
                 begin(arg_values),
                 std::inserter(der_env_values, begin(der_env_values)),
                     [](const std::string& symbol, const value& value)
@@ -138,7 +151,17 @@ namespace
                         return std::make_pair(symbol, value);
                     });
 
-            environment der_env(&env, der_env_values, {} );
+            // 3.2. Prepare the variable length arguments.
+            std::vector<value> vargs;
+            if (has_vargs)
+            {
+                const unsigned num_normal_args = fd->form_args.size() - 1;
+                std::copy(begin(arg_values) + num_normal_args,
+                          end(arg_values),
+                          std::back_inserter(vargs));
+            }
+
+            environment der_env(&env, der_env_values, {}, has_vargs, vargs);
 
             // 4. Execute the expression.
             return { fd->expr->eval(der_env) };
