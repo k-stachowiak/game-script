@@ -36,6 +36,7 @@ enum ast_node_type
         AST_FUNC_DECL,
         AST_FUNC_CALL,
         AST_LITERAL,
+        AST_COMPOUND
 };
 
 enum ast_node_lit_type
@@ -45,7 +46,13 @@ enum ast_node_lit_type
         AST_LIT_CHARACTER,
         AST_LIT_STRING,
         AST_LIT_BOOLEAN
-        // TODO: add compound types.
+};
+
+enum ast_node_cpd_type
+{
+        AST_CPD_ARRAY,
+        AST_CPD_LIST,
+        AST_CPD_TUPLE
 };
 
 struct ast_node;
@@ -76,6 +83,12 @@ struct ast_literal {
         } body;
 };
 
+struct ast_compound
+{
+        enum ast_node_cpd_type type;
+        struct ast_node *first_element;
+};
+
 struct ast_node
 {
         enum ast_node_type type;
@@ -84,10 +97,12 @@ struct ast_node
                 struct ast_func_decl func_decl;
                 struct ast_func_call func_call;
                 struct ast_literal literal;
+                struct ast_compound compound;
         } body;
         struct ast_node *next;
 };
 
+// TODO: Rename module to "unit".
 struct ast_module
 {
         char *name;
@@ -105,6 +120,8 @@ void ast_delete_func_call(struct ast_func_call *fc);
 
 struct ast_literal *ast_parse_literal(struct dom_node *node);
 void ast_delete_literal(struct ast_literal *lit);
+
+// TODO: implement the compound types.
 
 struct ast_node *ast_parse_expression(struct dom_node *node);
 void ast_delete_node(struct ast_node *node);
