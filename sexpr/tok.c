@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <stddef.h>
 
 #include "common/logg.h"
 #include "sexpr/tok.h"

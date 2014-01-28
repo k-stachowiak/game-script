@@ -24,7 +24,7 @@
 #define LLVL_DEBUG 1
 #define LLVL_ERROR 2
 
-#define LOG_LEVEL LLVL_DEBUG
+#define LOG_LEVEL LLVL_TRACE
 
 #if LOG_LEVEL <= LLVL_TRACE
 #       define LOG_TRACE(FORMAT, ...) printf("[TRACE] %s:%d " FORMAT "\n", __FILE__, __LINE__, ##__VA_ARGS__)
@@ -38,7 +38,7 @@
 #       define LOG_DEBUG
 #endif
 
-#if LOG_LEVEL <= LLVL_ERRROR
+#if LOG_LEVEL <= LLVL_ERROR
 #       define LOG_ERROR(FORMAT, ...) fprintf(stderr, "[ERROR] %s:%d " FORMAT "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #else
 #       define LOG_ERROR

@@ -34,12 +34,12 @@ int main()
 
         struct dom_node *dom_root;
 
-        struct ast_module *module;
+        struct ast_unit *unit;
 
-        source = "(module Main\n"
+        source = "(unit Main\n"
                  "(func main () \n"
                  "        (PRINT \"Hello, World\\n\")\n"
-                 "        0\n"
+                 "        {0 1 2 3 asdf}\n"
                  ")\n"
                  ")";
 
@@ -68,16 +68,16 @@ int main()
 
         free(tokens);
 
-        module = ast_parse_module(dom_root);
+        unit = ast_parse_unit(dom_root);
 
-        if (module)
-                LOG_DEBUG("Parsing module [SUCCESS].\n");
+        if (unit)
+                LOG_DEBUG("Parsing unit [SUCCESS].\n");
         else
-                LOG_DEBUG("Parsing module [FAILURE].\n");
+                LOG_DEBUG("Parsing unit [FAILURE].\n");
 
         dom_delete_node(dom_root);
 
-        ast_delete_module(module);
+        ast_delete_unit(unit);
 
         return EXIT_SUCCESS;
 }

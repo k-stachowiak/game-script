@@ -18,24 +18,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "common/logg.h"
 #include "ast/ast.h"
-
-static bool ast_is_symbol(char *string)
-{
-        int i;
-
-        if (isdigit(string[0]))
-                return false;
-
-        for (i = 0; i < AST_KEYWORD_COUNT; ++i)
-                if (ast_is_keyword(string, i))
-                        return false;
-
-        return true;
-}
 
 static bool ast_parse_symbol_list(struct dom_node *node,
                                   char ***form_args,

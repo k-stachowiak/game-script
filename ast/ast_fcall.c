@@ -36,15 +36,16 @@ struct ast_func_call *ast_parse_func_call(struct dom_node *node)
         int symbol_len;
         int i;
 
-        char *log_buffer = NULL;
+        char *log_buffer;
 
         symbol = NULL;
         first_act_arg = NULL;
         current_act_arg = NULL;
         result = NULL;
+        log_buffer = NULL;
 
         // Validate basic format.
-        if (node->type != DOM_COMPOUND &&
+        if (node->type != DOM_COMPOUND ||
             node->body.compound.type != DOM_CPD_CORE)
                 goto error;
 
@@ -55,7 +56,8 @@ struct ast_func_call *ast_parse_func_call(struct dom_node *node)
                 goto error;
 
         // Read symbol.
-        if (children[0].type != DOM_ATOM)
+        if (children[0].type != DOM_ATOM ||
+            !ast_is_symbol(children[0].body.atom.string))
                 goto error;
 
         symbol_len = strlen(children[0].body.atom.string);

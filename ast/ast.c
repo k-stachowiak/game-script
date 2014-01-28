@@ -18,14 +18,29 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "common/logg.h"
 #include "ast/ast.h"
 
+bool ast_is_symbol(char *string)
+{
+        int i;
+
+        if (isdigit(string[0]))
+                return false;
+
+        for (i = 0; i < AST_KEYWORD_COUNT; ++i)
+                if (ast_is_keyword(string, i))
+                        return false;
+
+        return true;
+}
+
 bool ast_is_keyword(char *string, enum ast_keyword kw)
 {
         static char *kw_map[] = {
-                "module",
+                "unit",
                 "func",
                 "true",
                 "false"
@@ -50,11 +65,21 @@ void ast_push(struct ast_node *node,
 
 struct ast_node *ast_parse_expression(struct dom_node *node)
 {
+        /*
+         * NOTE: in this function shallow copy of the created expression is made
+         * to the result structure. Therefore the objects obtained from the
+         * parsing functions aren't deeply deallocated. Only the "shells" are
+         * freed, whereas the "intestents" keep on living within the result
+         * object.
+         */
+
         struct ast_node *result;
 
         struct ast_func_decl *fd;
         struct ast_func_call *fc;
         struct ast_literal *lit;
+        struct ast_reference *ref;
+        struct ast_compound *cpd;
 
         if ((fd = ast_parse_func_decl(node))) {
                 result = malloc(sizeof(*result));
@@ -83,6 +108,24 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 return result;
         }
 
+        if ((ref = ast_parse_reference(node))) {
+                result = malloc(sizeof(*result));
+                result->next = NULL;
+                result->type = AST_REFERENCE;
+                memcpy(&(result->body.reference), ref, sizeof(*ref));
+                free(ref);
+                return result;
+        }
+
+        if ((cpd = ast_parse_compound(node))) {
+                result = malloc(sizeof(*result));
+                result->next = NULL;
+                result->type = AST_COMPOUND;
+                memcpy(&(result->body.compound), cpd, sizeof(*cpd));
+                free(cpd);
+                return result;
+        }
+
         return NULL;
 }
 
@@ -98,6 +141,12 @@ void ast_delete_node(struct ast_node *node)
         case AST_LITERAL:
                 ast_delete_literal(&(node->body.literal));
                 break;
+        case AST_REFERENCE:
+                ast_delete_reference(&(node->body.reference));
+                break;
+        case AST_COMPOUND:
+                ast_delete_compound(&(node->body.compound));
+                break;
         }
 
         if (node->next)
@@ -106,7 +155,7 @@ void ast_delete_node(struct ast_node *node)
         free(node);
 }
 
-struct ast_module *ast_parse_module(struct dom_node *node)
+struct ast_unit *ast_parse_unit(struct dom_node *node)
 {
         char *name;
         int name_len;
@@ -117,7 +166,7 @@ struct ast_module *ast_parse_module(struct dom_node *node)
         struct dom_node *child;
         int children_count;
 
-        struct ast_module *result;
+        struct ast_unit *result;
 
         int i;
 
@@ -152,7 +201,7 @@ struct ast_module *ast_parse_module(struct dom_node *node)
         ++child;
 
         if (child->type != DOM_ATOM) {
-                LOG_TRACE("Module name not found.");
+                LOG_TRACE("Unit name not found.");
                 goto error;
         }
 
@@ -163,7 +212,7 @@ struct ast_module *ast_parse_module(struct dom_node *node)
 
         ++child;
 
-        LOG_TRACE("Parsed module name \"%s\".", name);
+        LOG_TRACE("Parsed unit name \"%s\".", name);
 
         for (i = 2; i < children_count; ++i, child++) {
 
@@ -193,13 +242,13 @@ error:
         return NULL;
 }
 
-void ast_delete_module(struct ast_module *module)
+void ast_delete_unit(struct ast_unit *unit)
 {
-        if (!module)
+        if (!unit)
                 return;
 
-        if (module->functions)
-                ast_delete_node(module->functions);
+        if (unit->functions)
+                ast_delete_node(unit->functions);
 
-        free(module);
+        free(unit);
 }
