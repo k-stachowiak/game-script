@@ -85,7 +85,7 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 result = malloc(sizeof(*result));
                 result->next = NULL;
                 result->type = AST_FUNC_DECL;
-                memcpy(&(result->body.func_decl), fd, sizeof(*fd));
+                result->body.func_decl = *fd;
                 free(fd);
                 return result;
         }
@@ -94,7 +94,7 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 result = malloc(sizeof(*result));
                 result->next = NULL;
                 result->type = AST_FUNC_CALL;
-                memcpy(&(result->body.func_call), fc, sizeof(*fc));
+                result->body.func_call = *fc;
                 free(fc);
                 return result;
         }
@@ -103,7 +103,7 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 result = malloc(sizeof(*result));
                 result->next = NULL;
                 result->type = AST_LITERAL;
-                memcpy(&(result->body.literal), lit, sizeof(*lit));
+                result->body.literal = *lit;
                 free(lit);
                 return result;
         }
@@ -112,7 +112,7 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 result = malloc(sizeof(*result));
                 result->next = NULL;
                 result->type = AST_REFERENCE;
-                memcpy(&(result->body.reference), ref, sizeof(*ref));
+                result->body.reference = *ref;
                 free(ref);
                 return result;
         }
@@ -121,7 +121,7 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 result = malloc(sizeof(*result));
                 result->next = NULL;
                 result->type = AST_COMPOUND;
-                memcpy(&(result->body.compound), cpd, sizeof(*cpd));
+                result->body.compound = *cpd;
                 free(cpd);
                 return result;
         }
