@@ -53,7 +53,8 @@ static enum dom_cpd_type infer_compound_type(struct tok_def *token)
 // Dynamic memory management.
 // --------------------------
 
-static void dom_push(struct dom_node *node,
+// TODO: Handle the return value of this function.
+static bool dom_push(struct dom_node *node,
                      struct dom_node **dom_nodes,
                      int *dom_count,
                      int *dom_cap)
@@ -63,15 +64,25 @@ static void dom_push(struct dom_node *node,
                 *dom_count = 0;
                 *dom_cap = 10;
                 *dom_nodes = malloc(*dom_cap * sizeof(**dom_nodes));
+                if (!(*dom_nodes)) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return false;
+                }
 
         } else if (*dom_cap == *dom_count) {
                 *dom_cap *= 2;
                 *dom_nodes = realloc(*dom_nodes, *dom_cap * sizeof(**dom_nodes));
+                if (!(*dom_nodes)) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return false;
+                }
         }
 
         // Perform the insertion.
         (*dom_nodes)[*dom_count] = *node;
         ++(*dom_count);
+
+        return true;
 }
 
 // DOM node construction.
@@ -87,6 +98,7 @@ static struct dom_node *dom_read_atom(struct tok_def **current, struct tok_def *
         ptrdiff_t atom_len;
 
         result = malloc(sizeof(*result));
+        // TODO: Handle all allocation failures.
         result->type = DOM_ATOM;
 
         atom_len = (*current)->end - (*current)->begin;
@@ -168,7 +180,7 @@ static struct dom_node *dom_read_any(struct tok_def **current, struct tok_def **
                 return dom_read_atom(current, end);
 }
 
-bool domize(struct tok_def *tok_defs, int tok_count, struct dom_node **root)
+bool dom_build(struct tok_def *tok_defs, int tok_count, struct dom_node **root)
 {
         struct tok_def *begin;
         struct tok_def *end;

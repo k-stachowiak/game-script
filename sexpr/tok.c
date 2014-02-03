@@ -53,19 +53,19 @@ static inline bool allowed_in_atom(int c)
 // Seek algorithms.
 // ----------------
 
-static char *skip_spaces(char *current)
+static inline char *skip_spaces(char *current)
 {
         while (*current && isspace(*current)) ++current;
         return current;
 }
 
-static char *find_endl(char *current)
+static inline char *find_endl(char *current)
 {
         while (*current && *current != '\n') ++current;
         return current;
 }
 
-static char *find_nonescaped_strdelim(char *current, char delim)
+static inline char *find_nonescaped_strdelim(char *current, char delim)
 {
         while (*current && (*current != TOK_STR_DELIM ||
                            (*current == TOK_STR_DELIM &&
@@ -75,7 +75,7 @@ static char *find_nonescaped_strdelim(char *current, char delim)
         return current;
 }
 
-static char *find_not_allowed(char *current)
+static inline char *find_not_allowed(char *current)
 {
         while (*current && allowed_in_atom(*current))
                 ++current;
@@ -85,22 +85,28 @@ static char *find_not_allowed(char *current)
 // Dynamic memory management.
 // --------------------------
 
-static void tok_push(char *begin, char *end,
+static bool tok_push(char *begin, char *end,
                      struct tok_def **tok_defs,
                      int *tok_count,
                      int *tok_cap)
 {
-        char *token;
-
         // Adjust capacity if needed.
         if (*tok_cap == 0) {
                 *tok_count = 0;
                 *tok_cap = 10;
                 *tok_defs = malloc(*tok_cap * sizeof(**tok_defs));
+                if (!(*tok_defs)) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return false;
+                }
 
         } else if (*tok_cap == *tok_count) {
                 *tok_cap *= 2;
                 *tok_defs = realloc(*tok_defs, *tok_cap * sizeof(**tok_defs));
+                if (!(*tok_defs)) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return false;
+                }
         }
 
         // Perform the insertion.
@@ -108,8 +114,7 @@ static void tok_push(char *begin, char *end,
         ((*tok_defs)[*tok_count]).end = end;
         ++(*tok_count);
 
-        token = token_to_string((*tok_defs) + *tok_count - 1);
-        free(token);
+        return true;
 }
 
 // Tokenizer cases logic.
@@ -123,7 +128,8 @@ static char *tok_parenthesis(char *current,
         if (!(*current) || !is_any_paren(*current))
                 return current;
 
-        tok_push(current, current + 1, tok_defs, tok_count, tok_cap);
+        if (!tok_push(current, current + 1, tok_defs, tok_count, tok_cap))
+                return NULL;
 
         return skip_spaces(current + 1);
 }
@@ -153,7 +159,8 @@ static char *tok_regular_atom(char *current,
 
         atom_end = find_not_allowed(current);
 
-        tok_push(current, atom_end, tok_defs, tok_count, tok_cap);
+        if (!tok_push(current, atom_end, tok_defs, tok_count, tok_cap))
+                return NULL;
 
         return skip_spaces(atom_end);
 }
@@ -182,7 +189,8 @@ static char *tok_delim_atom(char *current,
                 return NULL;
         }
 
-        tok_push(current, string_end + 1, tok_defs, tok_count, tok_cap);
+        if (!tok_push(current, string_end + 1, tok_defs, tok_count, tok_cap))
+                return NULL;
 
         return skip_spaces(string_end + 1);
 }
@@ -229,6 +237,11 @@ char *token_to_string(struct tok_def *token)
 
         token_len = token->end - token->begin;
         result = malloc(token_len + 1);
+        if (!result) {
+                LOG_ERROR("Memory allocation failed.");
+                return NULL;
+        }
+
         memcpy(result, token->begin, token_len);
         result[token_len] = '\0';
         return result;

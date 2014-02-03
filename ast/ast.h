@@ -117,6 +117,9 @@ struct ast_unit
 bool ast_is_symbol(char *string);
 bool ast_is_keyword(char *string, enum ast_keyword kw);
 void ast_push(struct ast_node *node, struct ast_node **begin, struct ast_node **end);
+int ast_count(struct ast_node *first);
+
+struct ast_node *ast_fc_get_last_expr(struct ast_func_decl *fdecl);
 
 struct ast_func_decl *ast_parse_func_decl(struct dom_node *node);
 void ast_delete_func_decl(struct ast_func_decl *fd);

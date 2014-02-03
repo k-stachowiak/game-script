@@ -57,7 +57,7 @@ struct dom_node
         } body;
 };
 
-bool domize(struct tok_def *tok_defs, int tok_count, struct dom_node **root);
+bool dom_build(struct tok_def *tok_defs, int tok_count, struct dom_node **root);
 
 char *dom_print(struct dom_node *node);
 void dom_delete_node(struct dom_node *node);

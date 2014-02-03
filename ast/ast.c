@@ -63,6 +63,29 @@ void ast_push(struct ast_node *node,
         (*end) = node;
 }
 
+int ast_count(struct ast_node *first)
+{
+        int result;
+
+        result = 1;
+
+        while ((first = first->next))
+                ++result;
+
+        return result;
+}
+
+struct ast_node *ast_fc_get_last_expr(struct ast_func_decl *fdecl)
+{
+        struct ast_node *result;
+
+        result = fdecl->first_expr;
+        while (result->next)
+                result = result->next;
+
+        return result;
+}
+
 struct ast_node *ast_parse_expression(struct dom_node *node)
 {
         /*

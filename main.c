@@ -55,18 +55,21 @@ int main()
         LOG_DEBUG("Parsed %d tokens.\n", tok_count);
 
         dom_root = NULL;
-        if (!domize(tokens, tok_count, &dom_root)) {
+        if (!dom_build(tokens, tok_count, &dom_root)) {
                 LOG_DEBUG("Domize error.");
                 free(tokens);
                 return EXIT_FAILURE;
         }
 
-        if (dom_root)
-                LOG_DEBUG("Parsing DOM [SUCCESS].\n");
-        else
-                LOG_DEBUG("Parsing DOM [FAILURE].\n");
-
         free(tokens);
+
+        if (dom_root) {
+                LOG_DEBUG("Parsing DOM [SUCCESS].\n");
+
+        } else {
+                LOG_DEBUG("Parsing DOM [FAILURE].\n");
+                return EXIT_FAILURE;
+        }
 
         unit = ast_parse_unit(dom_root);
 

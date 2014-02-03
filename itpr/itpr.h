@@ -19,8 +19,6 @@
 #ifndef EVAL_H
 #define EVAL_H
 
-#define ITPR_MAX_KEY_LENGTH 1024
-
 #include "ast/ast.h"
 
 enum val_atom_type
@@ -67,18 +65,37 @@ struct value
         } body;
 };
 
-struct kvp
+struct val_kvp
 {
-        char key[ITPR_MAX_KEY_LENGTH];
-        value val;
+        char *key;
+        struct value val;
+};
+
+struct func_kvp
+{
+        char *key;                   // non-owning.
+        struct ast_func_decl *fdecl; // non-owning.
 };
 
 struct scope
 {
         struct scope *parent;
-        struct kvp *kvps;
-        int kvps_count;
+
+        struct val_kvp *val_kvps;
+        int val_kvps_count;
+
+        struct func_kvp *func_kvps;
+        int func_kvps_count;
 };
+
+void val_copy(struct value *dst, struct value *src);
+void val_delete(struct value *val);
+
+struct scope *scope_build(struct ast_node *first_func);
+void scope_delete(struct scope* scp);
+
+struct value *scope_find_val(struct scope *scp, char *symbol);
+struct ast_func_decl *scope_find_func(struct scope *scp, char *symbol);
 
 struct value *eval(struct ast_node *expr, struct scope *scp);
 
