@@ -22,8 +22,7 @@
 
 #include <stdbool.h>
 
-enum tok_char
-{
+enum tok_char {
         TOK_CORE_OPEN = '(',
         TOK_CORE_CLOSE = ')',
         TOK_LIST_OPEN = '{',
@@ -38,8 +37,7 @@ enum tok_char
         TOK_DELIM_ESCAPE = '\\'
 };
 
-struct tok_def
-{
+struct tok_def {
         char *begin;
         char *end;
 };

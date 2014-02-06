@@ -22,8 +22,7 @@
 
 #include "sexpr/dom.h"
 
-enum ast_keyword
-{
+enum ast_keyword {
         AST_KEYWORD_MODULE,
         AST_KEYWORD_FUNC,
         AST_KEYWORD_TRUE,
@@ -31,8 +30,7 @@ enum ast_keyword
         AST_KEYWORD_COUNT,
 };
 
-enum ast_node_type
-{
+enum ast_node_type {
         AST_FUNC_DECL,
         AST_FUNC_CALL,
         AST_LITERAL,
@@ -40,8 +38,7 @@ enum ast_node_type
         AST_COMPOUND
 };
 
-enum ast_node_lit_type
-{
+enum ast_node_lit_type {
         AST_LIT_INTEGER,
         AST_LIT_REAL,
         AST_LIT_CHARACTER,
@@ -49,8 +46,7 @@ enum ast_node_lit_type
         AST_LIT_BOOLEAN
 };
 
-enum ast_node_cpd_type
-{
+enum ast_node_cpd_type {
         AST_CPD_LIST,
         AST_CPD_ARRAY,
         AST_CPD_TUPLE
@@ -58,8 +54,7 @@ enum ast_node_cpd_type
 
 struct ast_node;
 
-struct ast_func_decl
-{
+struct ast_func_decl {
         char *symbol;
         char **form_args;
         int form_args_count;
@@ -67,8 +62,7 @@ struct ast_func_decl
         int exprs_count;
 };
 
-struct ast_func_call
-{
+struct ast_func_call {
         char *symbol;
         struct ast_node *act_args;
         int act_args_count;
@@ -76,8 +70,7 @@ struct ast_func_call
 
 struct ast_literal {
         enum ast_node_lit_type type;
-        union
-        {
+        union {
                 long integer;
                 double real;
                 char character;
@@ -90,19 +83,15 @@ struct ast_reference {
         char *symbol;
 };
 
-// TODO: Change the placement of the struct braces.
-struct ast_compound
-{
+struct ast_compound {
         enum ast_node_cpd_type type;
         struct ast_node *children;
         int children_count;
 };
 
-struct ast_node
-{
+struct ast_node {
         enum ast_node_type type;
-        union
-        {
+        union {
                 struct ast_func_decl func_decl;
                 struct ast_func_call func_call;
                 struct ast_literal literal;
@@ -111,8 +100,7 @@ struct ast_node
         } body;
 };
 
-struct ast_unit
-{
+struct ast_unit {
         char *name;
         struct ast_node *functions;
         int functions_count;

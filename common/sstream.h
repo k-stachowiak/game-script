@@ -22,8 +22,7 @@
 
 #include <stdio.h>
 
-struct sstream
-{
+struct sstream {
         char *buffer;
         int cap;
         int off;

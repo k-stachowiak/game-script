@@ -21,8 +21,7 @@
 
 #include "ast/ast.h"
 
-enum val_atom_type
-{
+enum val_atom_type {
         VAL_ATOM_INTEGER,
         VAL_ATOM_REAL,
         VAL_ATOM_CHARACTER,
@@ -30,19 +29,16 @@ enum val_atom_type
         VAL_ATOM_BOOLEAN
 };
 
-enum value_type
-{
+enum value_type {
         VAL_ATOMIC,
         VAL_LIST,
         VAL_ARRAY,
         VAL_TUPLE
 };
 
-struct val_atom
-{
+struct val_atom {
         enum val_atom_type type;
-        union
-        {
+        union {
                 long integer;
                 double real;
                 char character;
@@ -51,34 +47,28 @@ struct val_atom
         } body;
 };
 
-struct value
-{
+struct value {
         enum value_type type;
-        union
-        {
+        union {
                 struct val_atom atom;
-                struct
-                {
+                struct {
                         struct val_atom *atoms;
                         int atoms_count;
                 } compound;
         } body;
 };
 
-struct val_kvp
-{
+struct val_kvp {
         char *key;
         struct value val;
 };
 
-struct func_kvp
-{
+struct func_kvp {
         char *key;                   // non-owning.
         struct ast_func_decl *fdecl; // non-owning.
 };
 
-struct scope
-{
+struct scope {
         struct scope *parent;
 
         struct val_kvp *val_kvps;

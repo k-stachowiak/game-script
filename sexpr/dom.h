@@ -25,31 +25,25 @@
 
 #include "sexpr/tok.h"
 
-enum dom_node_type
-{
+enum dom_node_type {
         DOM_ATOM,
         DOM_COMPOUND
 };
 
-enum dom_cpd_type
-{
+enum dom_cpd_type {
         DOM_CPD_CORE,
         DOM_CPD_LIST,
         DOM_CPD_ARRAY,
         DOM_CPD_TUPLE
 };
 
-struct dom_node
-{
+struct dom_node {
         enum dom_node_type type;
-        union
-        {
-                struct
-                {
+        union {
+                struct {
                         char *string;
                 } atom;
-                struct
-                {
+                struct {
                         enum dom_cpd_type type;
                         struct dom_node *children;
                         int children_count;
