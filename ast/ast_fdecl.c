@@ -26,36 +26,36 @@ static bool ast_parse_symbol_list(struct dom_node *node,
                                   char ***form_args,
                                   int *form_args_count)
 {
-        struct dom_node *children;
-        int children_count;
+        struct dom_node *dom_children;
+        int dom_children_count;
         int i;
 
         if (node->type != DOM_COMPOUND ||
             node->body.compound.type != DOM_CPD_CORE)
                 return false;
 
-        children = node->body.compound.children;
-        children_count = node->body.compound.children_count;
+        dom_children = node->body.compound.children;
+        dom_children_count = node->body.compound.children_count;
 
-        *form_args = calloc(children_count, sizeof(**form_args));
+        *form_args = calloc(dom_children_count, sizeof(**form_args));
 
-        for (i = 0; i < children_count; ++i) {
+        for (i = 0; i < dom_children_count; ++i) {
 
                 int symbol_len;
 
-                if (children[i].type != DOM_ATOM ||
-                    !ast_is_symbol(children[i].body.atom.string))
+                if (dom_children[i].type != DOM_ATOM ||
+                    !ast_is_symbol(dom_children[i].body.atom.string))
                         goto error;
 
-                symbol_len = strlen(children[i].body.atom.string);
+                symbol_len = strlen(dom_children[i].body.atom.string);
                 (*form_args)[i] = malloc(symbol_len + 1);
-                strcpy((*form_args)[i], children[i].body.atom.string);
+                strcpy((*form_args)[i], dom_children[i].body.atom.string);
         }
 
         return true;
 
 error:
-        for (i = 0; i < children_count; ++i)
+        for (i = 0; i < dom_children_count; ++i)
                 if ((*form_args)[i])
                         free((*form_args)[i]);
 
@@ -66,14 +66,17 @@ error:
 
 struct ast_func_decl *ast_parse_func_decl(struct dom_node *node)
 {
-        struct dom_node *children;
-        int children_count;
+        struct dom_node *dom_children;
+        int dom_children_count;
 
         char *symbol;
+
         char **form_args;
         int form_args_count;
-        struct ast_node *first_expr;
-        struct ast_node *current_expr;
+
+        struct ast_node *exprs;
+        int exprs_count;
+        int exprs_cap;
 
         struct ast_func_decl *result;
 
@@ -85,47 +88,48 @@ struct ast_func_decl *ast_parse_func_decl(struct dom_node *node)
         symbol = NULL;
         form_args = NULL;
         form_args_count = 0;
-        first_expr = NULL;
-
-        current_expr = NULL;
+        exprs = NULL;
+        exprs_count = 0;
+        exprs_cap = 0;
 
         // Validate basic format.
         if (node->type != DOM_COMPOUND &&
             node->body.compound.type != DOM_CPD_CORE)
                 goto error;
 
-        children = node->body.compound.children;
-        children_count = node->body.compound.children_count;
+        dom_children = node->body.compound.children;
+        dom_children_count = node->body.compound.children_count;
 
-        if (children_count < 3)
+        if (dom_children_count < 3)
                 goto error;
 
-        if (children[0].type != DOM_ATOM ||
-            !ast_is_keyword(children[0].body.atom.string, AST_KEYWORD_FUNC))
+        if (dom_children[0].type != DOM_ATOM ||
+            !ast_is_keyword(dom_children[0].body.atom.string, AST_KEYWORD_FUNC))
                 goto error;
 
         // Read symbol.
-        if (children[1].type != DOM_ATOM)
+        if (dom_children[1].type != DOM_ATOM)
                 goto error;
 
-        symbol_len = strlen(children[1].body.atom.string);
+        symbol_len = strlen(dom_children[1].body.atom.string);
         symbol = malloc(symbol_len + 1);
-        strcpy(symbol, children[1].body.atom.string);
+        strcpy(symbol, dom_children[1].body.atom.string);
 
         // Read formal arguments.
-        if (children[2].type != DOM_COMPOUND ||
-            children[2].body.compound.type != DOM_CPD_CORE ||
-            !ast_parse_symbol_list(children + 2, &form_args, &form_args_count))
+        if (dom_children[2].type != DOM_COMPOUND ||
+            dom_children[2].body.compound.type != DOM_CPD_CORE ||
+            !ast_parse_symbol_list(dom_children + 2, &form_args, &form_args_count))
                 goto error;
 
-        // Read expressions.
-        for (i = 3; i < children_count; ++i) {
+        // Read exprs.
+        for (i = 3; i < dom_children_count; ++i) {
                 struct ast_node *expr;
-                expr = ast_parse_expression(children + i);
-                if (expr)
-                        ast_push(expr, &first_expr, &current_expr);
-                else
+                expr = ast_parse_expression(dom_children + i);
+                if (expr) {
+                        ast_push(expr, &exprs, &exprs_count, &exprs_cap);
+                } else {
                         goto error;
+                }
         }
 
         log_buffer = dom_print(node);
@@ -136,7 +140,8 @@ struct ast_func_decl *ast_parse_func_decl(struct dom_node *node)
         result->symbol = symbol;
         result->form_args = form_args;
         result->form_args_count = form_args_count;
-        result->first_expr = first_expr;
+        result->exprs = exprs;
+        result->exprs_count = exprs_count;
 
         return result;
 
@@ -145,17 +150,23 @@ error:
         LOG_TRACE("Parsing func declaration [FAILURE]:\n%s", log_buffer);
         free(log_buffer);
 
-        if (symbol)
+        if (symbol) {
                 free(symbol);
-
-        if (form_args_count > 0) {
-                free(form_args);
-                for (i = 0; i < form_args_count; ++i)
-                        free(form_args[i]);
         }
 
-        if (first_expr)
-                ast_delete_node(first_expr);
+        if (form_args_count > 0) {
+                for (i = 0; i < form_args_count; ++i) {
+                        free(form_args[i]);
+                }
+                free(form_args);
+        }
+
+        if (exprs) {
+                for (i = 0; i < exprs_count; ++i) {
+                        ast_delete_node(exprs + i);
+                }
+                free(exprs);
+        }
 
         return NULL;
 }
@@ -177,9 +188,12 @@ void ast_delete_func_decl(struct ast_func_decl *fd)
                 fd->form_args_count = 0;
         }
 
-        if (fd->first_expr) {
-                ast_delete_node(fd->first_expr);
-                fd->first_expr = NULL;
+        for (i = 0; i < fd->exprs_count; ++i) {
+                ast_delete_node(fd->exprs + i);
+        }
+
+        if (i > 0) {
+                free(fd->exprs);
         }
 }
 

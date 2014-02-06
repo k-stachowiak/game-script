@@ -24,11 +24,12 @@
 
 struct ast_compound *ast_parse_compound(struct dom_node *node)
 {
-        struct dom_node *children;
-        int children_count;
+        struct dom_node *dom_children;
+        int dom_children_count;
 
-        struct ast_node *first_element;
-        struct ast_node *current_element;
+        struct ast_node *ast_children;
+        int ast_children_count;
+        int ast_children_cap;
 
         struct ast_compound *result;
 
@@ -36,8 +37,11 @@ struct ast_compound *ast_parse_compound(struct dom_node *node)
 
         char *log_buffer;
 
-        first_element = NULL;
-        current_element = NULL;
+        dom_children = NULL;
+        dom_children_count = 0;
+        ast_children = NULL;
+        ast_children_count = 0;
+        ast_children_cap = 0;
         result = NULL;
         log_buffer = NULL;
 
@@ -48,21 +52,22 @@ struct ast_compound *ast_parse_compound(struct dom_node *node)
                 goto error;
         }
 
-        children = node->body.compound.children;
-        children_count = node->body.compound.children_count;
+        dom_children = node->body.compound.children;
+        dom_children_count = node->body.compound.children_count;
 
         // Read the elements.
-        for (i = 0; i < children_count; ++i) {
-                struct ast_node *element;
-                element = ast_parse_expression(children + i);
-                if (!element)
+        for (i = 0; i < dom_children_count; ++i) {
+                struct ast_node *child;
+                child = ast_parse_expression(dom_children + i);
+                if (!child)
                         goto error;
 
-                ast_push(element, &first_element, &current_element);
+                ast_push(child, &ast_children, &ast_children_count, &ast_children_cap);
         }
 
         result = malloc(sizeof(*result));
-        result->first_element = first_element;
+        result->children = ast_children;
+        result->children_count = ast_children_count;
 
         switch (node->body.compound.type) {
         case DOM_CPD_LIST:
@@ -95,17 +100,27 @@ error:
         LOG_TRACE("Parsing compound [FAILURE]:\n%s", log_buffer);
         free(log_buffer);
 
-        if (first_element)
-                ast_delete_node(first_element);
+        if (ast_children) {
+                for (i = 0; i < ast_children_count; ++i) {
+                        ast_delete_node(ast_children + i);
+                }
+                free(ast_children);
+        }
 
         return NULL;
 }
 
 void ast_delete_compound(struct ast_compound *cpd)
 {
-        if (cpd->first_element) {
-                ast_delete_node(cpd->first_element);
-                cpd->first_element = NULL;
+        int i;
+
+        // TODO: Don't recompute offsets in loop. Increment pointer.
+        for (i = 0; i < cpd->children_count; ++i) {
+                ast_delete_node(cpd->children + i);
+        }
+
+        if (i > 0) {
+                free(cpd->children);
         }
 }
 

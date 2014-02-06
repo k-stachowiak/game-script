@@ -24,12 +24,13 @@
 
 struct ast_func_call *ast_parse_func_call(struct dom_node *node)
 {
-        struct dom_node *children;
-        int children_count;
+        struct dom_node *dom_children;
+        int dom_children_count;
 
         char *symbol;
-        struct ast_node *first_act_arg;
-        struct ast_node *current_act_arg;
+        struct ast_node *act_args;
+        int act_args_count;
+        int act_args_cap;
 
         struct ast_func_call *result;
 
@@ -39,8 +40,9 @@ struct ast_func_call *ast_parse_func_call(struct dom_node *node)
         char *log_buffer;
 
         symbol = NULL;
-        first_act_arg = NULL;
-        current_act_arg = NULL;
+        act_args = NULL;
+        act_args_count = 0;
+        act_args_cap = 0;
         result = NULL;
         log_buffer = NULL;
 
@@ -49,29 +51,29 @@ struct ast_func_call *ast_parse_func_call(struct dom_node *node)
             node->body.compound.type != DOM_CPD_CORE)
                 goto error;
 
-        children = node->body.compound.children;
-        children_count = node->body.compound.children_count;
+        dom_children = node->body.compound.children;
+        dom_children_count = node->body.compound.children_count;
 
-        if (children_count == 0)
+        if (dom_children_count == 0)
                 goto error;
 
         // Read symbol.
-        if (children[0].type != DOM_ATOM ||
-            !ast_is_symbol(children[0].body.atom.string))
+        if (dom_children[0].type != DOM_ATOM ||
+            !ast_is_symbol(dom_children[0].body.atom.string))
                 goto error;
 
-        symbol_len = strlen(children[0].body.atom.string);
+        symbol_len = strlen(dom_children[0].body.atom.string);
         symbol = malloc(symbol_len + 1);
-        strcpy(symbol, children[0].body.atom.string);
+        strcpy(symbol, dom_children[0].body.atom.string);
 
         // Read the arguments.
-        for (i = 1; i < children_count; ++i) {
+        for (i = 1; i < dom_children_count; ++i) {
                 struct ast_node *act_arg;
-                act_arg = ast_parse_expression(children + i);
+                act_arg = ast_parse_expression(dom_children + i);
                 if (!act_arg)
                         goto error;
 
-                ast_push(act_arg, &first_act_arg, &current_act_arg);
+                ast_push(act_arg, &act_args, &act_args_count, &act_args_cap);
         }
 
         log_buffer = dom_print(node);
@@ -81,7 +83,8 @@ struct ast_func_call *ast_parse_func_call(struct dom_node *node)
         // Build the result.
         result = malloc(sizeof(*result));
         result->symbol = symbol;
-        result->first_act_arg = first_act_arg;
+        result->act_args = act_args;
+        result->act_args_count = act_args_count;
 
         return result;
 
@@ -93,22 +96,31 @@ error:
         if (symbol)
                 free(symbol);
 
-        if (first_act_arg)
-                ast_delete_node(first_act_arg);
+        if (act_args) {
+                for (i = 0; i < act_args_count; ++i) {
+                        ast_delete_node(act_args + i);
+                }
+                free(act_args);
+        }
 
         return NULL;
 }
 
 void ast_delete_func_call(struct ast_func_call *fc)
 {
+        int i;
+
         if (fc->symbol) {
                 free(fc->symbol);
                 fc->symbol = NULL;
         }
 
-        if (fc->first_act_arg) {
-                ast_delete_node(fc->first_act_arg);
-                fc->first_act_arg = NULL;
+        for (i = 0; i < fc->act_args_count; ++i) {
+                ast_delete_node(fc->act_args + i);
+        }
+
+        if (i > 0) {
+                free(fc->act_args);
         }
 }
 

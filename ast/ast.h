@@ -63,13 +63,15 @@ struct ast_func_decl
         char *symbol;
         char **form_args;
         int form_args_count;
-        struct ast_node *first_expr;
+        struct ast_node *exprs;
+        int exprs_count;
 };
 
 struct ast_func_call
 {
         char *symbol;
-        struct ast_node *first_act_arg;
+        struct ast_node *act_args;
+        int act_args_count;
 };
 
 struct ast_literal {
@@ -88,10 +90,12 @@ struct ast_reference {
         char *symbol;
 };
 
+// TODO: Change the placement of the struct braces.
 struct ast_compound
 {
         enum ast_node_cpd_type type;
-        struct ast_node *first_element;
+        struct ast_node *children;
+        int children_count;
 };
 
 struct ast_node
@@ -105,21 +109,18 @@ struct ast_node
                 struct ast_reference reference;
                 struct ast_compound compound;
         } body;
-        struct ast_node *next;
 };
 
 struct ast_unit
 {
         char *name;
         struct ast_node *functions;
+        int functions_count;
 };
 
 bool ast_is_symbol(char *string);
 bool ast_is_keyword(char *string, enum ast_keyword kw);
-void ast_push(struct ast_node *node, struct ast_node **begin, struct ast_node **end);
-int ast_count(struct ast_node *first);
-
-struct ast_node *ast_fc_get_last_expr(struct ast_func_decl *fdecl);
+bool ast_push(struct ast_node *node, struct ast_node **nodes, int *ast_count, int *ast_cap);
 
 struct ast_func_decl *ast_parse_func_decl(struct dom_node *node);
 void ast_delete_func_decl(struct ast_func_decl *fd);

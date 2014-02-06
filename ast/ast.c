@@ -49,41 +49,36 @@ bool ast_is_keyword(char *string, enum ast_keyword kw)
         return strcmp(string, kw_map[kw]) == 0;
 }
 
-void ast_push(struct ast_node *node,
-              struct ast_node **begin,
-              struct ast_node **end)
+// TODO: Handle the result value of this correctly.
+bool ast_push(struct ast_node *node,
+              struct ast_node **ast_nodes,
+              int *ast_count,
+              int *ast_cap)
 {
-        if (*begin == NULL) {
-                *begin = node;
-                *end = node;
-                return;
+        // Adjust capacity if needed.
+        if (*ast_cap == 0) {
+                *ast_count = 0;
+                *ast_cap = 10;
+                *ast_nodes = malloc(*ast_cap * sizeof(**ast_nodes));
+                if (!(*ast_nodes)) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return false;
+                }
+
+        } else if (*ast_cap == *ast_count) {
+                *ast_cap *= 2;
+                *ast_nodes = realloc(*ast_nodes, *ast_cap * sizeof(**ast_nodes));
+                if (!(*ast_nodes)) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return false;
+                }
         }
 
-        (*end)->next = node;
-        (*end) = node;
-}
+        // Perform the insertion.
+        (*ast_nodes)[*ast_count] = *node;
+        ++(*ast_count);
 
-int ast_count(struct ast_node *first)
-{
-        int result;
-
-        result = 1;
-
-        while ((first = first->next))
-                ++result;
-
-        return result;
-}
-
-struct ast_node *ast_fc_get_last_expr(struct ast_func_decl *fdecl)
-{
-        struct ast_node *result;
-
-        result = fdecl->first_expr;
-        while (result->next)
-                result = result->next;
-
-        return result;
+        return true;
 }
 
 struct ast_node *ast_parse_expression(struct dom_node *node)
@@ -106,7 +101,6 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
         if ((fd = ast_parse_func_decl(node))) {
                 result = malloc(sizeof(*result));
-                result->next = NULL;
                 result->type = AST_FUNC_DECL;
                 result->body.func_decl = *fd;
                 free(fd);
@@ -115,7 +109,6 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
         if ((fc = ast_parse_func_call(node))) {
                 result = malloc(sizeof(*result));
-                result->next = NULL;
                 result->type = AST_FUNC_CALL;
                 result->body.func_call = *fc;
                 free(fc);
@@ -124,7 +117,6 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
         if ((lit = ast_parse_literal(node))) {
                 result = malloc(sizeof(*result));
-                result->next = NULL;
                 result->type = AST_LITERAL;
                 result->body.literal = *lit;
                 free(lit);
@@ -133,7 +125,6 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
         if ((ref = ast_parse_reference(node))) {
                 result = malloc(sizeof(*result));
-                result->next = NULL;
                 result->type = AST_REFERENCE;
                 result->body.reference = *ref;
                 free(ref);
@@ -142,7 +133,6 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
         if ((cpd = ast_parse_compound(node))) {
                 result = malloc(sizeof(*result));
-                result->next = NULL;
                 result->type = AST_COMPOUND;
                 result->body.compound = *cpd;
                 free(cpd);
@@ -171,33 +161,30 @@ void ast_delete_node(struct ast_node *node)
                 ast_delete_compound(&(node->body.compound));
                 break;
         }
-
-        if (node->next)
-                ast_delete_node(node->next);
-
-        free(node);
 }
 
 struct ast_unit *ast_parse_unit(struct dom_node *node)
 {
+        struct dom_node *dom_children;
+        int dom_children_count;
+
         char *name;
-        int name_len;
 
         struct ast_node *functions;
-        struct ast_node *current;
-
-        struct dom_node *child;
-        int children_count;
+        int functions_count;
+        int functions_cap;
 
         struct ast_unit *result;
 
+        int name_len;
         int i;
 
         name = NULL;
         functions = NULL;
-        current = NULL;
+        functions_count = 0;
+        functions_cap = 0;
 
-        child = NULL;
+        result = NULL;
 
         // Validate node.
         if (node->type != DOM_COMPOUND ||
@@ -206,72 +193,81 @@ struct ast_unit *ast_parse_unit(struct dom_node *node)
                 goto error;
         }
 
-        child = node->body.compound.children;
-        children_count = node->body.compound.children_count;
+        dom_children = node->body.compound.children;
+        dom_children_count = node->body.compound.children_count;
 
-        if (children_count < 2) {
-                LOG_TRACE("Incorrect numger of node children :%d.", children_count);
+        if (dom_children_count < 2) {
+                LOG_TRACE("Incorrect numger of node children :%d.", dom_children_count);
                 goto error;
         }
 
-        if (child->type != DOM_ATOM ||
-            !ast_is_keyword(child->body.atom.string, AST_KEYWORD_MODULE)) {
+        if (dom_children[0].type != DOM_ATOM ||
+            !ast_is_keyword(dom_children[0].body.atom.string, AST_KEYWORD_MODULE)) {
                 LOG_TRACE("Moudle keyword not found, \"%s\" encountered instead.",
-                        child->body.atom.string);
+                        dom_children[0].body.atom.string);
                 goto error;
         }
 
-        ++child;
-
-        if (child->type != DOM_ATOM) {
+        if (dom_children[1].type != DOM_ATOM) {
                 LOG_TRACE("Unit name not found.");
                 goto error;
         }
 
         // Parse node.
-        name_len = strlen(child->body.atom.string);
+        name_len = strlen(dom_children[1].body.atom.string);
         name = malloc(name_len + 1);
-        strcpy(name, child->body.atom.string);
-
-        ++child;
+        strcpy(name, dom_children[1].body.atom.string);
 
         LOG_TRACE("Parsed unit name \"%s\".", name);
 
-        for (i = 2; i < children_count; ++i, child++) {
+        for (i = 2; i < dom_children_count; ++i) {
 
                 struct ast_node *node;
-                node = ast_parse_expression(child);
+                node = ast_parse_expression(dom_children + i);
 
                 if (node != NULL && node->type == AST_FUNC_DECL) {
-                        ast_push(node, &functions, &current);
+                        ast_push(node, &functions, &functions_count, &functions_cap);
+
                 } else {
                         goto error;
+
                 }
         }
 
         result = malloc(sizeof(*result));
         result->name = name;
         result->functions = functions;
+        result->functions_count = functions_count;
 
         return result;
 
 error:
-        if (name)
+        if (name) {
                 free(name);
+        }
 
-        if (functions)
-                ast_delete_node(functions);
+        if (functions) {
+                for (i = 0; i < functions_count; ++i) {
+                        ast_delete_node(functions + i);
+                }
+                free(functions);
+        }
 
         return NULL;
 }
 
 void ast_delete_unit(struct ast_unit *unit)
 {
+        int i;
+
         if (!unit)
                 return;
 
-        if (unit->functions)
-                ast_delete_node(unit->functions);
+        for (i = 0; i < unit->functions_count; ++i) {
+                ast_delete_node(unit->functions + i);
+        }
 
-        free(unit);
+        if (i > 0) {
+                free(unit->functions);
+        }
 }

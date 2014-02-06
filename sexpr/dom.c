@@ -114,9 +114,11 @@ static struct dom_node *dom_read_atom(struct tok_def **current, struct tok_def *
 static struct dom_node *dom_read_compound(struct tok_def **current, struct tok_def **end)
 {
         struct tok_def *begin;
+
         struct dom_node *children;
         int children_count;
         int children_cap;
+
         enum dom_cpd_type infered_type;
         struct dom_node *result;
         int i;
@@ -249,14 +251,12 @@ void dom_delete_node(struct dom_node *node)
 {
         int i;
 
-        if (!node)
-                return;
-
         switch (node->type) {
         case DOM_ATOM:
                 free(node->body.atom.string);
                 break;
         default:
+                // TODO: Get all the deleters right! WHO CALLS FREE???
                 for (i = 0; i < node->body.compound.children_count; ++i)
                         dom_delete_node(node->body.compound.children + i);
                 break;
