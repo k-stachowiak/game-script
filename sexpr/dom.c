@@ -139,7 +139,9 @@ static struct dom_node *dom_read_compound(struct tok_def **current, struct tok_d
                         goto success;
 
                 child = dom_read_any(current, end);
-                dom_push(child, &children, &children_count, &children_cap);
+                if (!child || !dom_push(child, &children, &children_count, &children_cap))
+                        break;
+
                 free(child);
         }
 

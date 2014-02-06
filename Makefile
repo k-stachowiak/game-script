@@ -6,6 +6,7 @@ main:   ./ast/ast_cpd.c \
         ./ast/ast_lit.c \
         ./ast/ast_ref.c \
         ./ast/ast_fdecl.c \
+        ./ast/ast_unit.c \
         ./ast/ast.c \
         ./sexpr/dom.c \
         ./sexpr/tok.c \

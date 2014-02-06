@@ -125,9 +125,7 @@ struct ast_func_decl *ast_parse_func_decl(struct dom_node *node)
         for (i = 3; i < dom_children_count; ++i) {
                 struct ast_node *expr;
                 expr = ast_parse_expression(dom_children + i);
-                if (expr) {
-                        ast_push(expr, &exprs, &exprs_count, &exprs_cap);
-                } else {
+                if (expr || !ast_push(expr, &exprs, &exprs_count, &exprs_cap)) {
                         goto error;
                 }
         }

@@ -70,10 +70,12 @@ struct ast_func_call *ast_parse_func_call(struct dom_node *node)
         for (i = 1; i < dom_children_count; ++i) {
                 struct ast_node *act_arg;
                 act_arg = ast_parse_expression(dom_children + i);
-                if (!act_arg)
+                if (!act_arg || !ast_push(act_arg,
+                                          &act_args,
+                                          &act_args_count,
+                                          &act_args_cap)) {
                         goto error;
-
-                ast_push(act_arg, &act_args, &act_args_count, &act_args_cap);
+                }
         }
 
         log_buffer = dom_print(node);

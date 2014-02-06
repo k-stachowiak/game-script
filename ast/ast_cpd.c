@@ -59,10 +59,12 @@ struct ast_compound *ast_parse_compound(struct dom_node *node)
         for (i = 0; i < dom_children_count; ++i) {
                 struct ast_node *child;
                 child = ast_parse_expression(dom_children + i);
-                if (!child)
+                if (!child || !ast_push(child,
+                                        &ast_children,
+                                        &ast_children_count,
+                                        &ast_children_cap)) {
                         goto error;
-
-                ast_push(child, &ast_children, &ast_children_count, &ast_children_cap);
+                }
         }
 
         result = malloc(sizeof(*result));
@@ -114,7 +116,6 @@ void ast_delete_compound(struct ast_compound *cpd)
 {
         int i;
 
-        // TODO: Don't recompute offsets in loop. Increment pointer.
         for (i = 0; i < cpd->children_count; ++i) {
                 ast_delete_node(cpd->children + i);
         }
