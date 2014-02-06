@@ -16,6 +16,7 @@
  * along with moon. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -31,12 +32,13 @@ static struct value *eval_func_decl(struct ast_func_decl* fd, struct scope* scp)
 static struct value *eval_func_call(struct ast_func_call *fc, struct scope *scp)
 {
         // TODO: implement.
-        LOG_ERROR("Higher order functions not supported.");
+        LOG_ERROR("Not implemented!");
         return NULL;
 }
 
 static struct value *eval_literal(struct ast_literal *lit)
 {
+        char *string;
         struct value *result;
         int string_len;
 
@@ -56,8 +58,13 @@ static struct value *eval_literal(struct ast_literal *lit)
                 break;
         case AST_LIT_STRING:
                 string_len = strlen(lit->body.string);
-                result->body.atom.body.string = malloc(string_len + 1);
-                strcpy(result->body.atom.body.string, lit->body.string);
+                string = malloc(string_len + 1);
+                if (!string) {
+                        LOG_ERROR("Memory allocation failed.");
+                        return NULL;
+                }
+                strcpy(string, lit->body.string);
+                result->body.atom.body.string = string;
                 break;
         case AST_LIT_BOOLEAN:
                 result->body.atom.body.boolean = lit->body.boolean;
@@ -76,36 +83,33 @@ static struct value *eval_reference(struct ast_reference *ref, struct scope *scp
                 return NULL;
 
         val_copy(&result, found);
+        if (!(*result))
+                return false;
 
         return result;
 }
 
-static struct value *eval_compound(struct ast_node *first_expr,
+static struct value *eval_compound(struct ast_node *exprs,
+                                   int exprs_count,
                                    struct scope *scp,
                                    enum value_type type)
 {
         int count, i;
-        struct ast_node *current;
         struct value *result;
 
         assert(type != VAL_ATOMIC);
 
-        count = ast_count(first_expr);
-        current = first_expr;
-
         result = malloc(sizeof(*result));
         result->type = type;
 
-        result->body.compound.atoms_count = count;
-        result->body.compound.atoms = malloc(sizeof(struct val_atom) * count);
+        result->body.compound.atoms_count = exprs_count;
+        result->body.compound.atoms = malloc(sizeof(struct val_atom) * exprs_count);
 
-        for (i = 0; i < count; ++i) {
+        for (i = 0; i < exprs_count; ++i) {
                 struct value *atom;
-                atom = eval(current, scp);
-                val_copy(:wa
-                                &(result->body.compound.atoms) + i, atom);
+                atom = eval(exprs + i, scp);
+                val_copy(&(result->body.compound.atoms + i), atom);
                 val_delete(atom);
-                current = current->next;
         }
 
         return result;
@@ -171,43 +175,23 @@ static bool node_types_equal(struct ast_node *lhs, struct ast_node *rhs, struct 
                 if (lhs->body.compound.type != rhs->body.compound.type)
                         return false;
 
-                lsubnode = lhs->body.compound.first_element;
-                rsubnode = rhs->body.compound.first_element;
-                lcpd_size = ast_cound(lsubnode);
-                rcpd_size = ast_cound(rsubnode);
+                lsubnode = lhs->body.compound.children;
+                rsubnode = rhs->body.compound.children;
+                lcpd_size = lhs->body.compound.children_count;
+                rcpd_size = rhs->body.compound.children_count;
                 if (lcpd_size != rcpd_size)
                         return false;
 
                 common_cpd_size = lcpd_size;
                 for (i = 0; i < common_cpd_size; ++i) {
-                        if (!node_types_equal(lsubnode, rsubnode))
+                        if (!node_types_equal(lsubnode, rsubnode)) {
                                 return false;
-                        lsubnode = lsubnode->next;
-                        rsubnode = rsubnode->next;
+                        }
+                        ++lsubnode;
+                        ++rsubnode;
                 }
                 return true;
         }
-}
-
-static bool all_node_types_equal(struct ast_node *first)
-{
-        int count;
-        struct ast_node *current;
-
-        count = ast_count(first);
-
-        if (count == 0)
-                return true;
-
-        current = first->next;
-
-        while (current) {
-                if (!node_types_equal(first, current))
-                        return false;
-                current = current->next;
-        }
-
-        return true;
 }
 
 static struct value *eval_list(struct ast_node *first_expr, struct scope *scp)
@@ -235,20 +219,27 @@ void val_copy(struct value **dst, struct value *src)
 {
         int cpd_buffer_size;
 
-        dst = malloc(sizeof(*dst));
-        dst->type = src->type;
+        *dst = malloc(sizeof(**dst));
+        if (!(*dst)) {
+                LOG_ERROR("Memory allocation failed.");
+                return;
+        }
+
+        (*dst)->type = src->type;
 
         switch (src->type) {
         case VAL_ATOMIC:
-                memcpy(dst, src, sizeof(*src));
+                memcpy(*dst, src, sizeof(*src));
                 break;
         case VAL_LIST:
         case VAL_ARRAY:
         case VAL_TUPLE:
                 cpd_buffer_size = sizeof(val_atom) * src->body.compound.atoms_count;
-                dst->body.compound.atoms_count = src->body.compound.atoms_count;
-                dst->body.compound.atoms = malloc(cpd_buffer_size);
-                memcpy(dst->body.compound.atoms, src->body.compound.atoms, cpd_buffer_size);
+                (*dst)->body.compound.atoms_count = src->body.compound.atoms_count;
+                (*dst)->body.compound.atoms = malloc(cpd_buffer_size);
+                memcpy((*dst)->body.compound.atoms,
+                       src->body.compound.atoms,
+                       cpd_buffer_size);
                 break;
         }
 }

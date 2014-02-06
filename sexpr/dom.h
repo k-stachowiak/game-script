@@ -20,6 +20,8 @@
 #ifndef DOM_H
 #define DOM_H
 
+// TODO: consider extracting a cmmon header for sexpr.
+
 #include <stdio.h>
 #include <stdbool.h>
 

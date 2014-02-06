@@ -53,7 +53,6 @@ static enum dom_cpd_type infer_compound_type(struct tok_def *token)
 // Dynamic memory management.
 // --------------------------
 
-// TODO: Handle the return value of this function.
 static bool dom_push(struct dom_node *node,
                      struct dom_node **dom_nodes,
                      int *dom_count,
