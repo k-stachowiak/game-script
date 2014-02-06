@@ -70,6 +70,7 @@ struct ast_func_decl *ast_parse_func_decl(struct dom_node *node)
         int dom_children_count;
 
         char *symbol;
+        int symbol_len;
 
         char **form_args;
         int form_args_count;
@@ -81,7 +82,6 @@ struct ast_func_decl *ast_parse_func_decl(struct dom_node *node)
         struct ast_func_decl *result;
 
         int i;
-        int symbol_len;
 
         char *log_buffer = NULL;
 
@@ -175,15 +175,12 @@ void ast_delete_func_decl(struct ast_func_decl *fd)
 
         if (fd->symbol) {
                 free(fd->symbol);
-                fd->symbol = NULL;
         }
 
         if (fd->form_args_count) {
                 for (i = 0; i < fd->form_args_count; ++i)
                         free(fd->form_args[i]);
                 free(fd->form_args);
-                fd->form_args = NULL;
-                fd->form_args_count = 0;
         }
 
         for (i = 0; i < fd->exprs_count; ++i) {

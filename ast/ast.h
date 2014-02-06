@@ -28,11 +28,13 @@ enum ast_keyword {
         AST_KEYWORD_TRUE,
         AST_KEYWORD_FALSE,
         AST_KEYWORD_COUNT,
+        AST_KEYWORD_BIND,
 };
 
 enum ast_node_type {
         AST_FUNC_DECL,
         AST_FUNC_CALL,
+        AST_BIND,
         AST_LITERAL,
         AST_REFERENCE,
         AST_COMPOUND
@@ -68,6 +70,11 @@ struct ast_func_call {
         int act_args_count;
 };
 
+struct ast_bind {
+        char *symbol;
+        struct ast_node *expr;
+};
+
 struct ast_literal {
         enum ast_node_lit_type type;
         union {
@@ -94,6 +101,7 @@ struct ast_node {
         union {
                 struct ast_func_decl func_decl;
                 struct ast_func_call func_call;
+                struct ast_bind bind;
                 struct ast_literal literal;
                 struct ast_reference reference;
                 struct ast_compound compound;
@@ -102,6 +110,7 @@ struct ast_node {
 
 struct ast_unit {
         char *name;
+        // TODO: handle global binds here.
         struct ast_node *functions;
         int functions_count;
 };
@@ -115,6 +124,9 @@ void ast_delete_func_decl(struct ast_func_decl *fd);
 
 struct ast_func_call *ast_parse_func_call(struct dom_node *node);
 void ast_delete_func_call(struct ast_func_call *fc);
+
+struct ast_bind *ast_parse_bind(struct dom_node *node);
+void ast_delete_bind(struct ast_bind *b);
 
 struct ast_literal *ast_parse_literal(struct dom_node *node);
 void ast_delete_literal(struct ast_literal *lit);

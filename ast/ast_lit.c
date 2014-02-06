@@ -161,7 +161,6 @@ void ast_delete_literal(struct ast_literal *lit)
 {
         if (lit->type == AST_LIT_STRING) {
                 free(lit->body.string);
-                lit->body.string = NULL;
         }
 }
 

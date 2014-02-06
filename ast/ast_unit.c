@@ -121,9 +121,6 @@ void ast_delete_unit(struct ast_unit *unit)
 {
         int i;
 
-        if (!unit)
-                return;
-
         for (i = 0; i < unit->functions_count; ++i) {
                 ast_delete_node(unit->functions + i);
         }

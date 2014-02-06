@@ -43,7 +43,8 @@ bool ast_is_keyword(char *string, enum ast_keyword kw)
                 "unit",
                 "func",
                 "true",
-                "false"
+                "false",
+                "bind"
         };
 
         return strcmp(string, kw_map[kw]) == 0;
@@ -94,6 +95,7 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
         struct ast_func_decl *fd;
         struct ast_func_call *fc;
+        struct ast_bind *b;
         struct ast_literal *lit;
         struct ast_reference *ref;
         struct ast_compound *cpd;
@@ -111,6 +113,14 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
                 result->type = AST_FUNC_CALL;
                 result->body.func_call = *fc;
                 free(fc);
+                return result;
+        }
+
+        if ((b = ast_parse_bind(node))) {
+                result = malloc(sizeof(*result));
+                result->type = AST_BIND;
+                result->body.bind = *b;
+                free(b);
                 return result;
         }
 
@@ -149,6 +159,9 @@ void ast_delete_node(struct ast_node *node)
                 break;
         case AST_FUNC_CALL:
                 ast_delete_func_call(&(node->body.func_call));
+                break;
+        case AST_BIND:
+                ast_delete_bind(&(node->body.bind));
                 break;
         case AST_LITERAL:
                 ast_delete_literal(&(node->body.literal));

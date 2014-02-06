@@ -204,6 +204,7 @@ static bool all_node_types_equal(struct ast_node *first)
         while (current) {
                 if (!node_types_equal(first, current))
                         return false;
+                current = current->next;
         }
 
         return true;
