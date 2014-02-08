@@ -52,8 +52,8 @@ struct value {
         union {
                 struct val_atom atom;
                 struct {
-                        struct val_atom *atoms;
-                        int atoms_count;
+                        struct value *values;
+                        int values_count;
                 } compound;
         } body;
 };

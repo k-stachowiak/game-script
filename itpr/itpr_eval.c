@@ -23,6 +23,143 @@
 #include "common/logg.h"
 #include "itpr/itpr.h"
 
+static bool value_types_equal(struct value *lhs, struct value *rhs)
+{
+        enum value_type common_val_type;
+        enum val_atom_type common_atom_type;
+        struct val_atom *latom, *ratom;
+        struct value *lval, *rval;
+        int common_val_count;
+        int i;
+
+        if (lhs->type != rhs->type)
+                return false;
+
+        common_val_type = lhs->type;
+
+        switch (common_val_type) {
+        case VAL_ATOMIC:
+                if (lhs->body.atom.type != rhs->body.atom.type)
+                        return false;
+
+                common_atom_type = lhs->body.atom.type;
+                latom = &(lhs->body.atom);
+                ratom = &(rhs->body.atom);
+
+                switch (common_atom_type) {
+                case VAL_ATOM_INTEGER:
+                        return latom->body.integer == ratom->body.integer;
+                case VAL_ATOM_REAL:
+                        return latom->body.real == ratom->body.real;
+                case VAL_ATOM_CHARACTER:
+                        return latom->body.character == ratom->body.character;
+                case VAL_ATOM_STRING:
+                        return strcmp(latom->body.string, ratom->body.string) == 0;
+                case VAL_ATOM_BOOLEAN:
+                        return latom->body.boolean == ratom->body.boolean;
+                }
+
+                LOG_ERROR("Logic error : control should not reach this point.");
+                return false;
+
+        case VAL_LIST:
+        case VAL_ARRAY:
+        case VAL_TUPLE:
+                if (lhs->body.compound.values_count != rhs->body.compound.values_count)
+                        return false;
+
+                common_val_count = lhs->body.compound.values_count;
+                lval = lhs->body.compound.values;
+                rval = rhs->body.compound.values;
+                for (i = 0; i < common_val_count; ++i) {
+                        if (!value_types_equal(lval, rval))
+                                return false;
+                        ++lval;
+                        ++rval;
+                }
+                return true;
+        }
+}
+
+static bool node_types_equal(struct ast_node *lhs, struct ast_node *rhs, struct scope *scp)
+{
+        // TODO: Handle error in finding references to non registered symbols.
+
+        // Common.
+        enum ast_node_type common_type;
+        int i;
+
+        // Function call comparison.
+        struct ast_func_decl *lfdecl, *rfdecl;
+        struct ast_node *last_lexpr, *last_rexpr;
+
+        // Literal comparison.
+        enum ast_node_lit_type llit_type, rlit_type;
+
+        // Reference comparison.
+        struct value *lval, *rval;
+
+        // Compound comparison.
+        struct ast_node *lsubnode, *rsubnode;
+        int lcpd_size, rcpd_size;
+        int common_cpd_size;
+
+        // Implementation.
+
+        if (lhs->type != rhs->type)
+                return false;
+
+        switch (common_type) {
+        case AST_FUNC_DECL:
+                LOG_ERROR("Type comparicon not suported!");
+                return false;
+
+        case AST_FUNC_CALL:
+                lfdecl = scope_find_func(scp, lhs->body.func_call.symbol);
+                rfdecl = scope_find_func(scp, rhs->body.func_call.symbol);
+                if (!lfdecl || !rfdecl)
+                        return false;
+                last_lexpr = lfdecl->exprs + (lfdecl->exprs_count - 1);
+                last_rexpr = rfdecl->exprs + (rfdecl->exprs_count - 1);
+                return node_types_equal(last_lexpr, last_rexpr, scp);
+
+        case AST_LITERAL:
+                llit_type = lhs->body.literal.type;
+                rlit_type = rhs->body.literal.type;
+                return llit_type == rlit_type;
+
+        case AST_REFERENCE:
+                lval = scope_find_val(scp, lhs->body.reference.symbol);
+                rval = scope_find_val(scp, rhs->body.reference.symbol);
+                if (!lval && !rval)
+                        return false;
+                if (!lval || !rval)
+                        return false;
+                return value_types_equal(rval, lval);
+
+        case AST_COMPOUND:
+                if (lhs->body.compound.type != rhs->body.compound.type)
+                        return false;
+
+                lsubnode = lhs->body.compound.children;
+                rsubnode = rhs->body.compound.children;
+                lcpd_size = lhs->body.compound.children_count;
+                rcpd_size = rhs->body.compound.children_count;
+                if (lcpd_size != rcpd_size)
+                        return false;
+
+                common_cpd_size = lcpd_size;
+                for (i = 0; i < common_cpd_size; ++i) {
+                        if (!node_types_equal(lsubnode, rsubnode, scp)) {
+                                return false;
+                        }
+                        ++lsubnode;
+                        ++rsubnode;
+                }
+                return true;
+        }
+}
+
 static struct value *eval_func_decl(struct ast_func_decl* fd, struct scope* scp)
 {
         LOG_ERROR("Higher order functions not supported.");
@@ -82,9 +219,13 @@ static struct value *eval_reference(struct ast_reference *ref, struct scope *scp
         if (!(found = scope_find_val(scp, ref->symbol)))
                 return NULL;
 
-        val_copy(&result, found);
-        if (!(*result))
-                return false;
+        result = malloc(sizeof(*result));
+        if (!result) {
+                LOG_ERROR("Memory allocation failed.");
+                return NULL;
+        }
+
+        val_copy(result, found);
 
         return result;
 }
@@ -94,104 +235,35 @@ static struct value *eval_compound(struct ast_node *exprs,
                                    struct scope *scp,
                                    enum value_type type)
 {
-        int count, i;
+        int i;
         struct value *result;
 
         assert(type != VAL_ATOMIC);
 
         result = malloc(sizeof(*result));
+        if (!result) {
+                LOG_ERROR("Memory allocation failed.");
+                return NULL;
+        }
+
         result->type = type;
 
         result->body.compound.atoms_count = exprs_count;
         result->body.compound.atoms = malloc(sizeof(struct val_atom) * exprs_count);
+        if (!result->body.compound.atoms) {
+                free(result);
+                LOG_ERROR("Memory allocation failed.");
+                return NULL;
+        }
 
         for (i = 0; i < exprs_count; ++i) {
                 struct value *atom;
                 atom = eval(exprs + i, scp);
-                val_copy(&(result->body.compound.atoms + i), atom);
+                val_copy(result + i, atom);
                 val_delete(atom);
         }
 
         return result;
-}
-
-static bool node_types_equal(struct ast_node *lhs, struct ast_node *rhs, struct scope *scp)
-{
-        // TODO: Handle error in finding references to non registered symbols.
-
-        // Common.
-        enum ast_node_type common_type;
-        int i;
-
-        // Function call comparison.
-        struct ast_func_decl *lfdecl, *rfdecl;
-        struct ast_node *last_lexpr, *last_rexpr;
-
-        // Literal comparison.
-        enum ast_node_lit_type llit_type, rlit_type;
-
-        // Reference comparison.
-        struct value *lval, *rval;
-
-        // Compound comparison.
-        struct ast_node *lsubnode, *rsubnode;
-        int lcpd_size, rcpd_size;
-        int common_cpd_size;
-
-        // Implementation.
-
-        if (lhs->type != rhs->type)
-                return false;
-
-        switch (common_type) {
-        case AST_FUNC_DECL:
-                LOG_ERROR("Type comparicon not suported!");
-                return false;
-
-        case AST_FUNC_CALL:
-                lfdecl = scope_find_func(scp, lhs->body.func_call.symbol);
-                rfdecl = scope_find_func(scp, rhs->body.func_call.symbol);
-                if (!lfdecl || !rfdecl)
-                        return false;
-                last_lexpr = get_last_expr(lfdecl);
-                last_rexpr = get_last_expr(rfdecl);
-                return node_types_equal(last_lexpr, last_rexpr, scp);
-
-        case AST_LITERAL:
-                llit_type = lhs->body.literal.type;
-                rlit_type = rhs->body.literal.type;
-                return llit_type == rlit_type;
-
-        case AST_REFERENCE:
-                lval = scope_find_val(scp, lhs->body.reference.symbol);
-                rval = scope_find_val(scp, rhs->body.reference.symbol);
-                if (!lval && !rval)
-                        return false;
-                if (!lval || !rval)
-                        return false;
-                return value_types_equal(rval, lval);
-
-        case AST_COMPOUND:
-                if (lhs->body.compound.type != rhs->body.compound.type)
-                        return false;
-
-                lsubnode = lhs->body.compound.children;
-                rsubnode = rhs->body.compound.children;
-                lcpd_size = lhs->body.compound.children_count;
-                rcpd_size = rhs->body.compound.children_count;
-                if (lcpd_size != rcpd_size)
-                        return false;
-
-                common_cpd_size = lcpd_size;
-                for (i = 0; i < common_cpd_size; ++i) {
-                        if (!node_types_equal(lsubnode, rsubnode)) {
-                                return false;
-                        }
-                        ++lsubnode;
-                        ++rsubnode;
-                }
-                return true;
-        }
 }
 
 static struct value *eval_list(struct ast_node *first_expr, struct scope *scp)
@@ -215,29 +287,23 @@ static struct value *eval_tuple(struct ast_node *first_expr, struct scope *scp)
         return result;
 }
 
-void val_copy(struct value **dst, struct value *src)
+void val_copy(struct value *dst, struct value *src)
 {
         int cpd_buffer_size;
 
-        *dst = malloc(sizeof(**dst));
-        if (!(*dst)) {
-                LOG_ERROR("Memory allocation failed.");
-                return;
-        }
-
-        (*dst)->type = src->type;
+        dst->type = src->type;
 
         switch (src->type) {
         case VAL_ATOMIC:
-                memcpy(*dst, src, sizeof(*src));
+                memcpy(dst, src, sizeof(*src));
                 break;
         case VAL_LIST:
         case VAL_ARRAY:
         case VAL_TUPLE:
                 cpd_buffer_size = sizeof(val_atom) * src->body.compound.atoms_count;
-                (*dst)->body.compound.atoms_count = src->body.compound.atoms_count;
-                (*dst)->body.compound.atoms = malloc(cpd_buffer_size);
-                memcpy((*dst)->body.compound.atoms,
+                dst->body.compound.atoms_count = src->body.compound.atoms_count;
+                dst->body.compound.atoms = malloc(cpd_buffer_size);
+                memcpy(dst->body.compound.atoms,
                        src->body.compound.atoms,
                        cpd_buffer_size);
                 break;
