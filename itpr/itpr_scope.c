@@ -18,32 +18,115 @@
 
 #include "itpr/itpr.h"
 
-struct scope *scope_build(struct ast_node *first_func)
+static bool parse_functions(struct ast_node *nodes,
+                            int nodes_count,
+                            struct func_kvp **func_kvps,
+                            int func_kvps_count,
+                            int func_kvps_cap)
 {
-        struct scope *result;
-        struct ast_node *current;
-        struct func_kvp *func_kvps;
-        int func_count;
         int i;
 
-        func_count = ast_count(first_func);
-        func_kvps = malloc(sizeof(*func_kvps) * func_count);
+        for (i = 0; i < nodes_count; ++i) {
 
-        current = first_func;
-        for (i = 0; i < func_count; ++i) {
-                func_kvps[i].key = current->body.func_decl.symbol;
-                func_kvps[i].fdecl = &(current->body.func_decl);
-                current = current->next;
+                struct func_kvp kvp;
+
+                if (nodes[i].type != AST_FUNC_DECL) {
+                        continue;
+                }
+
+                kvp.key = nodes[i].func_decl.symbol;
+                kvp.fdecl = nodes + i;
+                if (!func_kvp_push(&kvp, func_kvps, func_kvps_count, func_kvps_cap)) {
+                        return false;
+                }
         }
 
+        return true;
+}
+
+static bool parse_values(struct scope *partial_scp,
+                         struct ast_node *nodes,
+                         int nodes_count,
+                         struct val_kvp **val_kvps,
+                         int val_kvps_count,
+                         int val_kvps_cap)
+{
+        int i;
+
+        for (i = 0; i < nodes_count; ++i) {
+
+
+        }
+
+        return true;
+}
+
+struct scope *scope_build(struct ast_node *nodes, int nodes_count)
+{
+        struct scope *result;
+
+        struct func_kvp *func_kvps;
+        int func_kvps_count;
+        int func_kvps_cap;
+
+        struct val_kvp *val_kvps;
+        int val_kvps_count;
+        int val_kvps_cap;
+
+        int i;
+
+        // 1. Parse functions.
+        // -------------------
+
+        if (!parse_functions(nodes,
+                             nodes_count,
+                             &func_kvps,
+                             &func_kvps_count,
+                             &func_kvps_cap)) {
+                LOG_ERROR("Failed parsing functions.");
+                goto error;
+        }
+
+        //
         result = malloc(sizeof(*result));
         result->parent = NULL;
-        result->val_kvps = NULL;
-        result->val_kvps_count = 0;
+
+        if (!parse_values(func_kvps,
+                          func_kvps_count,
+                          nodes,
+                          nodes_count,
+                          &val_kvps,
+                          &val_kvps_count,
+                          &val_kvps_cap)) {
+                LOG_ERROR("Failed parsing functions.");
+                goto error;
+        }
+
+        result->val_kvps = val_kvps;
+        result->val_kvps_count = val_kvps_count;
         result->func_kvps = func_kvps;
-        result->func_kvps_count = func_count;
+        result->func_kvps_count = func_kvps_count;
 
         return result;
+
+error:
+        // Note: function declaration kvp intestents aren't deleted here, because
+        // they only store non-owning pointers to the related resources.
+
+        if (i > 0) {
+                free(func_kvps);
+        }
+
+        for (i = 0; i < val_kvps_count; ++i) {
+                free(func_kvps[i].key);
+                val_delete(&(func_kvps[i].val));
+        }
+
+        if (i > 0) {
+                free(val_kvps);
+        }
+
+        return NULL;
 }
 
 void scope_delete(struct scope* scp)
