@@ -1,7 +1,8 @@
 CFLAGS = -Wall -Werror -g -O0 -I.
 CC = clang
 
-main:   ./ast/ast_cpd.c \
+main:   ./ast/ast_bind.c \
+        ./ast/ast_cpd.c \
         ./ast/ast_fcall.c \
         ./ast/ast_lit.c \
         ./ast/ast_ref.c \

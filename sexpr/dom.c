@@ -252,6 +252,10 @@ void dom_delete_node(struct dom_node *node)
 {
         int i;
 
+        if (!node) {
+                return;
+        }
+
         switch (node->type) {
         case DOM_ATOM:
                 free(node->body.atom.string);

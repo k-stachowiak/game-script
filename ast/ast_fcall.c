@@ -112,6 +112,10 @@ void ast_delete_func_call(struct ast_func_call *fc)
 {
         int i;
 
+        if (!fc) {
+                return;
+        }
+
         if (fc->symbol) {
                 free(fc->symbol);
                 fc->symbol = NULL;

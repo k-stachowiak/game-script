@@ -116,6 +116,10 @@ void ast_delete_compound(struct ast_compound *cpd)
 {
         int i;
 
+        if (!cpd) {
+                return;
+        }
+
         for (i = 0; i < cpd->children_count; ++i) {
                 ast_delete_node(cpd->children + i);
         }

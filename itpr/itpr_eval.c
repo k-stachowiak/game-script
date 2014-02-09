@@ -92,7 +92,7 @@ static bool node_types_equal(struct ast_node *lhs, struct ast_node *rhs, struct 
         int i;
 
         // Function call comparison.
-        struct ast_func_decl *lfdecl, *rfdecl;
+        struct ast_node *lfdecl, *rfdecl;
         struct ast_node *last_lexpr, *last_rexpr;
 
         // Bind comparison.
@@ -126,8 +126,8 @@ static bool node_types_equal(struct ast_node *lhs, struct ast_node *rhs, struct 
                 rfdecl = scope_find_func(scp, rhs->body.func_call.symbol);
                 if (!lfdecl || !rfdecl)
                         return false;
-                last_lexpr = lfdecl->exprs + (lfdecl->exprs_count - 1);
-                last_rexpr = rfdecl->exprs + (rfdecl->exprs_count - 1);
+                last_lexpr = lfdecl->body.func_decl.exprs + (lfdecl->body.func_decl.exprs_count - 1);
+                last_rexpr = rfdecl->body.func_decl.exprs + (rfdecl->body.func_decl.exprs_count - 1);
                 return node_types_equal(last_lexpr, last_rexpr, scp);
 
         case AST_BIND:
@@ -330,6 +330,10 @@ void val_copy(struct value *dst, struct value *src)
 void val_delete(struct value *val)
 {
         int i;
+
+        if (!val) {
+                return;
+        }
 
         switch (val->type) {
         case VAL_ATOMIC:

@@ -159,6 +159,10 @@ success:
 
 void ast_delete_literal(struct ast_literal *lit)
 {
+        if (!lit) {
+                 return;
+        }
+
         if (lit->type == AST_LIT_STRING) {
                 free(lit->body.string);
         }

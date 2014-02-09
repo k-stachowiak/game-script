@@ -55,6 +55,11 @@ struct ast_reference *ast_parse_reference(struct dom_node *node)
 
 void ast_delete_reference(struct ast_reference *ref)
 {
-        if (ref->symbol)
+        if (!ref) {
+                return;
+        }
+
+        if (ref->symbol) {
                 free(ref->symbol);
+        }
 }

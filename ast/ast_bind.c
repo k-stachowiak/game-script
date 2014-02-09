@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "common/logg.h"
+#include "sexpr/dom.h"
 #include "ast/ast.h"
 
 struct ast_bind *ast_parse_bind(struct dom_node *node)
@@ -44,7 +45,7 @@ struct ast_bind *ast_parse_bind(struct dom_node *node)
                 goto error;
 
         dom_children = node->body.compound.children;
-        dom_children_cound = node->body.compound.children_count;
+        dom_children_count = node->body.compound.children_count;
 
         if (dom_children_count != 3)
                 goto error;
@@ -66,7 +67,7 @@ struct ast_bind *ast_parse_bind(struct dom_node *node)
         if (!expr)
                 goto error;
 
-        log_buffer = dom_print_node(node);
+        log_buffer = dom_print(node);
         LOG_TRACE("Parsing bind [SUCCESS]:\n%s", log_buffer);
         free(log_buffer);
 
@@ -91,6 +92,10 @@ error:
 
 void ast_delete_bind(struct ast_bind *b)
 {
+        if (!b) {
+                return;
+        }
+
         if (b->symbol) {
                 free(b->symbol);
         }

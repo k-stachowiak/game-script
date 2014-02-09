@@ -59,13 +59,13 @@ struct value {
 };
 
 struct val_kvp {
-        char *key;
-        struct value val;
+        char *key;              // non-owning.
+        struct value *val;      // owning!
 };
 
 struct func_kvp {
-        char *key;                   // non-owning.
-        struct ast_func_decl *fdecl; // non-owning.
+        char *key;              // non-owning.
+        struct ast_node *fdecl; // non-owning.
 };
 
 struct scope {
@@ -81,11 +81,11 @@ struct scope {
 void val_copy(struct value *dst, struct value *src);
 void val_delete(struct value *val);
 
-struct scope *scope_build(struct ast_node *first_func);
+struct scope *scope_build(struct ast_node *nodes, int nodes_count);
 void scope_delete(struct scope* scp);
 
 struct value *scope_find_val(struct scope *scp, char *symbol);
-struct ast_func_decl *scope_find_func(struct scope *scp, char *symbol);
+struct ast_node *scope_find_func(struct scope *scp, char *symbol);
 
 struct value *eval(struct ast_node *expr, struct scope *scp);
 

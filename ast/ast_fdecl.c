@@ -173,6 +173,10 @@ void ast_delete_func_decl(struct ast_func_decl *fd)
 {
         int i;
 
+        if (!fd) {
+                return;
+        }
+
         if (fd->symbol) {
                 free(fd->symbol);
         }

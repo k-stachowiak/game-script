@@ -153,6 +153,10 @@ struct ast_node *ast_parse_expression(struct dom_node *node)
 
 void ast_delete_node(struct ast_node *node)
 {
+        if (!node) {
+                return;
+        }
+
         switch (node->type) {
         case AST_FUNC_DECL:
                 ast_delete_func_decl(&(node->body.func_decl));
