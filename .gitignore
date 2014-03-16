@@ -1,3 +1,6 @@
 main
 memcheck.sh
 .*
+*.vcxproj
+*.filters
+*.user
