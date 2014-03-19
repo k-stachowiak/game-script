@@ -5,24 +5,31 @@
 #include <string>
 #include <map>
 
-#include "AstNode.h"
-#include "Value.h"
+#include "../API/Value.h"
 
 namespace moon {
 namespace itpr {
 
-	class CScope
-	{
-		std::map<std::string, itpr::CValue> m_binds;
-		std::map<std::string, std::unique_ptr<itpr::CAstNode>> m_funcDecls;
+	class CAstFuncDecl;
+
+	class CScope {
+		CScope* m_parent;
+		std::map<std::string, CValue> m_binds;
+		std::map<std::string, std::unique_ptr<itpr::CAstFuncDecl>> m_funcDecls;
 
 	public:
-		void RegisterValue(const std::string& name, itpr::CValue value);
-		void RegisterFunction(const std::string& name, std::unique_ptr<itpr::CAstNode>&& expr);
-		itpr::CValue GetBind(const std::string& name);
-		itpr::CAstNode& GetFunction(const std::string& name);
+		CScope();
+		CScope(CScope* parent);
+		void RegisterValue(const std::string& name, CValue value);
+		void RegisterFunction(const std::string& name, std::unique_ptr<itpr::CAstFuncDecl>&& expr);
+		CValue GetBind(const std::string& name);
+		itpr::CAstFuncDecl& GetFunction(const std::string& name);
 	};
 
+	CValue g_CallFunction(
+		CScope& scope,
+		itpr::CAstFuncDecl& function,
+		const std::vector<CValue>& args);
 }
 }
 

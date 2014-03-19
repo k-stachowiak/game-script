@@ -3,13 +3,20 @@
 namespace moon {
 namespace itpr {
 
-	CValue CAstFuncDecl::Evaluate(CScope& scope)
-	{
-	}
+	CAstFuncDecl::CAstFuncDecl(
+		const std::vector<std::string> formalArgs,
+		std::vector<std::unique_ptr<CAstNode>>&& expressions) :
+		m_formalArgs{ formalArgs },
+		m_expressions{ std::move(expressions) }
+	{}
 
-	const std::vector<std::string>& CAstFuncDecl::GetFormalArgs() const
+	CValue CAstFuncDecl::Evaluate(CScope& scope) const
 	{
-		return {};
+		CValue result;
+		for (const auto& expression : m_expressions) {
+			result = expression->Evaluate(scope);
+		}
+		return result;
 	}
 
 }

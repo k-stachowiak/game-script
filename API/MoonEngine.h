@@ -6,13 +6,13 @@
 #include <memory>
 #include <map>
 
+#include "Value.h"
 #include "../itpr/Scope.h"
 #include "../parse/Parser.h"
 
 namespace moon {
 
-	class CMoonEngine
-	{
+	class CMoonEngine {
 		std::unique_ptr<parse::CParser> m_parser;
 		std::map<std::string, std::unique_ptr<itpr::CScope>> m_units;
 
@@ -20,14 +20,14 @@ namespace moon {
 		static std::string m_ReadFile(const std::string& fileName);
 		const std::unique_ptr<itpr::CScope>& m_GetUnit(const std::string& unitName);
 
-	public:
+	public:		
 		void LoadUnit(const std::string& fileName);
 
-		itpr::CValue GetValue(const std::string& unitName, const std::string& symbol);
-		itpr::CValue CallFunction(
+		CValue GetValue(const std::string& unitName, const std::string& symbol);
+		CValue CallFunction(
 			const std::string& unitName,
 			const std::string& symbol,
-			const std::vector<itpr::CValue>& args);
+			const std::vector<CValue>& args);
 	};
 
 }

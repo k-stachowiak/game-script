@@ -51,35 +51,20 @@ namespace moon {
 		m_units[unitName] = std::move(unit);
 	}
 
-	itpr::CValue CMoonEngine::GetValue(const std::string& unitName, const std::string& name)
+	CValue CMoonEngine::GetValue(const std::string& unitName, const std::string& name)
 	{
 		const auto& unitScope = m_GetUnit(unitName);
 		return unitScope->GetBind(name);
 	}
 
-	itpr::CValue CMoonEngine::CallFunction(
+	CValue CMoonEngine::CallFunction(
 		const std::string& unitName,
 		const std::string& symbol,
-		const std::vector<itpr::CValue>& args)
+		const std::vector<CValue>& args)
 	{
 		const auto& unitScope = m_GetUnit(unitName);
-
-		// Note: Never do this!
-		itpr::CAstFuncDecl& funcDecl = dynamic_cast<itpr::CAstFuncDecl&>(unitScope->GetFunction(symbol));
-		std::vector<std::string> formalArgs = funcDecl.GetFormalArgs();
-
-		if (formalArgs.size() != args.size()) {
-			throw std::invalid_argument{ "Formal/actual argument count mismatch" };
-		}
-
-		std::shared_ptr<itpr::CScope> funcScope = std::make_shared<itpr::CScope>(unitScope);
-
-		unsigned commonSize = args.size();
-		for (unsigned i = 0; i < commonSize; ++i) {
-			funcScope->RegisterValue(formalArgs[i], args[i]);
-		}
-
-		return funcDecl.Evaluate(*funcScope);
+		itpr::CAstFuncDecl& funcDecl = unitScope->GetFunction(symbol);
+		return g_CallFunction(*unitScope, funcDecl, args);
 	}
 
 }
