@@ -17,8 +17,7 @@ namespace moon {
 
 	enum class ECompoundType {
 		ARRAY,
-		TUPLE,
-		LIST
+		TUPLE
 	};
 
 	class CValue {

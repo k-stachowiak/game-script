@@ -5,12 +5,11 @@
 
 namespace moon {
 namespace parse {
+namespace sexpr {
 
-	enum ESexprTokenCharacter {
+	enum ETokenCharacter {
 		TOK_CORE_OPEN = '(',
 		TOK_CORE_CLOSE = ')',
-		TOK_LIST_OPEN = '{',
-		TOK_LIST_CLOSE = '}',
 		TOK_ARR_OPEN = '[',
 		TOK_ARR_CLOSE = ']',
 		TOK_TUP_OPEN = '<',
@@ -21,13 +20,13 @@ namespace parse {
 		TOK_DELIM_ESCAPE = '\\'
 	};
 
-	class CSexprToken
+	class CToken
 	{
 		const char* m_begin;
 		const char* m_end;
 
 	public:
-		CSexprToken(const char* begin, const char* end) :
+		CToken(const char* begin, const char* end) :
 			m_begin(begin),
 			m_end(end)
 		{}
@@ -45,7 +44,6 @@ namespace parse {
 		bool IsOpeningParenthesis() const
 		{
 			return IsCharacter(TOK_CORE_OPEN) ||
-				IsCharacter(TOK_LIST_OPEN) ||
 				IsCharacter(TOK_ARR_OPEN) ||
 				IsCharacter(TOK_TUP_OPEN);
 		}
@@ -53,25 +51,24 @@ namespace parse {
 		bool IsClosingParenthesis() const
 		{
 			return IsCharacter(TOK_CORE_CLOSE) ||
-				   IsCharacter(TOK_LIST_CLOSE) ||
 				   IsCharacter(TOK_ARR_CLOSE) ||
 				   IsCharacter(TOK_TUP_CLOSE);
 		}
 	};
 
-	inline bool g_ParenthesisMatch(const CSexprToken& lhs, const CSexprToken& rhs)
+	inline bool g_ParenthesisMatch(const CToken& lhs, const CToken& rhs)
 	{
 		return (lhs.IsCharacter(TOK_CORE_OPEN) && rhs.IsCharacter(TOK_CORE_CLOSE)) ||
-			(lhs.IsCharacter(TOK_LIST_OPEN) && rhs.IsCharacter(TOK_LIST_CLOSE)) ||
 			(lhs.IsCharacter(TOK_ARR_OPEN) && rhs.IsCharacter(TOK_ARR_CLOSE)) ||
 			(lhs.IsCharacter(TOK_TUP_OPEN) && rhs.IsCharacter(TOK_TUP_CLOSE));
 	}
 
-	inline bool g_DelimiterMatch(const CSexprToken& lhs, const CSexprToken& rhs)
+	inline bool g_DelimiterMatch(const CToken& lhs, const CToken& rhs)
 	{
 		return (lhs.IsCharacter(TOK_STR_DELIM) && rhs.IsCharacter(TOK_STR_DELIM)) ||
 			(lhs.IsCharacter(TOK_CHAR_DELIM) && rhs.IsCharacter(TOK_CHAR_DELIM));
 	}
+}
 }
 }
 

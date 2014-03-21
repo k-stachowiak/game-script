@@ -3,17 +3,16 @@
 #include <iterator>
 #include <algorithm>
 
-#include "SexprTokenizer.h"
+#include "Algorithm.h"
 
 namespace moon {
 namespace parse {
+namespace sexpr {
 
 	static inline bool IsAnyParenthesis(int c)
 	{
 		return c == TOK_CORE_OPEN ||
 			   c == TOK_CORE_CLOSE ||
-			   c == TOK_LIST_OPEN ||
-			   c == TOK_LIST_CLOSE ||
 			   c == TOK_ARR_OPEN ||
 			   c == TOK_ARR_CLOSE ||
 			   c == TOK_TUP_OPEN ||
@@ -30,7 +29,7 @@ namespace parse {
 	}
 
 	template <class Iter>
-	Iter FindNonescapedDelimiter(Iter current, Iter last, char delimiter)
+	static Iter FindNonescapedDelimiter(Iter current, Iter last, char delimiter)
 	{
 		while (current != last && (
 			*current != TOK_STR_DELIM || (
@@ -42,19 +41,19 @@ namespace parse {
 	}
 
 	template <class Out>
-	CStrIter TryParseParenthesis(CStrIter current, CStrIter last, Out out)
+	static CStrIter TryParseParenthesis(CStrIter current, CStrIter last, Out out)
 	{
 		if (current == last || !IsAnyParenthesis(*current)) {
 			return current;
 		}
 
-		*(out++) = CSexprToken{ current, current + 1 };
+		*(out++) = CToken{ current, current + 1 };
 
 		return std::find_if_not(current, last, isspace);
 	}
 
 	template <class Out>
-	CStrIter TryParseRegularAtom(CStrIter current, CStrIter last, Out out)
+	static CStrIter TryParseRegularAtom(CStrIter current, CStrIter last, Out out)
 	{
 		if (current == last || !IsAllowedInAtom(*current)) {
 			return current;
@@ -62,13 +61,13 @@ namespace parse {
 		
 		auto atomEnd = std::find_if_not(current, last, IsAllowedInAtom);
 
-		*(out++) = CSexprToken{ current, atomEnd };
+		*(out++) = CToken{ current, atomEnd };
 
 		return std::find_if_not(current, last, isspace);
 	}
 
 	template <class Out>
-	CStrIter TryParseDelimitedAtom(CStrIter current, CStrIter last, Out out)
+	static CStrIter TryParseDelimitedAtom(CStrIter current, CStrIter last, Out out)
 	{
 		if (current == last || (*current != TOK_STR_DELIM &&
 							    *current != TOK_CHAR_DELIM)) {
@@ -82,12 +81,12 @@ namespace parse {
 			throw std::runtime_error{ "Non-delimited string/character atom" };
 		}
 
-		*(out++) = CSexprToken{ current, atomEnd };
+		*(out++) = CToken{ current, atomEnd };
 
 		return std::find_if_not(current, last, isspace);
 	}
 
-	CStrIter TryParseComments(CStrIter current, CStrIter last)
+	static CStrIter TryParseComments(CStrIter current, CStrIter last)
 	{
 		if (current == last || *current != TOK_COMMENT) {
 			return current;
@@ -99,9 +98,9 @@ namespace parse {
 	}
 
 
-	std::vector<CSexprToken> CSexprTokenizer::Tokenize(CStrIter current, const CStrIter& last)
+	std::vector<CToken> Tokenize(CStrIter current, const CStrIter& last)
 	{
-		std::vector<CSexprToken> result;
+		std::vector<CToken> result;
 		auto inserter = std::back_inserter(result);
 
 		current = std::find_if_not(current, last, isspace);
@@ -116,5 +115,6 @@ namespace parse {
 		return result;
 	}
 
+}
 }
 }

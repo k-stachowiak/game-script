@@ -1,26 +1,23 @@
 #include <iterator>
 
-#include "SexprDomBuilder.h"
+#include "Algorithm.h"
 
 namespace moon {
 namespace parse {
+namespace sexpr {
 
-	ESexprDomCompoundType InferCompoundType(const CSexprToken& token)
+	static EDomCompoundType InferCompoundType(const CToken& token)
 	{
 		if (token.IsCharacter(TOK_CORE_OPEN) || token.IsCharacter(TOK_CORE_CLOSE)) {
-			return ESexprDomCompoundType::CPD_CORE;
+			return EDomCompoundType::CPD_CORE;
 		}
 
 		if (token.IsCharacter(TOK_ARR_OPEN) || token.IsCharacter(TOK_ARR_CLOSE)) {
-			return ESexprDomCompoundType::CPD_ARRAY;
+			return EDomCompoundType::CPD_ARRAY;
 		}
 
 		if (token.IsCharacter(TOK_TUP_OPEN) || token.IsCharacter(TOK_TUP_CLOSE)) {
-			return ESexprDomCompoundType::CPD_TUPLE;
-		}
-
-		if (token.IsCharacter(TOK_LIST_OPEN) || token.IsCharacter(TOK_LIST_CLOSE)) {
-			return ESexprDomCompoundType::CPD_LIST;
+			return EDomCompoundType::CPD_TUPLE;
 		}
 
 		throw std::runtime_error{ "Unexpected compound delimiting token" };
@@ -34,12 +31,12 @@ namespace parse {
 	{
 		const auto begin = current++;
 
-		std::vector<CSexprDomNode> children;
+		std::vector<CDomNode> children;
 		auto inserter = std::back_inserter(children);
 
 		while (current != last) {
 			if (current->IsClosingParenthesis() && g_ParenthesisMatch(*begin, *current)) {
-				*(out++) = CSexprDomNode::MakeCompound(
+				*(out++) = CDomNode::MakeCompound(
 					InferCompoundType(*begin),
 					children);
 				return ++current;
@@ -54,7 +51,7 @@ namespace parse {
 	template <class In, class Out>
 	static inline In TryParseAtomDomNode(In current, In last, Out out)
 	{
-		*(out++) = CSexprDomNode::MakeAtom(current->ToString());
+		*(out++) = CDomNode::MakeAtom(current->ToString());
 		return ++current;
 	}
 
@@ -68,12 +65,12 @@ namespace parse {
 		}
 	}
 
-	std::vector<CSexprDomNode> CSexprDomBuilder::BuildDom(const std::vector<CSexprToken>& tokens)
+	std::vector<CDomNode> BuildDom(const std::vector<CToken>& tokens)
 	{
 		auto current = begin(tokens);
 		auto last = end(tokens);
 
-		std::vector<CSexprDomNode> result;
+		std::vector<CDomNode> result;
 		auto inserter = std::back_inserter(result);
 
 		while (current != last) {
@@ -83,5 +80,6 @@ namespace parse {
 		return result;
 	}
 
+}
 }
 }

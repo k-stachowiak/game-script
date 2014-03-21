@@ -8,12 +8,12 @@
 
 #include "Value.h"
 #include "../itpr/Scope.h"
-#include "../parse/Parser.h"
+#include "../parse/ParserBase.h"
 
 namespace moon {
 
 	class CMoonEngine {
-		std::unique_ptr<parse::CParser> m_parser;
+		std::unique_ptr<parse::CParserBase> m_parser;
 		std::map<std::string, std::unique_ptr<itpr::CScope>> m_units;
 
 		static std::string m_DropExtension(const std::string& fileName);

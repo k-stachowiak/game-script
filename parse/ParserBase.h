@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MOON_PARSE_PARSER_BASE_H
+#define MOON_PARSE_PARSER_BASE_H
 
 #include <string>
 #include <memory>
@@ -8,7 +9,7 @@
 namespace moon {
 namespace parse {
 
-	class CParser {
+	class CParserBase {
 	public:
 		virtual std::unique_ptr<itpr::CScope> Parse(const std::string& source) const = 0;
 	};
@@ -16,3 +17,4 @@ namespace parse {
 }
 }
 
+#endif
