@@ -32,6 +32,17 @@ namespace sexpr {
 	std::unique_ptr<itpr::CAstLiteral> TryParsingLiteral(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstReference> TryParsingReference(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstNode> TryParsingNode(const CDomNode& domNode);
+
+	bool AssertCompoundSize(const CDomNode& node, unsigned size);
+	bool AssertCompoundMinSize(const CDomNode& node, unsigned minSize);
+
+	bool ParseAtom(const CDomNode& node, std::string& result);
+
+	bool ParseLiteralBoolean(const std::string& atom, CValue& result);
+	bool ParseLiteralString(const std::string& atom, CValue& result);
+	bool ParseLiteralInteger(const std::string& atom, CValue& result);
+	bool ParseLiteralReal(const std::string& atom, CValue& result);
+
 }
 }
 }

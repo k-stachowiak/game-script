@@ -1,26 +1,28 @@
-﻿Build started 2014-03-21 00:39:18.
-     1>Project "C:\Users\Krzysiek\documents\visual studio 2013\Projects\moon-lang\moon-lang\moon-lang.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2014-03-22 01:09:57.
+     1>Project "C:\Users\Krzysiek\Documents\Visual Studio 2013\Projects\moon-lang\moon-lang\moon-lang.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt parse\sexpr\AlgorithmAstParsers.cpp
-         AlgorithmAstParsers.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt API\MoonEngine.cpp
+         MoonEngine.cpp
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Krzysiek\documents\visual studio 2013\Projects\moon-lang\Debug\moon-lang.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Krzysiek\documents\visual studio 2013\Projects\moon-lang\Debug\moon-lang.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Krzysiek\documents\visual studio 2013\Projects\moon-lang\Debug\moon-lang.lib" /MACHINE:X86 Debug\MoonEngine.obj
-         Debug\Main.obj
-         Debug\AstLiteral.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Krzysiek\Documents\Visual Studio 2013\Projects\moon-lang\Debug\moon-lang.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Krzysiek\Documents\Visual Studio 2013\Projects\moon-lang\Debug\moon-lang.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Krzysiek\Documents\Visual Studio 2013\Projects\moon-lang\Debug\moon-lang.lib" /MACHINE:X86 Debug\MoonEngine.obj
+         Debug\Value.obj
+         Debug\AstBind.obj
          Debug\AstCompound.obj
          Debug\AstFuncCall.obj
-         Debug\AstBind.obj
-         Debug\AstReference.obj
          Debug\AstFuncDecl.obj
+         Debug\AstLiteral.obj
+         Debug\AstReference.obj
          Debug\Scope.obj
-         Debug\Value.obj
-         Debug\AstParser.obj
-         Debug\AlgorithmTokenizer.obj
-         Debug\AlgorithmDomBuilder.obj
+         Debug\Main.obj
          Debug\AlgorithmAstParsers.obj
-         moon-lang.vcxproj -> C:\Users\Krzysiek\documents\visual studio 2013\Projects\moon-lang\Debug\moon-lang.exe
-     1>Done Building Project "C:\Users\Krzysiek\documents\visual studio 2013\Projects\moon-lang\moon-lang\moon-lang.vcxproj" (Build target(s)).
+         Debug\AlgorithmCommon.obj
+         Debug\AlgorithmDomBuilder.obj
+         Debug\AlgorithmLiteral.obj
+         Debug\AlgorithmTokenizer.obj
+         Debug\AstParser.obj
+         moon-lang.vcxproj -> C:\Users\Krzysiek\Documents\Visual Studio 2013\Projects\moon-lang\Debug\moon-lang.exe
+     1>Done Building Project "C:\Users\Krzysiek\Documents\Visual Studio 2013\Projects\moon-lang\moon-lang\moon-lang.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.67
+Time Elapsed 00:00:00.89

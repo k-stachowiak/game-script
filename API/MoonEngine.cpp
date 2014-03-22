@@ -1,9 +1,12 @@
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <memory>
 
 #include "MoonEngine.h"
 #include "../itpr/AstFuncDecl.h"
+#include "../itpr/AstBind.h"
+#include "../itpr/Scope.h"
 
 namespace moon {
 
@@ -54,7 +57,7 @@ namespace moon {
 	CValue CMoonEngine::GetValue(const std::string& unitName, const std::string& name)
 	{
 		const auto& unitScope = m_GetUnit(unitName);
-		return unitScope->GetBind(name);
+		return unitScope->GetBind(name)->Evaluate(*unitScope);
 	}
 
 	CValue CMoonEngine::CallFunction(
@@ -63,8 +66,7 @@ namespace moon {
 		const std::vector<CValue>& args)
 	{
 		const auto& unitScope = m_GetUnit(unitName);
-		itpr::CAstFuncDecl& funcDecl = unitScope->GetFunction(symbol);
-		return g_CallFunction(*unitScope, funcDecl, args);
+		return itpr::CallFunction(*unitScope, symbol, args);
 	}
 
 }

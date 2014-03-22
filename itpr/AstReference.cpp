@@ -1,4 +1,5 @@
 #include "AstReference.h"
+#include "AstBind.h"
 
 #include "Scope.h"
 
@@ -11,7 +12,7 @@ namespace itpr {
 
 	CValue CAstReference::Evaluate(CScope& scope) const
 	{
-		return scope.GetBind(m_symbol);
+		return scope.GetBind(m_symbol)->Evaluate(scope);
 	}
 
 }

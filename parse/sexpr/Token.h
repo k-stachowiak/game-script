@@ -36,37 +36,41 @@ namespace sexpr {
 			return std::string{ m_begin, m_end };
 		}
 
-		bool IsCharacter(char c) const
+		friend bool operator==(const CToken& token, char c)
 		{
-			return (m_end - m_begin) == 1 && *m_begin == c;
-		}
-
-		bool IsOpeningParenthesis() const
-		{
-			return IsCharacter(TOK_CORE_OPEN) ||
-				IsCharacter(TOK_ARR_OPEN) ||
-				IsCharacter(TOK_TUP_OPEN);
-		}
-
-		bool IsClosingParenthesis() const
-		{
-			return IsCharacter(TOK_CORE_CLOSE) ||
-				   IsCharacter(TOK_ARR_CLOSE) ||
-				   IsCharacter(TOK_TUP_CLOSE);
+			return (token.m_end - token.m_begin) == 1 && *(token.m_begin) == c;
 		}
 	};
 
-	inline bool g_ParenthesisMatch(const CToken& lhs, const CToken& rhs)
+	inline bool IsOpeningParenthesis(const CToken& token)
 	{
-		return (lhs.IsCharacter(TOK_CORE_OPEN) && rhs.IsCharacter(TOK_CORE_CLOSE)) ||
-			(lhs.IsCharacter(TOK_ARR_OPEN) && rhs.IsCharacter(TOK_ARR_CLOSE)) ||
-			(lhs.IsCharacter(TOK_TUP_OPEN) && rhs.IsCharacter(TOK_TUP_CLOSE));
+		return
+			token == TOK_CORE_OPEN ||
+			token == TOK_ARR_OPEN ||
+			token == TOK_TUP_OPEN;
 	}
 
-	inline bool g_DelimiterMatch(const CToken& lhs, const CToken& rhs)
+	inline bool IsClosingParenthesis(const CToken& token)
 	{
-		return (lhs.IsCharacter(TOK_STR_DELIM) && rhs.IsCharacter(TOK_STR_DELIM)) ||
-			(lhs.IsCharacter(TOK_CHAR_DELIM) && rhs.IsCharacter(TOK_CHAR_DELIM));
+		return
+			token == TOK_CORE_CLOSE ||
+			token == TOK_ARR_CLOSE ||
+			token == TOK_TUP_CLOSE;
+	}
+
+	inline bool ParenthesisMatch(const CToken& lhs, const CToken& rhs)
+	{
+		return
+			(lhs == TOK_CORE_OPEN && rhs == TOK_CORE_CLOSE) ||
+			(lhs == TOK_ARR_OPEN &&  rhs == TOK_ARR_CLOSE) ||
+			(lhs == TOK_TUP_OPEN &&  rhs == TOK_TUP_CLOSE);
+	}
+
+	inline bool DelimiterMatch(const CToken& lhs, const CToken& rhs)
+	{
+		return
+			(lhs == TOK_STR_DELIM && rhs == TOK_STR_DELIM) ||
+			(lhs == TOK_CHAR_DELIM && rhs == TOK_CHAR_DELIM);
 	}
 }
 }

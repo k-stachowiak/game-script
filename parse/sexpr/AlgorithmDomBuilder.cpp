@@ -8,15 +8,15 @@ namespace sexpr {
 
 	static EDomCompoundType InferCompoundType(const CToken& token)
 	{
-		if (token.IsCharacter(TOK_CORE_OPEN) || token.IsCharacter(TOK_CORE_CLOSE)) {
+		if (token == TOK_CORE_OPEN || token == TOK_CORE_CLOSE) {
 			return EDomCompoundType::CPD_CORE;
 		}
 
-		if (token.IsCharacter(TOK_ARR_OPEN) || token.IsCharacter(TOK_ARR_CLOSE)) {
+		if (token == TOK_ARR_OPEN || token == TOK_ARR_CLOSE) {
 			return EDomCompoundType::CPD_ARRAY;
 		}
 
-		if (token.IsCharacter(TOK_TUP_OPEN) || token.IsCharacter(TOK_TUP_CLOSE)) {
+		if (token == TOK_TUP_OPEN || token == TOK_TUP_CLOSE) {
 			return EDomCompoundType::CPD_TUPLE;
 		}
 
@@ -35,7 +35,7 @@ namespace sexpr {
 		auto inserter = std::back_inserter(children);
 
 		while (current != last) {
-			if (current->IsClosingParenthesis() && g_ParenthesisMatch(*begin, *current)) {
+			if (IsClosingParenthesis(*current) && ParenthesisMatch(*begin, *current)) {
 				*(out++) = CDomNode::MakeCompound(
 					InferCompoundType(*begin),
 					children);
@@ -58,7 +58,7 @@ namespace sexpr {
 	template <class In, class Out>
 	static inline In TryParseAnyDomNode(In current, In last, Out out)
 	{
-		if ((*current).IsOpeningParenthesis()) {
+		if (IsOpeningParenthesis(*current)) {
 			return TryParseCompoundDomNode(current, last, out);
 		} else {
 			return TryParseAtomDomNode(current, last, out);

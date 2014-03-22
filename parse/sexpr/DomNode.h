@@ -38,6 +38,18 @@ namespace sexpr {
 		{}
 
 	public:
+		friend bool operator==(const CDomNode& node, const std::string& str)
+		{
+			return
+				node.IsAtom() &&
+				node.GetAtom() == str;
+		}
+
+		friend bool operator!=(const CDomNode& node, const std::string& str)
+		{
+			return !(node == str);
+		}
+
 		bool IsAtom() const
 		{
 			return m_type == EDomNodeType::ATOM;
@@ -47,7 +59,7 @@ namespace sexpr {
 			return IsAtom() && m_atom == atom;
 		}
 
-		const std::string GetAtom() const {
+		const std::string& GetAtom() const {
 			return m_atom;
 		}
 
@@ -69,6 +81,11 @@ namespace sexpr {
 		bool IsCompoundTuple() const
 		{
 			return IsCompound() && m_compoundType == EDomCompoundType::CPD_TUPLE;
+		}
+
+		EDomCompoundType GetType() const
+		{
+			return m_compoundType;
 		}
 
 		std::vector<CDomNode>::const_iterator ChildrenBegin() const

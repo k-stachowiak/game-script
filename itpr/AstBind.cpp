@@ -1,4 +1,5 @@
 #include "AstBind.h"
+#include "AstLiteral.h"
 
 #include "Scope.h"
 
@@ -13,9 +14,13 @@ namespace itpr {
 	CValue CAstBind::Evaluate(CScope& scope) const
 	{
 		CValue result = m_expression->Evaluate(scope);
-		scope.RegisterValue(m_symbol, result);
+		scope.RegisterBind(m_symbol, std::unique_ptr<CAstNode> {new CAstLiteral{ result }});
 		return result;
 	}
 
+	const CAstFuncDecl* CAstBind::TryGettingFuncDecl() const
+	{
+		return dynamic_cast<const CAstFuncDecl*>(m_expression.get());
+	}
 }
 }

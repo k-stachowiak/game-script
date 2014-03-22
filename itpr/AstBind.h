@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "AstNode.h"
+#include "AstFuncDecl.h"
 
 namespace moon {
 namespace itpr {
@@ -15,6 +16,7 @@ namespace itpr {
 	public:
 		CAstBind(std::string symbol, std::unique_ptr<CAstNode>&& expression);
 		CValue Evaluate(CScope& scope) const override;
+		const CAstFuncDecl* TryGettingFuncDecl() const;
 	};
 
 }
