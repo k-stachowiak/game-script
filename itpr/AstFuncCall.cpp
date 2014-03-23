@@ -11,6 +11,7 @@ namespace itpr {
 		m_actualArgs{ std::move(actualArgs) }
 	{}
 
+	// TODO: Don't build full scope list - only global <- local
 	CValue CAstFuncCall::Evaluate(CScope& scope) const
 	{
 		std::vector<CValue> argValues;
