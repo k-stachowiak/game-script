@@ -4,30 +4,30 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <iosfwd>
 #include <map>
 
 #include "Value.h"
+#include "../parse/ParserBase.h"
+#include "../itpr/Scope.h"
 
 namespace moon {
 
-	namespace parse {
-		class CParserBase;
-	}
-
-	namespace itpr {
-		class CScope;
-	}
-
-	class CMoonEngine {
+	class CEngine {
 		std::unique_ptr<parse::CParserBase> m_parser;
 		std::map<std::string, std::unique_ptr<itpr::CScope>> m_units;
 
 		static std::string m_DropExtension(const std::string& fileName);
+		static std::string m_ReadStream(std::istream& input);
 		static std::string m_ReadFile(const std::string& fileName);
 		const std::unique_ptr<itpr::CScope>& m_GetUnit(const std::string& unitName);
 
-	public:		
-		void LoadUnit(const std::string& fileName);
+	public:
+		CEngine();
+
+		void LoadUnitFile(const std::string& fileName);
+		void LoadUnitStream(const std::string& unitName, std::istream& input);
+		void LoadUnitString(const std::string& unitName, const std::string& source);
 
 		CValue GetValue(const std::string& unitName, const std::string& symbol);
 		CValue CallFunction(

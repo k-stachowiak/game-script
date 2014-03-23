@@ -50,7 +50,7 @@ namespace sexpr {
 
 		*(out++) = CToken{ current, current + 1 };
 
-		return std::find_if_not(current, last, isspace);
+		return std::find_if_not(current + 1, last, isspace);
 	}
 
 	template <class Out>
@@ -64,7 +64,7 @@ namespace sexpr {
 
 		*(out++) = CToken{ current, atomEnd };
 
-		return std::find_if_not(current, last, isspace);
+		return std::find_if_not(atomEnd, last, isspace);
 	}
 
 	template <class Out>
@@ -84,7 +84,7 @@ namespace sexpr {
 
 		*(out++) = CToken{ current, atomEnd };
 
-		return std::find_if_not(current, last, isspace);
+		return std::find_if_not(atomEnd, last, isspace);
 	}
 
 	static CStrIter TryParseComments(CStrIter current, CStrIter last)

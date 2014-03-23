@@ -7,11 +7,10 @@
 
 #include "../API/Value.h"
 
+#include "AstBind.h"
+
 namespace moon {
 namespace itpr {
-
-	class CAstNode;
-	class CAstBind;
 
 	class CScope {
 		CScope* m_parent;

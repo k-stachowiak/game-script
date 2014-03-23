@@ -26,11 +26,11 @@ namespace moon {
 		long m_integer = -1;
 		double m_real = -1;
 		char m_character = -1;
-		std::string m_string = {};
+		std::string m_string;
 		int m_boolean = -1;
 
 		ECompoundType m_compoundType = ECompoundType::ARRAY;
-		std::vector<CValue> m_compoundValues = {};
+		std::vector<CValue> m_compoundValues;
 
 		CValue(
 			EValueType type,

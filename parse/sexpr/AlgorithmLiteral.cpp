@@ -35,7 +35,7 @@ namespace sexpr {
 	bool ParseLiteralInteger(const std::string& atom, CValue& result)
 	{
 		auto it = begin(atom);
-		if ((isdigit(*it) || (*it) == '-' || (*it) == '+') &&
+		if (!atom.empty() && (isdigit(*it) || (*it) == '-' || (*it) == '+') &&
 			std::all_of(it + 1, end(atom), isdigit)) {
 			std::stringstream ss;
 			ss << atom;

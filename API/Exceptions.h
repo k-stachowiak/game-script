@@ -18,8 +18,8 @@ namespace moon {
 		{}
 	};
 
-	struct ExUnitAlreadyRegisterend : public std::runtime_error {
-		ExUnitAlreadyRegisterend(const std::string& unitName) :
+	struct ExUnitAlreadyRegistered : public std::runtime_error {
+		ExUnitAlreadyRegistered(const std::string& unitName) :
 			std::runtime_error{ "Unit already registered : \"" + unitName + "\"" }
 		{}
 	};
