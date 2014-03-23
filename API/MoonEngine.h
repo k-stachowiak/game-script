@@ -15,12 +15,14 @@ namespace moon {
 
 	class CEngine {
 		std::unique_ptr<parse::CParserBase> m_parser;
+		itpr::CScope m_stdlibScope;
 		std::map<std::string, std::unique_ptr<itpr::CScope>> m_units;
 
 		static std::string m_DropExtension(const std::string& fileName);
 		static std::string m_ReadStream(std::istream& input);
 		static std::string m_ReadFile(const std::string& fileName);
-		const std::unique_ptr<itpr::CScope>& m_GetUnit(const std::string& unitName);
+
+		itpr::CScope* m_GetUnit(const std::string& unitName);
 
 	public:
 		CEngine();

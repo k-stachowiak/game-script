@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "AstNode.h"
-#include "AstFuncDecl.h"
+#include "AstFunction.h"
 
 namespace moon {
 namespace itpr {
@@ -12,12 +12,14 @@ namespace itpr {
 	class CAstBind : public CAstNode {
 		const std::string m_symbol;
 		std::unique_ptr<CAstNode> m_expression;
+		// TODO: Bind expression shouldn't be a bind
 
 	public:
 		CAstBind(std::string symbol, std::unique_ptr<CAstNode>&& expression);
 		CValue Evaluate(CScope& scope) const override;
 		const std::string& GetSymbol() const { return m_symbol; }
-		const CAstFuncDecl* TryGettingFuncDecl() const;
+		const CAstFunction* TryGettingFuncDecl() const;
+		const CAstNode* TryGettingNonFuncDecl() const;
 	};
 
 }

@@ -10,7 +10,9 @@ namespace sexpr {
 	class CAstParser : public CParserBase
 	{
 	public:
-		std::unique_ptr<itpr::CScope> Parse(const std::string& source) const override;
+		std::unique_ptr<itpr::CScope> Parse(
+			const std::string& source,
+			itpr::CScope* parentScope) const override;
 	};
 
 }

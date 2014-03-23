@@ -20,9 +20,11 @@ namespace itpr {
 	public:
 		CScope();
 		CScope(CScope* parent);
+
 		void RegisterBind(std::unique_ptr<CAstBind>&& bind);
 		void RegisterBind(const std::string& name, std::unique_ptr<CAstNode>&& expression);
-		CAstBind* GetBind(const std::string& name);
+
+		const CAstBind* GetBind(const std::string& name);
 		CValue CallFunction(const std::string& symbol, const std::vector<CValue>& args);
 	};
 

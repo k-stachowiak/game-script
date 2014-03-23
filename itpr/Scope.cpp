@@ -37,7 +37,7 @@ namespace itpr {
 		m_bind_map[name] = m_binds.back().get();
 	}
 
-	CAstBind* CScope::GetBind(const std::string& name)
+	const CAstBind* CScope::GetBind(const std::string& name)
 	{
 		if (m_bind_map.find(name) == end(m_bind_map)) {
 			if (!m_parent) {

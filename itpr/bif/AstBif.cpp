@@ -31,8 +31,14 @@ namespace bif {
 
 	CValue CAstUnaryArithmeticBif::Evaluate(CScope& scope) const
 	{
-		CAstBind* bind = scope.GetBind("x");
-		CValue actualArgument = bind->Evaluate(scope);
+		const CAstBind* bind = scope.GetBind("x");
+		const CAstNode* expr = bind->TryGettingNonFuncDecl();
+
+		if (!expr) {
+			throw except::ExAst::ReferenceToFunctionEvaluated{};
+		}
+
+		CValue actualArgument = expr->Evaluate(scope);
 
 		switch (actualArgument.GetType()) {
 		case EValueType::INTEGER:
@@ -48,11 +54,18 @@ namespace bif {
 
 	CValue CAstBinaryArithmeticBif::Evaluate(CScope& scope) const
 	{
-		CAstBind* lhsBind = scope.GetBind("lhs");
-		CAstBind* rhsBind = scope.GetBind("lhs");
+		const CAstBind* lhsBind = scope.GetBind("lhs");
+		const CAstBind* rhsBind = scope.GetBind("lhs");
 
-		CValue lhs = lhsBind->Evaluate(scope);
-		CValue rhs = rhsBind->Evaluate(scope);
+		const CAstNode* lhsExpr = lhsBind->TryGettingNonFuncDecl();
+		const CAstNode* rhsExpr = rhsBind->TryGettingNonFuncDecl();
+
+		if (!lhsBind || !rhsBind) {
+			throw except::ExAst::ReferenceToFunctionEvaluated{};
+		}
+
+		CValue lhs = lhsExpr->Evaluate(scope);
+		CValue rhs = rhsExpr->Evaluate(scope);
 
 		if (IsInteger(lhs) && IsInteger(rhs)) {
 			return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());

@@ -17,7 +17,7 @@ namespace itpr {
 		if (bind->TryGettingFuncDecl() != nullptr) {
 			throw except::ExAst::ReferenceToFunctionEvaluated{};
 		} else {
-			return bind->Evaluate(scope);
+			return bind->TryGettingNonFuncDecl()->Evaluate(scope);
 		}
 	}
 

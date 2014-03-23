@@ -10,6 +10,7 @@
 #include "../itpr/AstFuncDecl.h"
 #include "../itpr/AstBind.h"
 #include "../itpr/Scope.h"
+#include "../itpr/bif/AstBif.h"
 #include "../parse/sexpr/AstParser.h"
 
 namespace moon {
@@ -45,18 +46,22 @@ namespace moon {
 		return result;
 	}
 
-	const std::unique_ptr<itpr::CScope>& CEngine::m_GetUnit(const std::string& unitName)
+	itpr::CScope* CEngine::m_GetUnit(const std::string& unitName)
 	{
 		if (m_units.find(unitName) == end(m_units)) {
 			throw ExUnitNotRegistered{ unitName };
 		}
 
-		return m_units[unitName];
+		return m_units[unitName].get();
 	}
 
 	CEngine::CEngine()
 	{
 		m_parser.reset(new parse::sexpr::CAstParser);
+
+		for (auto&& pr : itpr::bif::BuildBifMap()) {
+			m_stdlibScope.RegisterBind(pr.first, std::move(pr.second));
+		}
 	}
 
 	void CEngine::LoadUnitFile(const std::string& fileName)
@@ -68,7 +73,11 @@ namespace moon {
 		}
 
 		std::string source = m_ReadFile(fileName);
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source);		
+		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
+		if (!unit) {
+			throw ExSourceParsingFailed{};
+		}
+
 		m_units[unitName] = std::move(unit);
 	}
 
@@ -78,7 +87,11 @@ namespace moon {
 		}
 
 		std::string source = m_ReadStream(input);
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source);
+		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
+		if (!unit) {
+			throw ExSourceParsingFailed{};
+		}
+
 		m_units[unitName] = std::move(unit);
 	}
 
@@ -88,14 +101,24 @@ namespace moon {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
 
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source);
+		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
+		if (!unit) {
+			throw ExSourceParsingFailed{};
+		}
+
 		m_units[unitName] = std::move(unit);
 	}
 
 	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
 	{
-		const auto& unitScope = m_GetUnit(unitName);
-		return unitScope->GetBind(name)->Evaluate(*unitScope);
+		auto* unitScope = m_GetUnit(unitName);
+		const auto* bind = unitScope->GetBind(name);
+		const auto* expression = bind->TryGettingNonFuncDecl();
+		if (!expression) {
+			throw ExValueRequestedFromFuncBind{};
+		}
+
+		return expression->Evaluate(*unitScope);
 	}
 
 	CValue CEngine::CallFunction(
@@ -103,7 +126,7 @@ namespace moon {
 		const std::string& symbol,
 		const std::vector<CValue>& args)
 	{
-		const auto& unitScope = m_GetUnit(unitName);
+		auto* unitScope = m_GetUnit(unitName);
 		return unitScope->CallFunction(symbol, args);
 	}
 

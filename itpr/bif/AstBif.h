@@ -7,7 +7,7 @@
 #include <memory>
 #include <functional>
 
-#include "../AstNode.h"
+#include "../AstFunction.h"
 
 namespace moon {
 namespace itpr {
@@ -18,7 +18,8 @@ namespace bif {
 	// argument type conversion magic happening if the argument
 	// type doesn't match the ewquired one but is also numeric.
 
-	class CAstUnaryArithmeticBif : public CAstNode {
+	class CAstUnaryArithmeticBif : public CAstFunction {
+		std::vector<std::string> m_formalArgs;
 		CValue(*m_integerImplementation)(long);
 		CValue(*m_realImplementation)(double);
 
@@ -28,12 +29,20 @@ namespace bif {
 			CValue(realImplementation)(double)) :
 			m_integerImplementation(integerImplementation),
 			m_realImplementation(realImplementation)
-		{}
+		{
+			m_formalArgs.push_back("x");
+		}
 
 		CValue Evaluate(CScope& scope) const override;
+
+		const std::vector<std::string>& GetFormalArgs() const
+		{
+			return m_formalArgs;
+		}
 	};
 
-	class CAstBinaryArithmeticBif : public CAstNode {
+	class CAstBinaryArithmeticBif : public CAstFunction {
+		std::vector<std::string> m_formalArgs;
 		CValue(*m_integerImplementation)(long, long);
 		CValue(*m_realImplementation)(double, double);
 
@@ -43,9 +52,17 @@ namespace bif {
 			CValue(realImplementation)(double, double)) :
 			m_integerImplementation(integerImplementation),
 			m_realImplementation(realImplementation)
-		{}
+		{
+			m_formalArgs.push_back("lhs");
+			m_formalArgs.push_back("rhs");
+		}
 
 		CValue Evaluate(CScope& scope) const override;
+
+		const std::vector<std::string>& GetFormalArgs() const
+		{
+			return m_formalArgs;
+		}
 	};
 
 	std::map<std::string, std::unique_ptr<CAstNode>> BuildBifMap();

@@ -5,12 +5,12 @@
 #include <string>
 #include <memory>
 
-#include "AstNode.h"
+#include "AstFunction.h"
 
 namespace moon {
 namespace itpr {
 
-	class CAstFuncDecl : public CAstNode {
+	class CAstFuncDecl : public CAstFunction {
 		const std::vector<std::string> m_formalArgs;
 		const std::vector<std::unique_ptr<CAstNode>> m_expressions;
 
@@ -21,7 +21,7 @@ namespace itpr {
 
 		CValue Evaluate(CScope& scope) const override;
 
-		const std::vector<std::string>& GetFormalArgs() const
+		const std::vector<std::string>& GetFormalArgs() const override
 		{
 			return m_formalArgs;
 		}
