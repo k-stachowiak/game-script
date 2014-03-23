@@ -3,6 +3,7 @@
 #include <iterator>
 #include <algorithm>
 
+#include "../../except/Tokenizer.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -78,7 +79,7 @@ namespace sexpr {
 		auto atomEnd = FindNonescapedDelimiter(current, last, delimiter);
 
 		if (current == last) {
-			throw std::runtime_error{ "Non-delimited string/character atom" };
+			throw except::ExTokenizer::NonDelimitedStringOrCharacter{};
 		}
 
 		*(out++) = CToken{ current, atomEnd };

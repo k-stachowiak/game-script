@@ -50,11 +50,21 @@ namespace moon {
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
 
+		friend bool IsInteger(const CValue& value)
+		{
+			return value.GetType() == EValueType::INTEGER;
+		}
+
+		friend bool IsReal(const CValue& value)
+		{
+			return value.GetType() == EValueType::REAL;
+		}
+
 		CValue() = default;
 		CValue& operator=(const CValue&) = default;
 
 		EValueType GetType() const { return m_type; }
-		long GetInt() const { return m_integer; }
+		long GetInteger() const { return m_integer; }
 		double GetReal() const { return m_real; }
 		char GetCharacter() const { return m_character; }
 		const std::string& GetString() const { return m_string; }

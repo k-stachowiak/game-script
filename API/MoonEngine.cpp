@@ -3,7 +3,9 @@
 #include <sstream>
 #include <memory>
 
+#include "Exceptions.h"
 #include "MoonEngine.h"
+#include "../parse/ParserBase.h"
 #include "../itpr/AstFuncDecl.h"
 #include "../itpr/AstBind.h"
 #include "../itpr/Scope.h"
@@ -20,7 +22,7 @@ namespace moon {
 	{
 		std::ifstream file{ fileName.c_str() };
 		if (!file.is_open()) {
-			throw std::invalid_argument{ "File not found." };
+			throw ExFileNotFound{ fileName };
 		}
 
 		std::string line;
@@ -35,7 +37,7 @@ namespace moon {
 	const std::unique_ptr<itpr::CScope>& CMoonEngine::m_GetUnit(const std::string& unitName)
 	{
 		if (m_units.find(unitName) == end(m_units)) {
-			throw std::invalid_argument{ "Invalid unit requested." };
+			throw ExUnitNotRegistered{ unitName };
 		}
 
 		return m_units[unitName];
@@ -46,7 +48,7 @@ namespace moon {
 		std::string unitName = m_DropExtension(fileName);
 
 		if (m_units.find(unitName) != end(m_units)) {
-			throw std::invalid_argument{ "Already contains unit of this name" };
+			throw ExUnitAlreadyRegisterend{ unitName };
 		}
 
 		std::string source = m_ReadFile(fileName);
@@ -66,7 +68,7 @@ namespace moon {
 		const std::vector<CValue>& args)
 	{
 		const auto& unitScope = m_GetUnit(unitName);
-		return itpr::CallFunction(*unitScope, symbol, args);
+		return unitScope->CallFunction(symbol, args);
 	}
 
 }

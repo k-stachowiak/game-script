@@ -1,5 +1,6 @@
 #include <iterator>
 
+#include "../../except/DomBuilder.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -20,7 +21,7 @@ namespace sexpr {
 			return EDomCompoundType::CPD_TUPLE;
 		}
 
-		throw std::runtime_error{ "Unexpected compound delimiting token" };
+		throw except::ExDomBuilder::UnexpectedCompoundDelimiter{};
 	}
 
 	template <class In, class Out>
@@ -45,7 +46,7 @@ namespace sexpr {
 			}
 		}
 
-		throw std::runtime_error{ "Unclosed compound DOM node" };
+		throw except::ExDomBuilder::UnclosedCompoundNode{};
 	}
 
 	template <class In, class Out>

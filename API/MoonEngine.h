@@ -7,10 +7,16 @@
 #include <map>
 
 #include "Value.h"
-#include "../itpr/Scope.h"
-#include "../parse/ParserBase.h"
 
 namespace moon {
+
+	namespace parse {
+		class CParserBase;
+	}
+
+	namespace itpr {
+		class CScope;
+	}
 
 	class CMoonEngine {
 		std::unique_ptr<parse::CParserBase> m_parser;

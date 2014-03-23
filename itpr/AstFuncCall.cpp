@@ -17,7 +17,7 @@ namespace itpr {
 		for (const auto& arg : m_actualArgs) {
 			argValues.push_back(arg->Evaluate(scope));
 		}
-		return CallFunction(scope, m_symbol, argValues);
+		return scope.CallFunction(m_symbol, argValues);
 	}
 
 }

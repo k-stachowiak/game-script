@@ -1,5 +1,6 @@
 #include "Scope.h"
 
+#include "../except/Scope.h"
 #include "AstBind.h"
 #include "AstLiteral.h"
 
@@ -14,10 +15,21 @@ namespace itpr {
 		m_parent{ parent }
 	{}
 
+	void CScope::RegisterBind(std::unique_ptr<CAstBind>&& bind)
+	{
+		std::string name = bind->GetSymbol();
+		if (m_bind_map.find(name) != end(m_bind_map)) {
+			throw except::ExScope::SymbolAlreadyRegistered{};
+		}
+
+		m_binds.push_back(std::move(bind));
+		m_bind_map[name] = m_binds.back().get();
+	}
+
 	void CScope::RegisterBind(const std::string& name, std::unique_ptr<CAstNode>&& expression)
 	{
 		if (m_bind_map.find(name) != end(m_bind_map)) {
-			throw std::invalid_argument{ "Already contains bind of this name" };
+			throw except::ExScope::SymbolAlreadyRegistered{};
 		}
 		m_binds.push_back(std::unique_ptr<CAstBind> {
 			new CAstBind{ name, std::move(expression) }
@@ -28,46 +40,47 @@ namespace itpr {
 	CAstBind* CScope::GetBind(const std::string& name)
 	{
 		if (m_bind_map.find(name) == end(m_bind_map)) {
-			throw std::invalid_argument{ "Bind of this name not found" };
+			if (!m_parent) {
+				throw except::ExScope::SymbolNotRegistered{};
+			} else {
+				return m_parent->GetBind(name);
+			}
 		}
 
 		return m_bind_map[name];
 	}
 
-	CValue CallFunction(
-		CScope& scope,
+	CValue CScope::CallFunction(
 		const std::string& symbol,
 		const std::vector<CValue>& args)
 	{
 		const CAstBind* bind;
 		try {
-			bind = scope.GetBind(symbol);
-		} catch (const std::invalid_argument&) {
-			throw std::invalid_argument{ "Symbol not found in this scope" };
+			bind = GetBind(symbol);
+		}
+		catch (const std::invalid_argument&) {
+			throw except::ExScope::SymbolNotRegistered{};
 		}
 
 		const auto* function = bind->TryGettingFuncDecl();
-
 		if (!function) {
-			throw std::invalid_argument{ "Symbol not a function in this scope" };
+			throw except::ExScope::SymbolIsNotFunction{};
 		}
 
 		std::vector<std::string> formalArgs = function->GetFormalArgs();
-
 		if (formalArgs.size() != args.size()) {
-			throw std::invalid_argument{ "Formal/actual argument count mismatch" };
+			throw except::ExScope::FormalActualArgCountMismatch{};
 		}
 
-		CScope funcScope{ &scope };
-
-		unsigned commonSize = args.size();
-		for (unsigned i = 0; i < commonSize; ++i) {
+		CScope funcScope{ this };
+		for (unsigned i = 0; i < args.size(); ++i) {
 			funcScope.RegisterBind(
 				formalArgs[i],
-				std::unique_ptr<CAstNode> {new CAstLiteral{ args[i] }});
+				std::unique_ptr<CAstNode> {new CAstLiteral{ args[i] }}
+			);
 		}
 
-		return function->Evaluate(scope);
+		return function->Evaluate(funcScope);
 	}
 
 }

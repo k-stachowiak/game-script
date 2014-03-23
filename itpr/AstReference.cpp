@@ -1,6 +1,7 @@
 #include "AstReference.h"
 #include "AstBind.h"
 
+#include "../except/Ast.h"
 #include "Scope.h"
 
 namespace moon {
@@ -12,7 +13,12 @@ namespace itpr {
 
 	CValue CAstReference::Evaluate(CScope& scope) const
 	{
-		return scope.GetBind(m_symbol)->Evaluate(scope);
+		const auto bind = scope.GetBind(m_symbol);
+		if (bind->TryGettingFuncDecl() != nullptr) {
+			throw except::ExAst::ReferenceToFunctionEvaluated{};
+		} else {
+			return bind->Evaluate(scope);
+		}
 	}
 
 }

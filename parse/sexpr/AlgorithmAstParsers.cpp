@@ -38,8 +38,6 @@ namespace sexpr {
 			return{};
 		}
 
-		// TODO: Can it really be ANY expression? Funcdecl?
-
 		return std::unique_ptr<itpr::CAstBind> { new itpr::CAstBind{ symbol, std::move(expression) }};
 	}
 

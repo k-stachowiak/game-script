@@ -4,14 +4,14 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	bool AssertCompoundSize(const CDomNode& node, unsigned size)
+	bool AssertCompoundSize(const CDomNode& node, int size)
 	{
 		return
 			node.IsCompound() &&
 			std::distance(node.ChildrenBegin(), node.ChildrenEnd()) == size;
 	}
 
-	bool AssertCompoundMinSize(const CDomNode& node, unsigned minSize)
+	bool AssertCompoundMinSize(const CDomNode& node, int minSize)
 	{
 		return
 			node.IsCompound() &&

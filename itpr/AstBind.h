@@ -11,11 +11,12 @@ namespace itpr {
 		
 	class CAstBind : public CAstNode {
 		const std::string m_symbol;
-		const std::unique_ptr<CAstNode> m_expression;
+		std::unique_ptr<CAstNode> m_expression;
 
 	public:
 		CAstBind(std::string symbol, std::unique_ptr<CAstNode>&& expression);
 		CValue Evaluate(CScope& scope) const override;
+		const std::string& GetSymbol() const { return m_symbol; }
 		const CAstFuncDecl* TryGettingFuncDecl() const;
 	};
 
