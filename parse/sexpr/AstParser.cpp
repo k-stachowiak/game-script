@@ -11,7 +11,7 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	std::unique_ptr<itpr::CScope> CAstParser::Parse(const std::string& source)
+	std::unique_ptr<itpr::CScope> CAstParser::Parse(const std::string& source) const
 	{
 		std::vector<CToken> tokens = Tokenize(CStrIter::Begin(source), CStrIter::End(source));
 		std::vector<CDomNode> domNodes = BuildDom(tokens);

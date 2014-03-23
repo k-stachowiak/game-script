@@ -21,16 +21,16 @@ namespace moon {
 	};
 
 	class CValue {
-		EValueType m_type;
+		EValueType m_type = EValueType::INTEGER;
 
-		long m_integer;
-		double m_real;
-		char m_character;
-		std::string m_string;
-		int m_boolean;
+		long m_integer = -1;
+		double m_real = -1;
+		char m_character = -1;
+		std::string m_string = {};
+		int m_boolean = -1;
 
-		ECompoundType m_compoundType;
-		std::vector<CValue> m_compoundValues;
+		ECompoundType m_compoundType = ECompoundType::ARRAY;
+		std::vector<CValue> m_compoundValues = {};
 
 		CValue(
 			EValueType type,

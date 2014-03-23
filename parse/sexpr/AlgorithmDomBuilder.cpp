@@ -52,6 +52,7 @@ namespace sexpr {
 	template <class In, class Out>
 	static inline In TryParseAtomDomNode(In current, In last, Out out)
 	{
+		(void)last;
 		*(out++) = CDomNode::MakeAtom(current->ToString());
 		return ++current;
 	}

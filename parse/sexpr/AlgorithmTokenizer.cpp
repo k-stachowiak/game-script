@@ -33,8 +33,8 @@ namespace sexpr {
 	static Iter FindNonescapedDelimiter(Iter current, Iter last, char delimiter)
 	{
 		while (current != last && (
-			*current != TOK_STR_DELIM || (
-				*current == TOK_STR_DELIM &&
+			*current != delimiter || (
+				*current == delimiter &&
 			    *(current - 1) == TOK_DELIM_ESCAPE))) {
 			++current;
 		}

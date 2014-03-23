@@ -34,7 +34,7 @@ namespace sexpr {
 
 		// 3.3 3rd child is any expression.
 		std::unique_ptr<itpr::CAstNode> expression;
-		if (expression = TryParsingNode(*(current++))) {
+		if ((expression = TryParsingNode(*(current++)))) {
 			return{};
 		}
 
