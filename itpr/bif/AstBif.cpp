@@ -55,7 +55,7 @@ namespace bif {
 	CValue CAstBinaryArithmeticBif::Evaluate(CScope& scope) const
 	{
 		const CAstBind* lhsBind = scope.GetBind("lhs");
-		const CAstBind* rhsBind = scope.GetBind("lhs");
+		const CAstBind* rhsBind = scope.GetBind("rhs");
 
 		const CAstNode* lhsExpr = lhsBind->TryGettingNonFuncDecl();
 		const CAstNode* rhsExpr = rhsBind->TryGettingNonFuncDecl();

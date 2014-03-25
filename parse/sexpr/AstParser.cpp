@@ -23,7 +23,11 @@ namespace sexpr {
 			if (!bind) {
 				return{};
 			} else {
-				result->RegisterBind(std::move(bind));
+				result->RegisterBind(
+						bind->GetLine(),
+						bind->GetColumn(),
+						bind->GetSymbol(),
+						std::move(bind->TakeOverExpression()));
 			}
 		}
 

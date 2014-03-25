@@ -22,14 +22,29 @@ namespace sexpr {
 
 	class CToken
 	{
+		const int m_line;
+		const int m_column;
+
 		const char* m_begin;
 		const char* m_end;
 
 	public:
-		CToken(const char* begin, const char* end) :
-			m_begin(begin),
-			m_end(end)
+		CToken(int line, int column, const char* begin, const char* end) :
+			m_line{ line },
+			m_column{ column },
+			m_begin{ begin },
+			m_end{ end }
 		{}
+
+		int GetLine() const
+		{
+			return m_line;
+		}
+
+		int GetColumn() const
+		{
+			return m_column;
+		}
 
 		std::string ToString() const
 		{

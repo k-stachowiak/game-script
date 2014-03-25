@@ -8,31 +8,24 @@ namespace moon {
 namespace itpr {
 
 	CScope::CScope() :
-		m_parent(nullptr)
+		m_parent{ nullptr }
 	{}
 
 	CScope::CScope(CScope* parent) :
 		m_parent{ parent }
 	{}
 
-	void CScope::RegisterBind(std::unique_ptr<CAstBind>&& bind)
-	{
-		std::string name = bind->GetSymbol();
-		if (m_bind_map.find(name) != end(m_bind_map)) {
-			throw except::ExScope::SymbolAlreadyRegistered{};
-		}
-
-		m_binds.push_back(std::move(bind));
-		m_bind_map[name] = m_binds.back().get();
-	}
-
-	void CScope::RegisterBind(const std::string& name, std::unique_ptr<CAstNode>&& expression)
+	void CScope::RegisterBind(
+			int line,
+			int column,
+			const std::string& name,
+			std::unique_ptr<CAstNode>&& expression)
 	{
 		if (m_bind_map.find(name) != end(m_bind_map)) {
 			throw except::ExScope::SymbolAlreadyRegistered{};
 		}
 		m_binds.push_back(std::unique_ptr<CAstBind> {
-			new CAstBind{ name, std::move(expression) }
+			new CAstBind{ line, column, name, std::move(expression) }
 		});
 		m_bind_map[name] = m_binds.back().get();
 	}
@@ -68,15 +61,24 @@ namespace itpr {
 		}
 
 		std::vector<std::string> formalArgs = function->GetFormalArgs();
-		if (formalArgs.size() != args.size()) {
+		std::vector<std::pair<int, int>> argLocations = function->GetArgLocations();
+		if (formalArgs.size() != args.size() || argLocations.size() != args.size()) {
 			throw except::ExScope::FormalActualArgCountMismatch{};
 		}
 
 		CScope funcScope{ this };
 		for (unsigned i = 0; i < args.size(); ++i) {
 			funcScope.RegisterBind(
+				argLocations[i].first,
+				argLocations[i].second,
 				formalArgs[i],
-				std::unique_ptr<CAstNode> {new CAstLiteral{ args[i] }}
+				std::unique_ptr<CAstNode> {
+					new CAstLiteral{
+						argLocations[i].first,
+						argLocations[i].second,
+						args[i]
+					}
+				}
 			);
 		}
 

@@ -20,6 +20,7 @@ namespace bif {
 
 	class CAstUnaryArithmeticBif : public CAstFunction {
 		std::vector<std::string> m_formalArgs;
+		std::vector<std::pair<int, int>> m_argLocations;
 		CValue(*m_integerImplementation)(long);
 		CValue(*m_realImplementation)(double);
 
@@ -27,10 +28,12 @@ namespace bif {
 		CAstUnaryArithmeticBif(
 			CValue(integerImplementation)(long),
 			CValue(realImplementation)(double)) :
-			m_integerImplementation(integerImplementation),
-			m_realImplementation(realImplementation)
+			CAstFunction{ -1, -1 },
+			m_integerImplementation{ integerImplementation },
+			m_realImplementation{ realImplementation }
 		{
 			m_formalArgs.push_back("x");
+			m_argLocations.push_back(std::make_pair(-1, -1));
 		}
 
 		CValue Evaluate(CScope& scope) const override;
@@ -39,10 +42,16 @@ namespace bif {
 		{
 			return m_formalArgs;
 		}
+
+		const std::vector<std::pair<int, int>>& GetArgLocations() const
+		{
+			return m_argLocations;
+		}
 	};
 
 	class CAstBinaryArithmeticBif : public CAstFunction {
 		std::vector<std::string> m_formalArgs;
+		std::vector<std::pair<int, int>> m_argLocations;
 		CValue(*m_integerImplementation)(long, long);
 		CValue(*m_realImplementation)(double, double);
 
@@ -50,11 +59,14 @@ namespace bif {
 		CAstBinaryArithmeticBif(
 			CValue(integerImplementation)(long, long),
 			CValue(realImplementation)(double, double)) :
-			m_integerImplementation(integerImplementation),
-			m_realImplementation(realImplementation)
+			CAstFunction{ -1, -1 },
+			m_integerImplementation{ integerImplementation },
+			m_realImplementation{ realImplementation }
 		{
 			m_formalArgs.push_back("lhs");
 			m_formalArgs.push_back("rhs");
+			m_argLocations.push_back(std::make_pair(-1, -1));
+			m_argLocations.push_back(std::make_pair(-1, -1));
 		}
 
 		CValue Evaluate(CScope& scope) const override;
@@ -62,6 +74,11 @@ namespace bif {
 		const std::vector<std::string>& GetFormalArgs() const
 		{
 			return m_formalArgs;
+		}
+
+		const std::vector<std::pair<int, int>>& GetArgLocations() const
+		{
+			return m_argLocations;
 		}
 	};
 

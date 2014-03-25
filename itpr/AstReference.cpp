@@ -7,7 +7,8 @@
 namespace moon {
 namespace itpr {
 
-	CAstReference::CAstReference(std::string symbol) :
+	CAstReference::CAstReference(int line, int column, std::string symbol) :
+		CAstNode{ line, column },
 		m_symbol{ symbol }
 	{}
 

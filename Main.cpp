@@ -49,7 +49,7 @@ std::vector<std::function<void()>> tests {
 
 	[]() {
 
-		std::printf("Simple value retrieval.");
+		std::printf("Simple value retrieval.\n");
 
 		std::string source =
 			"# Useless constant\n"

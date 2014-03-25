@@ -48,7 +48,7 @@ namespace sexpr {
 			return current;
 		}
 
-		*(out++) = CToken{ current, current + 1 };
+		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, current + 1 };
 
 		return std::find_if_not(current + 1, last, isspace);
 	}
@@ -62,7 +62,7 @@ namespace sexpr {
 		
 		auto atomEnd = std::find_if_not(current, last, IsAllowedInAtom);
 
-		*(out++) = CToken{ current, atomEnd };
+		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, atomEnd };
 
 		return std::find_if_not(atomEnd, last, isspace);
 	}
@@ -82,7 +82,7 @@ namespace sexpr {
 			throw except::ExTokenizer::NonDelimitedStringOrCharacter{};
 		}
 
-		*(out++) = CToken{ current, atomEnd };
+		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, atomEnd };
 
 		return std::find_if_not(atomEnd, last, isspace);
 	}

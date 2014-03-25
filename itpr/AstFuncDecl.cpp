@@ -4,9 +4,14 @@ namespace moon {
 namespace itpr {
 
 	CAstFuncDecl::CAstFuncDecl(
-		const std::vector<std::string> formalArgs,
+		int line,
+		int column,
+		std::vector<std::string> formalArgs,
+		std::vector<std::pair<int, int>> argLocations,
 		std::vector<std::unique_ptr<CAstNode>>&& expressions) :
+		CAstFunction{ line, column },
 		m_formalArgs{ formalArgs },
+		m_argLocations{ argLocations },
 		m_expressions{ std::move(expressions) }
 	{}
 

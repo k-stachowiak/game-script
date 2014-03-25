@@ -3,7 +3,12 @@
 namespace moon {
 namespace itpr {
 
-	CAstCompound::CAstCompound(ECompoundType type, std::vector<std::unique_ptr<CAstNode>>&& expressions) :
+	CAstCompound::CAstCompound(
+		int line, 
+		int column, 
+		ECompoundType type, 
+		std::vector<std::unique_ptr<CAstNode>>&& expressions) :
+		CAstNode{ line, column },
 		m_type{ type },
 		m_expressions{ std::move(expressions) }
 	{}

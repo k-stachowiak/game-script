@@ -38,6 +38,8 @@ namespace sexpr {
 		while (current != last) {
 			if (IsClosingParenthesis(*current) && ParenthesisMatch(*begin, *current)) {
 				*(out++) = CDomNode::MakeCompound(
+					begin->GetLine(),
+					begin->GetColumn(),
 					InferCompoundType(*begin),
 					children);
 				return ++current;
@@ -53,7 +55,10 @@ namespace sexpr {
 	static inline In TryParseAtomDomNode(In current, In last, Out out)
 	{
 		(void)last;
-		*(out++) = CDomNode::MakeAtom(current->ToString());
+		*(out++) = CDomNode::MakeAtom(
+			current->GetLine(),
+			current->GetColumn(),
+			current->ToString());
 		return ++current;
 	}
 

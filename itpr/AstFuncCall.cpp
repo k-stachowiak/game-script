@@ -6,7 +6,12 @@
 namespace moon {
 namespace itpr {
 
-	CAstFuncCall::CAstFuncCall(std::string symbol, std::vector<std::unique_ptr<CAstNode>>&& actualArgs) :
+	CAstFuncCall::CAstFuncCall(
+		int line, 
+		int column, 
+		std::string symbol, 
+		std::vector<std::unique_ptr<CAstNode>>&& actualArgs) :
+		CAstNode{ line, column },
 		m_symbol{ symbol },
 		m_actualArgs{ std::move(actualArgs) }
 	{}

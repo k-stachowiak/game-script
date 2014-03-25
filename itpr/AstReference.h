@@ -10,7 +10,7 @@ namespace itpr {
 		const std::string m_symbol;
 
 	public:
-		CAstReference(std::string symbol);
+		CAstReference(int line, int column, std::string symbol);
 		CValue Evaluate(CScope& scope) const override;
 	};
 

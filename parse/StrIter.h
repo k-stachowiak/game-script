@@ -9,15 +9,35 @@ namespace parse {
 
 	class CStrIter : public std::iterator<std::bidirectional_iterator_tag, char>
 	{
+		int m_line;
+		int m_column;
+
 		const char* m_begin;
 		const char* m_current;
 
 		CStrIter(const char* current) :
-			m_begin(current),
-			m_current(current)
+			m_line{ 0 },
+			m_column{ 0 },
+			m_begin{ current },
+			m_current{ current }
 		{}
 
+		bool m_AtNewLine() const
+		{
+			return *m_current == '\n';
+		}
+
 	public:
+		int GetLine() const
+		{
+			return m_line;
+		}
+
+		int GetColumn() const
+		{
+			return m_column;
+		}
+
 		friend bool operator==(const CStrIter& lhs, const CStrIter& rhs)
 		{
 			return lhs.m_current == rhs.m_current;
@@ -42,12 +62,27 @@ namespace parse {
 
 		CStrIter& operator++()
 		{
+			if (m_AtNewLine()) {
+				++m_line;
+				m_column = 0;
+			} else {
+				++m_column;
+			}
+
 			++m_current;
 			return *this;
 		}
 
 		CStrIter& operator--()
 		{
+			if (m_AtNewLine()) {
+				--m_line;
+				m_column = 0;
+			}
+			else {
+				--m_column;
+			}
+			
 			--m_current;
 			return *this;
 		}

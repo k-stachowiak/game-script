@@ -21,23 +21,40 @@ namespace sexpr {
 
 	class CDomNode
 	{
+		const int m_line;
+		const int m_column;
+
 		EDomNodeType m_type;		
 		std::string m_atom;
 		EDomCompoundType m_compoundType;
 		std::vector<CDomNode> m_compoundChildren;
 
 		CDomNode(
+			int line,
+			int column,
 			EDomNodeType type,
 			std::string atom,
 			EDomCompoundType compoundType,
 			std::vector<CDomNode> compoundChildren) :
-			m_type(type),
-			m_atom(atom),
-			m_compoundType(compoundType),
-			m_compoundChildren(compoundChildren)
+			m_line{ line },
+			m_column{ column },
+			m_type{ type },
+			m_atom{ atom },
+			m_compoundType{ compoundType },
+			m_compoundChildren{ compoundChildren }
 		{}
 
 	public:
+		int GetLine() const
+		{
+			return m_line;
+		}
+
+		int GetColumn() const
+		{
+			return m_column;
+		}
+
 		friend bool operator==(const CDomNode& node, const std::string& str)
 		{
 			return
@@ -98,9 +115,11 @@ namespace sexpr {
 			return m_compoundChildren.cend();
 		}
 
-		static CDomNode MakeAtom(const std::string& atom)
+		static CDomNode MakeAtom(int line, int column, const std::string& atom)
 		{
 			return CDomNode{
+				line,
+				column,
 				EDomNodeType::ATOM,
 				atom,
 				EDomCompoundType::CPD_CORE,
@@ -109,10 +128,14 @@ namespace sexpr {
 		}
 
 		static CDomNode MakeCompound(
+			int line,
+			int column,
 			EDomCompoundType compoundType,
 			const std::vector<CDomNode>& children)
 		{
 			return CDomNode{
+				line,
+				column,
 				EDomNodeType::COMPOUND,
 				{},
 				compoundType,

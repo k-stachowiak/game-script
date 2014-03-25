@@ -13,7 +13,12 @@ namespace itpr {
 		const std::vector<std::unique_ptr<CAstNode>> m_expressions;
 
 	public:
-		CAstCompound(ECompoundType type, std::vector<std::unique_ptr<CAstNode>>&& expressions);
+		CAstCompound(
+			int line, 
+			int column, 
+			ECompoundType type, 
+			std::vector<std::unique_ptr<CAstNode>>&& expressions);
+
 		CValue Evaluate(CScope& scope) const override;
 	};
 

@@ -21,8 +21,11 @@ namespace itpr {
 		CScope();
 		CScope(CScope* parent);
 
-		void RegisterBind(std::unique_ptr<CAstBind>&& bind);
-		void RegisterBind(const std::string& name, std::unique_ptr<CAstNode>&& expression);
+		void RegisterBind(
+				int line,
+				int column,
+				const std::string& name,
+				std::unique_ptr<CAstNode>&& expression);
 
 		const CAstBind* GetBind(const std::string& name);
 		CValue CallFunction(const std::string& symbol, const std::vector<CValue>& args);

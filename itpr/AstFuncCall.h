@@ -13,7 +13,12 @@ namespace itpr {
 		const std::vector<std::unique_ptr<CAstNode>> m_actualArgs;
 
 	public:
-		CAstFuncCall(std::string symbol, std::vector<std::unique_ptr<CAstNode>>&& actualArgs);
+		CAstFuncCall(
+			int line, 
+			int column, 
+			std::string symbol, 
+			std::vector<std::unique_ptr<CAstNode>>&& actualArgs);
+
 		CValue Evaluate(CScope& scope) const override;
 	};
 

@@ -10,7 +10,7 @@ namespace itpr {
 		const CValue m_value;
 
 	public:
-		CAstLiteral(CValue value);
+		CAstLiteral(int line, int column, CValue value);
 		CValue Evaluate(CScope& scope) const override;
 	};
 

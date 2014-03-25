@@ -6,7 +6,12 @@
 namespace moon {
 namespace itpr {
 
-	CAstBind::CAstBind(std::string symbol, std::unique_ptr<CAstNode>&& expression) :
+	CAstBind::CAstBind(
+		int line, 
+		int column, 
+		std::string symbol, 
+		std::unique_ptr<CAstNode>&& expression) :
+		CAstNode{ line, column },
 		m_symbol{ symbol },
 		m_expression{ std::move(expression) }
 	{}
@@ -14,7 +19,18 @@ namespace itpr {
 	CValue CAstBind::Evaluate(CScope& scope) const
 	{
 		CValue result = m_expression->Evaluate(scope);
-		scope.RegisterBind(m_symbol, std::unique_ptr<CAstNode> {new CAstLiteral{ result }});
+
+		scope.RegisterBind(
+				GetLine(),
+				GetColumn(),
+				m_symbol,
+				std::unique_ptr<CAstNode> {
+					new CAstLiteral{
+						m_expression->GetLine(),
+						m_expression->GetColumn(),
+						result }
+				});
+
 		return result;
 	}
 
@@ -30,6 +46,11 @@ namespace itpr {
 		} else {
 			return m_expression.get();
 		}
+	}
+
+	std::unique_ptr<CAstNode> CAstBind::TakeOverExpression()
+	{
+		return std::move(m_expression);
 	}
 }
 }

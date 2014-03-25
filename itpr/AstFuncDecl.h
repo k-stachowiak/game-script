@@ -12,11 +12,15 @@ namespace itpr {
 
 	class CAstFuncDecl : public CAstFunction {
 		const std::vector<std::string> m_formalArgs;
+		const std::vector<std::pair<int, int>> m_argLocations;
 		const std::vector<std::unique_ptr<CAstNode>> m_expressions;
 
 	public:
 		CAstFuncDecl(
-			const std::vector<std::string> formalArgs,
+			int line,
+			int column,
+			std::vector<std::string> formalArgs,
+			std::vector<std::pair<int, int>> argLocations,
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
 		CValue Evaluate(CScope& scope) const override;
@@ -24,6 +28,11 @@ namespace itpr {
 		const std::vector<std::string>& GetFormalArgs() const override
 		{
 			return m_formalArgs;
+		}
+
+		const std::vector<std::pair<int, int>>& GetArgLocations() const override
+		{
+			return m_argLocations;
 		}
 	};
 

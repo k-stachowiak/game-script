@@ -60,7 +60,11 @@ namespace moon {
 		m_parser.reset(new parse::sexpr::CAstParser);
 
 		for (auto&& pr : itpr::bif::BuildBifMap()) {
-			m_stdlibScope.RegisterBind(pr.first, std::move(pr.second));
+			m_stdlibScope.RegisterBind(
+					pr.second->GetLine(),
+					pr.second->GetColumn(),
+					pr.first,
+					std::move(pr.second));
 		}
 	}
 
