@@ -1,7 +1,7 @@
 #ifndef MOON_EXCEPT_AST_H
 #define MOON_EXCEPT_AST_H
 
-#include <stdexcept>
+#include "CompilationError.h"
 
 namespace moon {
 namespace except {

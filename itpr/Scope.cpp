@@ -1,5 +1,7 @@
 #include "Scope.h"
 
+#include <stdexcept>
+
 #include "../except/Scope.h"
 #include "AstBind.h"
 #include "AstLiteral.h"
@@ -22,7 +24,7 @@ namespace itpr {
 			std::unique_ptr<CAstNode>&& expression)
 	{
 		if (m_bind_map.find(name) != end(m_bind_map)) {
-			throw except::ExScope::SymbolAlreadyRegistered{};
+			throw except::ExScope::SymbolAlreadyRegistered{ line, column };
 		}
 		m_binds.push_back(std::unique_ptr<CAstBind> {
 			new CAstBind{ line, column, name, std::move(expression) }
@@ -34,7 +36,7 @@ namespace itpr {
 	{
 		if (m_bind_map.find(name) == end(m_bind_map)) {
 			if (!m_parent) {
-				throw except::ExScope::SymbolNotRegistered{};
+				throw std::invalid_argument{ name };
 			} else {
 				return m_parent->GetBind(name);
 			}
@@ -44,6 +46,8 @@ namespace itpr {
 	}
 
 	CValue CScope::CallFunction(
+		int line,
+		int column,
 		const std::string& symbol,
 		const std::vector<CValue>& args)
 	{
@@ -52,18 +56,18 @@ namespace itpr {
 			bind = GetBind(symbol);
 		}
 		catch (const std::invalid_argument&) {
-			throw except::ExScope::SymbolNotRegistered{};
+			throw except::ExScope::SymbolNotRegistered{ line, column };
 		}
 
 		const auto* function = bind->TryGettingFuncDecl();
 		if (!function) {
-			throw except::ExScope::SymbolIsNotFunction{};
+			throw except::ExScope::SymbolIsNotFunction{ line, column };
 		}
 
 		std::vector<std::string> formalArgs = function->GetFormalArgs();
 		std::vector<std::pair<int, int>> argLocations = function->GetArgLocations();
 		if (formalArgs.size() != args.size() || argLocations.size() != args.size()) {
-			throw except::ExScope::FormalActualArgCountMismatch{};
+			throw except::ExScope::FormalActualArgCountMismatch{ line, column };
 		}
 
 		CScope funcScope{ this };

@@ -79,7 +79,10 @@ namespace sexpr {
 		auto atomEnd = FindNonescapedDelimiter(current, last, delimiter);
 
 		if (current == last) {
-			throw except::ExTokenizer::NonDelimitedStringOrCharacter{};
+			throw except::ExTokenizer::NonDelimitedStringOrCharacter{
+				current.GetLine(),
+				current.GetColumn()
+			};
 		}
 
 		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, atomEnd };

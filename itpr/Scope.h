@@ -28,7 +28,11 @@ namespace itpr {
 				std::unique_ptr<CAstNode>&& expression);
 
 		const CAstBind* GetBind(const std::string& name);
-		CValue CallFunction(const std::string& symbol, const std::vector<CValue>& args);
+		CValue CallFunction(
+				int line,
+				int column,
+				const std::string& symbol,
+				const std::vector<CValue>& args);
 	};
 
 }

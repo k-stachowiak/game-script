@@ -7,21 +7,21 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	static EDomCompoundType InferCompoundType(const CToken& token)
+	static EDomCompoundType InferCompoundType(int line, int column, const CToken& openingToken)
 	{
-		if (token == TOK_CORE_OPEN || token == TOK_CORE_CLOSE) {
+		if (openingToken == TOK_CORE_OPEN) {
 			return EDomCompoundType::CPD_CORE;
 		}
 
-		if (token == TOK_ARR_OPEN || token == TOK_ARR_CLOSE) {
+		if (openingToken == TOK_ARR_OPEN) {
 			return EDomCompoundType::CPD_ARRAY;
 		}
 
-		if (token == TOK_TUP_OPEN || token == TOK_TUP_CLOSE) {
+		if (openingToken == TOK_TUP_OPEN) {
 			return EDomCompoundType::CPD_TUPLE;
 		}
 
-		throw except::ExDomBuilder::UnexpectedCompoundDelimiter{};
+		throw except::ExDomBuilder::UnexpectedCompoundDelimiter{ line, column };
 	}
 
 	template <class In, class Out>
@@ -40,7 +40,7 @@ namespace sexpr {
 				*(out++) = CDomNode::MakeCompound(
 					begin->GetLine(),
 					begin->GetColumn(),
-					InferCompoundType(*begin),
+					InferCompoundType(begin->GetLine(), begin->GetColumn(), *begin),
 					children);
 				return ++current;
 			} else {
@@ -48,7 +48,10 @@ namespace sexpr {
 			}
 		}
 
-		throw except::ExDomBuilder::UnclosedCompoundNode{};
+		throw except::ExDomBuilder::UnclosedCompoundNode{
+			begin->GetLine(),
+			begin->GetColumn()
+		};
 	}
 
 	template <class In, class Out>

@@ -16,7 +16,7 @@ namespace itpr {
 	{
 		const auto bind = scope.GetBind(m_symbol);
 		if (bind->TryGettingFuncDecl() != nullptr) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{};
+			throw except::ExAst::ReferenceToFunctionEvaluated{ GetLine(), GetColumn() };
 		} else {
 			return bind->TryGettingNonFuncDecl()->Evaluate(scope);
 		}

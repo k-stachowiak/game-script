@@ -131,7 +131,7 @@ namespace moon {
 		const std::vector<CValue>& args)
 	{
 		auto* unitScope = m_GetUnit(unitName);
-		return unitScope->CallFunction(symbol, args);
+		return unitScope->CallFunction(-1, -1, symbol, args);
 	}
 
 }

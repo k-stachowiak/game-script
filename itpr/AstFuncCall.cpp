@@ -23,7 +23,7 @@ namespace itpr {
 		for (const auto& arg : m_actualArgs) {
 			argValues.push_back(arg->Evaluate(scope));
 		}
-		return scope.CallFunction(m_symbol, argValues);
+		return scope.CallFunction(GetLine(), GetColumn(), m_symbol, argValues);
 	}
 
 }

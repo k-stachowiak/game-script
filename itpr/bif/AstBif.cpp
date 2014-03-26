@@ -23,8 +23,8 @@ namespace bif {
 	CValue MulReal(double lhs, double rhs) { return CValue::MakeReal(lhs * rhs); }
 	CValue DivReal(double lhs, double rhs) { return CValue::MakeReal(lhs / rhs); }
 	
-	CValue SqrtInteger(long x)	{ return CValue::MakeInteger(static_cast<long>(sqrt(x))); }
-	CValue SqrtReal(double x)	{ return CValue::MakeReal(sqrt(x)); }
+	CValue SqrtInteger(long x) { return CValue::MakeInteger(static_cast<long>(sqrt(x))); }
+	CValue SqrtReal(double x)  { return CValue::MakeReal(sqrt(x)); }
 
 	// AST part implementation.
 	// ========================
@@ -35,7 +35,7 @@ namespace bif {
 		const CAstNode* expr = bind->TryGettingNonFuncDecl();
 
 		if (!expr) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{};
+			throw except::ExAst::ReferenceToFunctionEvaluated{ -1, -1 };
 		}
 
 		CValue actualArgument = expr->Evaluate(scope);
@@ -48,7 +48,7 @@ namespace bif {
 			return m_realImplementation(actualArgument.GetReal());
 
 		default:
-			throw except::ExAst::ArithmeticTypeMismatch{};
+			throw except::ExAst::ArithmeticTypeMismatch{ -1, -1 };
 		}
 	}
 
@@ -61,7 +61,7 @@ namespace bif {
 		const CAstNode* rhsExpr = rhsBind->TryGettingNonFuncDecl();
 
 		if (!lhsBind || !rhsBind) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{};
+			throw except::ExAst::ReferenceToFunctionEvaluated{ -1, -1 };
 		}
 
 		CValue lhs = lhsExpr->Evaluate(scope);
@@ -80,7 +80,7 @@ namespace bif {
 			return m_realImplementation(lhs.GetReal(), rhs.GetReal());
 
 		} else {
-			throw except::ExAst::ArithmeticTypeMismatch{};
+			throw except::ExAst::ArithmeticTypeMismatch{ -1, -1 };
 		}
 		
 	}
