@@ -7,24 +7,24 @@ namespace moon {
 namespace except {
 
 	struct ExScope {
-		struct SymbolAlreadyRegistered : public std::runtime_error {
-			SymbolAlreadyRegistered() :
-				std::runtime_error{ "Symbol already registered." }
+		struct SymbolAlreadyRegistered : public ExCompilationError {
+			SymbolAlreadyRegistered(int line, int column) :
+				ExCompilationError{ line, column, "Symbol already registered." }
 			{}
 		};
-		struct SymbolNotRegistered : public std::runtime_error {
-			SymbolNotRegistered() :
-				std::runtime_error{ "Symbol not registered." }
+		struct SymbolNotRegistered : public ExCompilationError {
+			SymbolNotRegistered(int line, int column) :
+				ExCompilationError{ line, column, "Symbol not registered." }
 			{}
 		};
-		struct SymbolIsNotFunction : public std::runtime_error {
-			SymbolIsNotFunction() :
-				std::runtime_error{ "Symbol is not a function." }
+		struct SymbolIsNotFunction : public ExCompilationError {
+			SymbolIsNotFunction(int line, int column) :
+				ExCompilationError{ line, column, "Symbol is not a function." }
 			{}
 		};
-		struct FormalActualArgCountMismatch : public std::runtime_error {
-			FormalActualArgCountMismatch() :
-				std::runtime_error{ "Formal and actual argument call mismatch." }
+		struct FormalActualArgCountMismatch : public ExCompilationError {
+			FormalActualArgCountMismatch(int line, int column) :
+				ExCompilationError{ line, column, "Formal and actual argument call mismatch." }
 			{}
 		};
 	};
