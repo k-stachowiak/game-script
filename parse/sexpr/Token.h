@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "../../common/SourceLocation.h"
+
 namespace moon {
 namespace parse {
 namespace sexpr {
@@ -22,28 +24,21 @@ namespace sexpr {
 
 	class CToken
 	{
-		const int m_line;
-		const int m_column;
+		const common::CSourceLocation m_location;
 
 		const char* m_begin;
 		const char* m_end;
 
 	public:
-		CToken(int line, int column, const char* begin, const char* end) :
-			m_line{ line },
-			m_column{ column },
+		CToken(common::CSourceLocation location, const char* begin, const char* end) :
+			m_location{ location },
 			m_begin{ begin },
 			m_end{ end }
 		{}
 
-		int GetLine() const
+		const common::CSourceLocation& GetLocation() const
 		{
-			return m_line;
-		}
-
-		int GetColumn() const
-		{
-			return m_column;
+			return m_location;
 		}
 
 		std::string ToString() const

@@ -38,8 +38,7 @@ namespace sexpr {
 		while (current != last) {
 			if (IsClosingParenthesis(*current) && ParenthesisMatch(*begin, *current)) {
 				*(out++) = CDomNode::MakeCompound(
-					begin->GetLine(),
-					begin->GetColumn(),
+					begin->GetLocation()
 					InferCompoundType(begin->GetLine(), begin->GetColumn(), *begin),
 					children);
 				return ++current;

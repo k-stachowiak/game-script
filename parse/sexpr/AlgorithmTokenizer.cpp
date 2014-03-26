@@ -48,7 +48,11 @@ namespace sexpr {
 			return current;
 		}
 
-		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, current + 1 };
+		*(out++) = CToken{ 
+			common::CSourceLocation::MakeRegular(
+				current.GetLine(),
+				current.GetColumn()),
+			current, current + 1 };
 
 		return std::find_if_not(current + 1, last, isspace);
 	}
@@ -62,7 +66,11 @@ namespace sexpr {
 		
 		auto atomEnd = std::find_if_not(current, last, IsAllowedInAtom);
 
-		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, atomEnd };
+		*(out++) = CToken{
+			common::CSourceLocation::MakeRegular(
+				current.GetLine(),
+				current.GetColumn()),
+			current, atomEnd };
 
 		return std::find_if_not(atomEnd, last, isspace);
 	}
@@ -85,7 +93,11 @@ namespace sexpr {
 			};
 		}
 
-		*(out++) = CToken{ current.GetLine(), current.GetColumn(), current, atomEnd };
+		*(out++) = CToken{
+			common::CSourceLocation::MakeRegular(
+				current.GetLine(),
+				current.GetColumn()),
+			current, atomEnd };
 
 		return std::find_if_not(atomEnd, last, isspace);
 	}
