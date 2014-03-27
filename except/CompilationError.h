@@ -4,18 +4,18 @@
 #include <string>
 #include <sstream>
 
+#include "../API/SourceLocation.h"
+
 namespace moon {
 namespace except {
 
 	class ExCompilationError {
-		int m_line;
-		int m_column;
+		const CSourceLocation m_location;
 		const std::string m_innerMessage;
 
 	public:
-		ExCompilationError(int line, int column, const std::string& innerMessage) :
-			m_line(line),
-			m_column(column),
+		ExCompilationError(CSourceLocation location, const std::string& innerMessage) :
+			m_location(location),
 			m_innerMessage(innerMessage)
 		{}
 
@@ -23,7 +23,9 @@ namespace except {
 		{
 			std::ostringstream oss;
 
-			oss << "Compilation error @ (" << m_line << ":" << m_column << ") : "
+			oss << "Compilation error @ ("
+				<< m_location.GetLine() << ":"
+				<< m_location.GetColumn() << ") : "
 				<< m_innerMessage;
 
 			return oss.str();

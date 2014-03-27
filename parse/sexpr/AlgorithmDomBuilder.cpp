@@ -7,7 +7,7 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	static EDomCompoundType InferCompoundType(int line, int column, const CToken& openingToken)
+	static EDomCompoundType InferCompoundType(CSourceLocation location, const CToken& openingToken)
 	{
 		if (openingToken == TOK_CORE_OPEN) {
 			return EDomCompoundType::CPD_CORE;
@@ -21,7 +21,7 @@ namespace sexpr {
 			return EDomCompoundType::CPD_TUPLE;
 		}
 
-		throw except::ExDomBuilder::UnexpectedCompoundDelimiter{ line, column };
+		throw except::ExDomBuilder::UnexpectedCompoundDelimiter{ location };
 	}
 
 	template <class In, class Out>
@@ -38,8 +38,8 @@ namespace sexpr {
 		while (current != last) {
 			if (IsClosingParenthesis(*current) && ParenthesisMatch(*begin, *current)) {
 				*(out++) = CDomNode::MakeCompound(
-					begin->GetLocation()
-					InferCompoundType(begin->GetLine(), begin->GetColumn(), *begin),
+					begin->GetLocation();
+					InferCompoundType(begin->GetLocation(), *begin),
 					children);
 				return ++current;
 			} else {

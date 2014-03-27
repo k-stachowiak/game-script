@@ -14,7 +14,7 @@ namespace itpr {
 		// Definitions and built-in functions to be universally and seamlesly
 		// accessible from the scope.
 
-		CAstFunction(int line, int column) : CAstNode{ line, column } {}
+		CAstFunction(const CSourceLocation& location) : CAstNode{ location } {}
 
 		virtual const std::vector<std::string>& GetFormalArgs() const = 0;
 		virtual const std::vector<std::pair<int, int>>& GetArgLocations() const = 0;

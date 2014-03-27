@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../common/SourceLocation.h"
+#include "../../API/SourceLocation.h"
 
 namespace moon {
 namespace parse {
@@ -24,19 +24,19 @@ namespace sexpr {
 
 	class CToken
 	{
-		const common::CSourceLocation m_location;
+		const CSourceLocation m_location;
 
 		const char* m_begin;
 		const char* m_end;
 
 	public:
-		CToken(common::CSourceLocation location, const char* begin, const char* end) :
+		CToken(CSourceLocation location, const char* begin, const char* end) :
 			m_location{ location },
 			m_begin{ begin },
 			m_end{ end }
 		{}
 
-		const common::CSourceLocation& GetLocation() const
+		const CSourceLocation& GetLocation() const
 		{
 			return m_location;
 		}

@@ -8,13 +8,13 @@ namespace except {
 
 	struct ExAst {
 		struct ReferenceToFunctionEvaluated : public ExCompilationError {
-			ReferenceToFunctionEvaluated(int line, int column) :
-				ExCompilationError{ line, column, "Reference to function evaluated." }
+			ReferenceToFunctionEvaluated(const CSourceLocation& location) :
+				ExCompilationError{ location, "Reference to function evaluated." }
 			{}
 		};
 		struct ArithmeticTypeMismatch : public ExCompilationError {
-			ArithmeticTypeMismatch(int line, int column) :
-				ExCompilationError{ line, column, "Arithmetic type mismatch." }
+			ArithmeticTypeMismatch(const CSourceLocation& location) :
+				ExCompilationError{ location, "Arithmetic type mismatch." }
 			{}
 		};
 	};

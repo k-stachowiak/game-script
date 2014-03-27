@@ -1,8 +1,7 @@
-#ifndef MOON_COMMON_SOURCE_LOCATION_H
-#define MOON_COMMON_SOURCE_LOCATION_H
+#ifndef MOON_SOURCE_LOCATION_H
+#define MOON_SOURCE_LOCATION_H
 
 namespace moon {
-namespace common {
 
 class CSourceLocation {
 	bool m_externalInvoke;
@@ -55,7 +54,6 @@ public:
 	}
 };
 
-}
 }
 
 #endif

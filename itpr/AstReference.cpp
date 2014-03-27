@@ -7,8 +7,8 @@
 namespace moon {
 namespace itpr {
 
-	CAstReference::CAstReference(int line, int column, std::string symbol) :
-		CAstNode{ line, column },
+	CAstReference::CAstReference(const CSourceLocation& location, std::string symbol) :
+		CAstNode{ location },
 		m_symbol{ symbol }
 	{}
 
@@ -16,7 +16,7 @@ namespace itpr {
 	{
 		const auto bind = scope.GetBind(m_symbol);
 		if (bind->TryGettingFuncDecl() != nullptr) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{ GetLine(), GetColumn() };
+			throw except::ExAst::ReferenceToFunctionEvaluated{ GetLocation() };
 		} else {
 			return bind->TryGettingNonFuncDecl()->Evaluate(scope);
 		}
