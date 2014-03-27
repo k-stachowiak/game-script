@@ -6,6 +6,7 @@
 #include <map>
 
 #include "../API/Value.h"
+#include "../API/SourceLocation.h"
 
 #include "AstBind.h"
 
@@ -22,15 +23,13 @@ namespace itpr {
 		CScope(CScope* parent);
 
 		void RegisterBind(
-				int line,
-				int column,
+				const CSourceLocation& location,
 				const std::string& name,
 				std::unique_ptr<CAstNode>&& expression);
 
 		const CAstBind* GetBind(const std::string& name);
 		CValue CallFunction(
-				int line,
-				int column,
+				const CSourceLocation& location,
 				const std::string& symbol,
 				const std::vector<CValue>& args);
 	};

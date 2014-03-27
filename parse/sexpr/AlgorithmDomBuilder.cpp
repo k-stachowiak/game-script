@@ -38,7 +38,7 @@ namespace sexpr {
 		while (current != last) {
 			if (IsClosingParenthesis(*current) && ParenthesisMatch(*begin, *current)) {
 				*(out++) = CDomNode::MakeCompound(
-					begin->GetLocation();
+					begin->GetLocation(),
 					InferCompoundType(begin->GetLocation(), *begin),
 					children);
 				return ++current;
@@ -47,10 +47,7 @@ namespace sexpr {
 			}
 		}
 
-		throw except::ExDomBuilder::UnclosedCompoundNode{
-			begin->GetLine(),
-			begin->GetColumn()
-		};
+		throw except::ExDomBuilder::UnclosedCompoundNode{ begin->GetLocation() };
 	}
 
 	template <class In, class Out>
@@ -58,8 +55,7 @@ namespace sexpr {
 	{
 		(void)last;
 		*(out++) = CDomNode::MakeAtom(
-			current->GetLine(),
-			current->GetColumn(),
+			current->GetLocation(),
 			current->ToString());
 		return ++current;
 	}

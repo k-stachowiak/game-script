@@ -18,16 +18,15 @@ namespace itpr {
 	{}
 
 	void CScope::RegisterBind(
-			int line,
-			int column,
+			const CSourceLocation& location,
 			const std::string& name,
 			std::unique_ptr<CAstNode>&& expression)
 	{
 		if (m_bind_map.find(name) != end(m_bind_map)) {
-			throw except::ExScope::SymbolAlreadyRegistered{ line, column };
+			throw except::ExScope::SymbolAlreadyRegistered{ location };
 		}
 		m_binds.push_back(std::unique_ptr<CAstBind> {
-			new CAstBind{ line, column, name, std::move(expression) }
+			new CAstBind{ location, name, std::move(expression) }
 		});
 		m_bind_map[name] = m_binds.back().get();
 	}
@@ -46,8 +45,7 @@ namespace itpr {
 	}
 
 	CValue CScope::CallFunction(
-		int line,
-		int column,
+		const CSourceLocation& location,
 		const std::string& symbol,
 		const std::vector<CValue>& args)
 	{
@@ -56,30 +54,28 @@ namespace itpr {
 			bind = GetBind(symbol);
 		}
 		catch (const std::invalid_argument&) {
-			throw except::ExScope::SymbolNotRegistered{ line, column };
+			throw except::ExScope::SymbolNotRegistered{ location };
 		}
 
 		const auto* function = bind->TryGettingFuncDecl();
 		if (!function) {
-			throw except::ExScope::SymbolIsNotFunction{ line, column };
+			throw except::ExScope::SymbolIsNotFunction{ location };
 		}
 
-		std::vector<std::string> formalArgs = function->GetFormalArgs();
-		std::vector<std::pair<int, int>> argLocations = function->GetArgLocations();
+		const std::vector<std::string>& formalArgs = function->GetFormalArgs();
+		const std::vector<CSourceLocation>& argLocations = function->GetArgLocations();
 		if (formalArgs.size() != args.size() || argLocations.size() != args.size()) {
-			throw except::ExScope::FormalActualArgCountMismatch{ line, column };
+			throw except::ExScope::FormalActualArgCountMismatch{ location };
 		}
 
 		CScope funcScope{ this };
 		for (unsigned i = 0; i < args.size(); ++i) {
 			funcScope.RegisterBind(
-				argLocations[i].first,
-				argLocations[i].second,
+				argLocations[i],
 				formalArgs[i],
 				std::unique_ptr<CAstNode> {
 					new CAstLiteral{
-						argLocations[i].first,
-						argLocations[i].second,
+						argLocations[i],
 						args[i]
 					}
 				}

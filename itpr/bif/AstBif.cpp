@@ -35,7 +35,7 @@ namespace bif {
 		const CAstNode* expr = bind->TryGettingNonFuncDecl();
 
 		if (!expr) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{ -1, -1 };
+			throw except::ExAst::ReferenceToFunctionEvaluated{ CSourceLocation::MakeBuiltInFunction() };
 		}
 
 		CValue actualArgument = expr->Evaluate(scope);
@@ -48,7 +48,7 @@ namespace bif {
 			return m_realImplementation(actualArgument.GetReal());
 
 		default:
-			throw except::ExAst::ArithmeticTypeMismatch{ -1, -1 };
+			throw except::ExAst::ArithmeticTypeMismatch{ CSourceLocation::MakeBuiltInFunction() };
 		}
 	}
 
@@ -61,7 +61,7 @@ namespace bif {
 		const CAstNode* rhsExpr = rhsBind->TryGettingNonFuncDecl();
 
 		if (!lhsBind || !rhsBind) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{ -1, -1 };
+			throw except::ExAst::ReferenceToFunctionEvaluated{ CSourceLocation::MakeBuiltInFunction() };
 		}
 
 		CValue lhs = lhsExpr->Evaluate(scope);
@@ -80,7 +80,7 @@ namespace bif {
 			return m_realImplementation(lhs.GetReal(), rhs.GetReal());
 
 		} else {
-			throw except::ExAst::ArithmeticTypeMismatch{ -1, -1 };
+			throw except::ExAst::ArithmeticTypeMismatch{ CSourceLocation::MakeBuiltInFunction() };
 		}
 		
 	}

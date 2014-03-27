@@ -3,8 +3,8 @@
 namespace moon {
 namespace itpr {
 
-	CAstLiteral::CAstLiteral(int line, int column, CValue value) :
-		CAstNode{ line, column },
+	CAstLiteral::CAstLiteral(const CSourceLocation& location, CValue value) :
+		CAstNode{ location },
 		m_value{ value }
 	{}
 

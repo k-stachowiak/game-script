@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "../../API/SourceLocation.h"
+
 namespace moon {
 namespace parse {
 namespace sexpr {
@@ -21,8 +23,7 @@ namespace sexpr {
 
 	class CDomNode
 	{
-		const int m_line;
-		const int m_column;
+		const CSourceLocation m_location;
 
 		EDomNodeType m_type;		
 		std::string m_atom;
@@ -30,14 +31,12 @@ namespace sexpr {
 		std::vector<CDomNode> m_compoundChildren;
 
 		CDomNode(
-			int line,
-			int column,
+			const CSourceLocation& location,
 			EDomNodeType type,
 			std::string atom,
 			EDomCompoundType compoundType,
 			std::vector<CDomNode> compoundChildren) :
-			m_line{ line },
-			m_column{ column },
+			m_location{ location },
 			m_type{ type },
 			m_atom{ atom },
 			m_compoundType{ compoundType },
@@ -45,14 +44,9 @@ namespace sexpr {
 		{}
 
 	public:
-		int GetLine() const
+		const CSourceLocation& GetLocation() const
 		{
-			return m_line;
-		}
-
-		int GetColumn() const
-		{
-			return m_column;
+			return m_location;
 		}
 
 		friend bool operator==(const CDomNode& node, const std::string& str)
@@ -115,11 +109,10 @@ namespace sexpr {
 			return m_compoundChildren.cend();
 		}
 
-		static CDomNode MakeAtom(int line, int column, const std::string& atom)
+		static CDomNode MakeAtom(const CSourceLocation& location, const std::string& atom)
 		{
 			return CDomNode{
-				line,
-				column,
+				location,
 				EDomNodeType::ATOM,
 				atom,
 				EDomCompoundType::CPD_CORE,
@@ -128,14 +121,12 @@ namespace sexpr {
 		}
 
 		static CDomNode MakeCompound(
-			int line,
-			int column,
+			const CSourceLocation& location,
 			EDomCompoundType compoundType,
 			const std::vector<CDomNode>& children)
 		{
 			return CDomNode{
-				line,
-				column,
+				location,
 				EDomNodeType::COMPOUND,
 				{},
 				compoundType,

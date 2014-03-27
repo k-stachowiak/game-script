@@ -4,11 +4,10 @@ namespace moon {
 namespace itpr {
 
 	CAstCompound::CAstCompound(
-		int line, 
-		int column, 
+		const CSourceLocation& location,
 		ECompoundType type, 
 		std::vector<std::unique_ptr<CAstNode>>&& expressions) :
-		CAstNode{ line, column },
+		CAstNode{ location },
 		m_type{ type },
 		m_expressions{ std::move(expressions) }
 	{}

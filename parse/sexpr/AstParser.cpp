@@ -24,8 +24,7 @@ namespace sexpr {
 				return{};
 			} else {
 				result->RegisterBind(
-						bind->GetLine(),
-						bind->GetColumn(),
+						bind->GetLocation(),
 						bind->GetSymbol(),
 						std::move(bind->TakeOverExpression()));
 			}

@@ -14,8 +14,7 @@ namespace itpr {
 
 	public:
 		CAstCompound(
-			int line, 
-			int column, 
+			const CSourceLocation& location,
 			ECompoundType type, 
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 

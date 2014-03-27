@@ -49,7 +49,7 @@ namespace sexpr {
 		}
 
 		*(out++) = CToken{ 
-			common::CSourceLocation::MakeRegular(
+			CSourceLocation::MakeRegular(
 				current.GetLine(),
 				current.GetColumn()),
 			current, current + 1 };
@@ -67,7 +67,7 @@ namespace sexpr {
 		auto atomEnd = std::find_if_not(current, last, IsAllowedInAtom);
 
 		*(out++) = CToken{
-			common::CSourceLocation::MakeRegular(
+			CSourceLocation::MakeRegular(
 				current.GetLine(),
 				current.GetColumn()),
 			current, atomEnd };
@@ -88,13 +88,14 @@ namespace sexpr {
 
 		if (current == last) {
 			throw except::ExTokenizer::NonDelimitedStringOrCharacter{
-				current.GetLine(),
-				current.GetColumn()
+				CSourceLocation::MakeRegular(
+					current.GetLine(),
+					current.GetColumn())
 			};
 		}
 
 		*(out++) = CToken{
-			common::CSourceLocation::MakeRegular(
+			CSourceLocation::MakeRegular(
 				current.GetLine(),
 				current.GetColumn()),
 			current, atomEnd };

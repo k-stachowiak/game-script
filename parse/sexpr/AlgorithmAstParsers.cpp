@@ -39,7 +39,7 @@ namespace sexpr {
 		}
 
 		return std::unique_ptr<itpr::CAstBind> { 
-			new itpr::CAstBind{ domNode.GetLine(), domNode.GetColumn(), symbol, std::move(expression) }
+			new itpr::CAstBind{ domNode.GetLocation(), symbol, std::move(expression) }
 		};
 	}
 
@@ -77,7 +77,7 @@ namespace sexpr {
 		}
 
 		return std::unique_ptr<itpr::CAstCompound> {
-			new itpr::CAstCompound{ domNode.GetLine(), domNode.GetColumn(), type, std::move(expressions) }
+			new itpr::CAstCompound{ domNode.GetLocation(), type, std::move(expressions) }
 		};
 	}
 
@@ -113,7 +113,7 @@ namespace sexpr {
 		}
 
 		return std::unique_ptr<itpr::CAstFuncCall> {
-			new itpr::CAstFuncCall{ domNode.GetLine(), domNode.GetColumn(), symbol, std::move(actualArgs) }
+			new itpr::CAstFuncCall{ domNode.GetLocation(), symbol, std::move(actualArgs) }
 		};
 	}
 
@@ -138,7 +138,7 @@ namespace sexpr {
 
 		// 3.2. 2nd keyword is a core compound of symbols.
 		std::vector<std::string> formalArgs;
-		std::vector<std::pair<int, int>> argLocations;
+		std::vector<CSourceLocation> argLocations;
 
 		const CDomNode& secondChild = *(current++);
 		if (!secondChild.IsCompoundCore()) {
@@ -150,7 +150,7 @@ namespace sexpr {
 				return{};
 			} else {
 				formalArgs.push_back(it->GetAtom());
-				argLocations.push_back(std::make_pair(it->GetLine(), it->GetColumn()));
+				argLocations.push_back(it->GetLocation());
 			}
 		}
 
@@ -167,8 +167,7 @@ namespace sexpr {
 
 		return std::unique_ptr<itpr::CAstFuncDecl> {
 			new itpr::CAstFuncDecl{
-				domNode.GetLine(),
-				domNode.GetColumn(),
+				domNode.GetLocation(),
 				formalArgs,
 				argLocations,
 				std::move(expressions) }
@@ -194,7 +193,7 @@ namespace sexpr {
 		}
 
 		return std::unique_ptr<itpr::CAstLiteral> {
-			new itpr::CAstLiteral{ domNode.GetLine(), domNode.GetColumn(), value }
+			new itpr::CAstLiteral{ domNode.GetLocation(), value }
 		};
 	}
 
@@ -207,7 +206,7 @@ namespace sexpr {
 		}
 
 		return std::unique_ptr<itpr::CAstReference> {
-			new itpr::CAstReference{ domNode.GetLine(), domNode.GetColumn(), symbol }
+			new itpr::CAstReference{ domNode.GetLocation(), symbol }
 		};
 	}
 

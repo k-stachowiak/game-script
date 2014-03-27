@@ -8,23 +8,23 @@ namespace except {
 
 	struct ExScope {
 		struct SymbolAlreadyRegistered : public ExCompilationError {
-			SymbolAlreadyRegistered(int line, int column) :
-				ExCompilationError{ line, column, "Symbol already registered." }
+			SymbolAlreadyRegistered(const CSourceLocation& location) :
+			ExCompilationError{ location, "Symbol already registered." }
 			{}
 		};
 		struct SymbolNotRegistered : public ExCompilationError {
-			SymbolNotRegistered(int line, int column) :
-				ExCompilationError{ line, column, "Symbol not registered." }
+			SymbolNotRegistered(const CSourceLocation& location) :
+			ExCompilationError{ location, "Symbol not registered." }
 			{}
 		};
 		struct SymbolIsNotFunction : public ExCompilationError {
-			SymbolIsNotFunction(int line, int column) :
-				ExCompilationError{ line, column, "Symbol is not a function." }
+			SymbolIsNotFunction(const CSourceLocation& location) :
+			ExCompilationError{ location, "Symbol is not a function." }
 			{}
 		};
 		struct FormalActualArgCountMismatch : public ExCompilationError {
-			FormalActualArgCountMismatch(int line, int column) :
-				ExCompilationError{ line, column, "Formal and actual argument call mismatch." }
+			FormalActualArgCountMismatch(const CSourceLocation& location) :
+			ExCompilationError{ location, "Formal and actual argument call mismatch." }
 			{}
 		};
 	};

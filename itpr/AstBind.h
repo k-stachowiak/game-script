@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "../API/SourceLocation.h"
 #include "AstNode.h"
 #include "AstFunction.h"
 
@@ -16,8 +17,7 @@ namespace itpr {
 
 	public:
 		CAstBind(
-			int line, 
-			int column, 
+			const CSourceLocation& location, 
 			std::string symbol, 
 			std::unique_ptr<CAstNode>&& expression);
 

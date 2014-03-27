@@ -14,8 +14,7 @@ namespace itpr {
 
 	public:
 		CAstFuncCall(
-			int line, 
-			int column, 
+			const CSourceLocation& location,
 			std::string symbol, 
 			std::vector<std::unique_ptr<CAstNode>>&& actualArgs);
 

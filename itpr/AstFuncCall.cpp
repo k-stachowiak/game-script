@@ -7,11 +7,10 @@ namespace moon {
 namespace itpr {
 
 	CAstFuncCall::CAstFuncCall(
-		int line, 
-		int column, 
+		const CSourceLocation& location,
 		std::string symbol, 
 		std::vector<std::unique_ptr<CAstNode>>&& actualArgs) :
-		CAstNode{ line, column },
+		CAstNode{ location },
 		m_symbol{ symbol },
 		m_actualArgs{ std::move(actualArgs) }
 	{}
@@ -23,7 +22,7 @@ namespace itpr {
 		for (const auto& arg : m_actualArgs) {
 			argValues.push_back(arg->Evaluate(scope));
 		}
-		return scope.CallFunction(GetLine(), GetColumn(), m_symbol, argValues);
+		return scope.CallFunction(GetLocation(), m_symbol, argValues);
 	}
 
 }

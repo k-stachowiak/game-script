@@ -17,7 +17,7 @@ namespace itpr {
 		CAstFunction(const CSourceLocation& location) : CAstNode{ location } {}
 
 		virtual const std::vector<std::string>& GetFormalArgs() const = 0;
-		virtual const std::vector<std::pair<int, int>>& GetArgLocations() const = 0;
+		virtual const std::vector<CSourceLocation>& GetArgLocations() const = 0;
 	};
 
 }

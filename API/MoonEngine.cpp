@@ -61,8 +61,7 @@ namespace moon {
 
 		for (auto&& pr : itpr::bif::BuildBifMap()) {
 			m_stdlibScope.RegisterBind(
-					pr.second->GetLine(),
-					pr.second->GetColumn(),
+					pr.second->GetLocation(),
 					pr.first,
 					std::move(pr.second));
 		}
@@ -131,7 +130,9 @@ namespace moon {
 		const std::vector<CValue>& args)
 	{
 		auto* unitScope = m_GetUnit(unitName);
-		return unitScope->CallFunction(-1, -1, symbol, args);
+		return unitScope->CallFunction(
+			CSourceLocation::MakeExternalInvoke(),
+			symbol, args);
 	}
 
 }
