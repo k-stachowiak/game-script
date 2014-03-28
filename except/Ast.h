@@ -17,6 +17,11 @@ namespace except {
 				ExCompilationError{ location, "Arithmetic type mismatch." }
 			{}
 		};
+		struct BindParsingFailed : public ExCompilationError {
+			BindParsingFailed(const CSourceLocation& location) :
+				ExCompilationError{ location, "Bind parsing failed." }
+			{}
+		};
 	};
 
 }

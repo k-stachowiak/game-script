@@ -74,7 +74,7 @@ std::vector<std::function<void()>> tests {
 	},
 
 	[]() {
-		std::printf("Scope hierarhy error test.");
+		std::printf("Scope hierarhy error test.\n");
 
 		// TODO: Implement a regression test against the scope hierarchy error.
 

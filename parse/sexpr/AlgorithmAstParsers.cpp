@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "../../except/Ast.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -41,6 +42,16 @@ namespace sexpr {
 		return std::unique_ptr<itpr::CAstBind> { 
 			new itpr::CAstBind{ domNode.GetLocation(), symbol, std::move(expression) }
 		};
+	}
+
+	std::unique_ptr<itpr::CAstBind> ParseBind(const CDomNode& domNode)
+	{
+		auto result = TryParsingBind(domNode);
+		if (result) {
+			return result;
+		} else {
+			throw except::ExAst::BindParsingFailed{ domNode.GetLocation() };
+		}
 	}
 
 	std::unique_ptr<itpr::CAstCompound> TryParsingCompound(const CDomNode& domNode)

@@ -33,6 +33,8 @@ namespace sexpr {
 	std::unique_ptr<itpr::CAstReference> TryParsingReference(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstNode> TryParsingNode(const CDomNode& domNode);
 
+	std::unique_ptr<itpr::CAstBind> ParseBind(const CDomNode& domNode);
+
 	bool AssertCompoundSize(const CDomNode& node, int size);
 	bool AssertCompoundMinSize(const CDomNode& node, int minSize);
 

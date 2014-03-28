@@ -19,15 +19,11 @@ namespace sexpr {
 		std::vector<CDomNode> domNodes = BuildDom(tokens);
 		std::unique_ptr<itpr::CScope> result{ new itpr::CScope{ parentScope } };
 		for (const CDomNode& domNode : domNodes) {
-			std::unique_ptr<itpr::CAstBind> bind = TryParsingBind(domNode);
-			if (!bind) {
-				return{};
-			} else {
-				result->RegisterBind(
-						bind->GetLocation(),
-						bind->GetSymbol(),
-						std::move(bind->TakeOverExpression()));
-			}
+			std::unique_ptr<itpr::CAstBind> bind = ParseBind(domNode);
+			result->RegisterBind(
+					bind->GetLocation(),
+					bind->GetSymbol(),
+					std::move(bind->TakeOverExpression()));
 		}
 
 		return result;
