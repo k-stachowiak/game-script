@@ -2,7 +2,7 @@
 #define MOON_ITPR_AST_NODE_H
 
 #include "../API/Value.h"
-#include "../API/SourceLocation.h"
+#include "../common/SourceLocation.h"
 
 namespace moon {
 namespace itpr {

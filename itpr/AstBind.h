@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "../API/SourceLocation.h"
+#include "../common/SourceLocation.h"
 #include "AstNode.h"
 #include "AstFunction.h"
 

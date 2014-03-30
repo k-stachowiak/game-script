@@ -10,7 +10,7 @@
 #include "../itpr/AstFuncDecl.h"
 #include "../itpr/AstBind.h"
 #include "../itpr/Scope.h"
-#include "../itpr/bif/AstBif.h"
+#include "../itpr/AstBif.h"
 #include "../parse/sexpr/AstParser.h"
 
 namespace moon {

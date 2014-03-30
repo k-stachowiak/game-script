@@ -1,7 +1,7 @@
 #ifndef MOON_EXCEPT_DOM_BUILDER_H
 #define MOON_EXCEPT_DOM_BUILDER_H
 
-#include "../API/SourceLocation.h"
+#include "../common/SourceLocation.h"
 #include "../API/Exceptions.h"
 
 namespace moon {

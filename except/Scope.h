@@ -2,7 +2,7 @@
 #define MOON_EXCEPT_SCOPE_H
 
 #include "../API/Exceptions.h"
-#include "../API/SourceLocation.h"
+#include "../common/SourceLocation.h"
 
 namespace moon {
 namespace except {
