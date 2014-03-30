@@ -29,14 +29,14 @@ namespace itpr {
 		return result;
 	}
 
-	const CAstFunction* CAstBind::TryGettingFuncDecl() const
+	const CAstFunction* CAstBind::TryGettingFunction() const
 	{
 		return dynamic_cast<const CAstFunction*>(m_expression.get());
 	}
 
-	const CAstNode* CAstBind::TryGettingNonFuncDecl() const
+	const CAstNode* CAstBind::TryGettingNonFunction() const
 	{
-		if (TryGettingFuncDecl()) {
+		if (TryGettingFunction()) {
 			return nullptr;
 		} else {
 			return m_expression.get();

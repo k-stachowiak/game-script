@@ -9,8 +9,10 @@
 
 /*
  * TODO:
- * - seal the exception handling from the bottom so that no detail exceptions leak to client code.
- * - Fix the case of the scope hierarchy. In MOON it should never be more than "local -> global".
+ * - Prepare interpreter error handling infrastructure.
+ *     - Stack frame
+ *     - Stack trace
+ *     - Runtime exception
  */
 
 bool IsClose(double x, double y) {
@@ -19,7 +21,6 @@ bool IsClose(double x, double y) {
 
 std::vector<std::function<void()>> tests {
 	[]() {
-
 		std::printf("Simple function call.\n");
 
 		std::string source =
@@ -48,7 +49,6 @@ std::vector<std::function<void()>> tests {
 	},
 
 	[]() {
-
 		std::printf("Simple value retrieval.\n");
 
 		std::string source =
@@ -71,14 +71,6 @@ std::vector<std::function<void()>> tests {
 		assert(IsClose(pi.GetReal(), 3.1415));
 
 		std::printf("OK\n\n");
-	},
-
-	[]() {
-		std::printf("Scope hierarhy error test.\n");
-
-		// TODO: Implement a regression test against the scope hierarchy error.
-
-		std::printf("Not implemented yet!\n\n");
 	}
 };
 

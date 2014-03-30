@@ -15,10 +15,10 @@ namespace itpr {
 	CValue CAstReference::Evaluate(CScope& scope) const
 	{
 		const auto bind = scope.GetBind(m_symbol);
-		if (bind->TryGettingFuncDecl() != nullptr) {
+		if (bind->TryGettingFunction() != nullptr) {
 			throw except::ExAst::ReferenceToFunctionEvaluated{ GetLocation() };
 		} else {
-			return bind->TryGettingNonFuncDecl()->Evaluate(scope);
+			return bind->TryGettingNonFunction()->Evaluate(scope);
 		}
 	}
 

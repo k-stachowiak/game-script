@@ -2,7 +2,7 @@
 #define MOON_EXCEPT_SEXPR_H
 
 #include "../API/SourceLocation.h"
-#include "CompilationError.h"
+#include "../API/Exceptions.h"
 
 namespace moon {
 namespace except {
@@ -10,7 +10,10 @@ namespace except {
 	struct ExTokenizer {
 		struct NonDelimitedStringOrCharacter : public ExCompilationError {
 			NonDelimitedStringOrCharacter(const CSourceLocation& location) :
-				ExCompilationError{ location, "Non-delimited string or character." }
+				ExCompilationError{
+					location.GetLine(),
+					location.GetColumn(),
+					"Non-delimited string or character." }
 			{}
 		};
 	};

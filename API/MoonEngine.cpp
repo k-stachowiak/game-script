@@ -70,17 +70,11 @@ namespace moon {
 	void CEngine::LoadUnitFile(const std::string& fileName)
 	{
 		std::string unitName = m_DropExtension(fileName);
-
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-
 		std::string source = m_ReadFile(fileName);
 		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
-		if (!unit) {
-			throw ExSourceParsingFailed{};
-		}
-
 		m_units[unitName] = std::move(unit);
 	}
 
@@ -88,13 +82,8 @@ namespace moon {
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-
 		std::string source = m_ReadStream(input);
 		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
-		if (!unit) {
-			throw ExSourceParsingFailed{};
-		}
-
 		m_units[unitName] = std::move(unit);
 	}
 
@@ -103,12 +92,7 @@ namespace moon {
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-
 		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
-		if (!unit) {
-			throw ExSourceParsingFailed{};
-		}
-
 		m_units[unitName] = std::move(unit);
 	}
 
@@ -116,7 +100,7 @@ namespace moon {
 	{
 		auto* unitScope = m_GetUnit(unitName);
 		const auto* bind = unitScope->GetBind(name);
-		const auto* expression = bind->TryGettingNonFuncDecl();
+		const auto* expression = bind->TryGettingNonFunction();
 		if (!expression) {
 			throw ExValueRequestedFromFuncBind{};
 		}

@@ -57,7 +57,7 @@ namespace itpr {
 			throw except::ExScope::SymbolNotRegistered{ location };
 		}
 
-		const auto* function = bind->TryGettingFuncDecl();
+		const auto* function = bind->TryGettingFunction();
 		if (!function) {
 			throw except::ExScope::SymbolIsNotFunction{ location };
 		}

@@ -23,8 +23,8 @@ namespace itpr {
 
 		CValue Evaluate(CScope& scope) const override;
 		const std::string& GetSymbol() const { return m_symbol; }
-		const CAstFunction* TryGettingFuncDecl() const;
-		const CAstNode* TryGettingNonFuncDecl() const;
+		const CAstFunction* TryGettingFunction() const;
+		const CAstNode* TryGettingNonFunction() const;
 		std::unique_ptr<CAstNode> TakeOverExpression();
 	};
 

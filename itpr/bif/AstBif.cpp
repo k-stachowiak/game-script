@@ -32,7 +32,7 @@ namespace bif {
 	CValue CAstUnaryArithmeticBif::Evaluate(CScope& scope) const
 	{
 		const CAstBind* bind = scope.GetBind("x");
-		const CAstNode* expr = bind->TryGettingNonFuncDecl();
+		const CAstNode* expr = bind->TryGettingNonFunction();
 
 		if (!expr) {
 			throw except::ExAst::ReferenceToFunctionEvaluated{ CSourceLocation::MakeBuiltInFunction() };
@@ -57,8 +57,8 @@ namespace bif {
 		const CAstBind* lhsBind = scope.GetBind("lhs");
 		const CAstBind* rhsBind = scope.GetBind("rhs");
 
-		const CAstNode* lhsExpr = lhsBind->TryGettingNonFuncDecl();
-		const CAstNode* rhsExpr = rhsBind->TryGettingNonFuncDecl();
+		const CAstNode* lhsExpr = lhsBind->TryGettingNonFunction();
+		const CAstNode* rhsExpr = rhsBind->TryGettingNonFunction();
 
 		if (!lhsBind || !rhsBind) {
 			throw except::ExAst::ReferenceToFunctionEvaluated{ CSourceLocation::MakeBuiltInFunction() };
