@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Compiled Object files
 *.slo
 *.lo
@@ -14,3 +15,18 @@
 *.vcxproj
 *.user
 *.filters
+=======
+main
+memcheck.sh
+.*
+*.vcxproj
+*.filters
+*.user
+*.obj
+*.lastbuildstate
+*.idb
+*.pdb
+*.log
+Debug/*
+/Debug
+>>>>>>> origin/cmoon
