@@ -77,9 +77,6 @@ namespace moon {
 
 		std::string source = m_ReadFile(fileName);
 		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
-		if (!unit) {
-			throw ExSourceParsingFailed{};
-		}
 
 		m_units[unitName] = std::move(unit);
 	}
@@ -91,9 +88,6 @@ namespace moon {
 
 		std::string source = m_ReadStream(input);
 		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
-		if (!unit) {
-			throw ExSourceParsingFailed{};
-		}
 
 		m_units[unitName] = std::move(unit);
 	}
@@ -105,9 +99,6 @@ namespace moon {
 		}
 
 		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
-		if (!unit) {
-			throw ExSourceParsingFailed{};
-		}
 
 		m_units[unitName] = std::move(unit);
 	}

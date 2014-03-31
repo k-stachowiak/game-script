@@ -1,25 +1,35 @@
 #ifndef MOON_EXCEPT_AST_H
 #define MOON_EXCEPT_AST_H
 
-#include "CompilationError.h"
+#include "../common/SourceLocation.h"
+#include "../API/Exceptions.h"
 
 namespace moon {
 namespace except {
 
 	struct ExAst {
-		struct ReferenceToFunctionEvaluated : public ExCompilationError {
+		struct ReferenceToFunctionEvaluated : public ExParsingError {
 			ReferenceToFunctionEvaluated(const CSourceLocation& location) :
-				ExCompilationError{ location, "Reference to function evaluated." }
+				ExParsingError{
+					location.GetLine(),
+					location.GetColumn(),
+					"Reference to function evaluated." }
 			{}
 		};
-		struct ArithmeticTypeMismatch : public ExCompilationError {
+		struct ArithmeticTypeMismatch : public ExParsingError {
 			ArithmeticTypeMismatch(const CSourceLocation& location) :
-				ExCompilationError{ location, "Arithmetic type mismatch." }
+				ExParsingError{
+					location.GetLine(),
+					location.GetColumn(),
+					"Arithmetic type mismatch." }
 			{}
 		};
-		struct BindParsingFailed : public ExCompilationError {
+		struct BindParsingFailed : public ExParsingError {
 			BindParsingFailed(const CSourceLocation& location) :
-				ExCompilationError{ location, "Bind parsing failed." }
+				ExParsingError{
+					location.GetLine(),
+					location.GetColumn(),
+					"Bind parsing failed." }
 			{}
 		};
 	};

@@ -1,30 +1,42 @@
 #ifndef MOON_EXCEPT_SCOPE_H
 #define MOON_EXCEPT_SCOPE_H
 
-#include "CompilationError.h"
+#include "../API/Exceptions.h"
 
 namespace moon {
 namespace except {
 
 	struct ExScope {
-		struct SymbolAlreadyRegistered : public ExCompilationError {
+		struct SymbolAlreadyRegistered : public ExParsingError {
 			SymbolAlreadyRegistered(const CSourceLocation& location) :
-			ExCompilationError{ location, "Symbol already registered." }
+			ExParsingError{
+				location.GetLine(),
+				location.GetColumn(),
+				"Symbol already registered." }
 			{}
 		};
-		struct SymbolNotRegistered : public ExCompilationError {
+		struct SymbolNotRegistered : public ExParsingError {
 			SymbolNotRegistered(const CSourceLocation& location) :
-			ExCompilationError{ location, "Symbol not registered." }
+			ExParsingError{
+				location.GetLine(),
+				location.GetColumn(),
+				"Symbol not registered." }
 			{}
 		};
-		struct SymbolIsNotFunction : public ExCompilationError {
+		struct SymbolIsNotFunction : public ExParsingError {
 			SymbolIsNotFunction(const CSourceLocation& location) :
-			ExCompilationError{ location, "Symbol is not a function." }
+			ExParsingError{
+				location.GetLine(),
+				location.GetColumn(),
+				"Symbol is not a function." }
 			{}
 		};
-		struct FormalActualArgCountMismatch : public ExCompilationError {
+		struct FormalActualArgCountMismatch : public ExParsingError {
 			FormalActualArgCountMismatch(const CSourceLocation& location) :
-			ExCompilationError{ location, "Formal and actual argument call mismatch." }
+			ExParsingError{
+				location.GetLine(),
+				location.GetColumn(),
+				"Formal and actual argument call mismatch." }
 			{}
 		};
 	};

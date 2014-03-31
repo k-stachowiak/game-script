@@ -1,21 +1,27 @@
 #ifndef MOON_EXCEPT_DOM_BUILDER_H
 #define MOON_EXCEPT_DOM_BUILDER_H
 
-#include "../API/SourceLocation.h"
-#include "CompilationError.h"
+#include "../common/SourceLocation.h"
+#include "../API/Exceptions.h"
 
 namespace moon {
 namespace except {
 
 	struct ExDomBuilder {
-		struct UnexpectedCompoundDelimiter : public ExCompilationError {
+		struct UnexpectedCompoundDelimiter : public ExParsingError {
 			UnexpectedCompoundDelimiter(const CSourceLocation& location) :
-			ExCompilationError{ location, "Unexpected compound delimiter." }
+			ExParsingError{
+				location.GetLine(),
+				location.GetColumn(),
+				"Unexpected compound delimiter." }
 			{}
 		};
-		struct UnclosedCompoundNode : public ExCompilationError {
+		struct UnclosedCompoundNode : public ExParsingError {
 			UnclosedCompoundNode(const CSourceLocation& location) :
-			ExCompilationError{ location, "Unclosed component node." }
+			ExParsingError{
+				location.GetLine(),
+				location.GetColumn(),
+				"Unclosed component node." }
 			{}
 		};
 	};

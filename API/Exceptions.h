@@ -2,6 +2,7 @@
 #define MOON_EXCEPTIONS_H
 
 #include <stdexcept>
+#include <sstream>
 #include <string>
 
 namespace moon {
@@ -24,17 +25,28 @@ namespace moon {
 		{}
 	};
 
-	struct ExSourceParsingFailed : public std::runtime_error {
-		ExSourceParsingFailed() :
-			std::runtime_error{ "Source parsing error." }
-		{}
-	};
-
 	struct ExValueRequestedFromFuncBind : public std::runtime_error {
 		ExValueRequestedFromFuncBind() :
 			std::runtime_error{ "Value requested from a function bind." }
 		{}
 	};
+
+	struct ExParsingError : public std::runtime_error {
+		static std::string BuildMessage(
+				int line,
+				int column,
+				const std::string& innerMessage)
+		{
+			std::ostringstream oss;
+			oss << "Parser error @ (" << line << ":" << column << ") - " << innerMessage;
+			return oss.str();
+		}
+
+		ExParsingError(int line, int column, const std::string& innerMessage) :
+			std::runtime_error{ BuildMessage(line, column, innerMessage) }
+		{}
+	};
+
 }
 
 #endif

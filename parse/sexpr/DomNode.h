@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../../API/SourceLocation.h"
+#include "../../common/SourceLocation.h"
 
 namespace moon {
 namespace parse {
