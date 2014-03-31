@@ -18,7 +18,7 @@ namespace except {
 		};
 		struct SymbolNotRegistered : public ExParsingError {
 			SymbolNotRegistered(const CSourceLocation& location) :
-			ExCompilationError{
+			ExParsingError{
 				location.GetLine(),
 				location.GetColumn(),
 				"Symbol not registered." }
@@ -26,6 +26,7 @@ namespace except {
 		};
 		struct SymbolIsNotFunction : public ExParsingError {
 			SymbolIsNotFunction(const CSourceLocation& location) :
+			ExParsingError{
 				location.GetLine(),
 				location.GetColumn(),
 				"Symbol is not a function." }
