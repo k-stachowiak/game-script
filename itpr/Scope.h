@@ -6,7 +6,6 @@
 #include <map>
 
 #include "../API/Value.h"
-
 #include "../common/SourceLocation.h"
 
 #include "AstBind.h"

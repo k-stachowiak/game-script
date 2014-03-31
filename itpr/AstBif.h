@@ -7,7 +7,7 @@
 #include <memory>
 #include <functional>
 
-#include "../AstFunction.h"
+#include "AstFunction.h"
 
 namespace moon {
 namespace itpr {

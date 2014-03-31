@@ -10,3 +10,4 @@ memcheck.sh
 *.pdb
 *.log
 Debug/*
+/Debug
