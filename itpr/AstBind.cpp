@@ -15,9 +15,9 @@ namespace itpr {
 		m_expression{ std::move(expression) }
 	{}
 
-	CValue CAstBind::Evaluate(CScope& scope) const
+	CValue CAstBind::Evaluate(CScope& scope, CStack& stack) const
 	{
-		CValue result = m_expression->Evaluate(scope);
+		CValue result = m_expression->Evaluate(scope, stack);
 
 		scope.RegisterBind(
 			GetLocation(),

@@ -14,11 +14,11 @@ namespace itpr {
 		m_expressions{ std::move(expressions) }
 	{}
 
-	CValue CAstFuncDecl::Evaluate(CScope& scope) const
+	CValue CAstFuncDecl::Evaluate(CScope& scope, CStack& stack) const
 	{
 		CValue result;
 		for (const auto& expression : m_expressions) {
-			result = expression->Evaluate(scope);
+			result = expression->Evaluate(scope, stack);
 		}
 		return result;
 	}

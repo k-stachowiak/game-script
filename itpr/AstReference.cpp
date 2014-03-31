@@ -12,13 +12,13 @@ namespace itpr {
 		m_symbol{ symbol }
 	{}
 
-	CValue CAstReference::Evaluate(CScope& scope) const
+	CValue CAstReference::Evaluate(CScope& scope, CStack& stack) const
 	{
 		const auto bind = scope.GetBind(m_symbol);
 		if (bind->TryGettingFunction() != nullptr) {
 			throw except::ExAst::ReferenceToFunctionEvaluated{ GetLocation() };
 		} else {
-			return bind->TryGettingNonFunction()->Evaluate(scope);
+			return bind->TryGettingNonFunction()->Evaluate(scope, stack);
 		}
 	}
 

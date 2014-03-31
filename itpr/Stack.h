@@ -3,10 +3,11 @@
 
 #include <vector>
 
+#include "../common/Log.h"
 #include "StackFrame.h"
 
 namespace moon {
-namespace common {
+namespace itpr {
 
 	class CStack {
 		std::vector<CStackFrame> m_impl;
@@ -14,6 +15,13 @@ namespace common {
 		void Push(const std::string& function)
 		{
 			m_impl.emplace_back(function);
+			LOG_TRACE("Pushed (%s)", m_impl.back().GetFunction().c_str());
+		}
+
+		void Pop()
+		{
+			LOG_TRACE("Popping (%s)", m_impl.back().GetFunction().c_str());
+			m_impl.pop_back();
 		}
 
 		template<class Func>

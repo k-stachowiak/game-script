@@ -10,8 +10,6 @@
 /*
  * TODO:
  * - Prepare interpreter error handling infrastructure.
- *     - Stack frame
- *     - Stack trace
  *     - Runtime exception
  */
 

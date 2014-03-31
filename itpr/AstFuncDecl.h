@@ -22,7 +22,7 @@ namespace itpr {
 			std::vector<CSourceLocation> argLocations,
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-		CValue Evaluate(CScope& scope) const override;
+		CValue Evaluate(CScope& scope, CStack& stack) const override;
 
 		const std::vector<std::string>& GetFormalArgs() const override
 		{

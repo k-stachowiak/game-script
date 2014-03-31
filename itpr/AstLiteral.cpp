@@ -8,7 +8,7 @@ namespace itpr {
 		m_value{ value }
 	{}
 
-	CValue CAstLiteral::Evaluate(CScope&) const
+	CValue CAstLiteral::Evaluate(CScope&, CStack&) const
 	{
 		return m_value;
 	}

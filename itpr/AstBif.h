@@ -36,7 +36,7 @@ namespace bif {
 			m_argLocations.push_back(CSourceLocation::MakeBuiltInFunction());
 		}
 
-		CValue Evaluate(CScope& scope) const override;
+		CValue Evaluate(CScope& scope, CStack& stack) const override;
 
 		const std::vector<std::string>& GetFormalArgs() const
 		{
@@ -69,7 +69,7 @@ namespace bif {
 			m_argLocations.push_back(CSourceLocation::MakeBuiltInFunction());
 		}
 
-		CValue Evaluate(CScope& scope) const override;
+		CValue Evaluate(CScope& scope, CStack& stack) const override;
 
 		const std::vector<std::string>& GetFormalArgs() const
 		{

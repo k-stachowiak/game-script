@@ -12,11 +12,11 @@ namespace itpr {
 		m_expressions{ std::move(expressions) }
 	{}
 
-	CValue CAstCompound::Evaluate(CScope& scope) const
+	CValue CAstCompound::Evaluate(CScope& scope, CStack& stack) const
 	{
 		std::vector<CValue> values;
 		for (const auto& expression : m_expressions) {
-			values.push_back(expression->Evaluate(scope));
+			values.push_back(expression->Evaluate(scope, stack));
 		}
 		return CValue::MakeCompound(m_type, values);
 	}

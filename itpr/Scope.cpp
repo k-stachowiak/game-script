@@ -5,6 +5,7 @@
 #include "../except/Scope.h"
 #include "AstBind.h"
 #include "AstLiteral.h"
+#include "Stack.h"
 
 namespace moon {
 namespace itpr {
@@ -45,6 +46,7 @@ namespace itpr {
 	}
 
 	CValue CScope::CallFunction(
+		CStack& stack,
 		const CSourceLocation& location,
 		const std::string& symbol,
 		const std::vector<CValue>& args)
@@ -82,7 +84,11 @@ namespace itpr {
 			);
 		}
 
-		return function->Evaluate(funcScope);
+		stack.Push(symbol);
+		CValue result = function->Evaluate(funcScope, stack);
+		stack.Pop();
+
+		return result;
 	}
 
 }

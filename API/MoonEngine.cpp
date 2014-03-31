@@ -10,6 +10,7 @@
 #include "../itpr/AstFuncDecl.h"
 #include "../itpr/AstBind.h"
 #include "../itpr/Scope.h"
+#include "../itpr/Stack.h"
 #include "../itpr/AstBif.h"
 #include "../parse/sexpr/AstParser.h"
 
@@ -108,7 +109,8 @@ namespace moon {
 			throw ExValueRequestedFromFuncBind{};
 		}
 
-		return expression->Evaluate(*unitScope);
+		itpr::CStack stack;
+		return expression->Evaluate(*unitScope, stack);
 	}
 
 	CValue CEngine::CallFunction(
@@ -117,9 +119,12 @@ namespace moon {
 		const std::vector<CValue>& args)
 	{
 		auto* unitScope = m_GetUnit(unitName);
+		itpr::CStack stack;
 		return unitScope->CallFunction(
+			stack,
 			CSourceLocation::MakeExternalInvoke(),
-			symbol, args);
+			symbol,
+			args);
 	}
 
 }

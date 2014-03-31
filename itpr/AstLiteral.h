@@ -11,7 +11,7 @@ namespace itpr {
 
 	public:
 		CAstLiteral(const CSourceLocation& location, CValue value);
-		CValue Evaluate(CScope& scope) const override;
+		CValue Evaluate(CScope&, CStack&) const override;
 	};
 
 }

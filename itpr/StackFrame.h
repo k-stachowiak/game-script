@@ -1,10 +1,10 @@
-#ifndef MOON_COMMON_STACK_FRAME_H
-#define MOON_COMMON_STACK_FRAME_H
+#ifndef MOON_ITPR_STACK_FRAME_H
+#define MOON_ITPR_STACK_FRAME_H
 
 #include <string>
 
 namespace moon {
-namespace common {
+namespace itpr {
 
 	class CStackFrame {
 		const std::string m_function;

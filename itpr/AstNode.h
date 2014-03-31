@@ -7,7 +7,9 @@
 namespace moon {
 namespace itpr {
 
+	// TODO: Unify the scope and stack.
 	class CScope;
+	class CStack;
 
 	class CAstNode {
 		const CSourceLocation m_location;
@@ -23,7 +25,7 @@ namespace itpr {
 
 		virtual ~CAstNode()	{}
 
-		virtual CValue Evaluate(CScope& scope) const = 0;
+		virtual CValue Evaluate(CScope& scope, CStack& stack) const = 0;
 	};
 
 }

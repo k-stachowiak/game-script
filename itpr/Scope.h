@@ -29,6 +29,7 @@ namespace itpr {
 
 		const CAstBind* GetBind(const std::string& name);
 		CValue CallFunction(
+				CStack& stack,
 				const CSourceLocation& location,
 				const std::string& symbol,
 				const std::vector<CValue>& args);

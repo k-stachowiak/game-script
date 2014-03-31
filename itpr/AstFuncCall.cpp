@@ -15,14 +15,13 @@ namespace itpr {
 		m_actualArgs{ std::move(actualArgs) }
 	{}
 
-	// TODO: Don't build full scope list - only global <- local
-	CValue CAstFuncCall::Evaluate(CScope& scope) const
+	CValue CAstFuncCall::Evaluate(CScope& scope, CStack& stack) const
 	{
 		std::vector<CValue> argValues;
 		for (const auto& arg : m_actualArgs) {
-			argValues.push_back(arg->Evaluate(scope));
+			argValues.push_back(arg->Evaluate(scope, stack));
 		}
-		return scope.CallFunction(GetLocation(), m_symbol, argValues);
+		return scope.CallFunction(stack, GetLocation(), m_symbol, argValues);
 	}
 
 }
