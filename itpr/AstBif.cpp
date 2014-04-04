@@ -1,7 +1,7 @@
 #include <cmath>
 
-#include "../except/Ast.h"
 #include "../API/Value.h"
+#include "Exceptions.h"
 #include "Scope.h"
 #include "AstBind.h"
 #include "AstBif.h"
@@ -35,7 +35,10 @@ namespace bif {
 		const CAstNode* expr = bind->TryGettingNonFunction();
 
 		if (!expr) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{ CSourceLocation::MakeBuiltInFunction() };
+			throw ExAstReferenceToFunctionEvaluated{
+				CSourceLocation::MakeBuiltInFunction(),
+				stack
+			};
 		}
 
 		CValue actualArgument = expr->Evaluate(scope, stack);
@@ -48,7 +51,10 @@ namespace bif {
 			return m_realImplementation(actualArgument.GetReal());
 
 		default:
-			throw except::ExAst::ArithmeticTypeMismatch{ CSourceLocation::MakeBuiltInFunction() };
+			throw ExAstArithmeticTypeMismatch{
+				   CSourceLocation::MakeBuiltInFunction(),
+				   stack
+			};
 		}
 	}
 
@@ -61,7 +67,10 @@ namespace bif {
 		const CAstNode* rhsExpr = rhsBind->TryGettingNonFunction();
 
 		if (!lhsBind || !rhsBind) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{ CSourceLocation::MakeBuiltInFunction() };
+			throw ExAstReferenceToFunctionEvaluated{
+				CSourceLocation::MakeBuiltInFunction(),
+				stack
+			};
 		}
 
 		CValue lhs = lhsExpr->Evaluate(scope, stack);
@@ -80,7 +89,10 @@ namespace bif {
 			return m_realImplementation(lhs.GetReal(), rhs.GetReal());
 
 		} else {
-			throw except::ExAst::ArithmeticTypeMismatch{ CSourceLocation::MakeBuiltInFunction() };
+			throw ExAstArithmeticTypeMismatch{
+				CSourceLocation::MakeBuiltInFunction(),
+				stack
+			};
 		}
 		
 	}

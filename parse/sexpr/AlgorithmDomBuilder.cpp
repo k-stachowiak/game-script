@@ -1,6 +1,6 @@
 #include <iterator>
 
-#include "../../except/DomBuilder.h"
+#include "Exceptions.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -21,7 +21,7 @@ namespace sexpr {
 			return EDomCompoundType::CPD_TUPLE;
 		}
 
-		throw except::ExDomBuilder::UnexpectedCompoundDelimiter{ location };
+		throw ExDomUnexpectedCompoundDelimiter{ location };
 	}
 
 	template <class In, class Out>
@@ -47,7 +47,7 @@ namespace sexpr {
 			}
 		}
 
-		throw except::ExDomBuilder::UnclosedCompoundNode{ begin->GetLocation() };
+		throw ExDomUnclosedCompoundNode{ begin->GetLocation() };
 	}
 
 	template <class In, class Out>

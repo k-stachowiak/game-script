@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace moon {
 
@@ -44,6 +45,31 @@ namespace moon {
 
 		ExParsingError(int line, int column, const std::string& innerMessage) :
 			std::runtime_error{ BuildMessage(line, column, innerMessage) }
+		{}
+	};
+
+	struct ExInterpretationError : public std::runtime_error {
+		static std::string BuildMessage(
+				int line,
+				int column,
+				const std::vector<std::string>& stackFrames,
+				const std::string& innerMessage)
+		{
+			std::ostringstream oss;
+			oss << "Interpreter error @ (" << line << ":" << column << ")" << std::endl;
+			oss << innerMessage << std::endl;
+			for (const std::string& stackFrame : stackFrames) {
+				oss << '\t' << stackFrame << std::endl;
+			}
+			return oss.str();
+		}
+
+		ExInterpretationError(
+				int line,
+				int column,
+				const std::vector<std::string>& stackFrames,
+				const std::string& innerMessage) :
+				std::runtime_error{ BuildMessage(line, column, stackFrames, innerMessage) }
 		{}
 	};
 

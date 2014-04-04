@@ -22,10 +22,16 @@ namespace itpr {
 		CScope();
 		CScope(CScope* parent);
 
-		void RegisterBind(
+		void TryRegisteringBind(
 				const CSourceLocation& location,
+				const CStack& stack,
 				const std::string& name,
 				std::unique_ptr<CAstNode>&& expression);
+
+		void RegisterBind(
+			const CSourceLocation& location,
+			const std::string& name,
+			std::unique_ptr<CAstNode>&& expression);
 
 		const CAstBind* GetBind(const std::string& name);
 		CValue CallFunction(

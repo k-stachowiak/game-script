@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include "../except/Scope.h"
+#include "Exceptions.h"
 #include "AstBind.h"
 #include "AstLiteral.h"
 #include "Stack.h"
@@ -18,14 +18,23 @@ namespace itpr {
 		m_parent{ parent }
 	{}
 
-	void CScope::RegisterBind(
+	void CScope::TryRegisteringBind(
 			const CSourceLocation& location,
+			const CStack& stack,
 			const std::string& name,
 			std::unique_ptr<CAstNode>&& expression)
 	{
 		if (m_bind_map.find(name) != end(m_bind_map)) {
-			throw except::ExScope::SymbolAlreadyRegistered{ location };
+			throw ExScopeSymbolAlreadyRegistered{ location, stack };
 		}
+		RegisterBind(location, name, std::move(expression));
+	}
+
+	void CScope::RegisterBind(
+		const CSourceLocation& location,
+		const std::string& name,
+		std::unique_ptr<CAstNode>&& expression)
+	{
 		m_binds.push_back(std::unique_ptr<CAstBind> {
 			new CAstBind{ location, name, std::move(expression) }
 		});
@@ -56,24 +65,25 @@ namespace itpr {
 			bind = GetBind(symbol);
 		}
 		catch (const std::invalid_argument&) {
-			throw except::ExScope::SymbolNotRegistered{ location };
+			throw ExScopeSymbolNotRegistered{ location, stack };
 		}
 
 		const auto* function = bind->TryGettingFunction();
 		if (!function) {
-			throw except::ExScope::SymbolIsNotFunction{ location };
+			throw ExScopeSymbolIsNotFunction{ location, stack };
 		}
 
 		const std::vector<std::string>& formalArgs = function->GetFormalArgs();
 		const std::vector<CSourceLocation>& argLocations = function->GetArgLocations();
 		if (formalArgs.size() != args.size() || argLocations.size() != args.size()) {
-			throw except::ExScope::FormalActualArgCountMismatch{ location };
+			throw ExScopeFormalActualArgCountMismatch{ location, stack };
 		}
 
 		CScope funcScope{ this };
 		for (unsigned i = 0; i < args.size(); ++i) {
-			funcScope.RegisterBind(
+			funcScope.TryRegisteringBind(
 				argLocations[i],
+				stack,
 				formalArgs[i],
 				std::unique_ptr<CAstNode> {
 					new CAstLiteral{

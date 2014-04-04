@@ -1,7 +1,7 @@
 #include "AstReference.h"
 #include "AstBind.h"
 
-#include "../except/Ast.h"
+#include "Exceptions.h"
 #include "Scope.h"
 
 namespace moon {
@@ -16,7 +16,7 @@ namespace itpr {
 	{
 		const auto bind = scope.GetBind(m_symbol);
 		if (bind->TryGettingFunction() != nullptr) {
-			throw except::ExAst::ReferenceToFunctionEvaluated{ GetLocation() };
+			throw ExAstReferenceToFunctionEvaluated{ GetLocation(), stack };
 		} else {
 			return bind->TryGettingNonFunction()->Evaluate(scope, stack);
 		}
