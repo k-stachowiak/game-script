@@ -9,6 +9,11 @@
 
 /*
  * TODO:
+ * - Unify exceptions.
+ *     - Move the derived exceptions to the respective modules
+ *     - Only have parsetime and runtime top-level errors
+ *     - Make sure, that no logic depends on the exceptions so that they can be switched off.
+ * - Add assertions for arrays to be of one type.
  * - Prepare interpreter error handling infrastructure.
  *     - Runtime exception
  */
