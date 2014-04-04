@@ -25,9 +25,9 @@ namespace itpr {
 		}
 
 		template<class Func>
-		void visit(Func func)
+		void Visit(Func func) const
 		{
-			for (int i = 0; i < m_impl.size(); ++i) {
+			for (unsigned i = 0; i < m_impl.size(); ++i) {
 				func(i, m_impl[m_impl.size() - 1 - i]);
 			}
 		}

@@ -19,8 +19,9 @@ namespace itpr {
 	{
 		CValue result = m_expression->Evaluate(scope, stack);
 
-		scope.RegisterBind(
+		scope.TryRegisteringBind(
 			GetLocation(),
+			stack,
 			m_symbol,
 			std::unique_ptr<CAstNode> {
 				new CAstLiteral{ m_expression->GetLocation(), result }

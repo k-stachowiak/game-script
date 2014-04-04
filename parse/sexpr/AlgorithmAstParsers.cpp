@@ -1,7 +1,8 @@
 #include <algorithm>
 #include <iterator>
 
-#include "../../except/Ast.h"
+#include "../../itpr/Exceptions.h"
+#include "Exceptions.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -50,7 +51,7 @@ namespace sexpr {
 		if (result) {
 			return result;
 		} else {
-			throw except::ExAst::BindParsingFailed{ domNode.GetLocation() };
+			throw itpr::ExAstBindParsingFailed{ domNode.GetLocation() };
 		}
 	}
 

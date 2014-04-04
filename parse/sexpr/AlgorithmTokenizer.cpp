@@ -3,7 +3,7 @@
 #include <iterator>
 #include <algorithm>
 
-#include "../../except/Tokenizer.h"
+#include "Exceptions.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -87,7 +87,7 @@ namespace sexpr {
 		auto atomEnd = FindNonescapedDelimiter(current, last, delimiter);
 
 		if (current == last) {
-			throw except::ExTokenizer::NonDelimitedStringOrCharacter{
+			throw ExTokNonDelimitedStringOrCharacter{
 				CSourceLocation::MakeRegular(
 					current.GetLine(),
 					current.GetColumn())
