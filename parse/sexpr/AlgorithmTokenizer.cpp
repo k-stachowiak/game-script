@@ -84,7 +84,7 @@ namespace sexpr {
 		}
 
 		char delimiter = *current;
-		auto atomEnd = FindNonescapedDelimiter(current, last, delimiter);
+		auto atomEnd = FindNonescapedDelimiter(current + 1, last, delimiter);
 
 		if (current == last) {
 			throw ExTokNonDelimitedStringOrCharacter{
@@ -98,9 +98,9 @@ namespace sexpr {
 			CSourceLocation::MakeRegular(
 				current.GetLine(),
 				current.GetColumn()),
-			current, atomEnd };
+			current, atomEnd + 1 };
 
-		return std::find_if_not(atomEnd, last, isspace);
+		return std::find_if_not(atomEnd + 1, last, isspace);
 	}
 
 	static CStrIter TryParseComments(CStrIter current, CStrIter last)

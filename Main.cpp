@@ -6,10 +6,10 @@
 #include <functional>
 
 #include "API/MoonEngine.h"
+#include "API/Exceptions.h"
 
 /*
  * TODO:
- * - Add assertions for arrays to be of one type.
  * - Prepare interpreter error handling infrastructure.
  *     - Runtime exception
  */
@@ -18,9 +18,56 @@ bool IsClose(double x, double y) {
 	return std::abs(x - y) < 0.01;
 }
 
-std::vector<std::function<void()>> tests {
+std::vector<std::function<void()>> tests{
+
 	[]() {
-		std::printf("Simple function call.\n");
+		std::printf("Vector construction failure... ");
+
+		std::string source =
+			"(bind arr [\"one\" 2 3.0])";
+
+		moon::CEngine engine;
+
+		try {
+			engine.LoadUnitString("test", source);
+			const auto& array = engine.GetValue("test", "arr");
+			assert(false);
+		}
+		catch (const moon::ExInterpretationError&) {
+		}
+
+		std::printf("OK\n");
+	},
+
+	[]() {
+		std::printf("Constructing vector... ");
+
+		std::string source =
+			"(bind arr [\"one\" \"two\" \"three\"])";
+
+		moon::CEngine engine;
+		engine.LoadUnitString("test", source);
+
+		auto arr = engine.GetValue("test", "arr");
+
+		assert(arr.GetType() == moon::EValueType::COMPOUND);
+		assert(arr.GetCompoundType() == moon::ECompoundType::ARRAY);
+
+		const auto& compound = arr.GetCompound();
+
+		assert(compound.size() == 3);
+		assert(compound[0].GetType() == moon::EValueType::STRING);
+		assert(compound[0].GetString() == "one");
+		assert(compound[1].GetType() == moon::EValueType::STRING);
+		assert(compound[1].GetString() == "two");
+		assert(compound[2].GetType() == moon::EValueType::STRING);
+		assert(compound[2].GetString() == "three");
+
+		std::printf("OK\n");
+	},
+
+	[]() {
+		std::printf("Simple function call... ");
 
 		std::string source =
 			"(bind module (func (x y)\n"
@@ -44,11 +91,11 @@ std::vector<std::function<void()>> tests {
 		assert(rResult.GetType() == moon::EValueType::REAL);
 		assert(IsClose(rResult.GetReal(), std::sqrt(2)));
 
-		std::printf("OK\n\n");
+		std::printf("OK\n");
 	},
 
 	[]() {
-		std::printf("Simple value retrieval.\n");
+		std::printf("Simple value retrieval... ");
 
 		std::string source =
 			"# Useless constant\n"
@@ -69,7 +116,7 @@ std::vector<std::function<void()>> tests {
 		assert(neg_thousand.GetInteger() == -1000);
 		assert(IsClose(pi.GetReal(), 3.1415));
 
-		std::printf("OK\n\n");
+		std::printf("OK\n");
 	}
 };
 

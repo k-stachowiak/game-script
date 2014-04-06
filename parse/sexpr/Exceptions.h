@@ -34,6 +34,14 @@ namespace sexpr {
 		{}
 	};
 
+	struct ExAstBindParsingFailed : public ExParsingError {
+		ExAstBindParsingFailed(const CSourceLocation& location) :
+		ExParsingError{
+			location.GetLine(),
+			location.GetColumn(),
+			"Bind parsing failed." }
+		{}
+	};
 }
 }
 }

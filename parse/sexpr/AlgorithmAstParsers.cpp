@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "../../itpr/Exceptions.h"
+#include "Exceptions.h"
 #include "Exceptions.h"
 #include "Algorithm.h"
 
@@ -51,7 +51,7 @@ namespace sexpr {
 		if (result) {
 			return result;
 		} else {
-			throw itpr::ExAstBindParsingFailed{ domNode.GetLocation() };
+			throw ExAstBindParsingFailed{ domNode.GetLocation() };
 		}
 	}
 

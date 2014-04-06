@@ -83,12 +83,13 @@ namespace itpr {
 		{}
 	};
 
-	struct ExAstBindParsingFailed : public ExParsingError {
-		ExAstBindParsingFailed(const CSourceLocation& location) :
-		ExParsingError{
+	struct ExInconsistentTypesInArray : public ExInterpretationError {
+		ExInconsistentTypesInArray(const CSourceLocation& location, const CStack& stack) :
+		ExInterpretationError{
 			location.GetLine(),
 			location.GetColumn(),
-			"Bind parsing failed." }
+			GenStackFrames(stack),
+			"Inconsistent types in array." }
 		{}
 	};
 

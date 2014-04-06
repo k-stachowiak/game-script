@@ -50,6 +50,16 @@ namespace moon {
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
 
+		friend bool IsCompound(const CValue& value)
+		{
+			return value.m_type == EValueType::COMPOUND;
+		}
+
+		friend bool IsAtomic(const CValue& value)
+		{
+			return value.m_type != EValueType::COMPOUND;
+		}
+
 		friend bool IsInteger(const CValue& value)
 		{
 			return value.GetType() == EValueType::INTEGER;
@@ -59,6 +69,8 @@ namespace moon {
 		{
 			return value.GetType() == EValueType::REAL;
 		}
+
+		static bool TypesEqual(const CValue& lhs, const CValue& rhs);
 
 		CValue() = default;
 		CValue& operator=(const CValue&) = default;

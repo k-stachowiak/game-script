@@ -7,7 +7,6 @@
 namespace moon {
 namespace itpr {
 
-	// TODO: Unify the scope and stack.
 	class CScope;
 	class CStack;
 

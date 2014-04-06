@@ -81,7 +81,38 @@ namespace moon {
 			0, 0, 0, {}, 0,
 			type, values
 		};
+
 		return result;
+	}
+
+	bool CValue::TypesEqual(const CValue& lhs, const CValue& rhs)
+	{
+		if (IsAtomic(lhs) && IsAtomic(rhs)) {
+			return lhs.GetType() == rhs.GetType();
+
+		}
+		else if (IsCompound(lhs) && IsCompound(rhs)) {
+
+			// Compare compound types and sizes.
+			if (lhs.m_compoundType != rhs.m_compoundType ||
+				lhs.m_compoundValues.size() != rhs.m_compoundValues.size()) {
+				return false;
+			}
+
+			// Compare child-wise.
+			unsigned commonSize = lhs.m_compoundValues.size();
+			for (unsigned i = 0; i < commonSize; ++i) {
+				if (!TypesEqual(lhs.m_compoundValues[i], rhs.m_compoundValues[i])) {
+					return false;
+				}
+			}
+
+			return true;
+
+		}
+		else {
+			return false;
+		}
 	}
 
 }

@@ -1,4 +1,5 @@
 #include "AstCompound.h"
+#include "Exceptions.h"
 
 namespace moon {
 namespace itpr {
@@ -18,6 +19,17 @@ namespace itpr {
 		for (const auto& expression : m_expressions) {
 			values.push_back(expression->Evaluate(scope, stack));
 		}
+
+		// Conditionally assert type consistency.
+		if (values.size() > 1) {
+			const CValue& firstValue = values.front();
+			for (unsigned i = 1; i < values.size(); ++i) {
+				if (!CValue::TypesEqual(firstValue, values[i])) {
+					throw ExInconsistentTypesInArray(GetLocation(), stack);
+				}
+			}
+		}
+
 		return CValue::MakeCompound(m_type, values);
 	}
 
