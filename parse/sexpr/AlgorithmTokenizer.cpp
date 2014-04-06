@@ -86,7 +86,7 @@ namespace sexpr {
 		char delimiter = *current;
 		auto atomEnd = FindNonescapedDelimiter(current + 1, last, delimiter);
 
-		if (current == last) {
+		if (atomEnd == last || (*atomEnd != delimiter)) {
 			throw ExTokNonDelimitedStringOrCharacter{
 				CSourceLocation::MakeRegular(
 					current.GetLine(),

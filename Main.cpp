@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 
+#include <map>
 #include <string>
 #include <functional>
 
@@ -9,19 +10,66 @@
 #include "API/Exceptions.h"
 
 /*
- * TODO:
- * - Prepare interpreter error handling infrastructure.
- *     - Runtime exception
+ * Exceptions to test:
+ * [v] Tokenizer
+ * [v] Dom builder
+ * [ ] SexprParser
+ * RUNTIME ERRORS...
  */
 
-bool IsClose(double x, double y) {
+/* TODO:
+ * - Logical assertions about the AST, e.g. cannot bind a bind.
+ * - Start building the documentation.
+ */
+
+bool IsClose(double x, double y)
+{
 	return std::abs(x - y) < 0.01;
 }
 
-std::vector<std::function<void()>> tests{
+std::vector<std::pair<std::string, std::function<void()>>> tests{
 
-	[]() {
-		std::printf("Vector construction failure... ");
+	// Parsing errors.
+	// ---------------
+
+	{ "Dom builder failure... ", []() {
+		moon::CEngine engine;
+
+		std::string source = "(bind one 1";
+
+		try {
+			engine.LoadUnitString("test", source);
+			assert(false);
+		} catch (const moon::ExParsingError&) {
+		}
+	} },
+
+	{ "Tokenization failure", []() {
+
+		moon::CEngine engine;
+
+		try {
+			std::string unclosedString = "(bind unclosed-string \"asd)";
+			engine.LoadUnitString("test", unclosedString);
+			assert(false);
+		}
+		catch (const moon::ExParsingError&) {
+		}
+
+		try {
+			std::string unclosedChar = "(bind unclosed-char \'c)";
+			engine.LoadUnitString("test", unclosedChar);
+			assert(false);
+		}
+		catch (const moon::ExParsingError&) {
+		}
+
+	} },
+
+	// Interpretation errors.
+	// ----------------------
+
+	{ "Vector construction failure", []() {
 
 		std::string source =
 			"(bind arr [\"one\" 2 3.0])";
@@ -36,11 +84,12 @@ std::vector<std::function<void()>> tests{
 		catch (const moon::ExInterpretationError&) {
 		}
 
-		std::printf("OK\n");
-	},
+	} },
 
-	[]() {
-		std::printf("Constructing vector... ");
+	// Runtime logic.
+	// --------------
+
+	{ "Constructing vector", []() {
 
 		std::string source =
 			"(bind arr [\"one\" \"two\" \"three\"])";
@@ -62,12 +111,12 @@ std::vector<std::function<void()>> tests{
 		assert(compound[1].GetString() == "two");
 		assert(compound[2].GetType() == moon::EValueType::STRING);
 		assert(compound[2].GetString() == "three");
+	} },
 
-		std::printf("OK\n");
-	},
+	// Client scenarios.
+	// -----------------
 
-	[]() {
-		std::printf("Simple function call... ");
+	{ "Simple function call", []() {
 
 		std::string source =
 			"(bind module (func (x y)\n"
@@ -90,12 +139,9 @@ std::vector<std::function<void()>> tests{
 		auto rResult = engine.CallFunction("test", "module", { rx, ry });
 		assert(rResult.GetType() == moon::EValueType::REAL);
 		assert(IsClose(rResult.GetReal(), std::sqrt(2)));
+	} },
 
-		std::printf("OK\n");
-	},
-
-	[]() {
-		std::printf("Simple value retrieval... ");
+	{ "Simple value retrieval", []() {
 
 		std::string source =
 			"# Useless constant\n"
@@ -115,15 +161,15 @@ std::vector<std::function<void()>> tests{
 
 		assert(neg_thousand.GetInteger() == -1000);
 		assert(IsClose(pi.GetReal(), 3.1415));
-
-		std::printf("OK\n");
-	}
+	} }
 };
 
 int main()
 {
-	for (auto test : tests) {
-		test();
+	for (const auto& pr : tests) {
+		std::printf("%s... ", pr.first.c_str());
+		pr.second();
+		std::printf("OK\n");
 	}
 
 	return 0;
