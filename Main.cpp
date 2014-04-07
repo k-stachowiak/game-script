@@ -13,7 +13,7 @@
  * Exceptions to test:
  * [v] Tokenizer
  * [v] Dom builder
- * [ ] SexprParser
+ * [v] SexprParser
  * RUNTIME ERRORS...
  */
 
@@ -32,6 +32,22 @@ std::vector<std::pair<std::string, std::function<void()>>> tests{
 	// Interpretation errors.
 	// ----------------------
 
+	{ "Function reference evaluated", []() {
+		std::string source =
+			"(bind f (func (x) x))\n"
+			"(bind symbol f)";
+
+		moon::CEngine engine;
+
+		try {
+			engine.LoadUnitString("test", source);
+			engine.GetValue("test", "symbol");
+			assert(false);
+		}
+		catch (const moon::ExInterpretationError&) {
+		}
+	} },
+	
 	{ "Function passed as argument for numeric magic", []() {
 		std::string source = "(bind four (+ 2 (func (x) 2)))";
 
