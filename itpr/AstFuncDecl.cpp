@@ -16,6 +16,8 @@ namespace itpr {
 
 	CValue CAstFuncDecl::Evaluate(CScope& scope, CStack& stack) const
 	{
+		// TODO: WTF is this??? This should rather create a function value!
+		// TODO: Allow for evaluation of function declarations.
 		CValue result;
 		for (const auto& expression : m_expressions) {
 			result = expression->Evaluate(scope, stack);

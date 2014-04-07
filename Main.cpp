@@ -18,6 +18,7 @@
  */
 
 /* TODO:
+ * - Proper handling of the function declaration evaluation - currying?
  * - Logical assertions about the AST, e.g. cannot bind a bind.
  * - Start building the documentation.
  */
