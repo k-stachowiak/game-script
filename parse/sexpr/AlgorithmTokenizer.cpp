@@ -30,12 +30,9 @@ namespace sexpr {
 	}
 
 	template <class Iter>
-	static Iter FindNonescapedDelimiter(Iter current, Iter last, char delimiter)
+	static Iter FindNonescapedDelimiter(Iter current, Iter last, char delim)
 	{
-		while (current != last && (
-			*current != delimiter || (
-				*current == delimiter &&
-			    *(current - 1) == TOK_DELIM_ESCAPE))) {
+		while (current != last && (*current != delim || *(current - 1) == TOK_DELIM_ESCAPE)) {
 			++current;
 		}
 		return current;
