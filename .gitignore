@@ -29,4 +29,5 @@ memcheck.sh
 *.log
 Debug/*
 /Debug
->>>>>>> origin/cmoon
+cmake
+CMakeLists.txt
