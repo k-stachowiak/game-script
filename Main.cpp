@@ -29,10 +29,55 @@ bool IsClose(double x, double y)
 
 std::vector<std::pair<std::string, std::function<void()>>> tests{
 
+	// Interpretation errors.
+	// ----------------------
+
+	{ "Function passed as argument for numeric magic", []() {
+		std::string source = "(bind four (+ 2 (func (x) 2)))";
+
+		moon::CEngine engine;
+
+		try {
+			engine.LoadUnitString("test", source);
+			engine.GetValue("test", "four");
+			assert(false);
+		} catch (const moon::ExInterpretationError&) {
+		}
+	} },
+
+	{ "Vector construction failure", []() {
+
+		std::string source =
+			"(bind arr [\"one\" 2 3.0])";
+
+		moon::CEngine engine;
+
+		try {
+			engine.LoadUnitString("test", source);
+			engine.GetValue("test", "arr");
+			assert(false);
+		}
+		catch (const moon::ExInterpretationError&) {
+		}
+
+	} },
+
 	// Parsing errors.
 	// ---------------
 
-	{ "Dom builder failure... ", []() {
+	{ "Parsing : toplevel non-bind expression", []() {
+		moon::CEngine engine;
+
+		std::string source = "(func sqr (x) (* x x))";
+
+		try {
+			engine.LoadUnitString("test", source);
+			assert(false);
+		} catch (const moon::ExParsingError&) {
+		}
+	} },
+
+	{ "Dom builder failure", []() {
 		moon::CEngine engine;
 
 		std::string source = "(bind one 1";
@@ -62,26 +107,6 @@ std::vector<std::pair<std::string, std::function<void()>>> tests{
 			assert(false);
 		}
 		catch (const moon::ExParsingError&) {
-		}
-
-	} },
-
-	// Interpretation errors.
-	// ----------------------
-
-	{ "Vector construction failure", []() {
-
-		std::string source =
-			"(bind arr [\"one\" 2 3.0])";
-
-		moon::CEngine engine;
-
-		try {
-			engine.LoadUnitString("test", source);
-			const auto& array = engine.GetValue("test", "arr");
-			assert(false);
-		}
-		catch (const moon::ExInterpretationError&) {
 		}
 
 	} },

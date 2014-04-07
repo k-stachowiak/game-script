@@ -32,6 +32,7 @@ namespace bif {
 	CValue CAstUnaryArithmeticBif::Evaluate(CScope& scope, CStack& stack) const
 	{
 		const CAstBind* bind = scope.GetBind("x");
+		// TODO: Also prevent binds.
 		const CAstNode* expr = bind->TryGettingNonFunction();
 
 		if (!expr) {
