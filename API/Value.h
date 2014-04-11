@@ -6,13 +6,20 @@
 
 namespace moon {
 
+	// WOW, I've got what I wanted - higher order functions :]
+	namespace itpr {
+		class CAstFuncDef;
+		class CScope;
+	}
+
 	enum class EValueType {
 		INTEGER,
 		REAL,
 		CHARACTER,
 		STRING,
 		BOOLEAN,
-		COMPOUND
+		COMPOUND,
+		FUNCTION
 	};
 
 	enum class ECompoundType {
@@ -32,6 +39,9 @@ namespace moon {
 		ECompoundType m_compoundType = ECompoundType::ARRAY;
 		std::vector<CValue> m_compoundValues;
 
+		itpr::CAstFuncDef* m_funcDef;
+		std::vector<CValue> m_appliedArgs;
+
 		CValue(
 			EValueType type,
 			long integer,
@@ -40,7 +50,8 @@ namespace moon {
 			std::string string,
 			int boolean,
 			ECompoundType compoundType,
-			std::vector<CValue> compoundValues);
+			std::vector<CValue> compoundValues,
+			itpr::CAstFuncDef* funcDef);
 
 	public:
 		static CValue MakeInteger(long value);
@@ -49,6 +60,7 @@ namespace moon {
 		static CValue MakeString(std::string value);
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
+		static CValue MakeFunction(itpr::CAstFuncDef* funcDef);
 
 		friend bool IsCompound(const CValue& value)
 		{
@@ -58,6 +70,11 @@ namespace moon {
 		friend bool IsAtomic(const CValue& value)
 		{
 			return value.m_type != EValueType::COMPOUND;
+		}
+
+		friend bool IsFunction(const CValue& value)
+		{
+			return value.m_type == EValueType::FUNCTION;
 		}
 
 		friend bool IsInteger(const CValue& value)
@@ -84,6 +101,10 @@ namespace moon {
 
 		ECompoundType GetCompoundType() const { return m_compoundType; }
 		const std::vector<CValue>& GetCompound() const { return m_compoundValues; }
+		
+		int CValue::GetFuncArity() const;
+		itpr::CAstFuncDef* GetFuncDef() const { return m_funcDef; }
+		std::vector<CValue>& GetAppliedArgs() { return m_appliedArgs; }
 	};
 
 }

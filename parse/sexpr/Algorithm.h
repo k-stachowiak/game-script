@@ -13,7 +13,7 @@
 #include "../../itpr/AstBind.h"
 #include "../../itpr/AstCompound.h"
 #include "../../itpr/AstFuncCall.h"
-#include "../../itpr/AstFuncDecl.h"
+#include "../../itpr/AstFuncDef.h"
 #include "../../itpr/AstLiteral.h"
 #include "../../itpr/AstReference.h"
 
@@ -28,7 +28,7 @@ namespace sexpr {
 	std::unique_ptr<itpr::CAstBind> TryParsingBind(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstCompound> TryParsingCompound(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstFuncCall> TryParsingFuncCall(const CDomNode& domNode);
-	std::unique_ptr<itpr::CAstFuncDecl> TryParsingFuncDecl(const CDomNode& domNode);
+	std::unique_ptr<itpr::CAstFuncDef> TryParsingFuncDef(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstLiteral> TryParsingLiteral(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstReference> TryParsingReference(const CDomNode& domNode);
 	std::unique_ptr<itpr::CAstNode> TryParsingNode(const CDomNode& domNode);

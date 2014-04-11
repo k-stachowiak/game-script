@@ -129,7 +129,7 @@ namespace sexpr {
 		};
 	}
 
-	std::unique_ptr<itpr::CAstFuncDecl> TryParsingFuncDecl(const CDomNode& domNode)
+	std::unique_ptr<itpr::CAstFuncDef> TryParsingFuncDef(const CDomNode& domNode)
 	{
 		// 1. Is compound CORE.
 		if (!domNode.IsCompoundCore()) {
@@ -177,8 +177,8 @@ namespace sexpr {
 			}
 		}
 
-		return std::unique_ptr<itpr::CAstFuncDecl> {
-			new itpr::CAstFuncDecl{
+		return std::unique_ptr<itpr::CAstFuncDef> {
+			new itpr::CAstFuncDef{
 				domNode.GetLocation(),
 				formalArgs,
 				argLocations,
@@ -230,7 +230,7 @@ namespace sexpr {
 		if ((result = TryParsingLiteral(domNode)) ||
 			(result = TryParsingReference(domNode)) ||
 			(result = TryParsingBind(domNode)) ||
-			(result = TryParsingFuncDecl(domNode)) ||
+			(result = TryParsingFuncDef(domNode)) ||
 			(result = TryParsingFuncCall(domNode)) ||
 			(result = TryParsingCompound(domNode))) {
 			return result;

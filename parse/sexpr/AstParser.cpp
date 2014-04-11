@@ -1,6 +1,6 @@
 #include "AstParser.h"
 
-#include "../../itpr/AstFuncDecl.h"
+#include "../../itpr/AstFuncDef.h"
 #include "../../itpr/Stack.h"
 
 #include "../StrIter.h"

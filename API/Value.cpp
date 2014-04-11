@@ -1,3 +1,8 @@
+#include <algorithm>
+#include <iterator>
+
+#include "../itpr/AstFuncDef.h"
+
 #include "Value.h"
 
 namespace moon {
@@ -10,7 +15,8 @@ namespace moon {
 		std::string string,
 		int boolean,
 		ECompoundType compoundType,
-		std::vector<CValue> compoundValues) :
+		std::vector<CValue> compoundValues,
+		itpr::CAstFuncDef* funcDef) :
 		m_type{ type },
 		m_integer{ integer },
 		m_real{ real },
@@ -18,14 +24,16 @@ namespace moon {
 		m_string{ string },
 		m_boolean{ boolean },
 		m_compoundType{ compoundType },
-		m_compoundValues{ compoundValues }
+		m_compoundValues{ compoundValues },
+		m_funcDef{ funcDef }
 	{}
 
 	CValue CValue::MakeInteger(long value)
 	{
 		CValue result{
 			EValueType::INTEGER, value,
-			0, 0, {}, 0, ECompoundType::ARRAY, {}
+			0, 0, {}, 0, ECompoundType::ARRAY, {},
+			nullptr
 		};
 		return result;
 	}
@@ -36,7 +44,8 @@ namespace moon {
 			EValueType::REAL,
 			0,
 			value,
-			0, {}, 0, ECompoundType::ARRAY, {}
+			0, {}, 0, ECompoundType::ARRAY, {},
+			nullptr
 		};
 		return result;
 	}
@@ -47,7 +56,8 @@ namespace moon {
 			EValueType::CHARACTER,
 			0, 0,
 			value,
-			{}, 0, ECompoundType::ARRAY, {}
+			{}, 0, ECompoundType::ARRAY, {},
+			nullptr
 		};
 		return result;
 	}
@@ -58,7 +68,8 @@ namespace moon {
 			EValueType::STRING,
 			0, 0, 0,
 			value,
-			0, ECompoundType::ARRAY, {}
+			0, ECompoundType::ARRAY, {},
+			nullptr
 		};
 		return result;
 	}
@@ -69,7 +80,8 @@ namespace moon {
 			EValueType::BOOLEAN,
 			0, 0, 0, {},
 			value,
-			ECompoundType::ARRAY, {}
+			ECompoundType::ARRAY, {},
+			nullptr
 		};
 		return result;
 	}
@@ -79,19 +91,30 @@ namespace moon {
 		CValue result{
 			EValueType::COMPOUND,
 			0, 0, 0, {}, 0,
-			type, values
+			type, values,
+			nullptr
 		};
 
 		return result;
 	}
+	
+	CValue CValue::MakeFunction(itpr::CAstFuncDef* funcDef)
+	{
+		CValue result{
+			EValueType::FUNCTION,
+			0, 0, 0, {}, 0, ECompoundType::ARRAY, {},
+			funcDef
+		};
 
+		return result;
+	}
+	
 	bool CValue::TypesEqual(const CValue& lhs, const CValue& rhs)
 	{
 		if (IsAtomic(lhs) && IsAtomic(rhs)) {
 			return lhs.GetType() == rhs.GetType();
 
-		}
-		else if (IsCompound(lhs) && IsCompound(rhs)) {
+		} else if (IsCompound(lhs) && IsCompound(rhs)) {
 
 			// Compare compound types and sizes.
 			if (lhs.m_compoundType != rhs.m_compoundType ||
@@ -109,10 +132,17 @@ namespace moon {
 
 			return true;
 
-		}
-		else {
+		} else if (IsFunction(lhs) && IsFunction(rhs)) {
+			return lhs.GetFuncArity() == rhs.GetFuncArity();
+
+		} else {
 			return false;
 		}
+	}
+
+	int CValue::GetFuncArity() const
+	{
+		return m_funcDef->GetArgsCount() - m_appliedArgs.size();
 	}
 
 }

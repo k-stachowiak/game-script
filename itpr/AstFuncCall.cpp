@@ -1,6 +1,6 @@
 #include "AstFuncCall.h"
 
-#include "AstFuncDecl.h"
+#include "AstFuncDef.h"
 #include "Scope.h"
 
 namespace moon {

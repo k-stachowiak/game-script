@@ -1,5 +1,5 @@
-#ifndef MOON_ITPR_FUNC_DECL_H
-#define MOON_ITPR_FUNC_DECL_H
+#ifndef MOON_ITPR_FUNC_DEF_H
+#define MOON_ITPR_FUNC_DEF_H
 
 #include <vector>
 #include <string>
@@ -10,13 +10,13 @@
 namespace moon {
 namespace itpr {
 
-	class CAstFuncDecl : public CAstFunction {
+	class CAstFuncDef : public CAstFunction {
 		const std::vector<std::string> m_formalArgs;
 		const std::vector<CSourceLocation> m_argLocations;
 		const std::vector<std::unique_ptr<CAstNode>> m_expressions;
 
 	public:
-		CAstFuncDecl(
+		CAstFuncDef(
 			const CSourceLocation& location,
 			std::vector<std::string> formalArgs,
 			std::vector<CSourceLocation> argLocations,
@@ -32,6 +32,20 @@ namespace itpr {
 		const std::vector<CSourceLocation>& GetArgLocations() const override
 		{
 			return m_argLocations;
+		}
+
+		template <class Func>
+		void ForEachExpression(Func f) const
+		{
+			for (const auto& expr : m_expressions)
+			{
+
+			}
+		}
+
+		int GetArgsCount() const
+		{
+			return m_formalArgs.size();
 		}
 	};
 
