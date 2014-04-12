@@ -22,7 +22,7 @@ namespace itpr {
 			std::vector<CSourceLocation> argLocations,
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Execute(CScope& scope, CStack& stack) const override;
 
 		const std::vector<std::string>& GetFormalArgs() const override
 		{
@@ -32,15 +32,6 @@ namespace itpr {
 		const std::vector<CSourceLocation>& GetArgLocations() const override
 		{
 			return m_argLocations;
-		}
-
-		template <class Func>
-		void ForEachExpression(Func f) const
-		{
-			for (const auto& expr : m_expressions)
-			{
-
-			}
 		}
 
 		int GetArgsCount() const

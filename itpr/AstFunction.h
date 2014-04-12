@@ -16,8 +16,15 @@ namespace itpr {
 
 		CAstFunction(const CSourceLocation& location) : CAstNode{ location } {}
 
+		CValue Evaluate(CScope&, CStack&) const
+		{
+			return CValue::MakeFunction(this, {});
+		}
+
+		virtual CValue Execute(CScope& scope, CStack& stack) const = 0;
 		virtual const std::vector<std::string>& GetFormalArgs() const = 0;
 		virtual const std::vector<CSourceLocation>& GetArgLocations() const = 0;
+		virtual int GetArgsCount() const = 0;
 	};
 
 }

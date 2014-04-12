@@ -1,6 +1,7 @@
 #include "Scope.h"
 
 #include <stdexcept>
+#include <cassert>
 
 #include "Exceptions.h"
 #include "AstBind.h"
@@ -9,6 +10,27 @@
 
 namespace moon {
 namespace itpr {
+
+	const CAstFunction& CScope::m_AcquireFunction(
+		CStack& stack,
+		const CSourceLocation& location,
+		const std::string& symbol)
+	{
+		const CAstBind* bind;
+		try {
+			bind = GetBind(symbol);
+		}
+		catch (const std::invalid_argument&) {
+			throw ExScopeSymbolNotRegistered{ location, stack };
+		}
+
+		const CAstFunction* function = bind->TryGettingFunction();
+		if (!function) {
+			throw ExScopeSymbolIsNotFunction{ location, stack };
+		}
+
+		return *function;
+	}
 
 	CScope::CScope() :
 		m_parent{ nullptr }
@@ -58,47 +80,39 @@ namespace itpr {
 		CStack& stack,
 		const CSourceLocation& location,
 		const std::string& symbol,
-		const std::vector<CValue>& args)
+		const std::vector<CValue>& argValues)
 	{
-		const CAstBind* bind;
-		try {
-			bind = GetBind(symbol);
-		}
-		catch (const std::invalid_argument&) {
-			throw ExScopeSymbolNotRegistered{ location, stack };
-		}
+		const CAstFunction& function = m_AcquireFunction(stack, location, symbol);
 
-		const auto* function = bind->TryGettingFunction();
-		if (!function) {
-			throw ExScopeSymbolIsNotFunction{ location, stack };
-		}
+		const std::vector<std::string>& argNames = function.GetFormalArgs();
+		const std::vector<CSourceLocation>& argLocations = function.GetArgLocations();
+		assert(argNames.size() == argLocations.size());
+		unsigned argsCount = argNames.size();
 
-		const std::vector<std::string>& formalArgs = function->GetFormalArgs();
-		const std::vector<CSourceLocation>& argLocations = function->GetArgLocations();
-		if (formalArgs.size() != args.size() || argLocations.size() != args.size()) {
-			throw ExScopeFormalActualArgCountMismatch{ location, stack };
+		if (argValues.size() != argsCount) {
+			throw ExScopeFormalActualArgCountMismatch{
+				location,
+				stack
+			};
 		}
 
-		CScope funcScope{ this };
-		for (unsigned i = 0; i < args.size(); ++i) {
-			funcScope.TryRegisteringBind(
-				argLocations[i],
-				stack,
-				formalArgs[i],
-				std::unique_ptr<CAstNode> {
-					new CAstLiteral{
-						argLocations[i],
-						args[i]
-					}
-				}
-			);
+		if (argsCount == argValues.size()) {
+			CScope funcScope{ this };
+			for (unsigned i = 0; i < argsCount; ++i) {
+				std::unique_ptr<CAstNode> expression{ new CAstLiteral{ argLocations[i], argValues[i] } };
+				funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));
+			}
+
+			stack.Push(symbol);
+			CValue result = function.Execute(funcScope, stack);
+			stack.Pop();
+
+			return result;
+		} else {
+			// Note: This case could be detected as soon as possible
+			// for the sake of the optimization.
+			return CValue::MakeFunction(&function, argValues);
 		}
-
-		stack.Push(symbol);
-		CValue result = function->Evaluate(funcScope, stack);
-		stack.Pop();
-
-		return result;
 	}
 
 }

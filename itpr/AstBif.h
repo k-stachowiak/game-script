@@ -36,16 +36,21 @@ namespace bif {
 			m_argLocations.push_back(CSourceLocation::MakeBuiltInFunction());
 		}
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Execute(CScope& scope, CStack& stack) const override;
 
-		const std::vector<std::string>& GetFormalArgs() const
+		const std::vector<std::string>& GetFormalArgs() const override
 		{
 			return m_formalArgs;
 		}
 
-		const std::vector<CSourceLocation>& GetArgLocations() const
+		const std::vector<CSourceLocation>& GetArgLocations() const override
 		{
 			return m_argLocations;
+		}
+
+		int GetArgsCount() const override
+		{
+			return m_formalArgs.size();
 		}
 	};
 
@@ -69,7 +74,7 @@ namespace bif {
 			m_argLocations.push_back(CSourceLocation::MakeBuiltInFunction());
 		}
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Execute(CScope& scope, CStack& stack) const override;
 
 		const std::vector<std::string>& GetFormalArgs() const
 		{
@@ -79,6 +84,11 @@ namespace bif {
 		const std::vector<CSourceLocation>& GetArgLocations() const
 		{
 			return m_argLocations;
+		}
+		
+		int GetArgsCount() const override
+		{
+			return m_formalArgs.size();
 		}
 	};
 

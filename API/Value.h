@@ -8,7 +8,7 @@ namespace moon {
 
 	// WOW, I've got what I wanted - higher order functions :]
 	namespace itpr {
-		class CAstFuncDef;
+		class CAstFunction;
 		class CScope;
 	}
 
@@ -39,7 +39,7 @@ namespace moon {
 		ECompoundType m_compoundType = ECompoundType::ARRAY;
 		std::vector<CValue> m_compoundValues;
 
-		itpr::CAstFuncDef* m_funcDef;
+		const itpr::CAstFunction* m_funcDef;
 		std::vector<CValue> m_appliedArgs;
 
 		CValue(
@@ -51,7 +51,8 @@ namespace moon {
 			int boolean,
 			ECompoundType compoundType,
 			std::vector<CValue> compoundValues,
-			itpr::CAstFuncDef* funcDef);
+			const itpr::CAstFunction* funcDef,
+			std::vector<CValue> appliedArgs);
 
 	public:
 		static CValue MakeInteger(long value);
@@ -60,7 +61,7 @@ namespace moon {
 		static CValue MakeString(std::string value);
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
-		static CValue MakeFunction(itpr::CAstFuncDef* funcDef);
+		static CValue MakeFunction(const itpr::CAstFunction* funcDef, std::vector<CValue> appliedArgs);
 
 		friend bool IsCompound(const CValue& value)
 		{
@@ -103,7 +104,7 @@ namespace moon {
 		const std::vector<CValue>& GetCompound() const { return m_compoundValues; }
 		
 		int CValue::GetFuncArity() const;
-		itpr::CAstFuncDef* GetFuncDef() const { return m_funcDef; }
+		const itpr::CAstFunction* GetFuncDef() const { return m_funcDef; }
 		std::vector<CValue>& GetAppliedArgs() { return m_appliedArgs; }
 	};
 

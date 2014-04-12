@@ -17,10 +17,8 @@ namespace itpr {
 		assert(m_formalArgs.size() == m_argLocations.size());
 	}
 
-	CValue CAstFuncDef::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstFuncDef::Execute(CScope& scope, CStack& stack) const
 	{
-		// TODO: WTF is this??? This should rather create a function value!
-		// TODO: Allow for evaluation of function declarations.
 		CValue result;
 		for (const auto& expression : m_expressions) {
 			result = expression->Evaluate(scope, stack);

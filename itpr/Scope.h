@@ -18,6 +18,11 @@ namespace itpr {
 		std::vector<std::unique_ptr<CAstBind>> m_binds;
 		std::map<std::string, CAstBind*> m_bind_map;
 
+		const CAstFunction& m_AcquireFunction(
+			CStack& stack,
+			const CSourceLocation& location,
+			const std::string& symbol);
+
 	public:
 		CScope();
 		CScope(CScope* parent);
@@ -33,12 +38,15 @@ namespace itpr {
 			const std::string& name,
 			std::unique_ptr<CAstNode>&& expression);
 
+		CScope* GetParent() const { return m_parent; }
+
 		const CAstBind* GetBind(const std::string& name);
+
 		CValue CallFunction(
 				CStack& stack,
 				const CSourceLocation& location,
 				const std::string& symbol,
-				const std::vector<CValue>& args);
+				const std::vector<CValue>& argValues);
 	};
 
 }

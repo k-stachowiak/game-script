@@ -1,7 +1,11 @@
+#include <cassert>
+
 #include "AstFuncCall.h"
 
-#include "AstFuncDef.h"
+#include "AstFunction.h"
+#include "AstLiteral.h"
 #include "Scope.h"
+#include "Exceptions.h"
 
 namespace moon {
 namespace itpr {
@@ -17,11 +21,11 @@ namespace itpr {
 
 	CValue CAstFuncCall::Evaluate(CScope& scope, CStack& stack) const
 	{
-		std::vector<CValue> argValues;
+		std::vector<CValue> values;
 		for (const auto& arg : m_actualArgs) {
-			argValues.push_back(arg->Evaluate(scope, stack));
+			values.push_back(arg->Evaluate(scope, stack));
 		}
-		return scope.CallFunction(stack, GetLocation(), m_symbol, argValues);
+		return scope.CallFunction(stack, GetLocation(), m_symbol, values);
 	}
 
 }

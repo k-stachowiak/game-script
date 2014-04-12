@@ -29,7 +29,7 @@ namespace bif {
 	// AST part implementation.
 	// ========================
 
-	CValue CAstUnaryArithmeticBif::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstUnaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
 	{
 		const CAstBind* bind = scope.GetBind("x");
 		const CAstNode* expr = bind->TryGettingNonFunction();
@@ -43,6 +43,13 @@ namespace bif {
 
 		CValue actualArgument = expr->Evaluate(scope, stack);
 
+		if (IsFunction(actualArgument)) {
+			throw ExAstReferenceToFunctionEvaluated{
+				CSourceLocation::MakeBuiltInFunction(),
+				stack
+			};
+		}
+
 		switch (actualArgument.GetType()) {
 		case EValueType::INTEGER:
 			return m_integerImplementation(actualArgument.GetInteger());
@@ -52,13 +59,13 @@ namespace bif {
 
 		default:
 			throw ExAstArithmeticTypeMismatch{
-				   CSourceLocation::MakeBuiltInFunction(),
-				   stack
+				CSourceLocation::MakeBuiltInFunction(),
+				stack
 			};
 		}
 	}
 
-	CValue CAstBinaryArithmeticBif::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstBinaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
 	{
 		const CAstBind* lhsBind = scope.GetBind("lhs");
 		const CAstBind* rhsBind = scope.GetBind("rhs");
@@ -75,6 +82,13 @@ namespace bif {
 
 		CValue lhs = lhsExpr->Evaluate(scope, stack);
 		CValue rhs = rhsExpr->Evaluate(scope, stack);
+
+		if (IsFunction(lhs) || IsFunction(rhs)) {
+			throw ExAstReferenceToFunctionEvaluated{
+				CSourceLocation::MakeBuiltInFunction(),
+				stack
+			};
+		}
 
 		if (IsInteger(lhs) && IsInteger(rhs)) {
 			return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());
@@ -93,8 +107,7 @@ namespace bif {
 				CSourceLocation::MakeBuiltInFunction(),
 				stack
 			};
-		}
-		
+		}		
 	}
 
 	std::map<std::string, std::unique_ptr<CAstNode>> BuildBifMap()
