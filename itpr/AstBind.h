@@ -13,7 +13,6 @@ namespace itpr {
 	class CAstBind : public CAstNode {
 		const std::string m_symbol;
 		std::unique_ptr<CAstNode> m_expression;
-		// TODO: Bind expression shouldn't be a bind
 
 	public:
 		CAstBind(

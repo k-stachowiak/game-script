@@ -20,8 +20,7 @@ namespace itpr {
 			values.push_back(expression->Evaluate(scope, stack));
 		}
 
-		// Conditionally assert type consistency.
-		if (values.size() > 1) {
+		if (m_type == ECompoundType::ARRAY && values.size() > 1) {
 			const CValue& firstValue = values.front();
 			for (unsigned i = 1; i < values.size(); ++i) {
 				if (!CValue::TypesEqual(firstValue, values[i])) {

@@ -14,10 +14,6 @@ namespace itpr {
 		const std::vector<CSourceLocation> m_argLocations;
 
 	public:
-		// Note: This class only exists as a common base for the AST function
-		// Definitions and built-in functions to be universally and seamlesly
-		// accessible from the scope.
-
 		CAstFunction(
 			const CSourceLocation& location,
 			const std::vector<std::string>& formalArgs,

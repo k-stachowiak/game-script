@@ -11,6 +11,7 @@ namespace itpr {
 
 	class CStack {
 		std::vector<CStackFrame> m_impl;
+
 	public:
 		void Push(const std::string& function)
 		{

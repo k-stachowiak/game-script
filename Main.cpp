@@ -9,13 +9,7 @@
 #include "API/MoonEngine.h"
 #include "API/Exceptions.h"
 
-/*
- * Exceptions to test:
- * RUNTIME ERRORS...
- */
-
 /* TODO:
- * - Logical assertions about the AST, e.g. cannot bind a bind.
  * - Start building the documentation.
  */
 
