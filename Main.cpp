@@ -11,9 +11,6 @@
 
 /*
  * Exceptions to test:
- * [v] Tokenizer
- * [v] Dom builder
- * [v] SexprParser
  * RUNTIME ERRORS...
  */
 
@@ -157,6 +154,25 @@ std::vector<std::pair<std::string, std::function<void()>>> tests{
 
 	// Client scenarios.
 	// -----------------
+
+	{ "Currying example", []() {
+
+		std::string source =
+			"(bind test(func(a b)\n"
+			"\t(bind add_to_a (+ a))\n"
+			"\t(add_to_a b)\n"
+			"))";
+
+		moon::CEngine engine;
+		engine.LoadUnitString("test", source);
+
+		auto a = moon::CValue::MakeInteger(1);
+		auto b = moon::CValue::MakeInteger(2);
+		auto result = engine.CallFunction("test", "test", { a, b });
+
+		assert(result.GetType() == moon::EValueType::INTEGER);
+		assert(result.GetInteger() == 3);
+	} },
 
 	{ "Simple function call", []() {
 

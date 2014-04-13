@@ -82,6 +82,16 @@ namespace itpr {
 		const std::string& symbol,
 		const std::vector<CValue>& argValues)
 	{
+		// TODO:
+		// - have the m_AcquireFunction take into account the function values and already applied
+		// - If not function value, the nothing already applied
+		// - Rewrite the rest of the function so that it is rather a procedure of building up the
+		//   already applied list and only at the end the real call takes place.
+		//
+		// Wonder: What is the difference between a call to the global function and a function value?
+		//         How to express that in the source code?
+		//
+		// Note: THE SCOPE CAN NOW RETURN "name -> value" PAIRS SINCE THE FUNCTION VALUES HAVE BEEN CREATED!
 		const CAstFunction& function = m_AcquireFunction(stack, location, symbol);
 
 		const std::vector<std::string>& argNames = function.GetFormalArgs();
@@ -89,7 +99,7 @@ namespace itpr {
 		assert(argNames.size() == argLocations.size());
 		unsigned argsCount = argNames.size();
 
-		if (argValues.size() != argsCount) {
+		if (argValues.size() > argsCount) {
 			throw ExScopeFormalActualArgCountMismatch{
 				location,
 				stack
