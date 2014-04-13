@@ -39,7 +39,7 @@ namespace moon {
 		ECompoundType m_compoundType = ECompoundType::ARRAY;
 		std::vector<CValue> m_compoundValues;
 
-		const itpr::CAstFunction* m_funcDef;
+		const itpr::CAstFunction* m_funcDef = nullptr;
 		std::vector<CValue> m_appliedArgs;
 
 		CValue(
@@ -103,7 +103,7 @@ namespace moon {
 		ECompoundType GetCompoundType() const { return m_compoundType; }
 		const std::vector<CValue>& GetCompound() const { return m_compoundValues; }
 		
-		unsigned CValue::GetFuncArity() const;
+		unsigned GetFuncArity() const;
 		const itpr::CAstFunction& GetFuncDef() const { return *m_funcDef; }
 		std::vector<CValue>& GetAppliedArgs() { return m_appliedArgs; }
 	};

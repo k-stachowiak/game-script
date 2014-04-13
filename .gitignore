@@ -31,3 +31,4 @@ Debug/*
 /Debug
 cmake
 CMakeLists.txt
+*.out
