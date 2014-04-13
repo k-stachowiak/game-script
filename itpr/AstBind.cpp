@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "AstBind.h"
 #include "AstLiteral.h"
 
@@ -13,7 +15,9 @@ namespace itpr {
 		CAstNode{ location },
 		m_symbol{ symbol },
 		m_expression{ std::move(expression) }
-	{}
+	{
+		assert((bool)m_expression);
+	}
 
 	CValue CAstBind::Evaluate(CScope& scope, CStack& stack) const
 	{
@@ -30,18 +34,9 @@ namespace itpr {
 		return result;
 	}
 
-	const CAstFunction* CAstBind::TryGettingFunction() const
+	const CAstNode& CAstBind::GetExpression() const
 	{
-		return dynamic_cast<const CAstFunction*>(m_expression.get());
-	}
-
-	const CAstNode* CAstBind::TryGettingNonFunction() const
-	{
-		if (TryGettingFunction()) {
-			return nullptr;
-		} else {
-			return m_expression.get();
-		}
+		return *m_expression;
 	}
 
 	std::unique_ptr<CAstNode> CAstBind::TakeOverExpression()

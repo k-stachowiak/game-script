@@ -32,23 +32,8 @@ namespace bif {
 	CValue CAstUnaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
 	{
 		const CAstBind* bind = scope.GetBind("x");
-		const CAstNode* expr = bind->TryGettingNonFunction();
-
-		if (!expr) {
-			throw ExAstReferenceToFunctionEvaluated{
-				CSourceLocation::MakeBuiltInFunction(),
-				stack
-			};
-		}
-
-		CValue actualArgument = expr->Evaluate(scope, stack);
-
-		if (IsFunction(actualArgument)) {
-			throw ExAstReferenceToFunctionEvaluated{
-				CSourceLocation::MakeBuiltInFunction(),
-				stack
-			};
-		}
+		const CAstNode& expr = bind->GetExpression();
+		CValue actualArgument = expr.Evaluate(scope, stack);
 
 		switch (actualArgument.GetType()) {
 		case EValueType::INTEGER:
@@ -68,27 +53,13 @@ namespace bif {
 	CValue CAstBinaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
 	{
 		const CAstBind* lhsBind = scope.GetBind("lhs");
-		const CAstBind* rhsBind = scope.GetBind("rhs");
+		const CAstBind* rhsBind = scope.GetBind("rhs");		
 
-		const CAstNode* lhsExpr = lhsBind->TryGettingNonFunction();
-		const CAstNode* rhsExpr = rhsBind->TryGettingNonFunction();
+		const CAstNode& lhsExpr = lhsBind->GetExpression();
+		const CAstNode& rhsExpr = rhsBind->GetExpression();
 
-		if (!lhsBind || !rhsBind) {
-			throw ExAstReferenceToFunctionEvaluated{
-				CSourceLocation::MakeBuiltInFunction(),
-				stack
-			};
-		}
-
-		CValue lhs = lhsExpr->Evaluate(scope, stack);
-		CValue rhs = rhsExpr->Evaluate(scope, stack);
-
-		if (IsFunction(lhs) || IsFunction(rhs)) {
-			throw ExAstReferenceToFunctionEvaluated{
-				CSourceLocation::MakeBuiltInFunction(),
-				stack
-			};
-		}
+		CValue lhs = lhsExpr.Evaluate(scope, stack);
+		CValue rhs = rhsExpr.Evaluate(scope, stack);
 
 		if (IsInteger(lhs) && IsInteger(rhs)) {
 			return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());

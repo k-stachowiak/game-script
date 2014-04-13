@@ -14,13 +14,8 @@ namespace itpr {
 
 	CValue CAstReference::Evaluate(CScope& scope, CStack& stack) const
 	{
-		// TODO: The call below may throw - test for this and all other cases like this.
 		const auto bind = scope.GetBind(m_symbol);
-		if (bind->TryGettingFunction() != nullptr) {
-			throw ExAstReferenceToFunctionEvaluated{ GetLocation(), stack };
-		} else {
-			return bind->TryGettingNonFunction()->Evaluate(scope, stack);
-		}
+		return bind->GetExpression().Evaluate(scope, stack);
 	}
 
 }

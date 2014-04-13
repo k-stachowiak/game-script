@@ -18,7 +18,7 @@ namespace itpr {
 		std::vector<std::unique_ptr<CAstBind>> m_binds;
 		std::map<std::string, CAstBind*> m_bind_map;
 
-		const CAstFunction& m_AcquireFunction(
+		CValue m_AcquireFunction(
 			CStack& stack,
 			const CSourceLocation& location,
 			const std::string& symbol);

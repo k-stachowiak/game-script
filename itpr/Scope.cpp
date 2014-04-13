@@ -11,11 +11,14 @@
 namespace moon {
 namespace itpr {
 
-	const CAstFunction& CScope::m_AcquireFunction(
+	CValue CScope::m_AcquireFunction(
 		CStack& stack,
 		const CSourceLocation& location,
 		const std::string& symbol)
 	{
+		// TODO: Reduce the complexity of the below
+		//       or rewrite to be more clear.
+
 		const CAstBind* bind;
 		try {
 			bind = GetBind(symbol);
@@ -24,12 +27,14 @@ namespace itpr {
 			throw ExScopeSymbolNotRegistered{ location, stack };
 		}
 
-		const CAstFunction* function = bind->TryGettingFunction();
-		if (!function) {
+		const CAstNode& function = bind->GetExpression();
+		CValue functionValue = function.Evaluate(*this, stack);
+
+		if (!IsFunction(functionValue)) {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
 		}
 
-		return *function;
+		return functionValue;
 	}
 
 	CScope::CScope() :
@@ -82,47 +87,50 @@ namespace itpr {
 		const std::string& symbol,
 		const std::vector<CValue>& argValues)
 	{
-		// TODO:
-		// - have the m_AcquireFunction take into account the function values and already applied
-		// - If not function value, the nothing already applied
-		// - Rewrite the rest of the function so that it is rather a procedure of building up the
-		//   already applied list and only at the end the real call takes place.
-		//
-		// Wonder: What is the difference between a call to the global function and a function value?
-		//         How to express that in the source code?
-		//
-		// Note: THE SCOPE CAN NOW RETURN "name -> value" PAIRS SINCE THE FUNCTION VALUES HAVE BEEN CREATED!
-		const CAstFunction& function = m_AcquireFunction(stack, location, symbol);
+		// 1. Passed more than can be applied - error.
+		// -------------------------------------------
 
-		const std::vector<std::string>& argNames = function.GetFormalArgs();
-		const std::vector<CSourceLocation>& argLocations = function.GetArgLocations();
-		assert(argNames.size() == argLocations.size());
-		unsigned argsCount = argNames.size();
-
-		if (argValues.size() > argsCount) {
+		CValue functionValue = m_AcquireFunction(stack, location, symbol);
+		if (argValues.size() > functionValue.GetFuncArity()) {
 			throw ExScopeFormalActualArgCountMismatch{
 				location,
 				stack
 			};
 		}
 
-		if (argsCount == argValues.size()) {
-			CScope funcScope{ this };
-			for (unsigned i = 0; i < argsCount; ++i) {
-				std::unique_ptr<CAstNode> expression{ new CAstLiteral{ argLocations[i], argValues[i] } };
-				funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));
-			}
+		// 2. Passed less than needed - curry on ;-).
+		// ------------------------------------------
 
-			stack.Push(symbol);
-			CValue result = function.Execute(funcScope, stack);
-			stack.Pop();
+		const CAstFunction& functionDef = functionValue.GetFuncDef();
+		std::vector<CValue> applArgs = functionValue.GetAppliedArgs();
+		std::copy(begin(argValues), end(argValues), std::back_inserter(applArgs));
 
-			return result;
-		} else {
-			// Note: This case could be detected as soon as possible
-			// for the sake of the optimization.
-			return CValue::MakeFunction(&function, argValues);
+		if (argValues.size() < functionValue.GetFuncArity()) {
+			return CValue::MakeFunction(&functionDef, applArgs);
 		}
+
+		// 3. Passed the exact amount needed for the execution.
+		// ----------------------------------------------------
+
+		// 3.1. Analyze args.
+		const std::vector<std::string>& argNames = functionDef.GetFormalArgs();
+		const std::vector<CSourceLocation>& argLocations = functionDef.GetArgLocations();
+		assert(argNames.size() == argLocations.size());
+		unsigned argsCount = argNames.size();
+
+		// 3.2. Build local scope for the function.
+		CScope funcScope{ this };
+		for (unsigned i = 0; i < argsCount; ++i) {
+			std::unique_ptr<CAstNode> expression{ new CAstLiteral{ argLocations[i], applArgs[i] } };
+			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));
+		}
+
+		// 3.3. Execute the function.
+		stack.Push(symbol);
+		CValue result = functionDef.Execute(funcScope, stack);
+		stack.Pop();
+
+		return result;
 	}
 
 }

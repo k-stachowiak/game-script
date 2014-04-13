@@ -23,16 +23,6 @@ namespace itpr {
 		return result;
 	}
 
-	struct ExAstReferenceToFunctionEvaluated : public ExInterpretationError {
-		ExAstReferenceToFunctionEvaluated(const CSourceLocation& location, const CStack& stack) :
-		ExInterpretationError{
-				location.GetLine(),
-				location.GetColumn(),
-				GenStackFrames(stack),
-				"Reference to function evaluated." }
-		{}
-	};
-
 	struct ExAstArithmeticTypeMismatch : public ExInterpretationError {
 		ExAstArithmeticTypeMismatch(const CSourceLocation& location, const CStack& stack) :
 		ExInterpretationError{

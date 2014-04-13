@@ -104,13 +104,16 @@ namespace moon {
 	{
 		auto* unitScope = m_GetUnit(unitName);
 		const auto* bind = unitScope->GetBind(name);
-		const auto* expression = bind->TryGettingNonFunction();
-		if (!expression) {
-			throw ExValueRequestedFromFuncBind{};
-		}
+		const auto& expression = bind->GetExpression();
 
 		itpr::CStack stack;
-		return expression->Evaluate(*unitScope, stack);
+		CValue result = expression.Evaluate(*unitScope, stack);
+
+		if (IsFunction(result)) {
+			throw ExValueRequestedFromFuncBind{};
+		} else {
+			return result;
+		}
 	}
 
 	CValue CEngine::CallFunction(

@@ -142,7 +142,7 @@ namespace moon {
 		}
 	}
 
-	int CValue::GetFuncArity() const
+	unsigned CValue::GetFuncArity() const
 	{
 		return m_funcDef->GetArgsCount() - m_appliedArgs.size();
 	}
