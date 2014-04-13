@@ -11,7 +11,7 @@ namespace itpr {
 
 	public:
 		CAstLiteral(const CSourceLocation& location, CValue value);
-		CValue Evaluate(CScope&, CStack&) const override;
+		CValue Evaluate(std::shared_ptr<CScope>, CStack&) const override;
 	};
 
 }

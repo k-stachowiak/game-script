@@ -19,13 +19,13 @@ namespace itpr {
 		m_actualArgs{ std::move(actualArgs) }
 	{}
 
-	CValue CAstFuncCall::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstFuncCall::Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
 		std::vector<CValue> values;
 		for (const auto& arg : m_actualArgs) {
 			values.push_back(arg->Evaluate(scope, stack));
 		}
-		return scope.CallFunction(stack, GetLocation(), m_symbol, values);
+		return scope->CallFunction(stack, GetLocation(), m_symbol, values);
 	}
 
 }

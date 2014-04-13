@@ -18,7 +18,7 @@ namespace itpr {
 			ECompoundType type, 
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const override;
 	};
 
 }

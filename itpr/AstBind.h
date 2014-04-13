@@ -20,7 +20,7 @@ namespace itpr {
 			std::string symbol, 
 			std::unique_ptr<CAstNode>&& expression);
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const override;
 		const std::string& GetSymbol() const { return m_symbol; }
 		const CAstNode& GetExpression() const;
 		std::unique_ptr<CAstNode> TakeOverExpression();

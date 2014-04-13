@@ -19,11 +19,11 @@ namespace itpr {
 		assert((bool)m_expression);
 	}
 
-	CValue CAstBind::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstBind::Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
 		CValue result = m_expression->Evaluate(scope, stack);
 
-		scope.TryRegisteringBind(
+		scope->TryRegisteringBind(
 			GetLocation(),
 			stack,
 			m_symbol,

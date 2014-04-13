@@ -35,7 +35,7 @@ namespace bif {
 			m_realImplementation{ realImplementation }
 		{}
 
-		CValue Execute(CScope& scope, CStack& stack) const override;
+		CValue Execute(std::shared_ptr<CScope> scope, CStack& stack) const override;
 	};
 
 	class CAstBinaryArithmeticBif : public CAstFunction {
@@ -58,7 +58,7 @@ namespace bif {
 			m_realImplementation{ realImplementation }
 		{}
 
-		CValue Execute(CScope& scope, CStack& stack) const override;
+		CValue Execute(std::shared_ptr<CScope> scope, CStack& stack) const override;
 	};
 
 	std::map<std::string, std::unique_ptr<CAstNode>> BuildBifMap();

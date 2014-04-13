@@ -18,7 +18,7 @@ namespace itpr {
 			std::string symbol, 
 			std::vector<std::unique_ptr<CAstNode>>&& actualArgs);
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const override;
 	};
 
 }

@@ -12,9 +12,9 @@ namespace parse {
 	class CParserBase {
 	public:
 		virtual ~CParserBase() {}
-		virtual std::unique_ptr<itpr::CScope> Parse(
+		virtual std::shared_ptr<itpr::CScope> Parse(
 			const std::string& source,
-			itpr::CScope* parentScope) const = 0;
+			const std::shared_ptr<itpr::CScope>& parentScope) const = 0;
 	};
 
 }

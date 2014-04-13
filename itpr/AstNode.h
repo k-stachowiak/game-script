@@ -1,6 +1,8 @@
 #ifndef MOON_ITPR_AST_NODE_H
 #define MOON_ITPR_AST_NODE_H
 
+#include <memory>
+
 #include "../API/Value.h"
 #include "../common/SourceLocation.h"
 
@@ -24,7 +26,7 @@ namespace itpr {
 
 		virtual ~CAstNode()	{}
 
-		virtual CValue Evaluate(CScope& scope, CStack& stack) const = 0;
+		virtual CValue Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const = 0;
 	};
 
 }

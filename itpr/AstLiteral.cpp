@@ -8,7 +8,7 @@ namespace itpr {
 		m_value{ value }
 	{}
 
-	CValue CAstLiteral::Evaluate(CScope&, CStack&) const
+	CValue CAstLiteral::Evaluate(std::shared_ptr<CScope>, CStack&) const
 	{
 		return m_value;
 	}
