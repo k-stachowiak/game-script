@@ -11,7 +11,21 @@
 namespace moon {
 namespace itpr {
 
-	CValue CScope::m_AcquireFunction(
+	std::pair<const CAstBind*, CScope*> CScope::m_GetScopedBind(const std::string& name)
+	{
+		if (m_bind_map.find(name) == end(m_bind_map)) {
+			if (!m_parent) {
+				throw std::invalid_argument{ name };
+			}
+			else {
+				return m_parent->m_GetScopedBind(name);
+			}
+		}
+
+		return std::make_pair(m_bind_map[name], this);
+	}
+
+	std::pair<CValue, CScope*> CScope::m_AcquireFunction(
 		CStack& stack,
 		const CSourceLocation& location,
 		const std::string& symbol)
@@ -20,8 +34,9 @@ namespace itpr {
 		//       or rewrite to be more clear.
 
 		const CAstBind* bind;
+		CScope* scope;
 		try {
-			bind = GetBind(symbol);
+			std::tie(bind, scope) = m_GetScopedBind(symbol);
 		}
 		catch (const std::invalid_argument&) {
 			throw ExScopeSymbolNotRegistered{ location, stack };
@@ -34,7 +49,7 @@ namespace itpr {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
 		}
 
-		return functionValue;
+		return std::make_pair(functionValue, scope);
 	}
 
 	CScope::CScope() :
@@ -73,7 +88,8 @@ namespace itpr {
 		if (m_bind_map.find(name) == end(m_bind_map)) {
 			if (!m_parent) {
 				throw std::invalid_argument{ name };
-			} else {
+			}
+			else {
 				return m_parent->GetBind(name);
 			}
 		}
@@ -90,7 +106,9 @@ namespace itpr {
 		// 1. Passed more than can be applied - error.
 		// -------------------------------------------
 
-		CValue functionValue = m_AcquireFunction(stack, location, symbol);
+		CValue functionValue;
+		CScope* scope;
+		std::tie(functionValue, scope) = m_AcquireFunction(stack, location, symbol);
 		if (argValues.size() > functionValue.GetFuncArity()) {
 			throw ExScopeFormalActualArgCountMismatch{
 				location,
@@ -119,7 +137,7 @@ namespace itpr {
 		unsigned argsCount = argNames.size();
 
 		// 3.2. Build local scope for the function.
-		CScope funcScope{ this };
+		CScope funcScope{ scope };
 		for (unsigned i = 0; i < argsCount; ++i) {
 			std::unique_ptr<CAstNode> expression{ new CAstLiteral{ argLocations[i], applArgs[i] } };
 			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));

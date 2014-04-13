@@ -18,12 +18,15 @@ bool IsClose(double x, double y)
 	return std::abs(x - y) < 0.01;
 }
 
-std::vector<std::pair<std::string, std::function<void()>>> tests{
+std::vector<std::pair<std::string, std::function<void()>>> assertions {
+
+	// TODO: Test for the case of too many closing parentheses.
 
 	// Interpretation errors.
 	// ----------------------
 
 	{ "Function passed as argument for numeric magic", []() {
+
 		std::string source = "(bind four (+ 2 (func (x) 2)))";
 
 		moon::CEngine engine;
@@ -211,15 +214,83 @@ std::vector<std::pair<std::string, std::function<void()>>> tests{
 
 		assert(neg_thousand.GetInteger() == -1000);
 		assert(IsClose(pi.GetReal(), 3.1415));
-	} }
+	} },
+
+	{ "Symbol shadowing example.", []() {
+
+		std::string source =
+			"(bind x 2)\n"
+			"(bind dblx (func () (* x 2)))\n"
+			"(bind scope-test (func ()\n"
+			"\t(bind x 100)\n"
+			"\t(dblx)\n"
+			"))";
+
+		moon::CEngine engine;
+		engine.LoadUnitString("test", source);
+
+		auto result = engine.CallFunction("test", "scope-test", {});
+
+		assert(result.GetType() == moon::EValueType::INTEGER);
+		assert(result.GetInteger() == 4);
+	} },
+
+};
+
+std::vector<std::pair<std::string, std::function<bool()>>> optionals{
+
+	{ "Local scope capture.", []() {
+		std::string source =
+			"(bind lhs 1)\n"
+			"(bind make_doubler (func ()\n"
+			"\t(bind lhs 2)\n"
+			"\t(func (rhs)\n"
+			"\t\t(* lhs rhs)\n"
+			"\t)\n"
+			"))\n"
+			"(bind test(func(rhs)\n"
+			"\t(bind doubler(make_doubler))\n"
+			"\t(doubler rhs)\n"
+			"))";
+
+		moon::CEngine engine;
+		engine.LoadUnitString("test", source);
+
+		auto result = engine.CallFunction("test", "test", { moon::CValue::MakeInteger(3) });
+
+		assert(result.GetType() == moon::EValueType::INTEGER);
+
+		if (result.GetInteger() == 3) {
+			return false;
+		}
+		else if (result.GetInteger() == 6) {
+			return true;
+		}
+		else {
+			assert(false);
+			return false;
+		}
+	} },
+
 };
 
 int main()
 {
-	for (const auto& pr : tests) {
+	std::printf("Assertions:\n");
+	for (const auto& pr : assertions) {
 		std::printf("%s... ", pr.first.c_str());
 		pr.second();
-		std::printf("OK\n");
+		std::printf("Passed\n");
+	}
+
+	std::printf("\nChecks:\n");
+	for (const auto& pr : optionals) {
+		std::printf("%s... ", pr.first.c_str());
+		if (pr.second()) {
+			std::printf("Yes\n");
+		} else {
+			std::printf("No\n");
+		}
 	}
 
 	return 0;

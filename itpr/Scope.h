@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <map>
 
 #include "../API/Value.h"
@@ -18,7 +19,9 @@ namespace itpr {
 		std::vector<std::unique_ptr<CAstBind>> m_binds;
 		std::map<std::string, CAstBind*> m_bind_map;
 
-		CValue m_AcquireFunction(
+		std::pair<const CAstBind*, CScope*> m_GetScopedBind(const std::string& name);
+
+		std::pair<CValue, CScope*> m_AcquireFunction(
 			CStack& stack,
 			const CSourceLocation& location,
 			const std::string& symbol);
@@ -37,8 +40,6 @@ namespace itpr {
 			const CSourceLocation& location,
 			const std::string& name,
 			std::unique_ptr<CAstNode>&& expression);
-
-		CScope* GetParent() const { return m_parent; }
 
 		const CAstBind* GetBind(const std::string& name);
 
