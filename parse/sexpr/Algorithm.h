@@ -35,6 +35,7 @@ namespace sexpr {
 
 	std::unique_ptr<itpr::CAstBind> ParseBind(const CDomNode& domNode);
 
+	bool AssertCompoundSize(const CDomNode& node, int size);
 	bool AssertCompoundMinSize(const CDomNode& node, int minSize);
 
 	bool ParseAtom(const CDomNode& node, std::string& result);

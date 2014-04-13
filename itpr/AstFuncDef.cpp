@@ -1,4 +1,3 @@
-#include <cassert>
 #include "AstFuncDef.h"
 
 namespace moon {
@@ -9,13 +8,9 @@ namespace itpr {
 		std::vector<std::string> formalArgs,
 		std::vector<CSourceLocation> argLocations,
 		std::vector<std::unique_ptr<CAstNode>>&& expressions) :
-		CAstFunction{ location },
-		m_formalArgs{ formalArgs },
-		m_argLocations{ argLocations },
+		CAstFunction{ location, formalArgs, argLocations },
 		m_expressions{ std::move(expressions) }
-	{
-		assert(m_formalArgs.size() == m_argLocations.size());
-	}
+	{}
 
 	CValue CAstFuncDef::Execute(CScope& scope, CStack& stack) const
 	{
