@@ -16,9 +16,9 @@ namespace sexpr {
 	};
 
 	enum class EDomCompoundType {
-		CPD_CORE,
-		CPD_ARRAY,
-		CPD_TUPLE
+		CORE,
+		ARRAY,
+		TUPLE
 	};
 
 	class CDomNode
@@ -81,17 +81,17 @@ namespace sexpr {
 
 		bool IsCompoundCore() const
 		{
-			return IsCompound() && m_compoundType == EDomCompoundType::CPD_CORE;
+			return IsCompound() && m_compoundType == EDomCompoundType::CORE;
 		}
 
 		bool IsCompoundArray() const
 		{
-			return IsCompound() && m_compoundType == EDomCompoundType::CPD_ARRAY;
+			return IsCompound() && m_compoundType == EDomCompoundType::ARRAY;
 		}
 
 		bool IsCompoundTuple() const
 		{
-			return IsCompound() && m_compoundType == EDomCompoundType::CPD_TUPLE;
+			return IsCompound() && m_compoundType == EDomCompoundType::TUPLE;
 		}
 
 		EDomCompoundType GetType() const
@@ -115,7 +115,7 @@ namespace sexpr {
 				location,
 				EDomNodeType::ATOM,
 				atom,
-				EDomCompoundType::CPD_CORE,
+				EDomCompoundType::CORE,
 				{}
 			};
 		}

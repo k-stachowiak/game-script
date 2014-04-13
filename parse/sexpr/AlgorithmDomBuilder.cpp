@@ -10,15 +10,15 @@ namespace sexpr {
 	static EDomCompoundType InferCompoundType(CSourceLocation location, const CToken& openingToken)
 	{
 		if (openingToken == TOK_CORE_OPEN) {
-			return EDomCompoundType::CPD_CORE;
+			return EDomCompoundType::CORE;
 		}
 
 		if (openingToken == TOK_ARR_OPEN) {
-			return EDomCompoundType::CPD_ARRAY;
+			return EDomCompoundType::ARRAY;
 		}
 
 		if (openingToken == TOK_TUP_OPEN) {
-			return EDomCompoundType::CPD_TUPLE;
+			return EDomCompoundType::TUPLE;
 		}
 
 		throw ExDomUnexpectedCompoundDelimiter{ location };

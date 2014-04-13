@@ -65,11 +65,11 @@ namespace sexpr {
 		// 2. Is of ARRAY or TUPLE type.
 		ECompoundType type;
 		switch (domNode.GetType()) {
-		case EDomCompoundType::CPD_ARRAY:
+		case EDomCompoundType::ARRAY:
 			type = ECompoundType::ARRAY;
 			break;
 
-		case EDomCompoundType::CPD_TUPLE:
+		case EDomCompoundType::TUPLE:
 			type = ECompoundType::TUPLE;
 			break;
 
@@ -110,7 +110,7 @@ namespace sexpr {
 		// 3.1. 1st child is symbol.
 		std::string symbol;
 		if (!ParseAtom(*(current++), symbol)) {
-			return false;
+			return{};
 		}
 
 		// 3.2. Has 0 or more further children being any expression.
@@ -136,8 +136,8 @@ namespace sexpr {
 			return{};
 		}
 
-		// 2. Has 2 or more children.
-		if (!AssertCompoundMinSize(domNode, 2)) {
+		// 2. Has 3 or more children.
+		if (!AssertCompoundMinSize(domNode, 3)) {
 			return{};
 		}
 
