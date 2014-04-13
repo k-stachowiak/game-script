@@ -25,7 +25,7 @@ namespace itpr {
 			assert(m_formalArgs.size() == m_argLocations.size());
 		}
 
-		CValue Evaluate(CScope&, CStack&) const
+		CValue Evaluate(std::shared_ptr<CScope>, CStack&) const
 		{
 			return CValue::MakeFunction(this, {});
 		}
@@ -45,7 +45,7 @@ namespace itpr {
 			return m_formalArgs.size();
 		}
 
-		virtual CValue Execute(CScope& scope, CStack& stack) const = 0;
+		virtual CValue Execute(std::shared_ptr<CScope> scope, CStack& stack) const = 0;
 	};
 
 }

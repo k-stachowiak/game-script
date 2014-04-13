@@ -47,21 +47,21 @@ namespace moon {
 		return result;
 	}
 
-	itpr::CScope* CEngine::m_GetUnit(const std::string& unitName)
+	std::shared_ptr<itpr::CScope> CEngine::m_GetUnit(const std::string& unitName)
 	{
 		if (m_units.find(unitName) == end(m_units)) {
 			throw ExUnitNotRegistered{ unitName };
 		}
 
-		return m_units[unitName].get();
+		return m_units[unitName];
 	}
 
-	CEngine::CEngine()
+	CEngine::CEngine() :
+		m_parser{ new parse::sexpr::CAstParser },
+		m_stdlibScope{ new itpr::CScope }
 	{
-		m_parser.reset(new parse::sexpr::CAstParser);
-
 		for (auto&& pr : itpr::bif::BuildBifMap()) {
-			m_stdlibScope.RegisterBind(
+			m_stdlibScope->RegisterBind(
 					pr.second->GetLocation(),
 					pr.first,
 					std::move(pr.second));
@@ -75,9 +75,9 @@ namespace moon {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
 		std::string source = m_ReadFile(fileName);
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
+		std::shared_ptr<itpr::CScope> unit = m_parser->Parse(source, m_stdlibScope);
 
-		m_units[unitName] = std::move(unit);
+		m_units[unitName] = unit;
 	}
 
 	void CEngine::LoadUnitStream(const std::string& unitName, std::istream& input) {
@@ -85,9 +85,9 @@ namespace moon {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
 		std::string source = m_ReadStream(input);
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
+		std::shared_ptr<itpr::CScope> unit = m_parser->Parse(source, m_stdlibScope);
 
-		m_units[unitName] = std::move(unit);
+		m_units[unitName] = unit;
 	}
 
 	void CEngine::LoadUnitString(const std::string& unitName, const std::string& source)
@@ -95,19 +95,19 @@ namespace moon {
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
+		std::shared_ptr<itpr::CScope> unit = m_parser->Parse(source, m_stdlibScope);
 
-		m_units[unitName] = std::move(unit);
+		m_units[unitName] = unit;
 	}
 
 	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
 	{
-		auto* unitScope = m_GetUnit(unitName);
+		auto unitScope = m_GetUnit(unitName);
 		const auto* bind = unitScope->GetBind(name);
 		const auto& expression = bind->GetExpression();
 
 		itpr::CStack stack;
-		CValue result = expression.Evaluate(*unitScope, stack);
+		CValue result = expression.Evaluate(unitScope, stack);
 
 		if (IsFunction(result)) {
 			throw ExValueRequestedFromFuncBind{};
@@ -121,7 +121,7 @@ namespace moon {
 		const std::string& symbol,
 		const std::vector<CValue>& args)
 	{
-		auto* unitScope = m_GetUnit(unitName);
+		auto unitScope = m_GetUnit(unitName);
 		itpr::CStack stack;
 		return unitScope->CallFunction(
 			stack,

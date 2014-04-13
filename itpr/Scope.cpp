@@ -1,5 +1,6 @@
 #include "Scope.h"
 
+#include <memory>
 #include <stdexcept>
 #include <cassert>
 
@@ -11,7 +12,7 @@
 namespace moon {
 namespace itpr {
 
-	std::pair<const CAstBind*, CScope*> CScope::m_GetScopedBind(const std::string& name)
+	std::pair<const CAstBind*, std::shared_ptr<CScope>> CScope::m_GetScopedBind(const std::string& name)
 	{
 		if (m_bind_map.find(name) == end(m_bind_map)) {
 			if (!m_parent) {
@@ -22,10 +23,10 @@ namespace itpr {
 			}
 		}
 
-		return std::make_pair(m_bind_map[name], this);
+		return std::make_pair(m_bind_map[name], shared_from_this());
 	}
 
-	std::pair<CValue, CScope*> CScope::m_AcquireFunction(
+	std::pair<CValue, std::shared_ptr<CScope>> CScope::m_AcquireFunction(
 		CStack& stack,
 		const CSourceLocation& location,
 		const std::string& symbol)
@@ -34,7 +35,7 @@ namespace itpr {
 		//       or rewrite to be more clear.
 
 		const CAstBind* bind;
-		CScope* scope;
+		std::shared_ptr<CScope> scope;
 		try {
 			std::tie(bind, scope) = m_GetScopedBind(symbol);
 		}
@@ -43,7 +44,7 @@ namespace itpr {
 		}
 
 		const CAstNode& function = bind->GetExpression();
-		CValue functionValue = function.Evaluate(*this, stack);
+		CValue functionValue = function.Evaluate(shared_from_this(), stack);
 
 		if (!IsFunction(functionValue)) {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
@@ -56,7 +57,7 @@ namespace itpr {
 		m_parent{ nullptr }
 	{}
 
-	CScope::CScope(CScope* parent) :
+	CScope::CScope(const std::shared_ptr<CScope>& parent) :
 		m_parent{ parent }
 	{}
 
@@ -107,7 +108,7 @@ namespace itpr {
 		// -------------------------------------------
 
 		CValue functionValue;
-		CScope* scope;
+		std::shared_ptr<CScope> scope;
 		std::tie(functionValue, scope) = m_AcquireFunction(stack, location, symbol);
 		if (argValues.size() > functionValue.GetFuncArity()) {
 			throw ExScopeFormalActualArgCountMismatch{
@@ -137,10 +138,10 @@ namespace itpr {
 		unsigned argsCount = argNames.size();
 
 		// 3.2. Build local scope for the function.
-		CScope funcScope{ scope };
+		auto funcScope = std::make_shared<CScope>(scope);
 		for (unsigned i = 0; i < argsCount; ++i) {
 			std::unique_ptr<CAstNode> expression{ new CAstLiteral{ argLocations[i], applArgs[i] } };
-			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));
+			funcScope->TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));
 		}
 
 		// 3.3. Execute the function.

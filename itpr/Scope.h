@@ -14,21 +14,21 @@
 namespace moon {
 namespace itpr {
 
-	class CScope {
-		CScope* m_parent;
+	class CScope : public std::enable_shared_from_this<CScope> {
+		std::shared_ptr<CScope> m_parent;
 		std::vector<std::unique_ptr<CAstBind>> m_binds;
 		std::map<std::string, CAstBind*> m_bind_map;
 
-		std::pair<const CAstBind*, CScope*> m_GetScopedBind(const std::string& name);
+		std::pair<const CAstBind*, std::shared_ptr<CScope>> m_GetScopedBind(const std::string& name);
 
-		std::pair<CValue, CScope*> m_AcquireFunction(
+		std::pair<CValue, std::shared_ptr<CScope>> m_AcquireFunction(
 			CStack& stack,
 			const CSourceLocation& location,
 			const std::string& symbol);
 
 	public:
 		CScope();
-		CScope(CScope* parent);
+		CScope(const std::shared_ptr<CScope>& parent);
 
 		void TryRegisteringBind(
 				const CSourceLocation& location,

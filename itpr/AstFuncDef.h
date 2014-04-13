@@ -20,7 +20,7 @@ namespace itpr {
 			std::vector<CSourceLocation> argLocations,
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-		CValue Execute(CScope& scope, CStack& stack) const override;
+		CValue Execute(std::shared_ptr<CScope> scope, CStack& stack) const override;
 	};
 
 }

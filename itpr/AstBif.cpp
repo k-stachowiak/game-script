@@ -29,9 +29,9 @@ namespace bif {
 	// AST part implementation.
 	// ========================
 
-	CValue CAstUnaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
+	CValue CAstUnaryArithmeticBif::Execute(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
-		const CAstBind* bind = scope.GetBind("x");
+		const CAstBind* bind = scope->GetBind("x");
 		const CAstNode& expr = bind->GetExpression();
 		CValue actualArgument = expr.Evaluate(scope, stack);
 
@@ -50,10 +50,10 @@ namespace bif {
 		}
 	}
 
-	CValue CAstBinaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
+	CValue CAstBinaryArithmeticBif::Execute(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
-		const CAstBind* lhsBind = scope.GetBind("lhs");
-		const CAstBind* rhsBind = scope.GetBind("rhs");		
+		const CAstBind* lhsBind = scope->GetBind("lhs");
+		const CAstBind* rhsBind = scope->GetBind("rhs");
 
 		const CAstNode& lhsExpr = lhsBind->GetExpression();
 		const CAstNode& rhsExpr = rhsBind->GetExpression();

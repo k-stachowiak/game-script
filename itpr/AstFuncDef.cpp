@@ -12,7 +12,7 @@ namespace itpr {
 		m_expressions{ std::move(expressions) }
 	{}
 
-	CValue CAstFuncDef::Execute(CScope& scope, CStack& stack) const
+	CValue CAstFuncDef::Execute(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
 		CValue result;
 		for (const auto& expression : m_expressions) {

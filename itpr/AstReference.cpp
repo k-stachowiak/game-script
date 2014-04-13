@@ -12,9 +12,9 @@ namespace itpr {
 		m_symbol{ symbol }
 	{}
 
-	CValue CAstReference::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstReference::Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
-		const auto bind = scope.GetBind(m_symbol);
+		const auto bind = scope->GetBind(m_symbol);
 		return bind->GetExpression().Evaluate(scope, stack);
 	}
 

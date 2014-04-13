@@ -13,7 +13,7 @@ namespace itpr {
 		m_expressions{ std::move(expressions) }
 	{}
 
-	CValue CAstCompound::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstCompound::Evaluate(std::shared_ptr<CScope> scope, CStack& stack) const
 	{
 		std::vector<CValue> values;
 		for (const auto& expression : m_expressions) {
