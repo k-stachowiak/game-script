@@ -16,15 +16,15 @@ namespace sexpr {
 		const std::string& source,
 		const std::shared_ptr<itpr::CScope>& parentScope) const
 	{
+		itpr::CStack stack; // TODO: Try removing this stack. Maybe pass it from the engine?
 		std::vector<CToken> tokens = Tokenize(CStrIter::Begin(source), CStrIter::End(source));
 		std::vector<CDomNode> domNodes = BuildDom(tokens);
 		auto result = std::make_shared<itpr::CScope>(parentScope);
 		for (const CDomNode& domNode : domNodes) {
 			std::unique_ptr<itpr::CAstBind> bind = ParseBind(domNode);
 			result->RegisterBind(
-					bind->GetLocation(),
 					bind->GetSymbol(),
-					std::move(bind->TakeOverExpression()));
+					bind->Evaluate(result, stack));
 		}
 
 		return result;

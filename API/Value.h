@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace moon {
 
@@ -39,7 +40,8 @@ namespace moon {
 		ECompoundType m_compoundType = ECompoundType::ARRAY;
 		std::vector<CValue> m_compoundValues;
 
-		const itpr::CAstFunction* m_funcDef = nullptr;
+		std::shared_ptr<const itpr::CAstFunction> m_funcDef = nullptr;
+		std::shared_ptr<itpr::CScope> m_funcScope = nullptr;
 		std::vector<CValue> m_appliedArgs;
 
 		CValue(
@@ -51,7 +53,8 @@ namespace moon {
 			int boolean,
 			ECompoundType compoundType,
 			std::vector<CValue> compoundValues,
-			const itpr::CAstFunction* funcDef,
+			std::shared_ptr<const itpr::CAstFunction>& funcDef,
+			std::shared_ptr<itpr::CScope> funcScope,
 			std::vector<CValue> appliedArgs);
 
 	public:
@@ -61,7 +64,10 @@ namespace moon {
 		static CValue MakeString(std::string value);
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
-		static CValue MakeFunction(const itpr::CAstFunction* funcDef, std::vector<CValue> appliedArgs);
+		static CValue MakeFunction(
+				const std::shared_ptr<const itpr::CAstFunction>& funcDef,
+				const std::shared_ptr<itpr::CScope>& funcScope,
+				std::vector<CValue> appliedArgs);
 
 		friend bool IsCompound(const CValue& value)
 		{
@@ -104,7 +110,8 @@ namespace moon {
 		const std::vector<CValue>& GetCompound() const { return m_compoundValues; }
 		
 		unsigned GetFuncArity() const;
-		const itpr::CAstFunction& GetFuncDef() const { return *m_funcDef; }
+		const std::shared_ptr<const itpr::CAstFunction> GetFuncDef() const { return m_funcDef; }
+		const std::shared_ptr<itpr::CScope> GetFuncScope() const { return m_funcScope; }
 		std::vector<CValue>& GetAppliedArgs() { return m_appliedArgs; }
 	};
 
