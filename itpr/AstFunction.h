@@ -9,7 +9,7 @@
 namespace moon {
 namespace itpr {
 
-	class CAstFunction : public CAstNode {
+	class CAstFunction : public CAstNode, public std::enable_shared_from_this<CAstFunction> {
 		const std::vector<std::string> m_formalArgs;
 		const std::vector<CSourceLocation> m_argLocations;
 
@@ -25,9 +25,9 @@ namespace itpr {
 			assert(m_formalArgs.size() == m_argLocations.size());
 		}
 
-		CValue Evaluate(std::shared_ptr<CScope>, CStack&) const
+		CValue Evaluate(std::shared_ptr<CScope> scope, CStack&) const
 		{
-			return CValue::MakeFunction(this, {});
+			return CValue::MakeFunction(shared_from_this(), scope, {});
 		}
 
 		const std::vector<std::string>& GetFormalArgs() const
