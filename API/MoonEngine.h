@@ -15,13 +15,14 @@ namespace moon {
 
 	class CEngine {
 		std::unique_ptr<parse::CParserBase> m_parser;
-		itpr::CScope m_stdlibScope;
 		std::map<std::string, std::unique_ptr<itpr::CScope>> m_units;
 
 		static std::string m_DropExtension(const std::string& fileName);
 		static std::string m_ReadStream(std::istream& input);
 		static std::string m_ReadFile(const std::string& fileName);
+		static void m_InjectMapToScope(std::map<std::string, std::unique_ptr<itpr::CAstNode>>&& map, itpr::CScope& scope);
 
+		std::unique_ptr<itpr::CScope> m_BuildUnitScope(const std::string& source);
 		itpr::CScope* m_GetUnit(const std::string& unitName);
 
 	public:
@@ -32,10 +33,7 @@ namespace moon {
 		void LoadUnitString(const std::string& unitName, const std::string& source);
 
 		CValue GetValue(const std::string& unitName, const std::string& symbol);
-		CValue CallFunction(
-			const std::string& unitName,
-			const std::string& symbol,
-			const std::vector<CValue>& args);
+		CValue CallFunction(const std::string& unitName, const std::string& symbol, const std::vector<CValue>& args);
 	};
 
 }

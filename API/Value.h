@@ -105,7 +105,7 @@ namespace moon {
 		
 		unsigned GetFuncArity() const;
 		const itpr::CAstFunction& GetFuncDef() const { return *m_funcDef; }
-		std::vector<CValue>& GetAppliedArgs() { return m_appliedArgs; }
+		const std::vector<CValue>& GetAppliedArgs() const { return m_appliedArgs; }
 	};
 
 }

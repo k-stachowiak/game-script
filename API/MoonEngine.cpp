@@ -47,6 +47,28 @@ namespace moon {
 		return result;
 	}
 
+	void CEngine::m_InjectMapToScope(
+		std::map<std::string, std::unique_ptr<itpr::CAstNode>>&& map,
+		itpr::CScope& scope)
+	{
+		for (auto&& pr : map) {
+			scope.RegisterBind(
+				pr.second->GetLocation(),
+				pr.first,
+				std::move(pr.second));
+		}
+	}
+
+	std::unique_ptr<itpr::CScope> CEngine::m_BuildUnitScope(const std::string& source)
+	{
+		auto unit = std::unique_ptr<itpr::CScope> { new itpr::CScope() };
+
+		m_InjectMapToScope(itpr::bif::BuildBifMap(), *unit);
+		m_InjectMapToScope(m_parser->Parse(source), *unit);
+
+		return unit;
+	}
+
 	itpr::CScope* CEngine::m_GetUnit(const std::string& unitName)
 	{
 		if (m_units.find(unitName) == end(m_units)) {
@@ -57,37 +79,31 @@ namespace moon {
 	}
 
 	CEngine::CEngine()
-	{
-		m_parser.reset(new parse::sexpr::CAstParser);
-
-		for (auto&& pr : itpr::bif::BuildBifMap()) {
-			m_stdlibScope.RegisterBind(
-					pr.second->GetLocation(),
-					pr.first,
-					std::move(pr.second));
-		}
-	}
+	: m_parser{ new parse::sexpr::CAstParser }
+	{}
 
 	void CEngine::LoadUnitFile(const std::string& fileName)
 	{
 		std::string unitName = m_DropExtension(fileName);
+
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-		std::string source = m_ReadFile(fileName);
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
 
-		m_units[unitName] = std::move(unit);
+		std::string source = m_ReadFile(fileName);
+
+		m_units[unitName] = m_BuildUnitScope(source);
 	}
 
-	void CEngine::LoadUnitStream(const std::string& unitName, std::istream& input) {
+	void CEngine::LoadUnitStream(const std::string& unitName, std::istream& input)
+	{
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-		std::string source = m_ReadStream(input);
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
 
-		m_units[unitName] = std::move(unit);
+		std::string source = m_ReadStream(input);
+
+		m_units[unitName] = m_BuildUnitScope(source);
 	}
 
 	void CEngine::LoadUnitString(const std::string& unitName, const std::string& source)
@@ -95,9 +111,8 @@ namespace moon {
 		if (m_units.find(unitName) != end(m_units)) {
 			throw ExUnitAlreadyRegistered{ unitName };
 		}
-		std::unique_ptr<itpr::CScope> unit = m_parser->Parse(source, &m_stdlibScope);
 
-		m_units[unitName] = std::move(unit);
+		m_units[unitName] = m_BuildUnitScope(source);
 	}
 
 	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
