@@ -12,21 +12,17 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	std::unique_ptr<itpr::CScope> CAstParser::Parse(
-		const std::string& source,
-		itpr::CScope* parentScope) const
+	std::map<std::string, std::unique_ptr<itpr::CAstNode>>
+	CAstParser::Parse(const std::string& source) const
 	{
 		std::vector<CToken> tokens = Tokenize(CStrIter::Begin(source), CStrIter::End(source));
 		std::vector<CDomNode> domNodes = BuildDom(tokens);
-		std::unique_ptr<itpr::CScope> result{ new itpr::CScope{ parentScope } };
+		std::map<std::string, std::unique_ptr<itpr::CAstNode>> result;
 		for (const CDomNode& domNode : domNodes) {
-			std::unique_ptr<itpr::CAstBind> bind = ParseBind(domNode);
-			result->RegisterBind(
-					bind->GetLocation(),
-					bind->GetSymbol(),
-					std::move(bind->TakeOverExpression()));
+			auto bind = ParseBind(domNode);
+			auto pair = t_StripBind(std::move(bind));
+			result.insert(std::move(pair));
 		}
-
 		return result;
 	}
 
