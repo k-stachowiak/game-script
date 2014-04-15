@@ -32,3 +32,4 @@ Debug/*
 cmake
 CMakeLists.txt
 *.out
+gmon.out
