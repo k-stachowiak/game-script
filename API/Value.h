@@ -53,7 +53,7 @@ namespace moon {
 			int boolean,
 			ECompoundType compoundType,
 			std::vector<CValue> compoundValues,
-			std::shared_ptr<const itpr::CAstFunction>& funcDef,
+			std::shared_ptr<const itpr::CAstFunction> funcDef,
 			std::shared_ptr<itpr::CScope> funcScope,
 			std::vector<CValue> appliedArgs);
 

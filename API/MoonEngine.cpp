@@ -4,9 +4,11 @@
 #include <iostream>
 #include <memory>
 
+// TODO: Are all these includes necessary?
 #include "Exceptions.h"
 #include "MoonEngine.h"
 #include "../parse/ParserBase.h"
+#include "../itpr/Algorithm.h"
 #include "../itpr/AstFuncDef.h"
 #include "../itpr/AstBind.h"
 #include "../itpr/Scope.h"
@@ -61,11 +63,11 @@ namespace moon {
 		m_stdlibScope{ new itpr::CScope }
 	{
 		for (auto&& pr : itpr::bif::BuildBifMap()) {
-			m_stdlibScope->RegisterBind(
-					pr.second->GetLocation(),
-					pr.first,
-					std::move(pr.second));
+			m_stdlibScope->RegisterBind(pr.first, CValue::MakeFunction(
+					pr.second, m_stdlibScope, {}));
 		}
+		// TODO: Make the std scope the same as the global scope.
+		// Make the parser return somehow the list of binds and not the scope.
 	}
 
 	void CEngine::LoadUnitFile(const std::string& fileName)
@@ -102,13 +104,7 @@ namespace moon {
 
 	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
 	{
-		auto unitScope = m_GetUnit(unitName);
-		const auto* bind = unitScope->GetBind(name);
-		const auto& expression = bind->GetExpression();
-
-		itpr::CStack stack;
-		CValue result = expression.Evaluate(unitScope, stack);
-
+		CValue result = m_GetUnit(unitName)->GetValue(name);
 		if (IsFunction(result)) {
 			throw ExValueRequestedFromFuncBind{};
 		} else {
@@ -121,13 +117,14 @@ namespace moon {
 		const std::string& symbol,
 		const std::vector<CValue>& args)
 	{
-		auto unitScope = m_GetUnit(unitName);
 		itpr::CStack stack;
-		return unitScope->CallFunction(
-			stack,
-			CSourceLocation::MakeExternalInvoke(),
+		auto unitScope = m_GetUnit(unitName);
+		return ::moon::itpr::CallFunction(
 			symbol,
-			args);
+			args,
+			CSourceLocation::MakeExternalInvoke(),
+			unitScope,
+			stack);
 	}
 
 }
