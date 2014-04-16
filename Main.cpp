@@ -10,7 +10,8 @@
 #include "API/Exceptions.h"
 
 /* TODO:
- * - Start building the documentation.
+ * - Detect non-global captures and store them with function value.
+ * - Store all values on stack and introduce references.
  */
 
 bool IsClose(double x, double y)
