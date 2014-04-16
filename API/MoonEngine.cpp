@@ -49,13 +49,23 @@ namespace moon {
 
 	void CEngine::m_InjectMapToScope(
 		std::map<std::string, std::unique_ptr<itpr::CAstNode>>&& map,
-		itpr::CScope& scope)
+		itpr::CStack& stack, itpr::CScope& scope)
 	{
 		for (auto&& pr : map) {
-			scope.RegisterBind(
+			scope.TryRegisteringBind(
 				pr.second->GetLocation(),
+				stack,
 				pr.first,
-				std::move(pr.second));
+				pr.second->Evaluate(scope, stack));
+
+			// Store the pointer so that the function pointers in the CValue remain valid.
+			// Note that it is only possible because the map is passed in as an rvalue reference.
+			// Also note that this is quite suspicious and is a candidate for refactoring.
+			itpr::CAstFunction* maybeFunction = dynamic_cast<itpr::CAstFunction*>(pr.second.get());
+			if (maybeFunction) {
+				pr.second.release();
+				m_functions.push_back(std::unique_ptr<itpr::CAstFunction>(maybeFunction));
+			}
 		}
 	}
 
@@ -63,8 +73,9 @@ namespace moon {
 	{
 		auto unit = std::unique_ptr<itpr::CScope> { new itpr::CScope() };
 
-		m_InjectMapToScope(itpr::bif::BuildBifMap(), *unit);
-		m_InjectMapToScope(m_parser->Parse(source), *unit);
+		itpr::CStack stack;
+		m_InjectMapToScope(itpr::bif::BuildBifMap(), stack, *unit);
+		m_InjectMapToScope(m_parser->Parse(source), stack, *unit);
 
 		return unit;
 	}
@@ -117,12 +128,7 @@ namespace moon {
 
 	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
 	{
-		auto* unitScope = m_GetUnit(unitName);
-		const auto* bind = unitScope->GetBind(name);
-		const auto& expression = bind->GetExpression();
-
-		itpr::CStack stack;
-		CValue result = expression.Evaluate(*unitScope, stack);
+		CValue result = m_GetUnit(unitName)->GetValue(name);
 
 		if (IsFunction(result)) {
 			throw ExValueRequestedFromFuncBind{};

@@ -22,15 +22,7 @@ namespace itpr {
 	CValue CAstBind::Evaluate(CScope& scope, CStack& stack) const
 	{
 		CValue result = m_expression->Evaluate(scope, stack);
-
-		scope.TryRegisteringBind(
-			GetLocation(),
-			stack,
-			m_symbol,
-			std::unique_ptr<CAstNode> {
-				new CAstLiteral{ m_expression->GetLocation(), result }
-			});
-
+		scope.TryRegisteringBind(GetLocation(), stack, m_symbol, result);
 		return result;
 	}
 
