@@ -11,9 +11,9 @@
 namespace moon {
 namespace itpr {
 
-	std::pair<const CAstBind*, CScope*> CScope::m_GetScopedBind(const std::string& name)
+	std::pair<CValue, CScope*> CScope::m_GetScopedBind(const std::string& name)
 	{
-		if (m_bind_map.find(name) == end(m_bind_map)) {
+		if (m_binds.find(name) == end(m_binds)) {
 			if (!m_parent) {
 				throw std::invalid_argument{ name };
 			}
@@ -22,7 +22,7 @@ namespace itpr {
 			}
 		}
 
-		return std::make_pair(m_bind_map[name], this);
+		return std::make_pair(m_binds[name], this);
 	}
 
 	std::pair<CValue, CScope*> CScope::m_AcquireFunction(
@@ -33,17 +33,14 @@ namespace itpr {
 		// TODO: Reduce the complexity of the below
 		//       or rewrite to be more clear.
 
-		const CAstBind* bind;
+		CValue functionValue;
 		CScope* scope;
 		try {
-			std::tie(bind, scope) = m_GetScopedBind(symbol);
+			std::tie(functionValue, scope) = m_GetScopedBind(symbol);
 		}
 		catch (const std::invalid_argument&) {
 			throw ExScopeSymbolNotRegistered{ location, stack };
 		}
-
-		const CAstNode& function = bind->GetExpression();
-		CValue functionValue = function.Evaluate(*this, stack);
 
 		if (!IsFunction(functionValue)) {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
@@ -64,37 +61,33 @@ namespace itpr {
 			const CSourceLocation& location,
 			const CStack& stack,
 			const std::string& name,
-			std::unique_ptr<CAstNode>&& expression)
+			const CValue& value)
 	{
-		if (m_bind_map.find(name) != end(m_bind_map)) {
+		if (m_binds.find(name) != end(m_binds)) {
 			throw ExScopeSymbolAlreadyRegistered{ location, stack };
 		}
-		RegisterBind(location, name, std::move(expression));
+		RegisterBind(name, value);
 	}
 
 	void CScope::RegisterBind(
-		const CSourceLocation& location,
 		const std::string& name,
-		std::unique_ptr<CAstNode>&& expression)
+		const CValue& value)
 	{
-		m_binds.push_back(std::unique_ptr<CAstBind> {
-			new CAstBind{ location, name, std::move(expression) }
-		});
-		m_bind_map[name] = m_binds.back().get();
+		m_binds[name] = value;
 	}
 
-	const CAstBind* CScope::GetBind(const std::string& name)
+	const CValue& CScope::GetValue(const std::string& name)
 	{
-		if (m_bind_map.find(name) == end(m_bind_map)) {
+		if (m_binds.find(name) == end(m_binds)) {
 			if (!m_parent) {
 				throw std::invalid_argument{ name };
 			}
 			else {
-				return m_parent->GetBind(name);
+				return m_parent->GetValue(name);
 			}
 		}
 
-		return m_bind_map[name];
+		return m_binds[name];
 	}
 
 	CValue CScope::CallFunction(
@@ -139,8 +132,7 @@ namespace itpr {
 		// 3.2. Build local scope for the function.
 		CScope funcScope{ scope };
 		for (unsigned i = 0; i < argsCount; ++i) {
-			std::unique_ptr<CAstNode> expression{ new CAstLiteral{ argLocations[i], applArgs[i] } };
-			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], std::move(expression));
+			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], applArgs[i]);
 		}
 
 		// 3.3. Execute the function.
