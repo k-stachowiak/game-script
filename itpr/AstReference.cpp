@@ -17,5 +17,10 @@ namespace itpr {
 		return scope.GetValue(m_symbol);
 	}
 
+	void CAstReference::GetUsedSymbols(std::vector<std::string>& symbols) const
+	{
+		symbols.push_back(m_symbol);
+	}
+
 }
 }

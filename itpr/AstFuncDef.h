@@ -21,6 +21,7 @@ namespace itpr {
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
 		CValue Execute(CScope& scope, CStack& stack) const override;
+		void GetUsedSymbols(std::vector<std::string>& symbols) const override;
 	};
 
 }

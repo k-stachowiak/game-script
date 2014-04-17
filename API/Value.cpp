@@ -17,6 +17,7 @@ namespace moon {
 		ECompoundType compoundType,
 		std::vector<CValue> compoundValues,
 		const itpr::CAstFunction* funcDef,
+		std::vector<std::pair<std::string, CValue>> funcCaptures,
 		std::vector<CValue> appliedArgs) :
 		m_type{ type },
 		m_integer{ integer },
@@ -27,6 +28,7 @@ namespace moon {
 		m_compoundType{ compoundType },
 		m_compoundValues{ compoundValues },
 		m_funcDef{ funcDef },
+		m_funcCaptures{ funcCaptures },
 		m_appliedArgs{ appliedArgs }
 	{}
 
@@ -35,7 +37,7 @@ namespace moon {
 		CValue result{
 			EValueType::INTEGER, value,
 			0, 0, {}, 0, ECompoundType::ARRAY, {},
-			nullptr, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -47,7 +49,7 @@ namespace moon {
 			0,
 			value,
 			0, {}, 0, ECompoundType::ARRAY, {},
-			nullptr, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -59,7 +61,7 @@ namespace moon {
 			0, 0,
 			value,
 			{}, 0, ECompoundType::ARRAY, {},
-			nullptr, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -71,7 +73,7 @@ namespace moon {
 			0, 0, 0,
 			value,
 			0, ECompoundType::ARRAY, {},
-			nullptr, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -83,7 +85,7 @@ namespace moon {
 			0, 0, 0, {},
 			value,
 			ECompoundType::ARRAY, {},
-			nullptr, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -94,18 +96,21 @@ namespace moon {
 			EValueType::COMPOUND,
 			0, 0, 0, {}, 0,
 			type, values,
-			nullptr, {}
+			nullptr, {}, {}
 		};
 
 		return result;
 	}
 	
-	CValue CValue::MakeFunction(const itpr::CAstFunction* funcDef, std::vector<CValue> appliedArgs)
+	CValue CValue::MakeFunction(
+			const itpr::CAstFunction* funcDef,
+			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+			std::vector<CValue> appliedArgs)
 	{
 		CValue result{
 			EValueType::FUNCTION,
 			0, 0, 0, {}, 0, ECompoundType::ARRAY, {},
-			funcDef, appliedArgs
+			funcDef, funcCaptures, appliedArgs
 		};
 
 		return result;

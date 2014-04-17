@@ -26,6 +26,11 @@ namespace itpr {
 		return result;
 	}
 
+	void CAstBind::GetUsedSymbols(std::vector<std::string>& symbols) const
+	{
+		m_expression->GetUsedSymbols(symbols);
+	}
+
 	const CAstNode& CAstBind::GetExpression() const
 	{
 		return *m_expression;

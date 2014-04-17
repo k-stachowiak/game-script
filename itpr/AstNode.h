@@ -25,6 +25,7 @@ namespace itpr {
 		virtual ~CAstNode()	{}
 
 		virtual CValue Evaluate(CScope& scope, CStack& stack) const = 0;
+		virtual void GetUsedSymbols(std::vector<std::string>& symbols) const = 0;
 	};
 
 }

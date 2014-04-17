@@ -40,6 +40,7 @@ namespace moon {
 		std::vector<CValue> m_compoundValues;
 
 		const itpr::CAstFunction* m_funcDef = nullptr;
+		std::vector<std::pair<std::string, CValue>> m_funcCaptures;
 		std::vector<CValue> m_appliedArgs;
 
 		CValue(
@@ -52,6 +53,7 @@ namespace moon {
 			ECompoundType compoundType,
 			std::vector<CValue> compoundValues,
 			const itpr::CAstFunction* funcDef,
+			std::vector<std::pair<std::string, CValue>> funcCaptures,
 			std::vector<CValue> appliedArgs);
 
 	public:
@@ -61,7 +63,10 @@ namespace moon {
 		static CValue MakeString(std::string value);
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
-		static CValue MakeFunction(const itpr::CAstFunction* funcDef, std::vector<CValue> appliedArgs);
+		static CValue MakeFunction(
+			const itpr::CAstFunction* funcDef,
+			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+			std::vector<CValue> appliedArgs);
 
 		friend bool IsCompound(const CValue& value)
 		{
@@ -105,6 +110,7 @@ namespace moon {
 		
 		unsigned GetFuncArity() const;
 		const itpr::CAstFunction& GetFuncDef() const { return *m_funcDef; }
+		const std::vector<std::pair<std::string, CValue>>& GetFuncCaptures() const { return m_funcCaptures; }
 		const std::vector<CValue>& GetAppliedArgs() const { return m_appliedArgs; }
 	};
 

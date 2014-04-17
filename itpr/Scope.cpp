@@ -39,6 +39,19 @@ namespace itpr {
 		}
 	}
 
+	std::vector<std::pair<std::string, CValue>>
+	CLocalScope::FindNonGlobalValues(const std::vector<std::string>& names) const
+	{
+		std::vector<std::pair<std::string, CValue>> result;
+		for(const std::string& name : names) {
+			auto found = t_binds.find(name);
+			if (found != end(t_binds)) {
+				result.push_back(*found);
+			}
+		}
+		return result;
+	}
+
 	const CValue& CLocalScope::GetValue(const std::string& name)
 	{
 		if (t_binds.find(name) == end(t_binds)) {
@@ -48,6 +61,7 @@ namespace itpr {
 		}
 	}
 
+	// TODO: Clean up the below, store the locations with the captures.
 	CValue CallFunction(
 		CScope& scope,
 		CStack& stack,
@@ -70,12 +84,14 @@ namespace itpr {
 		// 2. Passed less than needed - curry on ;-).
 		// ------------------------------------------
 
-		const CAstFunction& functionDef = functionValue.GetFuncDef();
-		std::vector<CValue> applArgs = functionValue.GetAppliedArgs();
+		auto& functionDef = functionValue.GetFuncDef();
+		auto applArgs = functionValue.GetAppliedArgs();		
 		std::copy(begin(argValues), end(argValues), std::back_inserter(applArgs));
 
+		const auto& captures = functionValue.GetFuncCaptures();
+
 		if (argValues.size() < functionValue.GetFuncArity()) {
-			return CValue::MakeFunction(&functionDef, applArgs);
+			return CValue::MakeFunction(&functionDef, captures, applArgs);
 		}
 
 		// 3. Passed the exact amount needed for the execution.
@@ -91,6 +107,13 @@ namespace itpr {
 		CLocalScope funcScope{ scope.GetGlobalScope() };
 		for (unsigned i = 0; i < argsCount; ++i) {
 			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], applArgs[i]);
+		}
+		for (const auto& capture : captures) {
+			funcScope.TryRegisteringBind(
+				CSourceLocation::MakeRegular(666, -666),
+				stack,
+				capture.first,
+				capture.second);
 		}
 
 		// 3.3. Execute the function.

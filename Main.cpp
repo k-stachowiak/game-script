@@ -284,7 +284,9 @@ int main()
 		std::printf("Passed\n");
 	}
 
-	std::printf("\nChecks:\n");
+	std::printf("\n");
+
+	std::printf("Checks:\n");
 	for (const auto& pr : optionals) {
 		std::printf("%s... ", pr.first.c_str());
 		if (pr.second()) {

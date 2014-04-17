@@ -32,5 +32,12 @@ namespace itpr {
 		return CValue::MakeCompound(m_type, values);
 	}
 
+	void CAstCompound::GetUsedSymbols(std::vector<std::string>& symbols) const
+	{
+		for (const auto& expression : m_expressions) {
+			expression->GetUsedSymbols(symbols);
+		}
+	}
+
 }
 }

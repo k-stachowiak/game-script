@@ -34,20 +34,36 @@ namespace itpr {
 
 		virtual CGlobalScope& GetGlobalScope() = 0;
 
+		virtual std::vector<std::pair<std::string, CValue>>
+		FindNonGlobalValues(const std::vector<std::string>& names) const = 0;
+
 		virtual const CValue& GetValue(const std::string& name) = 0;
 	};
 
 	class CGlobalScope : public CScope {
 	public:
 		CGlobalScope& GetGlobalScope() { return *this; }
+
+		std::vector<std::pair<std::string, CValue>>
+		FindNonGlobalValues(const std::vector<std::string>&) const
+		{
+			return {};
+		}
+
 		const CValue& GetValue(const std::string& name);
 	};
 
 	class CLocalScope : public CScope {
 		CGlobalScope& m_globalScope;
+
 	public:
 		CLocalScope(CGlobalScope& globalScope) : m_globalScope(globalScope) {}
+
 		CGlobalScope& GetGlobalScope() { return m_globalScope; }
+
+		std::vector<std::pair<std::string, CValue>>
+		FindNonGlobalValues(const std::vector<std::string>& names) const;
+
 		const CValue& GetValue(const std::string& name);
 	};
 

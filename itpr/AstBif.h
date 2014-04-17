@@ -35,6 +35,7 @@ namespace bif {
 			m_realImplementation{ realImplementation }
 		{}
 
+		void GetUsedSymbols(std::vector<std::string>&) const override {}
 		CValue Execute(CScope& scope, CStack& stack) const override;
 	};
 
@@ -58,6 +59,7 @@ namespace bif {
 			m_realImplementation{ realImplementation }
 		{}
 
+		void GetUsedSymbols(std::vector<std::string>&) const {}
 		CValue Execute(CScope& scope, CStack& stack) const override;
 	};
 
