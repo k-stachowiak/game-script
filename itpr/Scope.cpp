@@ -11,59 +11,13 @@
 namespace moon {
 namespace itpr {
 
-	std::pair<CValue, CScope*> CScope::m_GetScopedBind(const std::string& name)
-	{
-		if (m_binds.find(name) == end(m_binds)) {
-			if (!m_parent) {
-				throw std::invalid_argument{ name };
-			}
-			else {
-				return m_parent->m_GetScopedBind(name);
-			}
-		}
-
-		return std::make_pair(m_binds[name], this);
-	}
-
-	std::pair<CValue, CScope*> CScope::m_AcquireFunction(
-		CStack& stack,
-		const CSourceLocation& location,
-		const std::string& symbol)
-	{
-		// TODO: Reduce the complexity of the below
-		//       or rewrite to be more clear.
-
-		CValue functionValue;
-		CScope* scope;
-		try {
-			std::tie(functionValue, scope) = m_GetScopedBind(symbol);
-		}
-		catch (const std::invalid_argument&) {
-			throw ExScopeSymbolNotRegistered{ location, stack };
-		}
-
-		if (!IsFunction(functionValue)) {
-			throw ExScopeSymbolIsNotFunction{ location, stack };
-		}
-
-		return std::make_pair(functionValue, scope);
-	}
-
-	CScope::CScope() :
-		m_parent{ nullptr }
-	{}
-
-	CScope::CScope(CScope* parent) :
-		m_parent{ parent }
-	{}
-
 	void CScope::TryRegisteringBind(
 			const CSourceLocation& location,
 			const CStack& stack,
 			const std::string& name,
 			const CValue& value)
 	{
-		if (m_binds.find(name) != end(m_binds)) {
+		if (t_binds.find(name) != end(t_binds)) {
 			throw ExScopeSymbolAlreadyRegistered{ location, stack };
 		}
 		RegisterBind(name, value);
@@ -73,40 +27,44 @@ namespace itpr {
 		const std::string& name,
 		const CValue& value)
 	{
-		m_binds[name] = value;
+		t_binds[name] = value;
 	}
 
-	const CValue& CScope::GetValue(const std::string& name)
+	const CValue& CGlobalScope::GetValue(const std::string& name)
 	{
-		if (m_binds.find(name) == end(m_binds)) {
-			if (!m_parent) {
-				throw std::invalid_argument{ name };
-			}
-			else {
-				return m_parent->GetValue(name);
-			}
+		if (t_binds.find(name) == end(t_binds)) {
+			throw std::invalid_argument{ name };
+		} else {
+			return t_binds[name];
 		}
-
-		return m_binds[name];
 	}
 
-	CValue CScope::CallFunction(
+	const CValue& CLocalScope::GetValue(const std::string& name)
+	{
+		if (t_binds.find(name) == end(t_binds)) {
+			return m_globalScope.GetValue(name);
+		} else {
+			return t_binds[name];
+		}
+	}
+
+	CValue CallFunction(
+		CScope& scope,
 		CStack& stack,
 		const CSourceLocation& location,
 		const std::string& symbol,
 		const std::vector<CValue>& argValues)
 	{
+		CValue functionValue = scope.GetValue(symbol);
+		if (!IsFunction(functionValue)) {
+			throw ExScopeSymbolIsNotFunction{ location, stack };
+		}
+
 		// 1. Passed more than can be applied - error.
 		// -------------------------------------------
 
-		CValue functionValue;
-		CScope* scope;
-		std::tie(functionValue, scope) = m_AcquireFunction(stack, location, symbol);
 		if (argValues.size() > functionValue.GetFuncArity()) {
-			throw ExScopeFormalActualArgCountMismatch{
-				location,
-				stack
-			};
+			throw ExScopeFormalActualArgCountMismatch{ location, stack };
 		}
 
 		// 2. Passed less than needed - curry on ;-).
@@ -130,7 +88,7 @@ namespace itpr {
 		unsigned argsCount = argNames.size();
 
 		// 3.2. Build local scope for the function.
-		CScope funcScope{ scope };
+		CLocalScope funcScope{ scope.GetGlobalScope() };
 		for (unsigned i = 0; i < argsCount; ++i) {
 			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], applArgs[i]);
 		}

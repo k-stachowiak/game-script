@@ -52,26 +52,28 @@ namespace moon {
 		itpr::CStack& stack, itpr::CScope& scope)
 	{
 		for (auto&& pr : map) {
-			scope.TryRegisteringBind(
-				pr.second->GetLocation(),
-				stack,
-				pr.first,
-				pr.second->Evaluate(scope, stack));
+
+			CValue value = pr.second->Evaluate(scope, stack);
 
 			// Store the pointer so that the function pointers in the CValue remain valid.
 			// Note that it is only possible because the map is passed in as an rvalue reference.
 			// Also note that this is quite suspicious and is a candidate for refactoring.
-			itpr::CAstFunction* maybeFunction = dynamic_cast<itpr::CAstFunction*>(pr.second.get());
+			itpr::CAstFunction* maybeFunction =
+				dynamic_cast<itpr::CAstFunction*>(pr.second.get());
+
 			if (maybeFunction) {
 				pr.second.release();
-				m_functions.push_back(std::unique_ptr<itpr::CAstFunction>(maybeFunction));
+				m_functions.push_back(std::shared_ptr<itpr::CAstFunction>(maybeFunction));
 			}
+
+			scope.TryRegisteringBind(
+				m_functions.back()->GetLocation(), stack, pr.first, value);
 		}
 	}
 
-	std::unique_ptr<itpr::CScope> CEngine::m_BuildUnitScope(const std::string& source)
+	std::unique_ptr<itpr::CGlobalScope> CEngine::m_BuildUnitScope(const std::string& source)
 	{
-		auto unit = std::unique_ptr<itpr::CScope> { new itpr::CScope() };
+		auto unit = std::unique_ptr<itpr::CGlobalScope> { new itpr::CGlobalScope() };
 
 		itpr::CStack stack;
 		m_InjectMapToScope(itpr::bif::BuildBifMap(), stack, *unit);
@@ -144,7 +146,8 @@ namespace moon {
 	{
 		auto* unitScope = m_GetUnit(unitName);
 		itpr::CStack stack;
-		return unitScope->CallFunction(
+		return itpr::CallFunction(
+			*unitScope,
 			stack,
 			CSourceLocation::MakeExternalInvoke(),
 			symbol,

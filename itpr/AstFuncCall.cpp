@@ -25,7 +25,7 @@ namespace itpr {
 		for (const auto& arg : m_actualArgs) {
 			values.push_back(arg->Evaluate(scope, stack));
 		}
-		return scope.CallFunction(stack, GetLocation(), m_symbol, values);
+		return itpr::CallFunction(scope, stack, GetLocation(), m_symbol, values);
 	}
 
 }

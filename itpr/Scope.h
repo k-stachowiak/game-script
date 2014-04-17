@@ -14,20 +14,13 @@
 namespace moon {
 namespace itpr {
 
+	class CGlobalScope;
+
 	class CScope {
-		CScope* m_parent;
-		std::map<std::string, CValue> m_binds;
-
-		std::pair<CValue, CScope*> m_GetScopedBind(const std::string& name);
-
-		std::pair<CValue, CScope*> m_AcquireFunction(
-			CStack& stack,
-			const CSourceLocation& location,
-			const std::string& symbol);
-
+	protected:
+		std::map<std::string, CValue> t_binds;
 	public:
-		CScope();
-		CScope(CScope* parent);
+		virtual ~CScope() {}
 
 		void TryRegisteringBind(
 			const CSourceLocation& location,
@@ -39,15 +32,31 @@ namespace itpr {
 			const std::string& name,
 			const CValue& value);
 
-		const CValue& GetValue(const std::string& name);
+		virtual CGlobalScope& GetGlobalScope() = 0;
 
-		CValue CallFunction(
-				CStack& stack,
-				const CSourceLocation& location,
-				const std::string& symbol,
-				const std::vector<CValue>& argValues);
+		virtual const CValue& GetValue(const std::string& name) = 0;
 	};
 
+	class CGlobalScope : public CScope {
+	public:
+		CGlobalScope& GetGlobalScope() { return *this; }
+		const CValue& GetValue(const std::string& name);
+	};
+
+	class CLocalScope : public CScope {
+		CGlobalScope& m_globalScope;
+	public:
+		CLocalScope(CGlobalScope& globalScope) : m_globalScope(globalScope) {}
+		CGlobalScope& GetGlobalScope() { return m_globalScope; }
+		const CValue& GetValue(const std::string& name);
+	};
+
+	CValue CallFunction(
+		CScope& scope,
+		CStack& stack,
+		const CSourceLocation& location,
+		const std::string& symbol,
+		const std::vector<CValue>& argValues);
 }
 }
 
