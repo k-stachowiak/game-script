@@ -32,6 +32,8 @@ namespace sexpr {
 		}
 	}
 
+	// TODO: Implement character parsing.
+
 	bool ParseLiteralInteger(const std::string& atom, CValue& result)
 	{
 		auto it = begin(atom);

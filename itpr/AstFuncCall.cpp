@@ -2,6 +2,7 @@
 
 #include "AstFuncCall.h"
 
+#include "Algorithm.h"
 #include "AstFunction.h"
 #include "AstLiteral.h"
 #include "Scope.h"

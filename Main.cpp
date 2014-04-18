@@ -10,7 +10,8 @@
 #include "API/Exceptions.h"
 
 /* TODO:
- * - Detect non-global captures and store them with function value.
+ * - Move the ast classes to a separate directory.
+ * - Associate source code location with each value - is it even possible?
  * - Store all values on stack and introduce references.
  */
 

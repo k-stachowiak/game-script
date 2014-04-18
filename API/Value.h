@@ -12,6 +12,9 @@ namespace moon {
 		class CScope;
 	}
 
+	class CSourceLocation;
+	class CValue;
+
 	enum class EValueType {
 		INTEGER,
 		REAL,
@@ -27,7 +30,19 @@ namespace moon {
 		TUPLE
 	};
 
+	struct SCompoundValue {
+		ECompoundType type;
+		std::vector<CValue> values;
+	};
+
+	struct SFunctionValue {
+		const itpr::CAstFunction* definition;
+		std::vector<std::pair<std::string, CValue>> captures;
+		std::vector<CValue> appliedArgs;
+	};
+
 	class CValue {
+
 		EValueType m_type = EValueType::INTEGER;
 
 		long m_integer = -1;
@@ -35,13 +50,8 @@ namespace moon {
 		char m_character = -1;
 		std::string m_string;
 		int m_boolean = -1;
-
-		ECompoundType m_compoundType = ECompoundType::ARRAY;
-		std::vector<CValue> m_compoundValues;
-
-		const itpr::CAstFunction* m_funcDef = nullptr;
-		std::vector<std::pair<std::string, CValue>> m_funcCaptures;
-		std::vector<CValue> m_appliedArgs;
+		SCompoundValue m_compound;
+		SFunctionValue m_function;
 
 		CValue(
 			EValueType type,
@@ -51,10 +61,10 @@ namespace moon {
 			std::string string,
 			int boolean,
 			ECompoundType compoundType,
-			std::vector<CValue> compoundValues,
-			const itpr::CAstFunction* funcDef,
-			std::vector<std::pair<std::string, CValue>> funcCaptures,
-			std::vector<CValue> appliedArgs);
+			const std::vector<CValue>& compoundValues,
+			const itpr::CAstFunction* funcDefinition,
+			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+			const std::vector<CValue>& funcAppliedArgs);
 
 	public:
 		static CValue MakeInteger(long value);
@@ -68,30 +78,12 @@ namespace moon {
 			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
 			std::vector<CValue> appliedArgs);
 
-		friend bool IsCompound(const CValue& value)
-		{
-			return value.m_type == EValueType::COMPOUND;
-		}
+		friend bool IsCompound(const CValue& value) { return value.m_type == EValueType::COMPOUND; }
+		friend bool IsAtomic(const CValue& value) { return value.m_type != EValueType::COMPOUND; }
 
-		friend bool IsAtomic(const CValue& value)
-		{
-			return value.m_type != EValueType::COMPOUND;
-		}
-
-		friend bool IsFunction(const CValue& value)
-		{
-			return value.m_type == EValueType::FUNCTION;
-		}
-
-		friend bool IsInteger(const CValue& value)
-		{
-			return value.GetType() == EValueType::INTEGER;
-		}
-
-		friend bool IsReal(const CValue& value)
-		{
-			return value.GetType() == EValueType::REAL;
-		}
+		friend bool IsFunction(const CValue& value) { return value.m_type == EValueType::FUNCTION; }
+		friend bool IsInteger(const CValue& value) { return value.GetType() == EValueType::INTEGER; }
+		friend bool IsReal(const CValue& value) { return value.GetType() == EValueType::REAL; }
 
 		static bool TypesEqual(const CValue& lhs, const CValue& rhs);
 
@@ -105,13 +97,13 @@ namespace moon {
 		const std::string& GetString() const { return m_string; }
 		int GetBoolean() const { return m_boolean; }
 
-		ECompoundType GetCompoundType() const { return m_compoundType; }
-		const std::vector<CValue>& GetCompound() const { return m_compoundValues; }
+		ECompoundType GetCompoundType() const { return m_compound.type; }
+		const std::vector<CValue>& GetCompound() const { return m_compound.values; }
 		
 		unsigned GetFuncArity() const;
-		const itpr::CAstFunction& GetFuncDef() const { return *m_funcDef; }
-		const std::vector<std::pair<std::string, CValue>>& GetFuncCaptures() const { return m_funcCaptures; }
-		const std::vector<CValue>& GetAppliedArgs() const { return m_appliedArgs; }
+		const itpr::CAstFunction& GetFuncDef() const { return *(m_function.definition); }
+		const std::vector<std::pair<std::string, CValue>>& GetFuncCaptures() const { return m_function.captures; }
+		const std::vector<CValue>& GetAppliedArgs() const { return m_function.appliedArgs; }
 	};
 
 }

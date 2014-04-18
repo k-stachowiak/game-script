@@ -7,6 +7,7 @@
 #include "Exceptions.h"
 #include "MoonEngine.h"
 #include "../parse/ParserBase.h"
+#include "../itpr/Algorithm.h"
 #include "../itpr/AstFuncDef.h"
 #include "../itpr/AstBind.h"
 #include "../itpr/Scope.h"

@@ -18,6 +18,7 @@ namespace itpr {
 
 	class CScope {
 	protected:
+		// TODO: Define a complex time for the value here - storing the location.
 		std::map<std::string, CValue> t_binds;
 	public:
 		virtual ~CScope() {}
@@ -67,12 +68,7 @@ namespace itpr {
 		const CValue& GetValue(const std::string& name);
 	};
 
-	CValue CallFunction(
-		CScope& scope,
-		CStack& stack,
-		const CSourceLocation& location,
-		const std::string& symbol,
-		const std::vector<CValue>& argValues);
+
 }
 }
 
