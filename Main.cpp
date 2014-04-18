@@ -10,7 +10,6 @@
 #include "API/Exceptions.h"
 
 /* TODO:
- * - Detect non-global captures and store them with function value.
  * - Store all values on stack and introduce references.
  */
 

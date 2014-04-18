@@ -67,12 +67,7 @@ namespace itpr {
 		const CValue& GetValue(const std::string& name);
 	};
 
-	CValue CallFunction(
-		CScope& scope,
-		CStack& stack,
-		const CSourceLocation& location,
-		const std::string& symbol,
-		const std::vector<CValue>& argValues);
+
 }
 }
 

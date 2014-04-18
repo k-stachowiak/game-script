@@ -15,28 +15,26 @@ namespace moon {
 		std::string string,
 		int boolean,
 		ECompoundType compoundType,
-		std::vector<CValue> compoundValues,
-		const itpr::CAstFunction* funcDef,
-		std::vector<std::pair<std::string, CValue>> funcCaptures,
-		std::vector<CValue> appliedArgs) :
+		const std::vector<CValue>& compoundValues,
+		const itpr::CAstFunction* funcDefinition,
+		const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+		const std::vector<CValue>& funcAppliedArgs) :
 		m_type{ type },
 		m_integer{ integer },
 		m_real{ real },
 		m_character{ character },
 		m_string{ string },
 		m_boolean{ boolean },
-		m_compoundType{ compoundType },
-		m_compoundValues{ compoundValues },
-		m_funcDef{ funcDef },
-		m_funcCaptures{ funcCaptures },
-		m_appliedArgs{ appliedArgs }
+		m_compound{ compoundType, compoundValues },
+		m_function{ funcDefinition, funcCaptures, funcAppliedArgs }
 	{}
 
 	CValue CValue::MakeInteger(long value)
 	{
 		CValue result{
 			EValueType::INTEGER, value,
-			0, 0, {}, 0, ECompoundType::ARRAY, {},
+			0, 0, {}, 0,
+			ECompoundType::ARRAY, {},
 			nullptr, {}, {}
 		};
 		return result;
@@ -48,7 +46,8 @@ namespace moon {
 			EValueType::REAL,
 			0,
 			value,
-			0, {}, 0, ECompoundType::ARRAY, {},
+			0, {}, 0,
+			ECompoundType::ARRAY, {},
 			nullptr, {}, {}
 		};
 		return result;
@@ -60,7 +59,8 @@ namespace moon {
 			EValueType::CHARACTER,
 			0, 0,
 			value,
-			{}, 0, ECompoundType::ARRAY, {},
+			{}, 0,
+			ECompoundType::ARRAY, {},
 			nullptr, {}, {}
 		};
 		return result;
@@ -72,7 +72,8 @@ namespace moon {
 			EValueType::STRING,
 			0, 0, 0,
 			value,
-			0, ECompoundType::ARRAY, {},
+			0,
+			ECompoundType::ARRAY, {},
 			nullptr, {}, {}
 		};
 		return result;
@@ -109,7 +110,8 @@ namespace moon {
 	{
 		CValue result{
 			EValueType::FUNCTION,
-			0, 0, 0, {}, 0, ECompoundType::ARRAY, {},
+			0, 0, 0, {}, 0,
+			ECompoundType::ARRAY, {},
 			funcDef, funcCaptures, appliedArgs
 		};
 
@@ -124,15 +126,15 @@ namespace moon {
 		} else if (IsCompound(lhs) && IsCompound(rhs)) {
 
 			// Compare compound types and sizes.
-			if (lhs.m_compoundType != rhs.m_compoundType ||
-				lhs.m_compoundValues.size() != rhs.m_compoundValues.size()) {
+			if (lhs.m_compound.type != rhs.m_compound.type ||
+				lhs.m_compound.values.size() != rhs.m_compound.values.size()) {
 				return false;
 			}
 
 			// Compare child-wise.
-			unsigned commonSize = lhs.m_compoundValues.size();
+			unsigned commonSize = lhs.m_compound.values.size();
 			for (unsigned i = 0; i < commonSize; ++i) {
-				if (!TypesEqual(lhs.m_compoundValues[i], rhs.m_compoundValues[i])) {
+				if (!TypesEqual(lhs.m_compound.values[i], rhs.m_compound.values[i])) {
 					return false;
 				}
 			}
@@ -149,7 +151,7 @@ namespace moon {
 
 	unsigned CValue::GetFuncArity() const
 	{
-		return m_funcDef->GetArgsCount() - m_appliedArgs.size();
+		return m_function.definition->GetArgsCount() - m_function.appliedArgs.size();
 	}
 
 }
