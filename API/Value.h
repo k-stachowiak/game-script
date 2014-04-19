@@ -33,12 +33,19 @@ namespace moon {
 	struct SCompoundValue {
 		ECompoundType type;
 		std::vector<CValue> values;
+		SCompoundValue() = default;
+		SCompoundValue(ECompoundType new_type, std::vector<CValue> new_values);
 	};
 
 	struct SFunctionValue {
 		const itpr::CAstFunction* definition;
 		std::vector<std::pair<std::string, CValue>> captures;
 		std::vector<CValue> appliedArgs;
+		SFunctionValue() = default;
+		SFunctionValue(
+			const itpr::CAstFunction* new_definition,
+			std::vector<std::pair<std::string, CValue>> new_captures,
+			std::vector<CValue> new_appliedArgs);
 	};
 
 	class CValue {

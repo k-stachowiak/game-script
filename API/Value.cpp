@@ -7,6 +7,17 @@
 
 namespace moon {
 
+	SCompoundValue::SCompoundValue(ECompoundType new_type, std::vector<CValue> new_values) :
+		type{ new_type }, values{ new_values }
+	{}
+
+	SFunctionValue::SFunctionValue(
+		const itpr::CAstFunction* new_definition,
+		std::vector<std::pair<std::string, CValue>> new_captures,
+		std::vector<CValue> new_appliedArgs) :
+		definition{ new_definition }, captures{ new_captures }, appliedArgs{ new_appliedArgs }
+	{}
+
 	CValue::CValue(
 		EValueType type,
 		long integer,
