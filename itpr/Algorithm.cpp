@@ -12,60 +12,52 @@ namespace itpr {
 		const std::string& symbol,
 		const std::vector<CValue>& argValues)
 	{
-		// TODO: Fix the wtf chaos below!
-
+		// Analyze function value.
 		CValue functionValue = scope.GetValue(symbol, location, stack);
 		if (!IsFunction(functionValue)) {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
 		}
 
-		// 1. Passed more than can be applied - error.
-		// -------------------------------------------
-
 		if (argValues.size() > functionValue.GetFuncArity()) {
 			throw ExScopeFormalActualArgCountMismatch{ location, stack };
 		}
 
-		// 2. Passed less than needed - curry on ;-).
-		// ------------------------------------------
-
-		auto& functionDef = functionValue.GetFuncDef();
+		// Analyze function definition.
+		const auto& functionDef = functionValue.GetFuncDef();
+		const auto& captures = functionValue.GetFuncCaptures();
 		auto applArgs = functionValue.GetAppliedArgs();
 		std::copy(begin(argValues), end(argValues), std::back_inserter(applArgs));
 
-		std::vector<std::string> capNames;
-		std::vector<CValue> capValues;
-		std::vector<CSourceLocation> capLocations;
-		functionValue.GetFuncCaptures(capNames, capValues, capLocations);
-		unsigned capCount = capNames.size();
-
 		if (argValues.size() < functionValue.GetFuncArity()) {
-			return CValue::MakeFunction(&functionDef, capNames, capValues, capLocations, applArgs);
+			// "Curry on"...			
+			return CValue::MakeFunction(&functionDef, captures, applArgs);
 		}
 
-		// 3. Passed the exact amount needed for the execution.
-		// ----------------------------------------------------
-
-		// 3.1. Analyze args.
-		const std::vector<std::string>& argNames = functionDef.GetFormalArgs();
-		const std::vector<CSourceLocation>& argLocations = functionDef.GetArgLocations();
+		// Call function
+		const auto& argNames = functionDef.GetFormalArgs();
+		const auto& argLocations = functionDef.GetArgLocations();
 		assert(argNames.size() == argLocations.size());
+
 		unsigned argsCount = argNames.size();
 
-		// 3.2. Build local scope for the function.
 		CLocalScope funcScope{ scope.GetGlobalScope() };
+
 		for (unsigned i = 0; i < argsCount; ++i) {
-			funcScope.TryRegisteringBind(stack, argNames[i], applArgs[i], argLocations[i]);
-		}
-		for (unsigned i = 0; i < capCount; ++i) {
 			funcScope.TryRegisteringBind(
-				stack,
-				capNames[i],
-				capValues[i],
-				capLocations[i]);
+				stack, 
+				argNames[i], 
+				applArgs[i], 
+				argLocations[i]);
 		}
 
-		// 3.3. Execute the function.
+		for (const auto& pr : captures) {
+			funcScope.TryRegisteringBind(
+				stack, 
+				pr.first, 
+				pr.second.value, 
+				pr.second.location);
+		}
+
 		stack.Push(symbol);
 		CValue result = functionDef.Execute(funcScope, stack);
 		stack.Pop();

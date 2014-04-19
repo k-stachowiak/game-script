@@ -19,13 +19,8 @@ CValue CAstFunction::Evaluate(CScope& scope, CStack&) const
 {
 	std::vector<std::string> symbols;
 	GetUsedSymbols(symbols);
-
-	std::vector<std::string> names;
-	std::vector<CValue> values;
-	std::vector<CSourceLocation> locations;
-	scope.FindNonGlobalValues(symbols, names, values, locations);
-
-	return CValue::MakeFunction(this, names, values, locations, {});
+	auto captures = scope.CaptureNonGlobals(symbols);
+	return CValue::MakeFunction(this, captures, {});
 }
 
 const std::vector<std::string>& CAstFunction::GetFormalArgs() const

@@ -11,8 +11,7 @@
 
 /* TODO:
  * - Move the ast classes to a separate directory.
- * - Associate source code location with each value - is it even possible?
- * - Store all values on stack and introduce references.
+ * - Store all values on stack.
  */
 
 bool IsClose(double x, double y)

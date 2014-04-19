@@ -3,6 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <map>
+
+#include "../common/SourceLocation.h"
 
 namespace moon {
 
@@ -11,8 +14,8 @@ namespace moon {
 		class CScope;
 	}
 
-	class CSourceLocation;
 	class CValue;
+	struct SCapture;
 
 	enum class EValueType {
 		INTEGER,
@@ -38,16 +41,12 @@ namespace moon {
 
 	struct SFunctionValue {
 		const itpr::CAstFunction* definition = nullptr;
-		std::vector<std::string> capNames;
-		std::vector<CValue> capValues;
-		std::vector<CSourceLocation> capLocations;
+		std::map<std::string, SCapture> captures;
 		std::vector<CValue> appliedArgs;
 		SFunctionValue() = default;
 		SFunctionValue(
 			const itpr::CAstFunction* new_definition,
-			std::vector<std::string> new_capNames,
-			std::vector<CValue> new_capValues,
-			std::vector<CSourceLocation> new_capLocations,
+			std::map<std::string, SCapture> new_captures,
 			std::vector<CValue> new_appliedArgs);
 	};
 
@@ -71,12 +70,10 @@ namespace moon {
 			std::string string,
 			int boolean,
 			ECompoundType compoundType,
-			const std::vector<CValue>& compoundValues,
+			std::vector<CValue> compoundValues,
 			const itpr::CAstFunction* funcDefinition,
-			const std::vector<std::string>& funcCapNames,
-			const std::vector<CValue>& funcCapValues,
-			const std::vector<CSourceLocation>& funcCapLocations,
-			const std::vector<CValue>& funcAppliedArgs);
+			std::map<std::string, SCapture> funcCaptures,
+			std::vector<CValue> funcAppliedArgs);
 
 	public:
 		static CValue MakeInteger(long value);
@@ -84,13 +81,11 @@ namespace moon {
 		static CValue MakeCharacter(char value);
 		static CValue MakeString(std::string value);
 		static CValue MakeBoolean(int value);
-		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
+		static CValue MakeCompound(ECompoundType type, const std::vector<CValue>& values);
 		static CValue MakeFunction(
 			const itpr::CAstFunction* definition,
-			std::vector<std::string> capNames,
-			std::vector<CValue> capValues,
-			std::vector<CSourceLocation> capLocations,
-			std::vector<CValue> appliedArgs);
+			const std::map<std::string, SCapture>& captures,
+			const std::vector<CValue>& appliedArgs);
 
 		friend bool IsCompound(const CValue& value) { return value.m_type == EValueType::COMPOUND; }
 		friend bool IsAtomic(const CValue& value) { return value.m_type != EValueType::COMPOUND; }
@@ -117,10 +112,14 @@ namespace moon {
 		unsigned GetFuncArity() const;
 		const itpr::CAstFunction& GetFuncDef() const { return *(m_function.definition); }
 		const std::vector<CValue>& GetAppliedArgs() const { return m_function.appliedArgs; }
-		void GetFuncCaptures(
-				std::vector<std::string>& capNames,
-				std::vector<CValue>& capValues,
-				std::vector<CSourceLocation>& capLocations) const;
+		const std::map<std::string, SCapture>& GetFuncCaptures() const;
+	};
+
+	struct SCapture {
+		CValue value;
+		CSourceLocation location;
+		SCapture() = default;
+		SCapture(CValue new_value, CSourceLocation new_location);
 	};
 
 }

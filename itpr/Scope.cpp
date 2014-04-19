@@ -29,15 +29,7 @@ namespace itpr {
 		const CStack& stack)
 	{
 		return GetValueStore(name, location, stack).value;
-	}
-
-	CSourceLocation CScope::GetLocation(
-		const std::string& name,
-		const CSourceLocation& location,
-		const CStack& stack)
-	{
-		return GetValueStore(name, location, stack).location;
-	}
+	} 
 
 	const SValueStore CGlobalScope::GetValueStore(
 		const std::string& name,
@@ -64,23 +56,22 @@ namespace itpr {
 		}
 	}
 
-	void CLocalScope::FindNonGlobalValues(
-		const std::vector<std::string>& in_names,
-		std::vector<std::string>& names,
-		std::vector<CValue>& values,
-		std::vector<CSourceLocation>& locations) const
+	std::map<std::string, SCapture>
+	CLocalScope::CaptureNonGlobals(const std::vector<std::string>& names) const
 	{
-		std::vector<std::pair<std::string, CValue>> result;
-		for(const std::string& in_name : in_names) {
-			auto found = t_binds.find(in_name);
+		std::map<std::string, SCapture> result;
+		for(const std::string& name : names) {
+			auto found = t_binds.find(name);
 			if (found == end(t_binds)) {
 				continue;
 			} else {
-				names.push_back(found->first);
-				values.push_back(found->second.value);
-				locations.push_back(found->second.location);
+				result[name] = {
+					found->second.value,
+					found->second.location
+				};
 			}
 		}
+		return result;
 	}
 
 }

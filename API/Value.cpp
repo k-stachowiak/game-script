@@ -7,20 +7,19 @@
 
 namespace moon {
 
-	SCompoundValue::SCompoundValue(ECompoundType new_type, std::vector<CValue> new_values) :
-		type{ new_type }, values{ new_values }
+	SCompoundValue::SCompoundValue(
+			ECompoundType new_type,
+			std::vector<CValue> new_values) :
+		type{ new_type },
+		values{ new_values }
 	{}
 
 	SFunctionValue::SFunctionValue(
 			const itpr::CAstFunction* new_definition,
-			std::vector<std::string> new_capNames,
-			std::vector<CValue> new_capValues,
-			std::vector<CSourceLocation> new_capLocations,
+			std::map<std::string, SCapture> new_captures,
 			std::vector<CValue> new_appliedArgs) :
 		definition{ new_definition },
-		capNames{ new_capNames },
-		capValues{ new_capValues },
-		capLocations{ new_capLocations },
+		captures{ new_captures },
 		appliedArgs{ new_appliedArgs }
 	{}
 
@@ -32,12 +31,10 @@ namespace moon {
 		std::string string,
 		int boolean,
 		ECompoundType compoundType,
-		const std::vector<CValue>& compoundValues,
+		std::vector<CValue> compoundValues,
 		const itpr::CAstFunction* funcDefinition,
-		const std::vector<std::string>& funcCapNames,
-		const std::vector<CValue>& funcCapValues,
-		const std::vector<CSourceLocation>& funcCapLocations,
-		const std::vector<CValue>& funcAppliedArgs) :
+		std::map<std::string, SCapture> funcCaptures,
+		std::vector<CValue> funcAppliedArgs) :
 		m_type{ type },
 		m_integer{ integer },
 		m_real{ real },
@@ -45,7 +42,7 @@ namespace moon {
 		m_string{ string },
 		m_boolean{ boolean },
 		m_compound{ compoundType, compoundValues },
-		m_function{ funcDefinition, funcCapNames, funcCapValues, funcCapLocations, funcAppliedArgs }
+		m_function{ funcDefinition, funcCaptures, funcAppliedArgs }
 	{}
 
 	CValue CValue::MakeInteger(long value)
@@ -54,7 +51,7 @@ namespace moon {
 			EValueType::INTEGER, value,
 			0, 0, {}, 0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}, {}, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -67,7 +64,7 @@ namespace moon {
 			value,
 			0, {}, 0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}, {}, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -80,7 +77,7 @@ namespace moon {
 			value,
 			{}, 0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}, {}, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -93,7 +90,7 @@ namespace moon {
 			value,
 			0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}, {}, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
@@ -105,18 +102,18 @@ namespace moon {
 			0, 0, 0, {},
 			value,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}, {}, {}
+			nullptr, {}, {}
 		};
 		return result;
 	}
 
-	CValue CValue::MakeCompound(ECompoundType type, std::vector<CValue> values)
+	CValue CValue::MakeCompound(ECompoundType type, const std::vector<CValue>& values)
 	{
 		CValue result{
 			EValueType::COMPOUND,
 			0, 0, 0, {}, 0,
 			type, values,
-			nullptr, {}, {}, {}, {}
+			nullptr, {}, {}
 		};
 
 		return result;
@@ -124,16 +121,14 @@ namespace moon {
 	
 	CValue CValue::MakeFunction(
 		const itpr::CAstFunction* definition,
-		std::vector<std::string> capNames,
-		std::vector<CValue> capValues,
-		std::vector<CSourceLocation> capLocations,
-		std::vector<CValue> appliedArgs)
+		const std::map<std::string, SCapture>& captures,
+		const std::vector<CValue>& appliedArgs)
 	{
 		CValue result{
 			EValueType::FUNCTION,
 			0, 0, 0, {}, 0,
 			ECompoundType::ARRAY, {},
-			definition, capNames, capValues, capLocations, appliedArgs
+			definition, captures, appliedArgs
 		};
 
 		return result;
@@ -175,14 +170,16 @@ namespace moon {
 		return m_function.definition->GetArgsCount() - m_function.appliedArgs.size();
 	}
 
-	void CValue::GetFuncCaptures(
-		std::vector<std::string>& capNames,
-		std::vector<CValue>& capValues,
-		std::vector<CSourceLocation>& capLocations) const
+	const std::map<std::string, SCapture>& CValue::GetFuncCaptures() const
 	{
-		capNames = m_function.capNames;
-		capValues = m_function.capValues;
-		capLocations = m_function.capLocations;
+		return m_function.captures;
 	}
+
+	SCapture::SCapture(
+			CValue new_value,
+			CSourceLocation new_location) :
+		value(new_value),
+		location(new_location)
+	{}
 
 }

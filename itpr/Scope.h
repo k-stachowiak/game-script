@@ -16,6 +16,7 @@ namespace itpr {
 
 	class CGlobalScope;
 
+	// TODO: this is identical to the SCapture. Merge the two?
 	struct SValueStore {
 		CValue value;
 		CSourceLocation location;
@@ -34,11 +35,8 @@ namespace itpr {
 
 		virtual CGlobalScope& GetGlobalScope() = 0;
 
-		virtual void FindNonGlobalValues(
-			const std::vector<std::string>& in_names,
-			std::vector<std::string>& names,
-			std::vector<CValue>& values,
-			std::vector<CSourceLocation>& locations) const = 0;
+		virtual std::map<std::string, SCapture>
+		CaptureNonGlobals(const std::vector<std::string>& names) const = 0;
 
 		void TryRegisteringBind(
 			const CStack& stack,
@@ -50,28 +48,22 @@ namespace itpr {
 			const std::string& name,
 			const CSourceLocation& location,
 			const CStack& stack);
-
-		CSourceLocation GetLocation(
-			const std::string& name,
-			const CSourceLocation& location,
-			const CStack& stack);
 	};
 
 	class CGlobalScope : public CScope {
 	public:
+		CGlobalScope& GetGlobalScope() override { return *this; }
+
 		const SValueStore GetValueStore(
 			const std::string& name,
 			const CSourceLocation& location,
 			const CStack& stack) const override;
 
-		CGlobalScope& GetGlobalScope() override { return *this; }
-
-		void FindNonGlobalValues(
-			const std::vector<std::string>&,
-			std::vector<std::string>&,
-			std::vector<CValue>&,
-			std::vector<CSourceLocation>&) const override
-		{}
+		std::map<std::string, SCapture>
+		CaptureNonGlobals(const std::vector<std::string>&) const override
+		{
+			return {};
+		}
 	};
 
 	class CLocalScope : public CScope {
@@ -80,18 +72,15 @@ namespace itpr {
 	public:
 		CLocalScope(CGlobalScope& globalScope) : m_globalScope(globalScope) {}
 		
+		CGlobalScope& GetGlobalScope() override { return m_globalScope; }
+
 		const SValueStore GetValueStore(
 			const std::string& name,
 			const CSourceLocation& location,
 			const CStack& stack) const override;
 
-		CGlobalScope& GetGlobalScope() override { return m_globalScope; }
-
-		void FindNonGlobalValues(
-			const std::vector<std::string>& in_names,
-			std::vector<std::string>& names,
-			std::vector<CValue>& values,
-			std::vector<CSourceLocation>& locations) const override;
+		std::map<std::string, SCapture>
+		CaptureNonGlobals(const std::vector<std::string>& names) const override;
 	};
 
 

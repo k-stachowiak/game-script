@@ -4,10 +4,10 @@
 namespace moon {
 
 class CSourceLocation {
-	bool m_externalInvoke;
-	bool m_builtInFunction;
-	int m_line;
-	int m_column;
+	bool m_externalInvoke = false;
+	bool m_builtInFunction = false;
+	int m_line = -2;
+	int m_column = -2;
 
 	CSourceLocation(
 		bool externalInvoke,
