@@ -20,48 +20,63 @@ namespace itpr {
 		if (t_binds.find(name) != end(t_binds)) {
 			throw ExScopeSymbolAlreadyRegistered{ location, stack };
 		}
-		RegisterBind(name, value);
-	}
-
-	void CScope::RegisterBind(
-		const std::string& name,
-		const CValue& value)
-	{
 		t_binds[name] = value;
+		t_locations[name] = location;
 	}
 
-	const CValue& CGlobalScope::GetValue(const std::string& name)
+	CValue CScope::GetValue(const std::string& name)
+	{
+		CValue value;
+		CSourceLocation location;
+		std::tie(value, location) = GetValueLocation(name);
+		return value;
+	}
+
+	CSourceLocation CScope::GetLocation(const std::string& name)
+	{
+		CValue value;
+		CSourceLocation location;
+		std::tie(value, location) = GetValueLocation(name);
+		return location;
+	}
+
+	std::pair<CValue, CSourceLocation>
+	CGlobalScope::GetValueLocation(const std::string& name)
 	{
 		if (t_binds.find(name) == end(t_binds)) {
 			throw std::invalid_argument{ name };
 		} else {
-			return t_binds[name];
+			return std::make_pair(t_binds[name], t_locations[name]);
 		}
 	}
 
-	std::vector<std::pair<std::string, CValue>>
-	CLocalScope::FindNonGlobalValues(const std::vector<std::string>& names) const
+	void CLocalScope::FindNonGlobalValues(
+		const std::vector<std::string>& in_names,
+		std::vector<std::string>& names,
+		std::vector<CValue>& values,
+		std::vector<CSourceLocation>& locations) const
 	{
 		std::vector<std::pair<std::string, CValue>> result;
-		for(const std::string& name : names) {
-			auto found = t_binds.find(name);
-			if (found != end(t_binds)) {
-				result.push_back(*found);
+		for(const std::string& in_name : in_names) {
+			if (t_binds.find(in_name) == end(t_binds)) {
+				continue;
+			} else {
+				names.push_back(in_name);
+				values.push_back(t_binds.at(in_name));
+				locations.push_back(t_locations.at(in_name));
 			}
 		}
-		return result;
 	}
 
-	const CValue& CLocalScope::GetValue(const std::string& name)
+	std::pair<CValue, CSourceLocation>
+	CLocalScope::GetValueLocation(const std::string& name)
 	{
 		if (t_binds.find(name) == end(t_binds)) {
-			return m_globalScope.GetValue(name);
+			return m_globalScope.GetValueLocation(name);
 		} else {
-			return t_binds[name];
+			return std::make_pair(t_binds[name], t_locations[name]);
 		}
 	}
-
-	
 
 }
 }

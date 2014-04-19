@@ -6,7 +6,6 @@
 
 namespace moon {
 
-	// WOW, I've got what I wanted - higher order functions :]
 	namespace itpr {
 		class CAstFunction;
 		class CScope;
@@ -31,20 +30,24 @@ namespace moon {
 	};
 
 	struct SCompoundValue {
-		ECompoundType type;
+		ECompoundType type = ECompoundType::ARRAY;
 		std::vector<CValue> values;
 		SCompoundValue() = default;
 		SCompoundValue(ECompoundType new_type, std::vector<CValue> new_values);
 	};
 
 	struct SFunctionValue {
-		const itpr::CAstFunction* definition;
-		std::vector<std::pair<std::string, CValue>> captures;
+		const itpr::CAstFunction* definition = nullptr;
+		std::vector<std::string> capNames;
+		std::vector<CValue> capValues;
+		std::vector<CSourceLocation> capLocations;
 		std::vector<CValue> appliedArgs;
 		SFunctionValue() = default;
 		SFunctionValue(
 			const itpr::CAstFunction* new_definition,
-			std::vector<std::pair<std::string, CValue>> new_captures,
+			std::vector<std::string> new_capNames,
+			std::vector<CValue> new_capValues,
+			std::vector<CSourceLocation> new_capLocations,
 			std::vector<CValue> new_appliedArgs);
 	};
 
@@ -70,7 +73,9 @@ namespace moon {
 			ECompoundType compoundType,
 			const std::vector<CValue>& compoundValues,
 			const itpr::CAstFunction* funcDefinition,
-			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+			const std::vector<std::string>& funcCapNames,
+			const std::vector<CValue>& funcCapValues,
+			const std::vector<CSourceLocation>& funcCapLocations,
 			const std::vector<CValue>& funcAppliedArgs);
 
 	public:
@@ -81,8 +86,10 @@ namespace moon {
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, std::vector<CValue> values);
 		static CValue MakeFunction(
-			const itpr::CAstFunction* funcDef,
-			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+			const itpr::CAstFunction* definition,
+			std::vector<std::string> capNames,
+			std::vector<CValue> capValues,
+			std::vector<CSourceLocation> capLocations,
 			std::vector<CValue> appliedArgs);
 
 		friend bool IsCompound(const CValue& value) { return value.m_type == EValueType::COMPOUND; }
@@ -109,8 +116,11 @@ namespace moon {
 		
 		unsigned GetFuncArity() const;
 		const itpr::CAstFunction& GetFuncDef() const { return *(m_function.definition); }
-		const std::vector<std::pair<std::string, CValue>>& GetFuncCaptures() const { return m_function.captures; }
 		const std::vector<CValue>& GetAppliedArgs() const { return m_function.appliedArgs; }
+		void GetFuncCaptures(
+				std::vector<std::string>& capNames,
+				std::vector<CValue>& capValues,
+				std::vector<CSourceLocation>& capLocations) const;
 	};
 
 }

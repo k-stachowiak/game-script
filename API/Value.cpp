@@ -12,10 +12,16 @@ namespace moon {
 	{}
 
 	SFunctionValue::SFunctionValue(
-		const itpr::CAstFunction* new_definition,
-		std::vector<std::pair<std::string, CValue>> new_captures,
-		std::vector<CValue> new_appliedArgs) :
-		definition{ new_definition }, captures{ new_captures }, appliedArgs{ new_appliedArgs }
+			const itpr::CAstFunction* new_definition,
+			std::vector<std::string> new_capNames,
+			std::vector<CValue> new_capValues,
+			std::vector<CSourceLocation> new_capLocations,
+			std::vector<CValue> new_appliedArgs) :
+		definition{ new_definition },
+		capNames{ new_capNames },
+		capValues{ new_capValues },
+		capLocations{ new_capLocations },
+		appliedArgs{ new_appliedArgs }
 	{}
 
 	CValue::CValue(
@@ -28,7 +34,9 @@ namespace moon {
 		ECompoundType compoundType,
 		const std::vector<CValue>& compoundValues,
 		const itpr::CAstFunction* funcDefinition,
-		const std::vector<std::pair<std::string, CValue>>& funcCaptures,
+		const std::vector<std::string>& funcCapNames,
+		const std::vector<CValue>& funcCapValues,
+		const std::vector<CSourceLocation>& funcCapLocations,
 		const std::vector<CValue>& funcAppliedArgs) :
 		m_type{ type },
 		m_integer{ integer },
@@ -37,7 +45,7 @@ namespace moon {
 		m_string{ string },
 		m_boolean{ boolean },
 		m_compound{ compoundType, compoundValues },
-		m_function{ funcDefinition, funcCaptures, funcAppliedArgs }
+		m_function{ funcDefinition, funcCapNames, funcCapValues, funcCapLocations, funcAppliedArgs }
 	{}
 
 	CValue CValue::MakeInteger(long value)
@@ -46,7 +54,7 @@ namespace moon {
 			EValueType::INTEGER, value,
 			0, 0, {}, 0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}
+			nullptr, {}, {}, {}, {}
 		};
 		return result;
 	}
@@ -59,7 +67,7 @@ namespace moon {
 			value,
 			0, {}, 0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}
+			nullptr, {}, {}, {}, {}
 		};
 		return result;
 	}
@@ -72,7 +80,7 @@ namespace moon {
 			value,
 			{}, 0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}
+			nullptr, {}, {}, {}, {}
 		};
 		return result;
 	}
@@ -85,7 +93,7 @@ namespace moon {
 			value,
 			0,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}
+			nullptr, {}, {}, {}, {}
 		};
 		return result;
 	}
@@ -97,7 +105,7 @@ namespace moon {
 			0, 0, 0, {},
 			value,
 			ECompoundType::ARRAY, {},
-			nullptr, {}, {}
+			nullptr, {}, {}, {}, {}
 		};
 		return result;
 	}
@@ -108,22 +116,24 @@ namespace moon {
 			EValueType::COMPOUND,
 			0, 0, 0, {}, 0,
 			type, values,
-			nullptr, {}, {}
+			nullptr, {}, {}, {}, {}
 		};
 
 		return result;
 	}
 	
 	CValue CValue::MakeFunction(
-			const itpr::CAstFunction* funcDef,
-			const std::vector<std::pair<std::string, CValue>>& funcCaptures,
-			std::vector<CValue> appliedArgs)
+		const itpr::CAstFunction* definition,
+		std::vector<std::string> capNames,
+		std::vector<CValue> capValues,
+		std::vector<CSourceLocation> capLocations,
+		std::vector<CValue> appliedArgs)
 	{
 		CValue result{
 			EValueType::FUNCTION,
 			0, 0, 0, {}, 0,
 			ECompoundType::ARRAY, {},
-			funcDef, funcCaptures, appliedArgs
+			definition, capNames, capValues, capLocations, appliedArgs
 		};
 
 		return result;
@@ -163,6 +173,16 @@ namespace moon {
 	unsigned CValue::GetFuncArity() const
 	{
 		return m_function.definition->GetArgsCount() - m_function.appliedArgs.size();
+	}
+
+	void CValue::GetFuncCaptures(
+		std::vector<std::string>& capNames,
+		std::vector<CValue>& capValues,
+		std::vector<CSourceLocation>& capLocations) const
+	{
+		capNames = m_function.capNames;
+		capValues = m_function.capValues;
+		capLocations = m_function.capLocations;
 	}
 
 }

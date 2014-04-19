@@ -12,6 +12,8 @@ namespace itpr {
 		const std::string& symbol,
 		const std::vector<CValue>& argValues)
 	{
+		// TODO: Fix the wtf chaos below!
+
 		CValue functionValue = scope.GetValue(symbol);
 		if (!IsFunction(functionValue)) {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
@@ -31,10 +33,14 @@ namespace itpr {
 		auto applArgs = functionValue.GetAppliedArgs();
 		std::copy(begin(argValues), end(argValues), std::back_inserter(applArgs));
 
-		const auto& captures = functionValue.GetFuncCaptures();
+		std::vector<std::string> capNames;
+		std::vector<CValue> capValues;
+		std::vector<CSourceLocation> capLocations;
+		functionValue.GetFuncCaptures(capNames, capValues, capLocations);
+		unsigned capCount = capNames.size();
 
 		if (argValues.size() < functionValue.GetFuncArity()) {
-			return CValue::MakeFunction(&functionDef, captures, applArgs);
+			return CValue::MakeFunction(&functionDef, capNames, capValues, capLocations, applArgs);
 		}
 
 		// 3. Passed the exact amount needed for the execution.
@@ -51,12 +57,12 @@ namespace itpr {
 		for (unsigned i = 0; i < argsCount; ++i) {
 			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], applArgs[i]);
 		}
-		for (const auto& capture : captures) {
+		for (unsigned i = 0; i < capCount; ++i) {
 			funcScope.TryRegisteringBind(
-				CSourceLocation::MakeRegular(666, -666),
+				capLocations[i],
 				stack,
-				capture.first,
-				capture.second);
+				capNames[i],
+				capValues[i]);
 		}
 
 		// 3.3. Execute the function.

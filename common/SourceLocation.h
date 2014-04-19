@@ -21,6 +21,7 @@ class CSourceLocation {
 	{}
 
 public:
+	CSourceLocation() = default;
 	CSourceLocation(const CSourceLocation&) = default;
 
 	static CSourceLocation MakeExternalInvoke()

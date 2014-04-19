@@ -18,40 +18,46 @@ namespace itpr {
 
 	class CScope {
 	protected:
-		// TODO: Define a complex time for the value here - storing the location.
+		// TODO: Join the two maps.
 		std::map<std::string, CValue> t_binds;
+		std::map<std::string, CSourceLocation> t_locations;
 	public:
 		virtual ~CScope() {}
 
 		void TryRegisteringBind(
-			const CSourceLocation& location,
+			const CSourceLocation& location, // TODO: reorder args here.
 			const CStack& stack,
-			const std::string& name,
-			const CValue& value);
-
-		void RegisterBind(
 			const std::string& name,
 			const CValue& value);
 
 		virtual CGlobalScope& GetGlobalScope() = 0;
 
-		virtual std::vector<std::pair<std::string, CValue>>
-		FindNonGlobalValues(const std::vector<std::string>& names) const = 0;
+		virtual void FindNonGlobalValues(
+			const std::vector<std::string>& in_names,
+			std::vector<std::string>& names,
+			std::vector<CValue>& values,
+			std::vector<CSourceLocation>& locations) const = 0;
 
-		virtual const CValue& GetValue(const std::string& name) = 0;
+		virtual std::pair<CValue, CSourceLocation>
+		GetValueLocation(const std::string& name) = 0;
+
+		CValue GetValue(const std::string& name);
+		CSourceLocation GetLocation(const std::string& name);
 	};
 
 	class CGlobalScope : public CScope {
 	public:
-		CGlobalScope& GetGlobalScope() { return *this; }
+		CGlobalScope& GetGlobalScope() override { return *this; }
 
-		std::vector<std::pair<std::string, CValue>>
-		FindNonGlobalValues(const std::vector<std::string>&) const
-		{
-			return {};
-		}
+		void FindNonGlobalValues(
+			const std::vector<std::string>&,
+			std::vector<std::string>&,
+			std::vector<CValue>&,
+			std::vector<CSourceLocation>&) const override
+		{}
 
-		const CValue& GetValue(const std::string& name);
+		std::pair<CValue, CSourceLocation>
+		GetValueLocation(const std::string& name) override;
 	};
 
 	class CLocalScope : public CScope {
@@ -60,12 +66,16 @@ namespace itpr {
 	public:
 		CLocalScope(CGlobalScope& globalScope) : m_globalScope(globalScope) {}
 
-		CGlobalScope& GetGlobalScope() { return m_globalScope; }
+		CGlobalScope& GetGlobalScope() override { return m_globalScope; }
 
-		std::vector<std::pair<std::string, CValue>>
-		FindNonGlobalValues(const std::vector<std::string>& names) const;
+		void FindNonGlobalValues(
+			const std::vector<std::string>& in_names,
+			std::vector<std::string>& names,
+			std::vector<CValue>& values,
+			std::vector<CSourceLocation>& locations) const override;
 
-		const CValue& GetValue(const std::string& name);
+		std::pair<CValue, CSourceLocation>
+		GetValueLocation(const std::string& name) override;
 	};
 
 
