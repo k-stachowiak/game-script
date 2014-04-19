@@ -12,41 +12,55 @@ namespace moon {
 namespace itpr {
 
 	void CScope::TryRegisteringBind(
-			const CSourceLocation& location,
 			const CStack& stack,
 			const std::string& name,
-			const CValue& value)
+			const CValue& value,
+			const CSourceLocation& location)
 	{
 		if (t_binds.find(name) != end(t_binds)) {
 			throw ExScopeSymbolAlreadyRegistered{ location, stack };
 		}
-		t_binds[name] = value;
-		t_locations[name] = location;
+		t_binds[name] = { value, location };
 	}
 
-	CValue CScope::GetValue(const std::string& name)
+	CValue CScope::GetValue(
+		const std::string& name,
+		const CSourceLocation& location,
+		const CStack& stack)
 	{
-		CValue value;
-		CSourceLocation location;
-		std::tie(value, location) = GetValueLocation(name);
-		return value;
+		return GetValueStore(name, location, stack).value;
 	}
 
-	CSourceLocation CScope::GetLocation(const std::string& name)
+	CSourceLocation CScope::GetLocation(
+		const std::string& name,
+		const CSourceLocation& location,
+		const CStack& stack)
 	{
-		CValue value;
-		CSourceLocation location;
-		std::tie(value, location) = GetValueLocation(name);
-		return location;
+		return GetValueStore(name, location, stack).location;
 	}
 
-	std::pair<CValue, CSourceLocation>
-	CGlobalScope::GetValueLocation(const std::string& name)
+	const SValueStore CGlobalScope::GetValueStore(
+		const std::string& name,
+		const CSourceLocation& location,
+		const CStack& stack) const
 	{
 		if (t_binds.find(name) == end(t_binds)) {
-			throw std::invalid_argument{ name };
+			throw ExScopeSymbolNotRegistered{ location, stack };
 		} else {
-			return std::make_pair(t_binds[name], t_locations[name]);
+			return t_binds.at(name);
+		}
+	}
+
+	const SValueStore CLocalScope::GetValueStore(
+		const std::string& name,
+		const CSourceLocation& location,
+		const CStack& stack) const
+	{
+		if (t_binds.find(name) == end(t_binds)) {
+			return m_globalScope.GetValueStore(name, location, stack);
+		}
+		else {
+			return t_binds.at(name);
 		}
 	}
 
@@ -58,23 +72,14 @@ namespace itpr {
 	{
 		std::vector<std::pair<std::string, CValue>> result;
 		for(const std::string& in_name : in_names) {
-			if (t_binds.find(in_name) == end(t_binds)) {
+			auto found = t_binds.find(in_name);
+			if (found == end(t_binds)) {
 				continue;
 			} else {
-				names.push_back(in_name);
-				values.push_back(t_binds.at(in_name));
-				locations.push_back(t_locations.at(in_name));
+				names.push_back(found->first);
+				values.push_back(found->second.value);
+				locations.push_back(found->second.location);
 			}
-		}
-	}
-
-	std::pair<CValue, CSourceLocation>
-	CLocalScope::GetValueLocation(const std::string& name)
-	{
-		if (t_binds.find(name) == end(t_binds)) {
-			return m_globalScope.GetValueLocation(name);
-		} else {
-			return std::make_pair(t_binds[name], t_locations[name]);
 		}
 	}
 

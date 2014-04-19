@@ -16,19 +16,21 @@ namespace itpr {
 
 	class CGlobalScope;
 
+	struct SValueStore {
+		CValue value;
+		CSourceLocation location;
+	};
+
 	class CScope {
 	protected:
-		// TODO: Join the two maps.
-		std::map<std::string, CValue> t_binds;
-		std::map<std::string, CSourceLocation> t_locations;
+		std::map<std::string, SValueStore> t_binds;
 	public:
 		virtual ~CScope() {}
 
-		void TryRegisteringBind(
-			const CSourceLocation& location, // TODO: reorder args here.
-			const CStack& stack,
+		virtual const SValueStore GetValueStore(
 			const std::string& name,
-			const CValue& value);
+			const CSourceLocation& location,
+			const CStack& stack) const = 0;
 
 		virtual CGlobalScope& GetGlobalScope() = 0;
 
@@ -38,15 +40,30 @@ namespace itpr {
 			std::vector<CValue>& values,
 			std::vector<CSourceLocation>& locations) const = 0;
 
-		virtual std::pair<CValue, CSourceLocation>
-		GetValueLocation(const std::string& name) = 0;
+		void TryRegisteringBind(
+			const CStack& stack,
+			const std::string& name,
+			const CValue& value,
+			const CSourceLocation& location);
 
-		CValue GetValue(const std::string& name);
-		CSourceLocation GetLocation(const std::string& name);
+		CValue GetValue(
+			const std::string& name,
+			const CSourceLocation& location,
+			const CStack& stack);
+
+		CSourceLocation GetLocation(
+			const std::string& name,
+			const CSourceLocation& location,
+			const CStack& stack);
 	};
 
 	class CGlobalScope : public CScope {
 	public:
+		const SValueStore GetValueStore(
+			const std::string& name,
+			const CSourceLocation& location,
+			const CStack& stack) const override;
+
 		CGlobalScope& GetGlobalScope() override { return *this; }
 
 		void FindNonGlobalValues(
@@ -55,9 +72,6 @@ namespace itpr {
 			std::vector<CValue>&,
 			std::vector<CSourceLocation>&) const override
 		{}
-
-		std::pair<CValue, CSourceLocation>
-		GetValueLocation(const std::string& name) override;
 	};
 
 	class CLocalScope : public CScope {
@@ -65,6 +79,11 @@ namespace itpr {
 
 	public:
 		CLocalScope(CGlobalScope& globalScope) : m_globalScope(globalScope) {}
+		
+		const SValueStore GetValueStore(
+			const std::string& name,
+			const CSourceLocation& location,
+			const CStack& stack) const override;
 
 		CGlobalScope& GetGlobalScope() override { return m_globalScope; }
 
@@ -73,9 +92,6 @@ namespace itpr {
 			std::vector<std::string>& names,
 			std::vector<CValue>& values,
 			std::vector<CSourceLocation>& locations) const override;
-
-		std::pair<CValue, CSourceLocation>
-		GetValueLocation(const std::string& name) override;
 	};
 
 

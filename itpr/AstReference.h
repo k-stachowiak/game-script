@@ -11,7 +11,7 @@ namespace itpr {
 
 	public:
 		CAstReference(const CSourceLocation& location, std::string symbol);
-		CValue Evaluate(CScope& scope, CStack&) const override;
+		CValue Evaluate(CScope& scope, CStack& stack) const override;
 		void GetUsedSymbols(std::vector<std::string>& symbols) const override;
 	};
 

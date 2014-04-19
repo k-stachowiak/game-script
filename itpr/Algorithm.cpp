@@ -14,7 +14,7 @@ namespace itpr {
 	{
 		// TODO: Fix the wtf chaos below!
 
-		CValue functionValue = scope.GetValue(symbol);
+		CValue functionValue = scope.GetValue(symbol, location, stack);
 		if (!IsFunction(functionValue)) {
 			throw ExScopeSymbolIsNotFunction{ location, stack };
 		}
@@ -55,14 +55,14 @@ namespace itpr {
 		// 3.2. Build local scope for the function.
 		CLocalScope funcScope{ scope.GetGlobalScope() };
 		for (unsigned i = 0; i < argsCount; ++i) {
-			funcScope.TryRegisteringBind(argLocations[i], stack, argNames[i], applArgs[i]);
+			funcScope.TryRegisteringBind(stack, argNames[i], applArgs[i], argLocations[i]);
 		}
 		for (unsigned i = 0; i < capCount; ++i) {
 			funcScope.TryRegisteringBind(
-				capLocations[i],
 				stack,
 				capNames[i],
-				capValues[i]);
+				capValues[i],
+				capLocations[i]);
 		}
 
 		// 3.3. Execute the function.

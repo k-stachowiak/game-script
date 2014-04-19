@@ -68,7 +68,10 @@ namespace moon {
 			}
 
 			scope.TryRegisteringBind(
-				m_functions.back()->GetLocation(), stack, pr.first, value);
+				stack,
+				pr.first,
+				value,
+				m_functions.back()->GetLocation());
 		}
 	}
 
@@ -130,9 +133,10 @@ namespace moon {
 	}
 
 	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
-	{
-		CValue result = m_GetUnit(unitName)->GetValue(name);
-
+	{		
+		auto* unitScope = m_GetUnit(unitName);
+		itpr::CStack stack;
+		CValue result = unitScope->GetValue(name, CSourceLocation::MakeExternalInvoke(), stack);
 		if (IsFunction(result)) {
 			throw ExValueRequestedFromFuncBind{};
 		} else {

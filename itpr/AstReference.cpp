@@ -12,9 +12,9 @@ namespace itpr {
 		m_symbol{ symbol }
 	{}
 
-	CValue CAstReference::Evaluate(CScope& scope, CStack&) const
+	CValue CAstReference::Evaluate(CScope& scope, CStack& stack) const
 	{
-		return scope.GetValue(m_symbol);
+		return scope.GetValue(m_symbol, GetLocation(), stack);
 	}
 
 	void CAstReference::GetUsedSymbols(std::vector<std::string>& symbols) const

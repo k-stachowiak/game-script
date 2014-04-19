@@ -22,7 +22,7 @@ namespace itpr {
 	CValue CAstBind::Evaluate(CScope& scope, CStack& stack) const
 	{
 		CValue result = m_expression->Evaluate(scope, stack);
-		scope.TryRegisteringBind(GetLocation(), stack, m_symbol, result);
+		scope.TryRegisteringBind(stack, m_symbol, result, GetLocation());
 		return result;
 	}
 

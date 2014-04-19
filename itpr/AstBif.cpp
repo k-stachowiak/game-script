@@ -31,7 +31,7 @@ namespace bif {
 
 	CValue CAstUnaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
 	{
-		CValue actualArgument = scope.GetValue("x");
+		CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
 
 		switch (actualArgument.GetType()) {
 		case EValueType::INTEGER:
@@ -50,8 +50,8 @@ namespace bif {
 
 	CValue CAstBinaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
 	{
-		CValue lhs = scope.GetValue("lhs");
-		CValue rhs = scope.GetValue("rhs");
+		CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
+		CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
 
 		if (IsInteger(lhs) && IsInteger(rhs)) {
 			return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());

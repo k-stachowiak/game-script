@@ -10,6 +10,7 @@ namespace moon {
 namespace itpr {
 
 	class CAstFunction : public CAstNode {
+		// TODO: unify this somehow.
 		const std::vector<std::string> m_formalArgs;
 		const std::vector<CSourceLocation> m_argLocations;
 
