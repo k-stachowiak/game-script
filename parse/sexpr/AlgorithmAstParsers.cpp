@@ -197,7 +197,8 @@ namespace sexpr {
 		// NOTE: The order of these assertions matters :(
 		CValue value;
 		if (!ParseLiteralBoolean(domNode.GetAtom(), value) &&
-			!ParseLiteralString(domNode.GetAtom(), value) &&
+			!ParseLiteralString(domNode.GetAtom(), domNode.GetLocation(), value) &&
+			!ParseLiteralCharacter(domNode.GetAtom(), domNode.GetLocation(), value) &&
 			!ParseLiteralInteger(domNode.GetAtom(), value) &&
 			!ParseLiteralReal(domNode.GetAtom(), value)) {
 

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "Exceptions.h"
 #include "Algorithm.h"
 
 namespace moon {
@@ -20,11 +21,20 @@ namespace sexpr {
 		}
 	}
 
-	bool ParseLiteralString(const std::string& atom, CValue& result)
+	bool ParseLiteralString(
+		const std::string& atom, 
+		const CSourceLocation& location,
+		CValue& result)
 	{
 		char delim = TOK_STR_DELIM;
+
+		if ((atom.front() == delim && atom.back() != delim) ||
+			(atom.front() != delim && atom.back() == delim)) {
+			throw ExMalformedDelimitedLiteral{ location };
+		}
+
 		unsigned length = std::distance(begin(atom), end(atom));
-		if (length >= 2 && atom.front() == delim &&	atom.back() == delim) {
+		if (atom.front() == delim && atom.back() == delim && length >= 2) {
 			result = CValue::MakeString(atom.substr(1, length - 2));
 			return true;
 		} else {
@@ -32,7 +42,30 @@ namespace sexpr {
 		}
 	}
 
-	// TODO: Implement character parsing.
+	bool ParseLiteralCharacter(
+		const std::string& atom,
+		const CSourceLocation& location,
+		CValue& result)
+	{
+		char delim = TOK_CHAR_DELIM;
+
+		if ((atom.front() == delim && atom.back() != delim) ||
+			(atom.front() != delim && atom.back() == delim)) {
+			throw ExMalformedDelimitedLiteral{ location };
+		}
+
+		unsigned length = std::distance(begin(atom), end(atom));
+		if (atom.front() == delim && atom.back() == delim) {
+			if ((length > 4) || (length < 3) || (length == 4 && atom.at(1) != '\\')) {
+				throw ExMalformedDelimitedLiteral{ location };
+			}
+			result = CValue::MakeCharacter(atom.at(length - 2));
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	bool ParseLiteralInteger(const std::string& atom, CValue& result)
 	{

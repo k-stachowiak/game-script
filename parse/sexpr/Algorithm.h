@@ -41,7 +41,8 @@ namespace sexpr {
 	bool ParseAtom(const CDomNode& node, std::string& result);
 
 	bool ParseLiteralBoolean(const std::string& atom, CValue& result);
-	bool ParseLiteralString(const std::string& atom, CValue& result);
+	bool ParseLiteralString(const std::string& atom, const CSourceLocation& location, CValue& result);
+	bool ParseLiteralCharacter(const std::string& atom, const CSourceLocation& location, CValue& result);
 	bool ParseLiteralInteger(const std::string& atom, CValue& result);
 	bool ParseLiteralReal(const std::string& atom, CValue& result);
 

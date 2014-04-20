@@ -42,6 +42,15 @@ namespace sexpr {
 			"Bind parsing failed." }
 		{}
 	};
+
+	struct ExMalformedDelimitedLiteral : public ExParsingError {
+		ExMalformedDelimitedLiteral(const CSourceLocation& location) :
+		ExParsingError{
+			location.GetLine(),
+			location.GetColumn(),
+			"Malformed delimited literal." }
+		{}
+	};
 }
 }
 }
