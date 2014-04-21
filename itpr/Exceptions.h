@@ -15,7 +15,7 @@ namespace itpr {
 	inline std::vector<std::string> GenStackFrames(const CStack& stack)
 	{
 		std::vector<std::string> result;
-		stack.Visit([&result](int level, const CStackFrame& frame) mutable {
+		stack.VisitCalls([&result](int level, const CStackFrame& frame) mutable {
 			std::ostringstream oss;
 			oss << level << " : " << frame.GetFunction();
 			result.push_back(oss.str());

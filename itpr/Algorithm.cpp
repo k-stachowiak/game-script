@@ -58,9 +58,9 @@ namespace itpr {
 				pr.second.location);
 		}
 
-		stack.Push(symbol);
+		stack.PushCall(symbol);
 		CValue result = functionDef.Execute(funcScope, stack);
-		stack.Pop();
+		stack.PopCall();
 
 		return result;
 	}

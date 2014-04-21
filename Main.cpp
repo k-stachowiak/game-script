@@ -10,7 +10,6 @@
 #include "API/Exceptions.h"
 
 /* TODO:
- * - Move the ast classes to a separate directory.
  * - Store all values on stack.
  */
 

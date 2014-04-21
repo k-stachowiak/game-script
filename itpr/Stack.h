@@ -10,26 +10,26 @@ namespace moon {
 namespace itpr {
 
 	class CStack {
-		std::vector<CStackFrame> m_impl;
+		std::vector<CStackFrame> m_calls;
 
 	public:
-		void Push(const std::string& function)
+		void PushCall(const std::string& function)
 		{
-			m_impl.emplace_back(function);
-			LOG_TRACE("Pushed (%s)", m_impl.back().GetFunction().c_str());
+			m_calls.emplace_back(function);
+			LOG_TRACE("Pushed (%s)", m_calls.back().GetFunction().c_str());
 		}
 
-		void Pop()
+		void PopCall()
 		{
-			LOG_TRACE("Popping (%s)", m_impl.back().GetFunction().c_str());
-			m_impl.pop_back();
+			LOG_TRACE("Popping (%s)", m_calls.back().GetFunction().c_str());
+			m_calls.pop_back();
 		}
 
 		template<class Func>
-		void Visit(Func func) const
+		void VisitCalls(Func func) const
 		{
-			for (unsigned i = 0; i < m_impl.size(); ++i) {
-				func(i, m_impl[m_impl.size() - 1 - i]);
+			for (unsigned i = 0; i < m_calls.size(); ++i) {
+				func(i, m_calls[m_calls.size() - 1 - i]);
 			}
 		}
 	};
