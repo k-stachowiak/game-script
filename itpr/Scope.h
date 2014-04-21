@@ -6,10 +6,11 @@
 #include <utility>
 #include <map>
 
+#include "Stack.h"
+
 #include "../API/Value.h"
 #include "../common/SourceLocation.h"
-
-#include "AstBind.h"
+#include "../ast/Bind.h"
 
 namespace moon {
 namespace itpr {

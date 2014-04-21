@@ -8,11 +8,11 @@
 #include "MoonEngine.h"
 #include "../parse/ParserBase.h"
 #include "../itpr/Algorithm.h"
-#include "../itpr/AstFuncDef.h"
-#include "../itpr/AstBind.h"
+#include "../ast/FuncDef.h"
+#include "../ast/Bind.h"
+#include "../ast/Bif.h"
 #include "../itpr/Scope.h"
 #include "../itpr/Stack.h"
-#include "../itpr/AstBif.h"
 #include "../parse/sexpr/AstParser.h"
 
 namespace moon {
@@ -49,7 +49,7 @@ namespace moon {
 	}
 
 	void CEngine::m_InjectMapToScope(
-		std::map<std::string, std::unique_ptr<itpr::CAstNode>>&& map,
+		std::map<std::string, std::unique_ptr<ast::CAstNode>>&& map,
 		itpr::CStack& stack, itpr::CScope& scope)
 	{
 		for (auto&& pr : map) {
@@ -59,12 +59,12 @@ namespace moon {
 			// Store the pointer so that the function pointers in the CValue remain valid.
 			// Note that it is only possible because the map is passed in as an rvalue reference.
 			// Also note that this is quite suspicious and is a candidate for refactoring.
-			itpr::CAstFunction* maybeFunction =
-				dynamic_cast<itpr::CAstFunction*>(pr.second.get());
+			ast::CAstFunction* maybeFunction =
+				dynamic_cast<ast::CAstFunction*>(pr.second.get());
 
 			if (maybeFunction) {
 				pr.second.release();
-				m_functions.push_back(std::shared_ptr<itpr::CAstFunction>(maybeFunction));
+				m_functions.push_back(std::shared_ptr<ast::CAstFunction>(maybeFunction));
 			}
 
 			scope.TryRegisteringBind(
@@ -80,7 +80,7 @@ namespace moon {
 		auto unit = std::unique_ptr<itpr::CGlobalScope> { new itpr::CGlobalScope() };
 
 		itpr::CStack stack;
-		m_InjectMapToScope(itpr::bif::BuildBifMap(), stack, *unit);
+		m_InjectMapToScope(ast::bif::BuildBifMap(), stack, *unit);
 		m_InjectMapToScope(m_parser->Parse(source), stack, *unit);
 
 		return unit;

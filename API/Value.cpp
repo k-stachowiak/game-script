@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "../itpr/AstFuncDef.h"
+#include "../ast/FuncDef.h"
 
 #include "Value.h"
 
@@ -15,7 +15,7 @@ namespace moon {
 	{}
 
 	SFunctionValue::SFunctionValue(
-			const itpr::CAstFunction* new_definition,
+			const ast::CAstFunction* new_definition,
 			std::map<std::string, SCapture> new_captures,
 			std::vector<CValue> new_appliedArgs) :
 		definition{ new_definition },
@@ -32,7 +32,7 @@ namespace moon {
 		int boolean,
 		ECompoundType compoundType,
 		std::vector<CValue> compoundValues,
-		const itpr::CAstFunction* funcDefinition,
+		const ast::CAstFunction* funcDefinition,
 		std::map<std::string, SCapture> funcCaptures,
 		std::vector<CValue> funcAppliedArgs) :
 		m_type{ type },
@@ -120,7 +120,7 @@ namespace moon {
 	}
 	
 	CValue CValue::MakeFunction(
-		const itpr::CAstFunction* definition,
+		const ast::CAstFunction* definition,
 		const std::map<std::string, SCapture>& captures,
 		const std::vector<CValue>& appliedArgs)
 	{

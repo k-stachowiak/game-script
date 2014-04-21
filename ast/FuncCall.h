@@ -1,12 +1,12 @@
-#ifndef MOON_ITPR_AST_FUNC_CALL_H
-#define MOON_ITPR_AST_FUNC_CALL_H
+#ifndef MOON_AST_FUNC_CALL_H
+#define MOON_AST_FUNC_CALL_H
 
 #include <memory>
 
-#include "AstNode.h"
+#include "Node.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	class CAstFuncCall : public CAstNode {
 		const std::string m_symbol;
@@ -18,7 +18,7 @@ namespace itpr {
 			std::string symbol, 
 			std::vector<std::unique_ptr<CAstNode>>&& actualArgs);
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
 		void GetUsedSymbols(std::vector<std::string>& symbols) const override;
 	};
 

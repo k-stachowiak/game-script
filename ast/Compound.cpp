@@ -1,8 +1,8 @@
-#include "AstCompound.h"
-#include "Exceptions.h"
+#include "Compound.h"
+#include "../itpr/Exceptions.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	CAstCompound::CAstCompound(
 		const CSourceLocation& location,
@@ -13,7 +13,7 @@ namespace itpr {
 		m_expressions{ std::move(expressions) }
 	{}
 
-	CValue CAstCompound::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstCompound::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		std::vector<CValue> values;
 		for (const auto& expression : m_expressions) {
@@ -24,7 +24,7 @@ namespace itpr {
 			const CValue& firstValue = values.front();
 			for (unsigned i = 1; i < values.size(); ++i) {
 				if (!CValue::TypesEqual(firstValue, values[i])) {
-					throw ExInconsistentTypesInArray(GetLocation(), stack);
+					throw itpr::ExInconsistentTypesInArray(GetLocation(), stack);
 				}
 			}
 		}

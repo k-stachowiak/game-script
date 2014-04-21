@@ -1,12 +1,12 @@
-#ifndef MOON_ITPR_AST_COMPOUND_H
-#define MOON_ITPR_AST_COMPOUND_H
+#ifndef MOON_AST_COMPOUND_H
+#define MOON_AST_COMPOUND_H
 
 #include <memory>
 
-#include "AstNode.h"
+#include "Node.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	class CAstCompound : public CAstNode {
 		const ECompoundType m_type;
@@ -18,7 +18,7 @@ namespace itpr {
 			ECompoundType type, 
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-		CValue Evaluate(CScope& scope, CStack& stack) const override;
+		CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
 		void GetUsedSymbols(std::vector<std::string>& symbols) const override;
 	};
 

@@ -1,18 +1,17 @@
-#include "AstReference.h"
-#include "AstBind.h"
+#include "Reference.h"
+#include "Bind.h"
 
-#include "Exceptions.h"
-#include "Scope.h"
+#include "../itpr/Scope.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	CAstReference::CAstReference(const CSourceLocation& location, std::string symbol) :
 		CAstNode{ location },
 		m_symbol{ symbol }
 	{}
 
-	CValue CAstReference::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstReference::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		return scope.GetValue(m_symbol, GetLocation(), stack);
 	}

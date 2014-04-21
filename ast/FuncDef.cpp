@@ -1,7 +1,7 @@
-#include "AstFuncDef.h"
+#include "FuncDef.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	CAstFuncDef::CAstFuncDef(
 		const CSourceLocation& location,
@@ -12,7 +12,7 @@ namespace itpr {
 		m_expressions{ std::move(expressions) }
 	{}
 
-	CValue CAstFuncDef::Execute(CScope& scope, CStack& stack) const
+	CValue CAstFuncDef::Execute(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		CValue result;
 		for (const auto& expression : m_expressions) {

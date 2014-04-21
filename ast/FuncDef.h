@@ -1,14 +1,14 @@
-#ifndef MOON_ITPR_FUNC_DEF_H
-#define MOON_ITPR_FUNC_DEF_H
+#ifndef MOON_AST_FUNC_DEF_H
+#define MOON_AST_FUNC_DEF_H
 
 #include <vector>
 #include <string>
 #include <memory>
 
-#include "AstFunction.h"
+#include "Function.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	class CAstFuncDef : public CAstFunction {
 		const std::vector<std::unique_ptr<CAstNode>> m_expressions;
@@ -20,7 +20,7 @@ namespace itpr {
 			std::vector<CSourceLocation> argLocations,
 			std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-		CValue Execute(CScope& scope, CStack& stack) const override;
+		CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
 		void GetUsedSymbols(std::vector<std::string>& symbols) const override;
 	};
 

@@ -1,13 +1,13 @@
 #include <cmath>
 
 #include "../API/Value.h"
-#include "Exceptions.h"
-#include "Scope.h"
-#include "AstBind.h"
-#include "AstBif.h"
+#include "../itpr/Exceptions.h"
+#include "../itpr/Scope.h"
+#include "Bind.h"
+#include "Bif.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 namespace bif {
 
 	// Build-in functions implementation.
@@ -29,7 +29,7 @@ namespace bif {
 	// AST part implementation.
 	// ========================
 
-	CValue CAstUnaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
+	CValue CAstUnaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
 
@@ -41,14 +41,14 @@ namespace bif {
 			return m_realImplementation(actualArgument.GetReal());
 
 		default:
-			throw ExAstArithmeticTypeMismatch{
+			throw itpr::ExAstArithmeticTypeMismatch{
 				CSourceLocation::MakeBuiltInFunction(),
 				stack
 			};
 		}
 	}
 
-	CValue CAstBinaryArithmeticBif::Execute(CScope& scope, CStack& stack) const
+	CValue CAstBinaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
 		CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
@@ -66,7 +66,7 @@ namespace bif {
 			return m_realImplementation(lhs.GetReal(), rhs.GetReal());
 
 		} else {
-			throw ExAstArithmeticTypeMismatch{
+			throw itpr::ExAstArithmeticTypeMismatch{
 				CSourceLocation::MakeBuiltInFunction(),
 				stack
 			};

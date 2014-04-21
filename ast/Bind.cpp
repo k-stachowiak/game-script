@@ -1,12 +1,12 @@
 #include <cassert>
 
-#include "AstBind.h"
-#include "AstLiteral.h"
+#include "Bind.h"
+#include "Literal.h"
 
-#include "Scope.h"
+#include "../itpr/Scope.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	CAstBind::CAstBind(
 		const CSourceLocation& location,
@@ -19,7 +19,7 @@ namespace itpr {
 		assert((bool)m_expression);
 	}
 
-	CValue CAstBind::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstBind::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		CValue result = m_expression->Evaluate(scope, stack);
 		scope.TryRegisteringBind(stack, m_symbol, result, GetLocation());

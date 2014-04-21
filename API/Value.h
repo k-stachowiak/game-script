@@ -9,8 +9,11 @@
 
 namespace moon {
 
-	namespace itpr {
+	namespace ast {
 		class CAstFunction;
+	}
+
+	namespace itpr {
 		class CScope;
 	}
 
@@ -40,12 +43,12 @@ namespace moon {
 	};
 
 	struct SFunctionValue {
-		const itpr::CAstFunction* definition = nullptr;
+		const ast::CAstFunction* definition = nullptr;
 		std::map<std::string, SCapture> captures;
 		std::vector<CValue> appliedArgs;
 		SFunctionValue() = default;
 		SFunctionValue(
-			const itpr::CAstFunction* new_definition,
+			const ast::CAstFunction* new_definition,
 			std::map<std::string, SCapture> new_captures,
 			std::vector<CValue> new_appliedArgs);
 	};
@@ -71,7 +74,7 @@ namespace moon {
 			int boolean,
 			ECompoundType compoundType,
 			std::vector<CValue> compoundValues,
-			const itpr::CAstFunction* funcDefinition,
+			const ast::CAstFunction* funcDefinition,
 			std::map<std::string, SCapture> funcCaptures,
 			std::vector<CValue> funcAppliedArgs);
 
@@ -83,7 +86,7 @@ namespace moon {
 		static CValue MakeBoolean(int value);
 		static CValue MakeCompound(ECompoundType type, const std::vector<CValue>& values);
 		static CValue MakeFunction(
-			const itpr::CAstFunction* definition,
+			const ast::CAstFunction* definition,
 			const std::map<std::string, SCapture>& captures,
 			const std::vector<CValue>& appliedArgs);
 
@@ -110,7 +113,7 @@ namespace moon {
 		const std::vector<CValue>& GetCompound() const { return m_compound.values; }
 		
 		unsigned GetFuncArity() const;
-		const itpr::CAstFunction& GetFuncDef() const { return *(m_function.definition); }
+		const ast::CAstFunction& GetFuncDef() const { return *(m_function.definition); }
 		const std::vector<CValue>& GetAppliedArgs() const { return m_function.appliedArgs; }
 		const std::map<std::string, SCapture>& GetFuncCaptures() const;
 	};

@@ -21,8 +21,6 @@ bool IsClose(double x, double y)
 
 std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
-	// TODO: Test for the case of too many closing parentheses.
-
 	// Interpretation errors.
 	// ----------------------
 
@@ -76,6 +74,18 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 		moon::CEngine engine;
 
 		std::string source = "(bind one 1";
+
+		try {
+			engine.LoadUnitString("test", source);
+			assert(false);
+		} catch (const moon::ExParsingError&) {
+		}
+	} },
+
+	{ "Another dom builder failure", []() {
+		moon::CEngine engine;
+
+		std::string source = "(bind one 1))";
 
 		try {
 			engine.LoadUnitString("test", source);

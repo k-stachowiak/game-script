@@ -1,8 +1,8 @@
-#include "AstFunction.h"
-#include "Scope.h"
+#include "Function.h"
+#include "../itpr/Scope.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 CAstFunction::CAstFunction(
 	const CSourceLocation& location,
@@ -15,7 +15,7 @@ CAstFunction::CAstFunction(
 	assert(m_formalArgs.size() == m_argLocations.size());
 }
 
-CValue CAstFunction::Evaluate(CScope& scope, CStack&) const
+CValue CAstFunction::Evaluate(itpr::CScope& scope, itpr::CStack&) const
 {
 	std::vector<std::string> symbols;
 	GetUsedSymbols(symbols);

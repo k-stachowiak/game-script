@@ -1,13 +1,13 @@
-#ifndef MOON_ITPR_FUNCTION_H
-#define MOON_ITPR_FUNCTION_H
+#ifndef MOON_AST_FUNCTION_H
+#define MOON_AST_FUNCTION_H
 
 #include <cassert>
 #include <utility>
 
-#include "AstNode.h"
+#include "Node.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	class CAstFunction : public CAstNode {
 		const std::vector<std::string> m_formalArgs;
@@ -19,11 +19,11 @@ namespace itpr {
 			const std::vector<std::string>& formalArgs,
 			const std::vector<CSourceLocation>& argLocations);
 
-		CValue Evaluate(CScope& scope, CStack&) const;
+		CValue Evaluate(itpr::CScope& scope, itpr::CStack&) const;
 		const std::vector<std::string>& GetFormalArgs() const;
 		const std::vector<CSourceLocation>& GetArgLocations() const;
 		int GetArgsCount() const;
-		virtual CValue Execute(CScope& scope, CStack& stack) const = 0;
+		virtual CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const = 0;
 	};
 
 }

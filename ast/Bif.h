@@ -1,5 +1,5 @@
-#ifndef MOON_ITPR_BIF_AST_BIF_H
-#define MOON_ITPR_BIF_AST_BIF_H
+#ifndef MOON_AST_BIF_H
+#define MOON_AST_BIF_H
 
 #include <map>
 #include <array>
@@ -7,10 +7,10 @@
 #include <memory>
 #include <functional>
 
-#include "AstFunction.h"
+#include "Function.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 namespace bif {
 
 	// Note:
@@ -36,7 +36,7 @@ namespace bif {
 		{}
 
 		void GetUsedSymbols(std::vector<std::string>&) const override {}
-		CValue Execute(CScope& scope, CStack& stack) const override;
+		CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
 	};
 
 	class CAstBinaryArithmeticBif : public CAstFunction {
@@ -60,7 +60,7 @@ namespace bif {
 		{}
 
 		void GetUsedSymbols(std::vector<std::string>&) const {}
-		CValue Execute(CScope& scope, CStack& stack) const override;
+		CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
 	};
 
 	std::map<std::string, std::unique_ptr<CAstNode>> BuildBifMap();

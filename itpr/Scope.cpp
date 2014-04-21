@@ -4,9 +4,9 @@
 #include <cassert>
 
 #include "Exceptions.h"
-#include "AstBind.h"
-#include "AstLiteral.h"
 #include "Stack.h"
+#include "../ast/Bind.h"
+#include "../ast/Literal.h"
 
 namespace moon {
 namespace itpr {

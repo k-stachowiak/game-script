@@ -1,15 +1,15 @@
 #include <cassert>
 
-#include "AstFuncCall.h"
+#include "FuncCall.h"
 
-#include "Algorithm.h"
-#include "AstFunction.h"
-#include "AstLiteral.h"
-#include "Scope.h"
-#include "Exceptions.h"
+#include "../itpr/Algorithm.h"
+#include "../itpr/Scope.h"
+#include "../itpr/Exceptions.h"
+#include "Function.h"
+#include "Literal.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	CAstFuncCall::CAstFuncCall(
 		const CSourceLocation& location,
@@ -20,7 +20,7 @@ namespace itpr {
 		m_actualArgs{ std::move(actualArgs) }
 	{}
 
-	CValue CAstFuncCall::Evaluate(CScope& scope, CStack& stack) const
+	CValue CAstFuncCall::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
 	{
 		std::vector<CValue> values;
 		for (const auto& arg : m_actualArgs) {

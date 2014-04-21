@@ -1,14 +1,14 @@
-#include "AstLiteral.h"
+#include "Literal.h"
 
 namespace moon {
-namespace itpr {
+namespace ast {
 
 	CAstLiteral::CAstLiteral(const CSourceLocation& location, CValue value) :
 		CAstNode{ location },
 		m_value{ value }
 	{}
 
-	CValue CAstLiteral::Evaluate(CScope&, CStack&) const
+	CValue CAstLiteral::Evaluate(itpr::CScope&, itpr::CStack&) const
 	{
 		return m_value;
 	}

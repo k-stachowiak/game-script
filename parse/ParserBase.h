@@ -5,15 +5,15 @@
 #include <map>
 #include <memory>
 
-#include "../itpr/AstBind.h"
+#include "../ast/Bind.h"
 
 namespace moon {
 namespace parse {
 
 	class CParserBase {
 	protected:
-		static std::pair<std::string, std::unique_ptr<itpr::CAstNode>> t_StripBind(
-				std::unique_ptr<itpr::CAstBind>&& bind)
+		static std::pair<std::string, std::unique_ptr<ast::CAstNode>> t_StripBind(
+				std::unique_ptr<ast::CAstBind>&& bind)
 		{
 			return std::make_pair(bind->GetSymbol(), bind->TakeOverExpression());
 		}
@@ -21,7 +21,7 @@ namespace parse {
 	public:
 		virtual ~CParserBase() {}
 
-		virtual std::map<std::string, std::unique_ptr<itpr::CAstNode>>
+		virtual std::map<std::string, std::unique_ptr<ast::CAstNode>>
 		Parse(const std::string& source) const = 0;
 	};
 
