@@ -45,6 +45,9 @@ namespace itpr {
 			const CValue& value,
 			const CSourceLocation& location);
 
+		std::vector<std::string> GetAllValues() const;
+		std::vector<std::string> GetAllFunctions() const;
+
 		CValue GetValue(
 			const std::string& name,
 			const CSourceLocation& location,

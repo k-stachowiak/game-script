@@ -27,7 +27,7 @@ namespace moon {
 			itpr::CStack& stack, itpr::CScope& scope);
 
 		std::unique_ptr<itpr::CGlobalScope> m_BuildUnitScope(const std::string& source);
-		itpr::CScope* m_GetUnit(const std::string& unitName);
+		itpr::CScope* m_GetUnit(const std::string& unitName) const;
 
 	public:
 		CEngine();
@@ -36,8 +36,11 @@ namespace moon {
 		void LoadUnitStream(const std::string& unitName, std::istream& input);
 		void LoadUnitString(const std::string& unitName, const std::string& source);
 
-		CValue GetValue(const std::string& unitName, const std::string& symbol);
-		CValue CallFunction(const std::string& unitName, const std::string& symbol, const std::vector<CValue>& args);
+		std::vector<std::string> GetAllValues(const std::string& unitName) const;
+		std::vector<std::string> GetAllFunctions(const std::string& unitName) const;
+
+		CValue GetValue(const std::string& unitName, const std::string& symbol) const;
+		CValue CallFunction(const std::string& unitName, const std::string& symbol, const std::vector<CValue>& args) const;
 	};
 
 }

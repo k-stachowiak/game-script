@@ -23,6 +23,28 @@ namespace itpr {
 		t_binds[name] = { value, location };
 	}
 
+	std::vector<std::string> CScope::GetAllValues() const
+	{
+		std::vector<std::string> result;
+		for (const auto& pr : t_binds) {
+			if (!IsFunction(pr.second.value)) {
+				result.push_back(pr.first);
+			}
+		}
+		return result;
+	}
+
+	std::vector<std::string> CScope::GetAllFunctions() const
+	{
+		std::vector<std::string> result;
+		for (const auto& pr : t_binds) {
+			if (IsFunction(pr.second.value)) {
+				result.push_back(pr.first);
+			}
+		}
+		return result;
+	}
+
 	CValue CScope::GetValue(
 		const std::string& name,
 		const CSourceLocation& location,

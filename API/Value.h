@@ -90,12 +90,22 @@ namespace moon {
 			const std::map<std::string, SCapture>& captures,
 			const std::vector<CValue>& appliedArgs);
 
-		friend bool IsCompound(const CValue& value) { return value.m_type == EValueType::COMPOUND; }
+		friend bool IsCompound(const CValue& value) { return value.m_type == EValueType::COMPOUND; }		
 		friend bool IsAtomic(const CValue& value) { return value.m_type != EValueType::COMPOUND; }
+
+		friend bool IsArray(const CValue& value) { return IsCompound(value) && value.GetCompoundType() == ECompoundType::ARRAY; }		
+		friend bool IsTuple(const CValue& value) { return IsCompound(value) && value.GetCompoundType() == ECompoundType::TUPLE; }
+		friend bool IsTuple(const CValue& value, int size)
+		{
+			return IsCompound(value) && 
+				   value.GetCompoundType() == ECompoundType::TUPLE &&
+				   value.m_compound.values.size() == size;
+		}
 
 		friend bool IsFunction(const CValue& value) { return value.m_type == EValueType::FUNCTION; }
 		friend bool IsInteger(const CValue& value) { return value.GetType() == EValueType::INTEGER; }
 		friend bool IsReal(const CValue& value) { return value.GetType() == EValueType::REAL; }
+		friend bool IsString(const CValue& value) { return value.GetType() == EValueType::STRING; }
 
 		static bool TypesEqual(const CValue& lhs, const CValue& rhs);
 

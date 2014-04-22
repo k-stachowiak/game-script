@@ -86,13 +86,13 @@ namespace moon {
 		return unit;
 	}
 
-	itpr::CScope* CEngine::m_GetUnit(const std::string& unitName)
+	itpr::CScope* CEngine::m_GetUnit(const std::string& unitName) const
 	{
 		if (m_units.find(unitName) == end(m_units)) {
 			throw ExUnitNotRegistered{ unitName };
 		}
 
-		return m_units[unitName].get();
+		return m_units.at(unitName).get();
 	}
 
 	CEngine::CEngine()
@@ -132,7 +132,20 @@ namespace moon {
 		m_units[unitName] = m_BuildUnitScope(source);
 	}
 
-	CValue CEngine::GetValue(const std::string& unitName, const std::string& name)
+
+	std::vector<std::string> CEngine::GetAllValues(const std::string& unitName) const
+	{
+		const auto* unitScope = m_GetUnit(unitName);
+		return unitScope->GetAllValues();
+	}
+
+	std::vector<std::string> CEngine::GetAllFunctions(const std::string& unitName) const
+	{
+		const auto* unitScope = m_GetUnit(unitName);
+		return unitScope->GetAllFunctions();
+	}
+
+	CValue CEngine::GetValue(const std::string& unitName, const std::string& name) const
 	{		
 		auto* unitScope = m_GetUnit(unitName);
 		itpr::CStack stack;
@@ -147,7 +160,7 @@ namespace moon {
 	CValue CEngine::CallFunction(
 		const std::string& unitName,
 		const std::string& symbol,
-		const std::vector<CValue>& args)
+		const std::vector<CValue>& args) const
 	{
 		auto* unitScope = m_GetUnit(unitName);
 		itpr::CStack stack;
