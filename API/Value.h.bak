@@ -95,7 +95,7 @@ namespace moon {
 
 		friend bool IsArray(const CValue& value) { return IsCompound(value) && value.GetCompoundType() == ECompoundType::ARRAY; }		
 		friend bool IsTuple(const CValue& value) { return IsCompound(value) && value.GetCompoundType() == ECompoundType::TUPLE; }
-		friend bool IsTuple(const CValue& value, unsigned size)
+		friend bool IsTuple(const CValue& value, int size)
 		{
 			return IsCompound(value) && 
 				   value.GetCompoundType() == ECompoundType::TUPLE &&

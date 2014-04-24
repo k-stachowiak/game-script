@@ -73,16 +73,16 @@ namespace bif {
 		}		
 	}
 
-	std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> BuildBifMap()
+	std::map<std::string, std::unique_ptr<CAstNode>> BuildBifMap()
 	{
-		std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> result;
+		std::map<std::string, std::unique_ptr<CAstNode>> result;
 
-		result.push_back(std::make_pair("+", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ AddInteger, AddReal }}));
-		result.push_back(std::make_pair("-", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ SubInteger, SubReal }}));
-		result.push_back(std::make_pair("*", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ MulInteger, MulReal }}));
-		result.push_back(std::make_pair("/", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ DivInteger, DivReal }}));
+		result["+"] = std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ AddInteger, AddReal } };
+		result["-"] = std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ SubInteger, SubReal } };
+		result["*"] = std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ MulInteger, MulReal } };
+		result["/"] = std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ DivInteger, DivReal } };
 
-		result.push_back(std::make_pair("sqrt", std::unique_ptr<CAstNode> { new CAstUnaryArithmeticBif{ SqrtInteger, SqrtReal }}));
+		result["sqrt"] = std::unique_ptr<CAstNode> { new CAstUnaryArithmeticBif{ SqrtInteger, SqrtReal } };
 
 		return result;
 	}

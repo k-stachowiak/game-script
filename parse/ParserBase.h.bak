@@ -21,7 +21,7 @@ namespace parse {
 	public:
 		virtual ~CParserBase() {}
 
-		virtual std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
+		virtual std::map<std::string, std::unique_ptr<ast::CAstNode>>
 		Parse(const std::string& source) const = 0;
 	};
 

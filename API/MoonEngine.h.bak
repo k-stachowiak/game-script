@@ -23,7 +23,7 @@ namespace moon {
 		static std::string m_ReadFile(const std::string& fileName);
 
 		void m_InjectMapToScope(
-			std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>&& map,
+			std::map<std::string, std::unique_ptr<ast::CAstNode>>&& map,
 			itpr::CStack& stack, itpr::CScope& scope);
 
 		std::unique_ptr<itpr::CGlobalScope> m_BuildUnitScope(const std::string& source);
