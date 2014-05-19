@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Exceptions.h"
-#include "MoonEngine.h"
+#include "Interpreter.h"
 #include "../parse/ParserBase.h"
 #include "../itpr/Algorithm.h"
 #include "../ast/FuncDef.h"
@@ -17,13 +17,13 @@
 
 namespace moon {
 
-    std::string CEngine::m_DropExtension(const std::string& fileName)
+    std::string CInterpreter::m_DropExtension(const std::string& fileName)
     {
         auto lastDot = fileName.rfind('.');
         return fileName.substr(0, lastDot);
     }
 
-    std::string CEngine::m_ReadStream(std::istream& input)
+    std::string CInterpreter::m_ReadStream(std::istream& input)
     {
         std::string line;
         std::stringstream resultStream;
@@ -34,7 +34,7 @@ namespace moon {
         return resultStream.str();
     }
 
-    std::string CEngine::m_ReadFile(const std::string& fileName)
+    std::string CInterpreter::m_ReadFile(const std::string& fileName)
     {
         std::ifstream fileStream{ fileName.c_str() };
         if (!fileStream.is_open()) {
@@ -48,7 +48,7 @@ namespace moon {
         return result;
     }
 
-    void CEngine::m_InjectMapToScope(
+    void CInterpreter::m_InjectMapToScope(
         std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>&& map,
         itpr::CStack& stack, itpr::CScope& scope)
     {
@@ -75,7 +75,7 @@ namespace moon {
         }
     }
 
-    std::unique_ptr<itpr::CGlobalScope> CEngine::m_BuildUnitScope(const std::string& source)
+    std::unique_ptr<itpr::CGlobalScope> CInterpreter::m_BuildUnitScope(const std::string& source)
     {
         auto unit = std::unique_ptr<itpr::CGlobalScope> { new itpr::CGlobalScope() };
 
@@ -86,7 +86,7 @@ namespace moon {
         return unit;
     }
 
-    itpr::CScope* CEngine::m_GetUnit(const std::string& unitName) const
+    itpr::CScope* CInterpreter::m_GetUnit(const std::string& unitName) const
     {
         if (m_units.find(unitName) == end(m_units)) {
             throw ExUnitNotRegistered{ unitName };
@@ -95,11 +95,11 @@ namespace moon {
         return m_units.at(unitName).get();
     }
 
-    CEngine::CEngine()
+    CInterpreter::CInterpreter()
     : m_parser{ new parse::sexpr::CAstParser }
     {}
 
-    void CEngine::LoadUnitFile(const std::string& fileName)
+    void CInterpreter::LoadUnitFile(const std::string& fileName)
     {
         std::string unitName = m_DropExtension(fileName);
 
@@ -112,7 +112,7 @@ namespace moon {
         m_units[unitName] = m_BuildUnitScope(source);
     }
 
-    void CEngine::LoadUnitStream(const std::string& unitName, std::istream& input)
+    void CInterpreter::LoadUnitStream(const std::string& unitName, std::istream& input)
     {
         if (m_units.find(unitName) != end(m_units)) {
             throw ExUnitAlreadyRegistered{ unitName };
@@ -123,7 +123,7 @@ namespace moon {
         m_units[unitName] = m_BuildUnitScope(source);
     }
 
-    void CEngine::LoadUnitString(const std::string& unitName, const std::string& source)
+    void CInterpreter::LoadUnitString(const std::string& unitName, const std::string& source)
     {
         if (m_units.find(unitName) != end(m_units)) {
             throw ExUnitAlreadyRegistered{ unitName };
@@ -133,20 +133,20 @@ namespace moon {
     }
 
 
-    std::vector<std::string> CEngine::GetAllValues(const std::string& unitName) const
+    std::vector<std::string> CInterpreter::GetAllValues(const std::string& unitName) const
     {
         const auto* unitScope = m_GetUnit(unitName);
         return unitScope->GetAllValues();
     }
 
-    std::vector<std::string> CEngine::GetAllFunctions(const std::string& unitName) const
+    std::vector<std::string> CInterpreter::GetAllFunctions(const std::string& unitName) const
     {
         const auto* unitScope = m_GetUnit(unitName);
         return unitScope->GetAllFunctions();
     }
 
-    CValue CEngine::GetValue(const std::string& unitName, const std::string& name) const
-    {        
+    CValue CInterpreter::GetValue(const std::string& unitName, const std::string& name) const
+    {
         auto* unitScope = m_GetUnit(unitName);
         itpr::CStack stack;
         CValue result = unitScope->GetValue(name, CSourceLocation::MakeExternalInvoke(), stack);
@@ -157,7 +157,7 @@ namespace moon {
         }
     }
 
-    CValue CEngine::CallFunction(
+    CValue CInterpreter::CallFunction(
         const std::string& unitName,
         const std::string& symbol,
         const std::vector<CValue>& args) const

@@ -6,7 +6,7 @@
 #include <string>
 #include <functional>
 
-#include "API/MoonEngine.h"
+#include "API/Interpreter.h"
 #include "API/Exceptions.h"
 
 /* TODO:
@@ -27,7 +27,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
         std::string source = "(bind four (+ 2 (func (x) 2)))";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         try {
             engine.LoadUnitString("test", source);
@@ -42,7 +42,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
         std::string source =
             "(bind arr [\"one\" 2 3.0])";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         try {
             engine.LoadUnitString("test", source);
@@ -58,7 +58,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
     // ---------------
 
     { "Parsing : toplevel non-bind expression", []() {
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         std::string source = "(func sqr (x) (* x x))";
 
@@ -70,7 +70,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
     } },
 
     { "Dom builder failure", []() {
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         std::string source = "(bind one 1";
 
@@ -82,7 +82,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
     } },
 
     { "Another dom builder failure", []() {
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         std::string source = "(bind one 1))";
 
@@ -95,7 +95,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
     { "Tokenization failure", []() {
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         try {
             std::string unclosedString = "(bind unclosed-string \"asd)";
@@ -117,7 +117,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
     { "Simple char parsing", []() {
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         try {
             std::string charParse = "(bind c 'c')";
@@ -137,7 +137,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
         std::string source =
             "(bind arr [\"one\" \"two\" \"three\"])";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
         engine.LoadUnitString("test", source);
 
         auto arr = engine.GetValue("test", "arr");
@@ -167,7 +167,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "\t(add_to_a b)\n"
             "))";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
         engine.LoadUnitString("test", source);
 
         auto a = moon::CValue::MakeInteger(1);
@@ -183,7 +183,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "(bind f (func (x) x))\n"
             "(bind symbol f)";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
 
         try {
             engine.LoadUnitString("test", source);
@@ -202,7 +202,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "\t(sqrt (+ x2 y2))\n"
             "))";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
         engine.LoadUnitString("test", source);
 
         auto ix = moon::CValue::MakeInteger(1);
@@ -227,7 +227,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "# Less useless constant\n"
             "(bind pi 3.1415)";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
         engine.LoadUnitString("test", source);
 
         auto neg_thousand = engine.GetValue("test", "neg_thousand");
@@ -250,7 +250,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "\t(dblx)\n"
             "))";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
         engine.LoadUnitString("test", source);
 
         auto result = engine.CallFunction("test", "scope-test", {});
@@ -277,7 +277,7 @@ std::vector<std::pair<std::string, std::function<bool()>>> optionals{
             "\t(doubler rhs)\n"
             "))";
 
-        moon::CEngine engine;
+        moon::CInterpreter engine;
         engine.LoadUnitString("test", source);
 
         auto result = engine.CallFunction("test", "test", { moon::CValue::MakeInteger(3) });

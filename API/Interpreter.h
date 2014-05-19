@@ -1,5 +1,5 @@
-#ifndef MOON_API_MOON_ENGINE_H
-#define MOON_API_MOON_ENGINE_H
+#ifndef MOON_API_MOON_INTERPRETER_H
+#define MOON_API_MOON_INTERPRETER_H
 
 #include <vector>
 #include <string>
@@ -13,7 +13,7 @@
 
 namespace moon {
 
-    class CEngine {
+    class CInterpreter {
         std::unique_ptr<parse::CParserBase> m_parser;
         std::vector<std::shared_ptr<ast::CAstFunction>> m_functions;
         std::map<std::string, std::unique_ptr<itpr::CGlobalScope>> m_units;
@@ -30,7 +30,7 @@ namespace moon {
         itpr::CScope* m_GetUnit(const std::string& unitName) const;
 
     public:
-        CEngine();
+        CInterpreter();
 
         void LoadUnitFile(const std::string& fileName);
         void LoadUnitStream(const std::string& unitName, std::istream& input);
