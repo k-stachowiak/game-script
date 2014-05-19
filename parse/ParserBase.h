@@ -10,20 +10,20 @@
 namespace moon {
 namespace parse {
 
-	class CParserBase {
-	protected:
-		static std::pair<std::string, std::unique_ptr<ast::CAstNode>> t_StripBind(
-				std::unique_ptr<ast::CAstBind>&& bind)
-		{
-			return std::make_pair(bind->GetSymbol(), bind->TakeOverExpression());
-		}
+    class CParserBase {
+    protected:
+        static std::pair<std::string, std::unique_ptr<ast::CAstNode>> t_StripBind(
+                std::unique_ptr<ast::CAstBind>&& bind)
+        {
+            return std::make_pair(bind->GetSymbol(), bind->TakeOverExpression());
+        }
 
-	public:
-		virtual ~CParserBase() {}
+    public:
+        virtual ~CParserBase() {}
 
-		virtual std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
-		Parse(const std::string& source) const = 0;
-	};
+        virtual std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
+        Parse(const std::string& source) const = 0;
+    };
 
 }
 }

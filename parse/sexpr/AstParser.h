@@ -7,12 +7,12 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	class CAstParser : public CParserBase
-	{
-	public:
-		std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
-		Parse(const std::string& source) const override;
-	};
+    class CAstParser : public CParserBase
+    {
+    public:
+        std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
+        Parse(const std::string& source) const override;
+    };
 
 }
 }

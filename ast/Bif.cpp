@@ -10,82 +10,82 @@ namespace moon {
 namespace ast {
 namespace bif {
 
-	// Build-in functions implementation.
-	// ==================================
+    // Build-in functions implementation.
+    // ==================================
 
-	CValue AddInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs + rhs); }
-	CValue SubInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs - rhs); }
-	CValue MulInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs * rhs); }
-	CValue DivInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs / rhs); }
+    CValue AddInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs + rhs); }
+    CValue SubInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs - rhs); }
+    CValue MulInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs * rhs); }
+    CValue DivInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs / rhs); }
 
-	CValue AddReal(double lhs, double rhs) { return CValue::MakeReal(lhs + rhs); }
-	CValue SubReal(double lhs, double rhs) { return CValue::MakeReal(lhs - rhs); }
-	CValue MulReal(double lhs, double rhs) { return CValue::MakeReal(lhs * rhs); }
-	CValue DivReal(double lhs, double rhs) { return CValue::MakeReal(lhs / rhs); }
-	
-	CValue SqrtInteger(long x) { return CValue::MakeInteger(static_cast<long>(sqrt(x))); }
-	CValue SqrtReal(double x)  { return CValue::MakeReal(sqrt(x)); }
+    CValue AddReal(double lhs, double rhs) { return CValue::MakeReal(lhs + rhs); }
+    CValue SubReal(double lhs, double rhs) { return CValue::MakeReal(lhs - rhs); }
+    CValue MulReal(double lhs, double rhs) { return CValue::MakeReal(lhs * rhs); }
+    CValue DivReal(double lhs, double rhs) { return CValue::MakeReal(lhs / rhs); }
+    
+    CValue SqrtInteger(long x) { return CValue::MakeInteger(static_cast<long>(sqrt(x))); }
+    CValue SqrtReal(double x)  { return CValue::MakeReal(sqrt(x)); }
 
-	// AST part implementation.
-	// ========================
+    // AST part implementation.
+    // ========================
 
-	CValue CAstUnaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
-	{
-		CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
+    CValue CAstUnaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    {
+        CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
 
-		switch (actualArgument.GetType()) {
-		case EValueType::INTEGER:
-			return m_integerImplementation(actualArgument.GetInteger());
+        switch (actualArgument.GetType()) {
+        case EValueType::INTEGER:
+            return m_integerImplementation(actualArgument.GetInteger());
 
-		case EValueType::REAL:
-			return m_realImplementation(actualArgument.GetReal());
+        case EValueType::REAL:
+            return m_realImplementation(actualArgument.GetReal());
 
-		default:
-			throw itpr::ExAstArithmeticTypeMismatch{
-				CSourceLocation::MakeBuiltInFunction(),
-				stack
-			};
-		}
-	}
+        default:
+            throw itpr::ExAstArithmeticTypeMismatch{
+                CSourceLocation::MakeBuiltInFunction(),
+                stack
+            };
+        }
+    }
 
-	CValue CAstBinaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
-	{
-		CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
-		CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
+    CValue CAstBinaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    {
+        CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
+        CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
 
-		if (IsInteger(lhs) && IsInteger(rhs)) {
-			return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());
+        if (IsInteger(lhs) && IsInteger(rhs)) {
+            return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());
 
-		} else if (IsInteger(lhs) && IsReal(rhs)) {
-			return m_realImplementation(static_cast<double>(lhs.GetInteger()), rhs.GetReal());
+        } else if (IsInteger(lhs) && IsReal(rhs)) {
+            return m_realImplementation(static_cast<double>(lhs.GetInteger()), rhs.GetReal());
 
-		} else if (IsReal(lhs) && IsInteger(rhs)) {
-			return m_realImplementation(lhs.GetReal(), static_cast<double>(rhs.GetInteger()));
+        } else if (IsReal(lhs) && IsInteger(rhs)) {
+            return m_realImplementation(lhs.GetReal(), static_cast<double>(rhs.GetInteger()));
 
-		} else if (IsReal(lhs) && IsReal(rhs)) {
-			return m_realImplementation(lhs.GetReal(), rhs.GetReal());
+        } else if (IsReal(lhs) && IsReal(rhs)) {
+            return m_realImplementation(lhs.GetReal(), rhs.GetReal());
 
-		} else {
-			throw itpr::ExAstArithmeticTypeMismatch{
-				CSourceLocation::MakeBuiltInFunction(),
-				stack
-			};
-		}		
-	}
+        } else {
+            throw itpr::ExAstArithmeticTypeMismatch{
+                CSourceLocation::MakeBuiltInFunction(),
+                stack
+            };
+        }        
+    }
 
-	std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> BuildBifMap()
-	{
-		std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> result;
+    std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> BuildBifMap()
+    {
+        std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> result;
 
-		result.push_back(std::make_pair("+", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ AddInteger, AddReal }}));
-		result.push_back(std::make_pair("-", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ SubInteger, SubReal }}));
-		result.push_back(std::make_pair("*", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ MulInteger, MulReal }}));
-		result.push_back(std::make_pair("/", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ DivInteger, DivReal }}));
+        result.push_back(std::make_pair("+", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ AddInteger, AddReal }}));
+        result.push_back(std::make_pair("-", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ SubInteger, SubReal }}));
+        result.push_back(std::make_pair("*", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ MulInteger, MulReal }}));
+        result.push_back(std::make_pair("/", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ DivInteger, DivReal }}));
 
-		result.push_back(std::make_pair("sqrt", std::unique_ptr<CAstNode> { new CAstUnaryArithmeticBif{ SqrtInteger, SqrtReal }}));
+        result.push_back(std::make_pair("sqrt", std::unique_ptr<CAstNode> { new CAstUnaryArithmeticBif{ SqrtInteger, SqrtReal }}));
 
-		return result;
-	}
+        return result;
+    }
 
 }
 }

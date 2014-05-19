@@ -12,19 +12,19 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-	std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
-	CAstParser::Parse(const std::string& source) const
-	{
-		std::vector<CToken> tokens = Tokenize(CStrIter::Begin(source), CStrIter::End(source));
-		std::vector<CDomNode> domNodes = BuildDom(tokens);
-		std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>> result;
-		for (const CDomNode& domNode : domNodes) {
-			auto bind = ParseBind(domNode);
-			auto pair = t_StripBind(std::move(bind));
-			result.push_back(std::move(pair));
-		}
-		return result;
-	}
+    std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>>
+    CAstParser::Parse(const std::string& source) const
+    {
+        std::vector<CToken> tokens = Tokenize(CStrIter::Begin(source), CStrIter::End(source));
+        std::vector<CDomNode> domNodes = BuildDom(tokens);
+        std::vector<std::pair<std::string, std::unique_ptr<ast::CAstNode>>> result;
+        for (const CDomNode& domNode : domNodes) {
+            auto bind = ParseBind(domNode);
+            auto pair = t_StripBind(std::move(bind));
+            result.push_back(std::move(pair));
+        }
+        return result;
+    }
 
 }
 }

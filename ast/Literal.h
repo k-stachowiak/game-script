@@ -6,14 +6,14 @@
 namespace moon {
 namespace ast {
 
-	class CAstLiteral : public CAstNode {
-		const CValue m_value;
+    class CAstLiteral : public CAstNode {
+        const CValue m_value;
 
-	public:
-		CAstLiteral(const CSourceLocation& location, CValue value);
-		CValue Evaluate(itpr::CScope&, itpr::CStack&) const override;
-		void GetUsedSymbols(std::vector<std::string>&) const override {}
-	};
+    public:
+        CAstLiteral(const CSourceLocation& location, CValue value);
+        CValue Evaluate(itpr::CScope&, itpr::CStack&) const override;
+        void GetUsedSymbols(std::vector<std::string>&) const override {}
+    };
 
 }
 }

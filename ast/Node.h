@@ -6,32 +6,32 @@
 
 namespace moon {
 
-	namespace itpr {
-		class CScope;
-		class CStack;
-	}
+    namespace itpr {
+        class CScope;
+        class CStack;
+    }
 
 namespace ast {
 
-	
+    
 
-	class CAstNode {
-		const CSourceLocation m_location;
-	public:
-		CAstNode(CSourceLocation location) :
-			m_location{ location }
-		{}
+    class CAstNode {
+        const CSourceLocation m_location;
+    public:
+        CAstNode(CSourceLocation location) :
+            m_location{ location }
+        {}
 
-		CSourceLocation GetLocation() const
-		{
-			return m_location;
-		}
+        CSourceLocation GetLocation() const
+        {
+            return m_location;
+        }
 
-		virtual ~CAstNode()	{}
+        virtual ~CAstNode()    {}
 
-		virtual CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const = 0;
-		virtual void GetUsedSymbols(std::vector<std::string>& symbols) const = 0;
-	};
+        virtual CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const = 0;
+        virtual void GetUsedSymbols(std::vector<std::string>& symbols) const = 0;
+    };
 
 }
 }
