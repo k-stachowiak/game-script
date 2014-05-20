@@ -19,11 +19,11 @@ namespace ast {
             const std::vector<std::string>& formalArgs,
             const std::vector<CSourceLocation>& argLocations);
 
-        CValue Evaluate(itpr::CScope& scope, itpr::CStack&) const;
+        itpr::CValue Evaluate(itpr::CScope& scope, itpr::CStack&) const;
         const std::vector<std::string>& GetFormalArgs() const;
         const std::vector<CSourceLocation>& GetArgLocations() const;
         int GetArgsCount() const;
-        virtual CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const = 0;
+        virtual itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const = 0;
     };
 
 }

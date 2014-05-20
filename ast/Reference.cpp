@@ -11,7 +11,7 @@ namespace ast {
         m_symbol{ symbol }
     {}
 
-    CValue CAstReference::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::CValue CAstReference::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
     {
         return scope.GetValue(m_symbol, GetLocation(), stack);
     }

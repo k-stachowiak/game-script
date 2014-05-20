@@ -6,6 +6,7 @@
 #include "Value.h"
 
 namespace moon {
+namespace itpr {
 
     SCompoundValue::SCompoundValue(
             ECompoundType new_type,
@@ -182,4 +183,5 @@ namespace moon {
         location(new_location)
     {}
 
+}
 }

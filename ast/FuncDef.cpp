@@ -12,9 +12,9 @@ namespace ast {
         m_expressions{ std::move(expressions) }
     {}
 
-    CValue CAstFuncDef::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::CValue CAstFuncDef::Execute(itpr::CScope& scope, itpr::CStack& stack) const
     {
-        CValue result;
+        itpr::CValue result;
         for (const auto& expression : m_expressions) {
             result = expression->Evaluate(scope, stack);
         }

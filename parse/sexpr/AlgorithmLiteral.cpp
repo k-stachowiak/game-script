@@ -8,13 +8,13 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-    bool ParseLiteralBoolean(const std::string& atom, CValue& result)
+    bool ParseLiteralBoolean(const std::string& atom, itpr::CValue& result)
     {
         if (atom == "true") {
-            result = CValue::MakeBoolean(1);
+            result = itpr::CValue::MakeBoolean(1);
             return true;
         } else if (atom == "false") {
-            result = CValue::MakeBoolean(0);
+            result = itpr::CValue::MakeBoolean(0);
             return true;
         } else {
             return false;
@@ -24,7 +24,7 @@ namespace sexpr {
     bool ParseLiteralString(
         const std::string& atom, 
         const CSourceLocation& location,
-        CValue& result)
+        itpr::CValue& result)
     {
         char delim = TOK_STR_DELIM;
 
@@ -35,7 +35,7 @@ namespace sexpr {
 
         unsigned length = std::distance(begin(atom), end(atom));
         if (atom.front() == delim && atom.back() == delim && length >= 2) {
-            result = CValue::MakeString(atom.substr(1, length - 2));
+            result = itpr::CValue::MakeString(atom.substr(1, length - 2));
             return true;
         } else {
             return false;
@@ -45,7 +45,7 @@ namespace sexpr {
     bool ParseLiteralCharacter(
         const std::string& atom,
         const CSourceLocation& location,
-        CValue& result)
+        itpr::CValue& result)
     {
         char delim = TOK_CHAR_DELIM;
 
@@ -59,7 +59,7 @@ namespace sexpr {
             if ((length > 4) || (length < 3) || (length == 4 && atom.at(1) != '\\')) {
                 throw ExMalformedDelimitedLiteral{ location };
             }
-            result = CValue::MakeCharacter(atom.at(length - 2));
+            result = itpr::CValue::MakeCharacter(atom.at(length - 2));
             return true;
         }
         else {
@@ -67,7 +67,7 @@ namespace sexpr {
         }
     }
 
-    bool ParseLiteralInteger(const std::string& atom, CValue& result)
+    bool ParseLiteralInteger(const std::string& atom, itpr::CValue& result)
     {
         auto it = begin(atom);
         if (!atom.empty() && (isdigit(*it) || (*it) == '-' || (*it) == '+') &&
@@ -76,21 +76,21 @@ namespace sexpr {
             ss << atom;
             long integer;
             ss >> integer;
-            result = CValue::MakeInteger(integer);
+            result = itpr::CValue::MakeInteger(integer);
             return true;
         } else {
             return false;
         }
     }
 
-    bool ParseLiteralReal(const std::string& atom, CValue& result)
+    bool ParseLiteralReal(const std::string& atom, itpr::CValue& result)
     {
         std::stringstream ss;
         ss << atom;
         double real;
         ss >> real;
         if (ss.eof()) {
-            result = CValue::MakeReal(real);
+            result = itpr::CValue::MakeReal(real);
             return true;
         } else {
             return false;

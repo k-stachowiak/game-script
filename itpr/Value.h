@@ -8,15 +8,14 @@
 #include "../common/SourceLocation.h"
 
 namespace moon {
-
+    
     namespace ast {
         class CAstFunction;
     }
 
-    namespace itpr {
-        class CScope;
-    }
+namespace itpr {
 
+    class CScope;
     class CValue;
     struct SCapture;
 
@@ -135,6 +134,7 @@ namespace moon {
         SCapture(CValue new_value, CSourceLocation new_location);
     };
 
+}
 }
 
 #endif

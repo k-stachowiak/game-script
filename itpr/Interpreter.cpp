@@ -16,6 +16,7 @@
 #include "../parse/sexpr/AstParser.h"
 
 namespace moon {
+namespace itpr {
 
     std::string CInterpreter::m_DropExtension(const std::string& fileName)
     {
@@ -172,4 +173,5 @@ namespace moon {
             args);
     }
 
+}
 }

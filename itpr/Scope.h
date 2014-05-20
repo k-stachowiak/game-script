@@ -8,7 +8,7 @@
 
 #include "Stack.h"
 
-#include "../API/Value.h"
+#include "Value.h"
 #include "../common/SourceLocation.h"
 #include "../ast/Bind.h"
 

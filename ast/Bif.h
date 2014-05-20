@@ -19,13 +19,13 @@ namespace bif {
     // type doesn't match the ewquired one but is also numeric.
 
     class CAstUnaryArithmeticBif : public CAstFunction {
-        CValue(*m_integerImplementation)(long);
-        CValue(*m_realImplementation)(double);
+        itpr::CValue(*m_integerImplementation)(long);
+        itpr::CValue(*m_realImplementation)(double);
 
     public:
         CAstUnaryArithmeticBif(
-            CValue(integerImplementation)(long),
-            CValue(realImplementation)(double)) :
+            itpr::CValue(integerImplementation)(long),
+            itpr::CValue(realImplementation)(double)) :
             CAstFunction{
                 CSourceLocation::MakeBuiltInFunction(),
                 { "x" },
@@ -36,19 +36,19 @@ namespace bif {
         {}
 
         void GetUsedSymbols(std::vector<std::string>&) const override {}
-        CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
     };
 
     class CAstBinaryArithmeticBif : public CAstFunction {
         std::vector<std::string> m_formalArgs;
         std::vector<CSourceLocation> m_argLocations;
-        CValue(*m_integerImplementation)(long, long);
-        CValue(*m_realImplementation)(double, double);
+        itpr::CValue(*m_integerImplementation)(long, long);
+        itpr::CValue(*m_realImplementation)(double, double);
 
     public:
         CAstBinaryArithmeticBif(
-            CValue(integerImplementation)(long, long),
-            CValue(realImplementation)(double, double)) :
+            itpr::CValue(integerImplementation)(long, long),
+            itpr::CValue(realImplementation)(double, double)) :
             CAstFunction{
                 CSourceLocation::MakeBuiltInFunction(),
                     { "lhs", "rhs" },
@@ -60,7 +60,7 @@ namespace bif {
         {}
 
         void GetUsedSymbols(std::vector<std::string>&) const {}
-        CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
     };
 
     std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> BuildBifMap();

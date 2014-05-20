@@ -20,9 +20,9 @@ namespace ast {
         m_actualArgs{ std::move(actualArgs) }
     {}
 
-    CValue CAstFuncCall::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::CValue CAstFuncCall::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
     {
-        std::vector<CValue> values;
+        std::vector<itpr::CValue> values;
         for (const auto& arg : m_actualArgs) {
             values.push_back(arg->Evaluate(scope, stack));
         }

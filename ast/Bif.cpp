@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "../API/Value.h"
+#include "../itpr/Value.h"
 #include "../itpr/Exceptions.h"
 #include "../itpr/Scope.h"
 #include "Bind.h"
@@ -13,31 +13,31 @@ namespace bif {
     // Build-in functions implementation.
     // ==================================
 
-    CValue AddInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs + rhs); }
-    CValue SubInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs - rhs); }
-    CValue MulInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs * rhs); }
-    CValue DivInteger(long lhs, long rhs) { return CValue::MakeInteger(lhs / rhs); }
+    itpr::CValue AddInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs + rhs); }
+    itpr::CValue SubInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs - rhs); }
+    itpr::CValue MulInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs * rhs); }
+    itpr::CValue DivInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs / rhs); }
 
-    CValue AddReal(double lhs, double rhs) { return CValue::MakeReal(lhs + rhs); }
-    CValue SubReal(double lhs, double rhs) { return CValue::MakeReal(lhs - rhs); }
-    CValue MulReal(double lhs, double rhs) { return CValue::MakeReal(lhs * rhs); }
-    CValue DivReal(double lhs, double rhs) { return CValue::MakeReal(lhs / rhs); }
+    itpr::CValue AddReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs + rhs); }
+    itpr::CValue SubReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs - rhs); }
+    itpr::CValue MulReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs * rhs); }
+    itpr::CValue DivReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs / rhs); }
     
-    CValue SqrtInteger(long x) { return CValue::MakeInteger(static_cast<long>(sqrt(x))); }
-    CValue SqrtReal(double x)  { return CValue::MakeReal(sqrt(x)); }
+    itpr::CValue SqrtInteger(long x) { return itpr::CValue::MakeInteger(static_cast<long>(sqrt(x))); }
+    itpr::CValue SqrtReal(double x)  { return itpr::CValue::MakeReal(sqrt(x)); }
 
     // AST part implementation.
     // ========================
 
-    CValue CAstUnaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::CValue CAstUnaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
     {
-        CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
+        itpr::CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
 
         switch (actualArgument.GetType()) {
-        case EValueType::INTEGER:
+        case itpr::EValueType::INTEGER:
             return m_integerImplementation(actualArgument.GetInteger());
 
-        case EValueType::REAL:
+        case itpr::EValueType::REAL:
             return m_realImplementation(actualArgument.GetReal());
 
         default:
@@ -48,10 +48,10 @@ namespace bif {
         }
     }
 
-    CValue CAstBinaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::CValue CAstBinaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
     {
-        CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
-        CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
+        itpr::CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
+        itpr::CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
 
         if (IsInteger(lhs) && IsInteger(rhs)) {
             return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());

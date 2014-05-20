@@ -15,12 +15,12 @@ CAstFunction::CAstFunction(
     assert(m_formalArgs.size() == m_argLocations.size());
 }
 
-CValue CAstFunction::Evaluate(itpr::CScope& scope, itpr::CStack&) const
+itpr::CValue CAstFunction::Evaluate(itpr::CScope& scope, itpr::CStack&) const
 {
     std::vector<std::string> symbols;
     GetUsedSymbols(symbols);
     auto captures = scope.CaptureNonGlobals(symbols);
-    return CValue::MakeFunction(this, captures, {});
+    return itpr::CValue::MakeFunction(this, captures, {});
 }
 
 const std::vector<std::string>& CAstFunction::GetFormalArgs() const

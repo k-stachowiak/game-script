@@ -7,11 +7,12 @@
 #include <iosfwd>
 #include <map>
 
-#include "../API/Value.h"
 #include "../parse/ParserBase.h"
+#include "../itpr/Value.h"
 #include "../itpr/Scope.h"
 
 namespace moon {
+namespace itpr {
 
     class CInterpreter {
         std::unique_ptr<parse::CParserBase> m_parser;
@@ -43,6 +44,7 @@ namespace moon {
         CValue CallFunction(const std::string& unitName, const std::string& symbol, const std::vector<CValue>& args) const;
     };
 
+}
 }
 
 #endif

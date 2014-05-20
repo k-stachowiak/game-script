@@ -20,7 +20,7 @@ namespace ast {
             std::string symbol, 
             std::unique_ptr<CAstNode>&& expression);
 
-        CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
         const std::string& GetSymbol() const { return m_symbol; }
         const CAstNode& GetExpression() const;

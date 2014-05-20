@@ -11,7 +11,7 @@ namespace ast {
 
     public:
         CAstReference(const CSourceLocation& location, std::string symbol);
-        CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
     };
 

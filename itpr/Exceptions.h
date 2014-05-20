@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "../common/SourceLocation.h"
-#include "../API/Exceptions.h"
+#include "../common/Exceptions.h"
 #include "Stack.h"
 
 namespace moon {

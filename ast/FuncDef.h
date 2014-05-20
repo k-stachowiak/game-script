@@ -20,7 +20,7 @@ namespace ast {
             std::vector<CSourceLocation> argLocations,
             std::vector<std::unique_ptr<CAstNode>>&& expressions);
 
-        CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
     };
 

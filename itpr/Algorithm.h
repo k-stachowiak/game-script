@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "../API/Value.h"
+#include "Value.h"
 #include "../common/SourceLocation.h"
 
 #include "Stack.h"

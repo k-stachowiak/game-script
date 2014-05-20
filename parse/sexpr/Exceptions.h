@@ -2,7 +2,7 @@
 #define MOON_PARSE_SEXPR_EXCEPTIONS_H
 
 #include "../../common/SourceLocation.h"
-#include "../../API/Exceptions.h"
+#include "../../common/Exceptions.h"
 
 namespace moon {
 namespace parse {

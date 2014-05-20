@@ -18,7 +18,7 @@ namespace ast {
             std::string symbol, 
             std::vector<std::unique_ptr<CAstNode>>&& actualArgs);
 
-        CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
     };
 

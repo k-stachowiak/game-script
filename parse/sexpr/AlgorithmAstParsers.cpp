@@ -63,14 +63,14 @@ namespace sexpr {
         }
 
         // 2. Is of ARRAY or TUPLE type.
-        ECompoundType type;
+        itpr::ECompoundType type;
         switch (domNode.GetType()) {
         case EDomCompoundType::ARRAY:
-            type = ECompoundType::ARRAY;
+            type = itpr::ECompoundType::ARRAY;
             break;
 
         case EDomCompoundType::TUPLE:
-            type = ECompoundType::TUPLE;
+            type = itpr::ECompoundType::TUPLE;
             break;
 
         default:
@@ -195,7 +195,7 @@ namespace sexpr {
 
         // 2. Can be parsed to non-compound value.
         // NOTE: The order of these assertions matters :(
-        CValue value;
+        itpr::CValue value;
         if (!ParseLiteralBoolean(domNode.GetAtom(), value) &&
             !ParseLiteralString(domNode.GetAtom(), domNode.GetLocation(), value) &&
             !ParseLiteralCharacter(domNode.GetAtom(), domNode.GetLocation(), value) &&
