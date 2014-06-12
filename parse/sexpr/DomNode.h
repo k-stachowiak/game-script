@@ -10,32 +10,32 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-    enum class EDomNodeType {
+    enum class DomNodeType {
         ATOM,
         COMPOUND
     };
 
-    enum class EDomCompoundType {
+    enum class DomCompoundType {
         CORE,
         ARRAY,
         TUPLE
     };
 
-    class CDomNode
+    class DomNode
     {
-        const CSourceLocation m_location;
+        const SourceLocation m_location;
 
-        EDomNodeType m_type;        
+        DomNodeType m_type;        
         std::string m_atom;
-        EDomCompoundType m_compoundType;
-        std::vector<CDomNode> m_compoundChildren;
+        DomCompoundType m_compoundType;
+        std::vector<DomNode> m_compoundChildren;
 
-        CDomNode(
-            const CSourceLocation& location,
-            EDomNodeType type,
+        DomNode(
+            const SourceLocation& location,
+            DomNodeType type,
             std::string atom,
-            EDomCompoundType compoundType,
-            std::vector<CDomNode> compoundChildren) :
+            DomCompoundType compoundType,
+            std::vector<DomNode> compoundChildren) :
             m_location{ location },
             m_type{ type },
             m_atom{ atom },
@@ -44,26 +44,26 @@ namespace sexpr {
         {}
 
     public:
-        const CSourceLocation& GetLocation() const
+        const SourceLocation& GetLocation() const
         {
             return m_location;
         }
 
-        friend bool operator==(const CDomNode& node, const std::string& str)
+        friend bool operator==(const DomNode& node, const std::string& str)
         {
             return
                 node.IsAtom() &&
                 node.GetAtom() == str;
         }
 
-        friend bool operator!=(const CDomNode& node, const std::string& str)
+        friend bool operator!=(const DomNode& node, const std::string& str)
         {
             return !(node == str);
         }
 
         bool IsAtom() const
         {
-            return m_type == EDomNodeType::ATOM;
+            return m_type == DomNodeType::ATOM;
         }
 
         bool IsAtom(const std::string& atom) const {
@@ -76,58 +76,58 @@ namespace sexpr {
 
         bool IsCompound() const
         {
-            return m_type == EDomNodeType::COMPOUND;
+            return m_type == DomNodeType::COMPOUND;
         }
 
         bool IsCompoundCore() const
         {
-            return IsCompound() && m_compoundType == EDomCompoundType::CORE;
+            return IsCompound() && m_compoundType == DomCompoundType::CORE;
         }
 
         bool IsCompoundArray() const
         {
-            return IsCompound() && m_compoundType == EDomCompoundType::ARRAY;
+            return IsCompound() && m_compoundType == DomCompoundType::ARRAY;
         }
 
         bool IsCompoundTuple() const
         {
-            return IsCompound() && m_compoundType == EDomCompoundType::TUPLE;
+            return IsCompound() && m_compoundType == DomCompoundType::TUPLE;
         }
 
-        EDomCompoundType GetType() const
+        DomCompoundType GetType() const
         {
             return m_compoundType;
         }
 
-        std::vector<CDomNode>::const_iterator ChildrenBegin() const
+        std::vector<DomNode>::const_iterator ChildrenBegin() const
         {
             return m_compoundChildren.cbegin();
         }
 
-        std::vector<CDomNode>::const_iterator ChildrenEnd() const
+        std::vector<DomNode>::const_iterator ChildrenEnd() const
         {
             return m_compoundChildren.cend();
         }
 
-        static CDomNode MakeAtom(const CSourceLocation& location, const std::string& atom)
+        static DomNode MakeAtom(const SourceLocation& location, const std::string& atom)
         {
-            return CDomNode{
+            return DomNode{
                 location,
-                EDomNodeType::ATOM,
+                DomNodeType::ATOM,
                 atom,
-                EDomCompoundType::CORE,
+                DomCompoundType::CORE,
                 {}
             };
         }
 
-        static CDomNode MakeCompound(
-            const CSourceLocation& location,
-            EDomCompoundType compoundType,
-            const std::vector<CDomNode>& children)
+        static DomNode MakeCompound(
+            const SourceLocation& location,
+            DomCompoundType compoundType,
+            const std::vector<DomNode>& children)
         {
-            return CDomNode{
+            return DomNode{
                 location,
-                EDomNodeType::COMPOUND,
+                DomNodeType::COMPOUND,
                 {},
                 compoundType,
                 children

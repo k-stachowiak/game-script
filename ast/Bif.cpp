@@ -13,45 +13,45 @@ namespace bif {
     // Build-in functions implementation.
     // ==================================
 
-    itpr::CValue AddInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs + rhs); }
-    itpr::CValue SubInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs - rhs); }
-    itpr::CValue MulInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs * rhs); }
-    itpr::CValue DivInteger(long lhs, long rhs) { return itpr::CValue::MakeInteger(lhs / rhs); }
+    itpr::Value AddInteger(long lhs, long rhs) { return itpr::Value::MakeInteger(lhs + rhs); }
+    itpr::Value SubInteger(long lhs, long rhs) { return itpr::Value::MakeInteger(lhs - rhs); }
+    itpr::Value MulInteger(long lhs, long rhs) { return itpr::Value::MakeInteger(lhs * rhs); }
+    itpr::Value DivInteger(long lhs, long rhs) { return itpr::Value::MakeInteger(lhs / rhs); }
 
-    itpr::CValue AddReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs + rhs); }
-    itpr::CValue SubReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs - rhs); }
-    itpr::CValue MulReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs * rhs); }
-    itpr::CValue DivReal(double lhs, double rhs) { return itpr::CValue::MakeReal(lhs / rhs); }
+    itpr::Value AddReal(double lhs, double rhs) { return itpr::Value::MakeReal(lhs + rhs); }
+    itpr::Value SubReal(double lhs, double rhs) { return itpr::Value::MakeReal(lhs - rhs); }
+    itpr::Value MulReal(double lhs, double rhs) { return itpr::Value::MakeReal(lhs * rhs); }
+    itpr::Value DivReal(double lhs, double rhs) { return itpr::Value::MakeReal(lhs / rhs); }
     
-    itpr::CValue SqrtInteger(long x) { return itpr::CValue::MakeInteger(static_cast<long>(sqrt(x))); }
-    itpr::CValue SqrtReal(double x)  { return itpr::CValue::MakeReal(sqrt(x)); }
+    itpr::Value SqrtInteger(long x) { return itpr::Value::MakeInteger(static_cast<long>(sqrt(x))); }
+    itpr::Value SqrtReal(double x)  { return itpr::Value::MakeReal(sqrt(x)); }
 
     // AST part implementation.
     // ========================
 
-    itpr::CValue CAstUnaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::Value AstUnaryArithmeticBif::Execute(itpr::Scope& scope, itpr::Stack& stack) const
     {
-        itpr::CValue actualArgument = scope.GetValue("x", GetLocation(), stack);
+        itpr::Value actualArgument = scope.GetValue("x", GetLocation(), stack);
 
         switch (actualArgument.GetType()) {
-        case itpr::EValueType::INTEGER:
+        case itpr::ValueType::INTEGER:
             return m_integerImplementation(actualArgument.GetInteger());
 
-        case itpr::EValueType::REAL:
+        case itpr::ValueType::REAL:
             return m_realImplementation(actualArgument.GetReal());
 
         default:
             throw itpr::ExAstArithmeticTypeMismatch{
-                CSourceLocation::MakeBuiltInFunction(),
+                SourceLocation::MakeBuiltInFunction(),
                 stack
             };
         }
     }
 
-    itpr::CValue CAstBinaryArithmeticBif::Execute(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::Value AstBinaryArithmeticBif::Execute(itpr::Scope& scope, itpr::Stack& stack) const
     {
-        itpr::CValue rhs = scope.GetValue("rhs", GetLocation(), stack);
-        itpr::CValue lhs = scope.GetValue("lhs", GetLocation(), stack);
+        itpr::Value rhs = scope.GetValue("rhs", GetLocation(), stack);
+        itpr::Value lhs = scope.GetValue("lhs", GetLocation(), stack);
 
         if (IsInteger(lhs) && IsInteger(rhs)) {
             return m_integerImplementation(lhs.GetInteger(), rhs.GetInteger());
@@ -67,22 +67,22 @@ namespace bif {
 
         } else {
             throw itpr::ExAstArithmeticTypeMismatch{
-                CSourceLocation::MakeBuiltInFunction(),
+                SourceLocation::MakeBuiltInFunction(),
                 stack
             };
         }        
     }
 
-    std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> BuildBifMap()
+    std::vector<std::pair<std::string, std::unique_ptr<AstNode>>> BuildBifMap()
     {
-        std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> result;
+        std::vector<std::pair<std::string, std::unique_ptr<AstNode>>> result;
 
-        result.push_back(std::make_pair("+", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ AddInteger, AddReal }}));
-        result.push_back(std::make_pair("-", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ SubInteger, SubReal }}));
-        result.push_back(std::make_pair("*", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ MulInteger, MulReal }}));
-        result.push_back(std::make_pair("/", std::unique_ptr<CAstNode> { new CAstBinaryArithmeticBif{ DivInteger, DivReal }}));
+        result.push_back(std::make_pair("+", std::unique_ptr<AstNode> { new AstBinaryArithmeticBif{ AddInteger, AddReal }}));
+        result.push_back(std::make_pair("-", std::unique_ptr<AstNode> { new AstBinaryArithmeticBif{ SubInteger, SubReal }}));
+        result.push_back(std::make_pair("*", std::unique_ptr<AstNode> { new AstBinaryArithmeticBif{ MulInteger, MulReal }}));
+        result.push_back(std::make_pair("/", std::unique_ptr<AstNode> { new AstBinaryArithmeticBif{ DivInteger, DivReal }}));
 
-        result.push_back(std::make_pair("sqrt", std::unique_ptr<CAstNode> { new CAstUnaryArithmeticBif{ SqrtInteger, SqrtReal }}));
+        result.push_back(std::make_pair("sqrt", std::unique_ptr<AstNode> { new AstUnaryArithmeticBif{ SqrtInteger, SqrtReal }}));
 
         return result;
     }

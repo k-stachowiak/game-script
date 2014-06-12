@@ -3,13 +3,13 @@
 
 namespace moon {
 
-class CSourceLocation {
+class SourceLocation {
     bool m_externalInvoke = false;
     bool m_builtInFunction = false;
     int m_line = -2;
     int m_column = -2;
 
-    CSourceLocation(
+    SourceLocation(
         bool externalInvoke,
         bool builtInFunction,
         int line,
@@ -21,22 +21,22 @@ class CSourceLocation {
     {}
 
 public:
-    CSourceLocation() = default;
-    CSourceLocation(const CSourceLocation&) = default;
+    SourceLocation() = default;
+    SourceLocation(const SourceLocation&) = default;
 
-    static CSourceLocation MakeExternalInvoke()
+    static SourceLocation MakeExternalInvoke()
     {
-        return CSourceLocation(true, false, -1, -1);
+        return SourceLocation(true, false, -1, -1);
     }
 
-    static CSourceLocation MakeBuiltInFunction()
+    static SourceLocation MakeBuiltInFunction()
     {
-        return CSourceLocation(false, true, -1, -1);
+        return SourceLocation(false, true, -1, -1);
     }
 
-    static CSourceLocation MakeRegular(int line, int column)
+    static SourceLocation MakeRegular(int line, int column)
     {
-        return CSourceLocation(false, false, line, column);
+        return SourceLocation(false, false, line, column);
     }
 
     bool IsRegular() const

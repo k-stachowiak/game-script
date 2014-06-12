@@ -8,35 +8,35 @@
 namespace moon {
 namespace ast {
 
-    CAstBind::CAstBind(
-        const CSourceLocation& location,
+    AstBind::AstBind(
+        const SourceLocation& location,
         std::string symbol, 
-        std::unique_ptr<CAstNode>&& expression) :
-        CAstNode{ location },
+        std::unique_ptr<AstNode>&& expression) :
+        AstNode{ location },
         m_symbol{ symbol },
         m_expression{ std::move(expression) }
     {
         assert((bool)m_expression);
     }
 
-    itpr::CValue CAstBind::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::Value AstBind::Evaluate(itpr::Scope& scope, itpr::Stack& stack) const
     {
-        itpr::CValue result = m_expression->Evaluate(scope, stack);
+        itpr::Value result = m_expression->Evaluate(scope, stack);
         scope.TryRegisteringBind(stack, m_symbol, result, GetLocation());
         return result;
     }
 
-    void CAstBind::GetUsedSymbols(std::vector<std::string>& symbols) const
+    void AstBind::GetUsedSymbols(std::vector<std::string>& symbols) const
     {
         m_expression->GetUsedSymbols(symbols);
     }
 
-    const CAstNode& CAstBind::GetExpression() const
+    const AstNode& AstBind::GetExpression() const
     {
         return *m_expression;
     }
 
-    std::unique_ptr<CAstNode> CAstBind::TakeOverExpression()
+    std::unique_ptr<AstNode> AstBind::TakeOverExpression()
     {
         return std::move(m_expression);
     }

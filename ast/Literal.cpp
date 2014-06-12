@@ -3,12 +3,12 @@
 namespace moon {
 namespace ast {
 
-    CAstLiteral::CAstLiteral(const CSourceLocation& location, itpr::CValue value) :
-        CAstNode{ location },
+    AstLiteral::AstLiteral(const SourceLocation& location, itpr::Value value) :
+        AstNode{ location },
         m_value{ value }
     {}
 
-    itpr::CValue CAstLiteral::Evaluate(itpr::CScope&, itpr::CStack&) const
+    itpr::Value AstLiteral::Evaluate(itpr::Scope&, itpr::Stack&) const
     {
         return m_value;
     }

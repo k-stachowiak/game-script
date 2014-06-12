@@ -4,35 +4,35 @@
 namespace moon {
 namespace ast {
 
-    CAstCompound::CAstCompound(
-        const CSourceLocation& location,
-        itpr::ECompoundType type, 
-        std::vector<std::unique_ptr<CAstNode>>&& expressions) :
-        CAstNode{ location },
+    AstCompound::AstCompound(
+        const SourceLocation& location,
+        itpr::CompoundType type, 
+        std::vector<std::unique_ptr<AstNode>>&& expressions) :
+        AstNode{ location },
         m_type{ type },
         m_expressions{ std::move(expressions) }
     {}
 
-    itpr::CValue CAstCompound::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::Value AstCompound::Evaluate(itpr::Scope& scope, itpr::Stack& stack) const
     {
-        std::vector<itpr::CValue> values;
+        std::vector<itpr::Value> values;
         for (const auto& expression : m_expressions) {
             values.push_back(expression->Evaluate(scope, stack));
         }
 
-        if (m_type == itpr::ECompoundType::ARRAY && values.size() > 1) {
-            const itpr::CValue& firstValue = values.front();
+        if (m_type == itpr::CompoundType::ARRAY && values.size() > 1) {
+            const itpr::Value& firstValue = values.front();
             for (unsigned i = 1; i < values.size(); ++i) {
-                if (!itpr::CValue::TypesEqual(firstValue, values[i])) {
+                if (!itpr::Value::TypesEqual(firstValue, values[i])) {
                     throw itpr::ExInconsistentTypesInArray(GetLocation(), stack);
                 }
             }
         }
 
-        return itpr::CValue::MakeCompound(m_type, values);
+        return itpr::Value::MakeCompound(m_type, values);
     }
 
-    void CAstCompound::GetUsedSymbols(std::vector<std::string>& symbols) const
+    void AstCompound::GetUsedSymbols(std::vector<std::string>& symbols) const
     {
         for (const auto& expression : m_expressions) {
             expression->GetUsedSymbols(symbols);

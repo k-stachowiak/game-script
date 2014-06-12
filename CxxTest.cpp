@@ -27,7 +27,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
         std::string source = "(bind four (+ 2 (func (x) 2)))";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         try {
             engine.LoadUnitString("test", source);
@@ -42,7 +42,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
         std::string source =
             "(bind arr [\"one\" 2 3.0])";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         try {
             engine.LoadUnitString("test", source);
@@ -58,7 +58,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
     // ---------------
 
     { "Parsing : toplevel non-bind expression", []() {
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         std::string source = "(func sqr (x) (* x x))";
 
@@ -70,7 +70,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
     } },
 
     { "Dom builder failure", []() {
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         std::string source = "(bind one 1";
 
@@ -82,7 +82,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
     } },
 
     { "Another dom builder failure", []() {
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         std::string source = "(bind one 1))";
 
@@ -95,7 +95,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
     { "Tokenization failure", []() {
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         try {
             std::string unclosedString = "(bind unclosed-string \"asd)";
@@ -117,13 +117,13 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
 
     { "Simple char parsing", []() {
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         try {
             std::string charParse = "(bind c 'c')";
             engine.LoadUnitString("test", charParse);
-            moon::itpr::CValue result = engine.GetValue("test", "c");
-            assert(result.GetType() == moon::itpr::EValueType::CHARACTER);
+            moon::itpr::Value result = engine.GetValue("test", "c");
+            assert(result.GetType() == moon::itpr::ValueType::CHARACTER);
             assert(result.GetCharacter() == 'c');
         } catch (const moon::ExParsingError&) {
         }
@@ -137,22 +137,22 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
         std::string source =
             "(bind arr [\"one\" \"two\" \"three\"])";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
         engine.LoadUnitString("test", source);
 
         auto arr = engine.GetValue("test", "arr");
 
-        assert(arr.GetType() == moon::itpr::EValueType::COMPOUND);
-        assert(arr.GetCompoundType() == moon::itpr::ECompoundType::ARRAY);
+        assert(arr.GetType() == moon::itpr::ValueType::COMPOUND);
+        assert(arr.GetCompoundType() == moon::itpr::CompoundType::ARRAY);
 
         const auto& compound = arr.GetCompound();
 
         assert(compound.size() == 3);
-        assert(compound[0].GetType() == moon::itpr::EValueType::STRING);
+        assert(compound[0].GetType() == moon::itpr::ValueType::STRING);
         assert(compound[0].GetString() == "one");
-        assert(compound[1].GetType() == moon::itpr::EValueType::STRING);
+        assert(compound[1].GetType() == moon::itpr::ValueType::STRING);
         assert(compound[1].GetString() == "two");
-        assert(compound[2].GetType() == moon::itpr::EValueType::STRING);
+        assert(compound[2].GetType() == moon::itpr::ValueType::STRING);
         assert(compound[2].GetString() == "three");
     } },
 
@@ -167,14 +167,14 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "\t(add_to_a b)\n"
             "))";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
         engine.LoadUnitString("test", source);
 
-        auto a = moon::itpr::CValue::MakeInteger(1);
-        auto b = moon::itpr::CValue::MakeInteger(2);
+        auto a = moon::itpr::Value::MakeInteger(1);
+        auto b = moon::itpr::Value::MakeInteger(2);
         auto result = engine.CallFunction("test", "test", { a, b });
 
-        assert(result.GetType() == moon::itpr::EValueType::INTEGER);
+        assert(result.GetType() == moon::itpr::ValueType::INTEGER);
         assert(result.GetInteger() == 3);
     } },
 
@@ -183,7 +183,7 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "(bind f (func (x) x))\n"
             "(bind symbol f)";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
 
         try {
             engine.LoadUnitString("test", source);
@@ -202,19 +202,19 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "\t(sqrt (+ x2 y2))\n"
             "))";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
         engine.LoadUnitString("test", source);
 
-        auto ix = moon::itpr::CValue::MakeInteger(1);
-        auto iy = moon::itpr::CValue::MakeInteger(1);
+        auto ix = moon::itpr::Value::MakeInteger(1);
+        auto iy = moon::itpr::Value::MakeInteger(1);
         auto iResult = engine.CallFunction("test", "module", { ix, iy });
-        assert(iResult.GetType() == moon::itpr::EValueType::INTEGER);
+        assert(iResult.GetType() == moon::itpr::ValueType::INTEGER);
         assert(iResult.GetInteger() == 1);
 
-        auto rx = moon::itpr::CValue::MakeReal(1);
-        auto ry = moon::itpr::CValue::MakeReal(1);
+        auto rx = moon::itpr::Value::MakeReal(1);
+        auto ry = moon::itpr::Value::MakeReal(1);
         auto rResult = engine.CallFunction("test", "module", { rx, ry });
-        assert(rResult.GetType() == moon::itpr::EValueType::REAL);
+        assert(rResult.GetType() == moon::itpr::ValueType::REAL);
         assert(IsClose(rResult.GetReal(), std::sqrt(2)));
     } },
 
@@ -227,14 +227,14 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "# Less useless constant\n"
             "(bind pi 3.1415)";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
         engine.LoadUnitString("test", source);
 
         auto neg_thousand = engine.GetValue("test", "neg_thousand");
         auto pi = engine.GetValue("test", "pi");
 
-        assert(neg_thousand.GetType() == moon::itpr::EValueType::INTEGER);
-        assert(pi.GetType() == moon::itpr::EValueType::REAL);
+        assert(neg_thousand.GetType() == moon::itpr::ValueType::INTEGER);
+        assert(pi.GetType() == moon::itpr::ValueType::REAL);
 
         assert(neg_thousand.GetInteger() == -1000);
         assert(IsClose(pi.GetReal(), 3.1415));
@@ -250,12 +250,12 @@ std::vector<std::pair<std::string, std::function<void()>>> assertions {
             "\t(dblx)\n"
             "))";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
         engine.LoadUnitString("test", source);
 
         auto result = engine.CallFunction("test", "scope-test", {});
 
-        assert(result.GetType() == moon::itpr::EValueType::INTEGER);
+        assert(result.GetType() == moon::itpr::ValueType::INTEGER);
         assert(result.GetInteger() == 4);
     } },
 
@@ -277,12 +277,12 @@ std::vector<std::pair<std::string, std::function<bool()>>> optionals{
             "\t(doubler rhs)\n"
             "))";
 
-        moon::itpr::CInterpreter engine;
+        moon::itpr::Interpreter engine;
         engine.LoadUnitString("test", source);
 
-        auto result = engine.CallFunction("test", "test", { moon::itpr::CValue::MakeInteger(3) });
+        auto result = engine.CallFunction("test", "test", { moon::itpr::Value::MakeInteger(3) });
 
-        assert(result.GetType() == moon::itpr::EValueType::INTEGER);
+        assert(result.GetType() == moon::itpr::ValueType::INTEGER);
 
         if (result.GetInteger() == 3) {
             return false;

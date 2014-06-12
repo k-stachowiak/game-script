@@ -6,10 +6,10 @@
 namespace moon {
 namespace itpr {
 
-    class CStackFrame {
+    class StackFrame {
         const std::string m_function;
     public:
-        CStackFrame(std::string function) :
+        StackFrame(std::string function) :
             m_function{ function }
         {}
 

@@ -15,75 +15,75 @@
 namespace moon {
 namespace itpr {
 
-    class CGlobalScope;
+    class GlobalScope;
 
     // TODO: this is identical to the SCapture. Merge the two?
-    struct SValueStore {
-        CValue value;
-        CSourceLocation location;
+    struct ValueStore {
+        Value value;
+        SourceLocation location;
     };
 
-    class CScope {
+    class Scope {
     protected:
-        std::map<std::string, SValueStore> t_binds;
+        std::map<std::string, ValueStore> t_binds;
     public:
-        virtual ~CScope() {}
+        virtual ~Scope() {}
 
-        virtual const SValueStore GetValueStore(
+        virtual const ValueStore GetValueStore(
             const std::string& name,
-            const CSourceLocation& location,
-            const CStack& stack) const = 0;
+            const SourceLocation& location,
+            const Stack& stack) const = 0;
 
-        virtual CGlobalScope& GetGlobalScope() = 0;
+        virtual GlobalScope& GetGlobalScope() = 0;
 
-        virtual std::map<std::string, SCapture>
+        virtual std::map<std::string, Capture>
         CaptureNonGlobals(const std::vector<std::string>& names) const = 0;
 
         void TryRegisteringBind(
-            const CStack& stack,
+            const Stack& stack,
             const std::string& name,
-            const CValue& value,
-            const CSourceLocation& location);
+            const Value& value,
+            const SourceLocation& location);
 
         std::vector<std::string> GetAllValues() const;
         std::vector<std::string> GetAllFunctions() const;
 
-        CValue GetValue(
+        Value GetValue(
             const std::string& name,
-            const CSourceLocation& location,
-            const CStack& stack);
+            const SourceLocation& location,
+            const Stack& stack);
     };
 
-    class CGlobalScope : public CScope {
+    class GlobalScope : public Scope {
     public:
-        CGlobalScope& GetGlobalScope() override { return *this; }
+        GlobalScope& GetGlobalScope() override { return *this; }
 
-        const SValueStore GetValueStore(
+        const ValueStore GetValueStore(
             const std::string& name,
-            const CSourceLocation& location,
-            const CStack& stack) const override;
+            const SourceLocation& location,
+            const Stack& stack) const override;
 
-        std::map<std::string, SCapture>
+        std::map<std::string, Capture>
         CaptureNonGlobals(const std::vector<std::string>&) const override
         {
             return {};
         }
     };
 
-    class CLocalScope : public CScope {
-        CGlobalScope& m_globalScope;
+    class LocalScope : public Scope {
+        GlobalScope& m_globalScope;
 
     public:
-        CLocalScope(CGlobalScope& globalScope) : m_globalScope(globalScope) {}
+        LocalScope(GlobalScope& globalScope) : m_globalScope(globalScope) {}
         
-        CGlobalScope& GetGlobalScope() override { return m_globalScope; }
+        GlobalScope& GetGlobalScope() override { return m_globalScope; }
 
-        const SValueStore GetValueStore(
+        const ValueStore GetValueStore(
             const std::string& name,
-            const CSourceLocation& location,
-            const CStack& stack) const override;
+            const SourceLocation& location,
+            const Stack& stack) const override;
 
-        std::map<std::string, SCapture>
+        std::map<std::string, Capture>
         CaptureNonGlobals(const std::vector<std::string>& names) const override;
     };
 

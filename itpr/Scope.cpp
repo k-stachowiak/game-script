@@ -11,11 +11,11 @@
 namespace moon {
 namespace itpr {
 
-    void CScope::TryRegisteringBind(
-            const CStack& stack,
+    void Scope::TryRegisteringBind(
+            const Stack& stack,
             const std::string& name,
-            const CValue& value,
-            const CSourceLocation& location)
+            const Value& value,
+            const SourceLocation& location)
     {
         if (t_binds.find(name) != end(t_binds)) {
             throw ExScopeSymbolAlreadyRegistered{ location, stack };
@@ -23,7 +23,7 @@ namespace itpr {
         t_binds[name] = { value, location };
     }
 
-    std::vector<std::string> CScope::GetAllValues() const
+    std::vector<std::string> Scope::GetAllValues() const
     {
         std::vector<std::string> result;
         for (const auto& pr : t_binds) {
@@ -34,7 +34,7 @@ namespace itpr {
         return result;
     }
 
-    std::vector<std::string> CScope::GetAllFunctions() const
+    std::vector<std::string> Scope::GetAllFunctions() const
     {
         std::vector<std::string> result;
         for (const auto& pr : t_binds) {
@@ -45,18 +45,18 @@ namespace itpr {
         return result;
     }
 
-    CValue CScope::GetValue(
+    Value Scope::GetValue(
         const std::string& name,
-        const CSourceLocation& location,
-        const CStack& stack)
+        const SourceLocation& location,
+        const Stack& stack)
     {
         return GetValueStore(name, location, stack).value;
     } 
 
-    const SValueStore CGlobalScope::GetValueStore(
+    const ValueStore GlobalScope::GetValueStore(
         const std::string& name,
-        const CSourceLocation& location,
-        const CStack& stack) const
+        const SourceLocation& location,
+        const Stack& stack) const
     {
         if (t_binds.find(name) == end(t_binds)) {
             throw ExScopeSymbolNotRegistered{ location, stack };
@@ -65,10 +65,10 @@ namespace itpr {
         }
     }
 
-    const SValueStore CLocalScope::GetValueStore(
+    const ValueStore LocalScope::GetValueStore(
         const std::string& name,
-        const CSourceLocation& location,
-        const CStack& stack) const
+        const SourceLocation& location,
+        const Stack& stack) const
     {
         if (t_binds.find(name) == end(t_binds)) {
             return m_globalScope.GetValueStore(name, location, stack);
@@ -78,10 +78,10 @@ namespace itpr {
         }
     }
 
-    std::map<std::string, SCapture>
-    CLocalScope::CaptureNonGlobals(const std::vector<std::string>& names) const
+    std::map<std::string, Capture>
+    LocalScope::CaptureNonGlobals(const std::vector<std::string>& names) const
     {
-        std::map<std::string, SCapture> result;
+        std::map<std::string, Capture> result;
         for(const std::string& name : names) {
             auto found = t_binds.find(name);
             if (found == end(t_binds)) {

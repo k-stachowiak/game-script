@@ -4,21 +4,21 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-    bool AssertCompoundSize(const CDomNode& node, int size)
+    bool AssertCompoundSize(const DomNode& node, int size)
     {
         return
             node.IsCompound() &&
             std::distance(node.ChildrenBegin(), node.ChildrenEnd()) == size;
     }
 
-    bool AssertCompoundMinSize(const CDomNode& node, int minSize)
+    bool AssertCompoundMinSize(const DomNode& node, int minSize)
     {
         return
             node.IsCompound() &&
             std::distance(node.ChildrenBegin(), node.ChildrenEnd()) >= minSize;
     }
 
-    bool ParseAtom(const CDomNode& node, std::string& result)
+    bool ParseAtom(const DomNode& node, std::string& result)
     {
         if (!node.IsAtom()) {
             return false;

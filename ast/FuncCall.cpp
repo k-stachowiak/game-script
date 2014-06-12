@@ -11,25 +11,25 @@
 namespace moon {
 namespace ast {
 
-    CAstFuncCall::CAstFuncCall(
-        const CSourceLocation& location,
+    AstFuncCall::AstFuncCall(
+        const SourceLocation& location,
         std::string symbol, 
-        std::vector<std::unique_ptr<CAstNode>>&& actualArgs) :
-        CAstNode{ location },
+        std::vector<std::unique_ptr<AstNode>>&& actualArgs) :
+        AstNode{ location },
         m_symbol{ symbol },
         m_actualArgs{ std::move(actualArgs) }
     {}
 
-    itpr::CValue CAstFuncCall::Evaluate(itpr::CScope& scope, itpr::CStack& stack) const
+    itpr::Value AstFuncCall::Evaluate(itpr::Scope& scope, itpr::Stack& stack) const
     {
-        std::vector<itpr::CValue> values;
+        std::vector<itpr::Value> values;
         for (const auto& arg : m_actualArgs) {
             values.push_back(arg->Evaluate(scope, stack));
         }
         return itpr::CallFunction(scope, stack, GetLocation(), m_symbol, values);
     }
 
-    void CAstFuncCall::GetUsedSymbols(std::vector<std::string>& symbols) const
+    void AstFuncCall::GetUsedSymbols(std::vector<std::string>& symbols) const
     {
         symbols.push_back(m_symbol);
         for (const auto& arg : m_actualArgs) {

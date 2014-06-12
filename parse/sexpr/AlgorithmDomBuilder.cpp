@@ -7,18 +7,18 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-    static EDomCompoundType InferCompoundType(CSourceLocation location, const CToken& openingToken)
+    static DomCompoundType InferCompoundType(SourceLocation location, const Token& openingToken)
     {
         if (openingToken == TOK_CORE_OPEN) {
-            return EDomCompoundType::CORE;
+            return DomCompoundType::CORE;
         }
 
         if (openingToken == TOK_ARR_OPEN) {
-            return EDomCompoundType::ARRAY;
+            return DomCompoundType::ARRAY;
         }
 
         if (openingToken == TOK_TUP_OPEN) {
-            return EDomCompoundType::TUPLE;
+            return DomCompoundType::TUPLE;
         }
 
         throw ExDomUnexpectedCompoundDelimiter{ location };
@@ -32,12 +32,12 @@ namespace sexpr {
     {
         const auto begin = current++;
 
-        std::vector<CDomNode> children;
+        std::vector<DomNode> children;
         auto inserter = std::back_inserter(children);
 
         while (current != last) {
             if (IsClosingParenthesis(*current) && ParenthesisMatch(*begin, *current)) {
-                *(out++) = CDomNode::MakeCompound(
+                *(out++) = DomNode::MakeCompound(
                     begin->GetLocation(),
                     InferCompoundType(begin->GetLocation(), *begin),
                     children);
@@ -54,7 +54,7 @@ namespace sexpr {
     static inline In TryParseAtomDomNode(In current, In last, Out out)
     {
         (void)last;
-        *(out++) = CDomNode::MakeAtom(
+        *(out++) = DomNode::MakeAtom(
             current->GetLocation(),
             current->ToString());
         return ++current;
@@ -70,12 +70,12 @@ namespace sexpr {
         }
     }
 
-    std::vector<CDomNode> BuildDom(const std::vector<CToken>& tokens)
+    std::vector<DomNode> BuildDom(const std::vector<Token>& tokens)
     {
         auto current = begin(tokens);
         auto last = end(tokens);
 
-        std::vector<CDomNode> result;
+        std::vector<DomNode> result;
         auto inserter = std::back_inserter(result);
 
         while (current != last) {

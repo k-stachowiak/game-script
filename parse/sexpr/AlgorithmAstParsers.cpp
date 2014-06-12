@@ -9,7 +9,7 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-    std::unique_ptr<ast::CAstBind> TryParsingBind(const CDomNode& domNode)
+    std::unique_ptr<ast::AstBind> TryParsingBind(const DomNode& domNode)
     {
         // 1. Is compound CORE
         if (!domNode.IsCompoundCore()) {
@@ -35,17 +35,17 @@ namespace sexpr {
         }
 
         // 3.3 3rd child is any expression.
-        std::unique_ptr<ast::CAstNode> expression;
+        std::unique_ptr<ast::AstNode> expression;
         if (!(expression = TryParsingNode(*(current++)))) {
             return{};
         }
 
-        return std::unique_ptr<ast::CAstBind> { 
-            new ast::CAstBind{ domNode.GetLocation(), symbol, std::move(expression) }
+        return std::unique_ptr<ast::AstBind> { 
+            new ast::AstBind{ domNode.GetLocation(), symbol, std::move(expression) }
         };
     }
 
-    std::unique_ptr<ast::CAstBind> ParseBind(const CDomNode& domNode)
+    std::unique_ptr<ast::AstBind> ParseBind(const DomNode& domNode)
     {
         auto result = TryParsingBind(domNode);
         if (result) {
@@ -55,7 +55,7 @@ namespace sexpr {
         }
     }
 
-    std::unique_ptr<ast::CAstCompound> TryParsingCompound(const CDomNode& domNode)
+    std::unique_ptr<ast::AstCompound> TryParsingCompound(const DomNode& domNode)
     {
         // 1. Is compound.
         if (domNode.IsAtom()) {
@@ -63,14 +63,14 @@ namespace sexpr {
         }
 
         // 2. Is of ARRAY or TUPLE type.
-        itpr::ECompoundType type;
+        itpr::CompoundType type;
         switch (domNode.GetType()) {
-        case EDomCompoundType::ARRAY:
-            type = itpr::ECompoundType::ARRAY;
+        case DomCompoundType::ARRAY:
+            type = itpr::CompoundType::ARRAY;
             break;
 
-        case EDomCompoundType::TUPLE:
-            type = itpr::ECompoundType::TUPLE;
+        case DomCompoundType::TUPLE:
+            type = itpr::CompoundType::TUPLE;
             break;
 
         default:
@@ -78,7 +78,7 @@ namespace sexpr {
         }
 
         // 3. Has 0 or more expressions.
-        std::vector<std::unique_ptr<ast::CAstNode>> expressions;
+        std::vector<std::unique_ptr<ast::AstNode>> expressions;
         for (auto it = domNode.ChildrenBegin(); it != domNode.ChildrenEnd(); ++it) {
             auto astNode = TryParsingNode(*it);
             if (!astNode) {
@@ -88,12 +88,12 @@ namespace sexpr {
             }
         }
 
-        return std::unique_ptr<ast::CAstCompound> {
-            new ast::CAstCompound{ domNode.GetLocation(), type, std::move(expressions) }
+        return std::unique_ptr<ast::AstCompound> {
+            new ast::AstCompound{ domNode.GetLocation(), type, std::move(expressions) }
         };
     }
 
-    std::unique_ptr<ast::CAstFuncCall> TryParsingFuncCall(const CDomNode& domNode)
+    std::unique_ptr<ast::AstFuncCall> TryParsingFuncCall(const DomNode& domNode)
     {
         // 1. Is compound CORE.
         if (!domNode.IsCompoundCore()) {
@@ -114,7 +114,7 @@ namespace sexpr {
         }
 
         // 3.2. Has 0 or more further children being any expression.
-        std::vector<std::unique_ptr<ast::CAstNode>> actualArgs;
+        std::vector<std::unique_ptr<ast::AstNode>> actualArgs;
         for (auto it = current; it != domNode.ChildrenEnd(); ++it) {
             auto astNode = TryParsingNode(*it);
             if (!astNode) {
@@ -124,12 +124,12 @@ namespace sexpr {
             }
         }
 
-        return std::unique_ptr<ast::CAstFuncCall> {
-            new ast::CAstFuncCall{ domNode.GetLocation(), symbol, std::move(actualArgs) }
+        return std::unique_ptr<ast::AstFuncCall> {
+            new ast::AstFuncCall{ domNode.GetLocation(), symbol, std::move(actualArgs) }
         };
     }
 
-    std::unique_ptr<ast::CAstFuncDef> TryParsingFuncDef(const CDomNode& domNode)
+    std::unique_ptr<ast::AstFuncDef> TryParsingFuncDef(const DomNode& domNode)
     {
         // 1. Is compound CORE.
         if (!domNode.IsCompoundCore()) {
@@ -150,9 +150,9 @@ namespace sexpr {
 
         // 3.2. 2nd keyword is a core compound of symbols.
         std::vector<std::string> formalArgs;
-        std::vector<CSourceLocation> argLocations;
+        std::vector<SourceLocation> argLocations;
 
-        const CDomNode& secondChild = *(current++);
+        const DomNode& secondChild = *(current++);
         if (!secondChild.IsCompoundCore()) {
             return{};
         }
@@ -167,7 +167,7 @@ namespace sexpr {
         }
 
         // 3.3. Has 1 or more further expressions.
-        std::vector<std::unique_ptr<ast::CAstNode>> expressions;
+        std::vector<std::unique_ptr<ast::AstNode>> expressions;
         for (auto it = current; it != domNode.ChildrenEnd(); ++it) {
             auto astNode = TryParsingNode(*it);
             if (!astNode) {
@@ -177,8 +177,8 @@ namespace sexpr {
             }
         }
 
-        return std::unique_ptr<ast::CAstFuncDef> {
-            new ast::CAstFuncDef{
+        return std::unique_ptr<ast::AstFuncDef> {
+            new ast::AstFuncDef{
                 domNode.GetLocation(),
                 formalArgs,
                 argLocations,
@@ -186,7 +186,7 @@ namespace sexpr {
         };
     }
 
-    std::unique_ptr<ast::CAstLiteral> TryParsingLiteral(const CDomNode& domNode)
+    std::unique_ptr<ast::AstLiteral> TryParsingLiteral(const DomNode& domNode)
     {
         // 1. Is atom.
         if (domNode.IsCompound()) {
@@ -195,7 +195,7 @@ namespace sexpr {
 
         // 2. Can be parsed to non-compound value.
         // NOTE: The order of these assertions matters :(
-        itpr::CValue value;
+        itpr::Value value;
         if (!ParseLiteralBoolean(domNode.GetAtom(), value) &&
             !ParseLiteralString(domNode.GetAtom(), domNode.GetLocation(), value) &&
             !ParseLiteralCharacter(domNode.GetAtom(), domNode.GetLocation(), value) &&
@@ -205,12 +205,12 @@ namespace sexpr {
             return{};
         }
 
-        return std::unique_ptr<ast::CAstLiteral> {
-            new ast::CAstLiteral{ domNode.GetLocation(), value }
+        return std::unique_ptr<ast::AstLiteral> {
+            new ast::AstLiteral{ domNode.GetLocation(), value }
         };
     }
 
-    std::unique_ptr<ast::CAstReference> TryParsingReference(const CDomNode& domNode)
+    std::unique_ptr<ast::AstReference> TryParsingReference(const DomNode& domNode)
     {
         // 1. Is a symbol.
         std::string symbol;
@@ -218,14 +218,14 @@ namespace sexpr {
             return{};
         }
 
-        return std::unique_ptr<ast::CAstReference> {
-            new ast::CAstReference{ domNode.GetLocation(), symbol }
+        return std::unique_ptr<ast::AstReference> {
+            new ast::AstReference{ domNode.GetLocation(), symbol }
         };
     }
 
-    std::unique_ptr<ast::CAstNode> TryParsingNode(const CDomNode& domNode)
+    std::unique_ptr<ast::AstNode> TryParsingNode(const DomNode& domNode)
     {
-        std::unique_ptr<ast::CAstNode> result;
+        std::unique_ptr<ast::AstNode> result;
 
         // NOTE: The order of these assertions matters :(
         if ((result = TryParsingLiteral(domNode)) ||

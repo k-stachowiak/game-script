@@ -5,15 +5,15 @@
 namespace moon {
 namespace itpr {
 
-    CValue CallFunction(
-        CScope& scope,
-        CStack& stack,
-        const CSourceLocation& location,
+    Value CallFunction(
+        Scope& scope,
+        Stack& stack,
+        const SourceLocation& location,
         const std::string& symbol,
-        const std::vector<CValue>& argValues)
+        const std::vector<Value>& argValues)
     {
         // Analyze function value.
-        CValue functionValue = scope.GetValue(symbol, location, stack);
+        Value functionValue = scope.GetValue(symbol, location, stack);
         if (!IsFunction(functionValue)) {
             throw ExScopeSymbolIsNotFunction{ location, stack };
         }
@@ -30,7 +30,7 @@ namespace itpr {
 
         if (argValues.size() < functionValue.GetFuncArity()) {
             // "Curry on"...            
-            return CValue::MakeFunction(&functionDef, captures, applArgs);
+            return Value::MakeFunction(&functionDef, captures, applArgs);
         }
 
         // Call function
@@ -40,7 +40,7 @@ namespace itpr {
 
         unsigned argsCount = argNames.size();
 
-        CLocalScope funcScope{ scope.GetGlobalScope() };
+        LocalScope funcScope{ scope.GetGlobalScope() };
 
         for (unsigned i = 0; i < argsCount; ++i) {
             funcScope.TryRegisteringBind(
@@ -59,7 +59,7 @@ namespace itpr {
         }
 
         stack.PushCall(symbol);
-        CValue result = functionDef.Execute(funcScope, stack);
+        Value result = functionDef.Execute(funcScope, stack);
         stack.PopCall();
 
         return result;

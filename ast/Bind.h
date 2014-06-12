@@ -10,21 +10,21 @@
 namespace moon {
 namespace ast {
         
-    class CAstBind : public CAstNode {
+    class AstBind : public AstNode {
         const std::string m_symbol;
-        std::unique_ptr<CAstNode> m_expression;
+        std::unique_ptr<AstNode> m_expression;
 
     public:
-        CAstBind(
-            const CSourceLocation& location, 
+        AstBind(
+            const SourceLocation& location, 
             std::string symbol, 
-            std::unique_ptr<CAstNode>&& expression);
+            std::unique_ptr<AstNode>&& expression);
 
-        itpr::CValue Evaluate(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::Value Evaluate(itpr::Scope& scope, itpr::Stack& stack) const override;
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
         const std::string& GetSymbol() const { return m_symbol; }
-        const CAstNode& GetExpression() const;
-        std::unique_ptr<CAstNode> TakeOverExpression();
+        const AstNode& GetExpression() const;
+        std::unique_ptr<AstNode> TakeOverExpression();
     };
 
 }

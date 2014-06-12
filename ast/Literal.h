@@ -6,12 +6,12 @@
 namespace moon {
 namespace ast {
 
-    class CAstLiteral : public CAstNode {
-        const itpr::CValue m_value;
+    class AstLiteral : public AstNode {
+        const itpr::Value m_value;
 
     public:
-        CAstLiteral(const CSourceLocation& location, itpr::CValue value);
-        itpr::CValue Evaluate(itpr::CScope&, itpr::CStack&) const override;
+        AstLiteral(const SourceLocation& location, itpr::Value value);
+        itpr::Value Evaluate(itpr::Scope&, itpr::Stack&) const override;
         void GetUsedSymbols(std::vector<std::string>&) const override {}
     };
 

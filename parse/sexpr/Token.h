@@ -9,7 +9,7 @@ namespace moon {
 namespace parse {
 namespace sexpr {
 
-    enum ETokenCharacter {
+    enum TokenCharacter {
         TOK_CORE_OPEN = '(',
         TOK_CORE_CLOSE = ')',
         TOK_ARR_OPEN = '[',
@@ -22,21 +22,21 @@ namespace sexpr {
         TOK_DELIM_ESCAPE = '\\'
     };
 
-    class CToken
+    class Token
     {
-        const CSourceLocation m_location;
+        const SourceLocation m_location;
 
         const char* m_begin;
         const char* m_end;
 
     public:
-        CToken(CSourceLocation location, const char* begin, const char* end) :
+        Token(SourceLocation location, const char* begin, const char* end) :
             m_location{ location },
             m_begin{ begin },
             m_end{ end }
         {}
 
-        const CSourceLocation& GetLocation() const
+        const SourceLocation& GetLocation() const
         {
             return m_location;
         }
@@ -46,13 +46,13 @@ namespace sexpr {
             return std::string{ m_begin, m_end };
         }
 
-        friend bool operator==(const CToken& token, char c)
+        friend bool operator==(const Token& token, char c)
         {
             return (token.m_end - token.m_begin) == 1 && *(token.m_begin) == c;
         }
     };
 
-    inline bool IsOpeningParenthesis(const CToken& token)
+    inline bool IsOpeningParenthesis(const Token& token)
     {
         return
             token == TOK_CORE_OPEN ||
@@ -60,7 +60,7 @@ namespace sexpr {
             token == TOK_TUP_OPEN;
     }
 
-    inline bool IsClosingParenthesis(const CToken& token)
+    inline bool IsClosingParenthesis(const Token& token)
     {
         return
             token == TOK_CORE_CLOSE ||
@@ -68,7 +68,7 @@ namespace sexpr {
             token == TOK_TUP_CLOSE;
     }
 
-    inline bool ParenthesisMatch(const CToken& lhs, const CToken& rhs)
+    inline bool ParenthesisMatch(const Token& lhs, const Token& rhs)
     {
         return
             (lhs == TOK_CORE_OPEN && rhs == TOK_CORE_CLOSE) ||
@@ -76,7 +76,7 @@ namespace sexpr {
             (lhs == TOK_TUP_OPEN &&  rhs == TOK_TUP_CLOSE);
     }
 
-    inline bool DelimiterMatch(const CToken& lhs, const CToken& rhs)
+    inline bool DelimiterMatch(const Token& lhs, const Token& rhs)
     {
         return
             (lhs == TOK_STR_DELIM && rhs == TOK_STR_DELIM) ||

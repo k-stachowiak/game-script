@@ -9,7 +9,7 @@ namespace parse {
 namespace sexpr {
 
     struct ExTokNonDelimitedStringOrCharacter : public ExParsingError {
-        ExTokNonDelimitedStringOrCharacter(const CSourceLocation& location) :
+        ExTokNonDelimitedStringOrCharacter(const SourceLocation& location) :
         ExParsingError{
             location.GetLine(),
             location.GetColumn(),
@@ -18,7 +18,7 @@ namespace sexpr {
     };
 
     struct ExDomUnexpectedCompoundDelimiter : public ExParsingError {
-        ExDomUnexpectedCompoundDelimiter(const CSourceLocation& location) :
+        ExDomUnexpectedCompoundDelimiter(const SourceLocation& location) :
         ExParsingError{
             location.GetLine(),
             location.GetColumn(),
@@ -26,7 +26,7 @@ namespace sexpr {
         {}
     };
     struct ExDomUnclosedCompoundNode : public ExParsingError {
-        ExDomUnclosedCompoundNode(const CSourceLocation& location) :
+        ExDomUnclosedCompoundNode(const SourceLocation& location) :
         ExParsingError{
             location.GetLine(),
             location.GetColumn(),
@@ -35,7 +35,7 @@ namespace sexpr {
     };
 
     struct ExAstBindParsingFailed : public ExParsingError {
-        ExAstBindParsingFailed(const CSourceLocation& location) :
+        ExAstBindParsingFailed(const SourceLocation& location) :
         ExParsingError{
             location.GetLine(),
             location.GetColumn(),
@@ -44,7 +44,7 @@ namespace sexpr {
     };
 
     struct ExMalformedDelimitedLiteral : public ExParsingError {
-        ExMalformedDelimitedLiteral(const CSourceLocation& location) :
+        ExMalformedDelimitedLiteral(const SourceLocation& location) :
         ExParsingError{
             location.GetLine(),
             location.GetColumn(),

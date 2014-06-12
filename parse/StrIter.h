@@ -9,7 +9,7 @@
 namespace moon {
 namespace parse {
 
-    class CStrIter : public std::iterator<std::bidirectional_iterator_tag, char>
+    class StrIter : public std::iterator<std::bidirectional_iterator_tag, char>
     {
         int m_line;
         int m_column;
@@ -17,7 +17,7 @@ namespace parse {
         const char* m_begin;
         const char* m_current;
 
-        CStrIter(const char* current) :
+        StrIter(const char* current) :
             m_line{ 0 },
             m_column{ 0 },
             m_begin{ current },
@@ -40,17 +40,17 @@ namespace parse {
             return m_column;
         }
 
-        friend bool operator==(const CStrIter& lhs, const CStrIter& rhs)
+        friend bool operator==(const StrIter& lhs, const StrIter& rhs)
         {
             return lhs.m_current == rhs.m_current;
         }
 
-        friend bool operator!=(const CStrIter& lhs, const CStrIter& rhs)
+        friend bool operator!=(const StrIter& lhs, const StrIter& rhs)
         {
             return !(lhs == rhs);
         }
 
-        CStrIter& operator=(const CStrIter& other)
+        StrIter& operator=(const StrIter& other)
         {
             m_begin = other.m_begin;
             m_current = other.m_current;
@@ -62,7 +62,7 @@ namespace parse {
             return *m_current;
         }
 
-        CStrIter& operator++()
+        StrIter& operator++()
         {
             if (m_AtNewLine()) {
                 ++m_line;
@@ -75,7 +75,7 @@ namespace parse {
             return *this;
         }
 
-        CStrIter& operator--()
+        StrIter& operator--()
         {
             if (m_AtNewLine()) {
                 --m_line;
@@ -94,26 +94,26 @@ namespace parse {
             return m_current;
         }
 
-        friend CStrIter operator+(CStrIter iter, int increment)
+        friend StrIter operator+(StrIter iter, int increment)
         {
             std::advance(iter.m_current, increment);
             return iter;
         }
 
-        friend CStrIter operator-(CStrIter iter, int decrement)
+        friend StrIter operator-(StrIter iter, int decrement)
         {
             std::advance(iter.m_current, -decrement);
             return iter;
         }
 
-        static CStrIter Begin(const std::string& str)
+        static StrIter Begin(const std::string& str)
         {
-            return CStrIter{ str.data() };
+            return StrIter{ str.data() };
         }
 
-        static CStrIter End(const std::string& str)
+        static StrIter End(const std::string& str)
         {
-            return CStrIter{ str.data() + str.size() };
+            return StrIter{ str.data() + str.size() };
         }
     };
 

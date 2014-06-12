@@ -9,21 +9,21 @@
 namespace moon {
 namespace ast {
 
-    class CAstFunction : public CAstNode {
+    class AstFunction : public AstNode {
         const std::vector<std::string> m_formalArgs;
-        const std::vector<CSourceLocation> m_argLocations;
+        const std::vector<SourceLocation> m_argLocations;
 
     public:
-        CAstFunction(
-            const CSourceLocation& location,
+        AstFunction(
+            const SourceLocation& location,
             const std::vector<std::string>& formalArgs,
-            const std::vector<CSourceLocation>& argLocations);
+            const std::vector<SourceLocation>& argLocations);
 
-        itpr::CValue Evaluate(itpr::CScope& scope, itpr::CStack&) const;
+        itpr::Value Evaluate(itpr::Scope& scope, itpr::Stack&) const;
         const std::vector<std::string>& GetFormalArgs() const;
-        const std::vector<CSourceLocation>& GetArgLocations() const;
+        const std::vector<SourceLocation>& GetArgLocations() const;
         int GetArgsCount() const;
-        virtual itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const = 0;
+        virtual itpr::Value Execute(itpr::Scope& scope, itpr::Stack& stack) const = 0;
     };
 
 }

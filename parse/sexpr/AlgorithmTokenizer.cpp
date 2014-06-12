@@ -39,14 +39,14 @@ namespace sexpr {
     }
 
     template <class Out>
-    static CStrIter TryParseParenthesis(CStrIter current, CStrIter last, Out out)
+    static StrIter TryParseParenthesis(StrIter current, StrIter last, Out out)
     {
         if (current == last || !IsAnyParenthesis(*current)) {
             return current;
         }
 
-        *(out++) = CToken{ 
-            CSourceLocation::MakeRegular(
+        *(out++) = Token{ 
+            SourceLocation::MakeRegular(
                 current.GetLine(),
                 current.GetColumn()),
             current, current + 1 };
@@ -55,7 +55,7 @@ namespace sexpr {
     }
 
     template <class Out>
-    static CStrIter TryParseRegularAtom(CStrIter current, CStrIter last, Out out)
+    static StrIter TryParseRegularAtom(StrIter current, StrIter last, Out out)
     {
         if (current == last || !IsAllowedInAtom(*current)) {
             return current;
@@ -63,8 +63,8 @@ namespace sexpr {
         
         auto atomEnd = std::find_if_not(current, last, IsAllowedInAtom);
 
-        *(out++) = CToken{
-            CSourceLocation::MakeRegular(
+        *(out++) = Token{
+            SourceLocation::MakeRegular(
                 current.GetLine(),
                 current.GetColumn()),
             current, atomEnd };
@@ -73,7 +73,7 @@ namespace sexpr {
     }
 
     template <class Out>
-    static CStrIter TryParseDelimitedAtom(CStrIter current, CStrIter last, Out out)
+    static StrIter TryParseDelimitedAtom(StrIter current, StrIter last, Out out)
     {
         if (current == last || (*current != TOK_STR_DELIM &&
                                 *current != TOK_CHAR_DELIM)) {
@@ -85,14 +85,14 @@ namespace sexpr {
 
         if (atomEnd == last || (*atomEnd != delimiter)) {
             throw ExTokNonDelimitedStringOrCharacter{
-                CSourceLocation::MakeRegular(
+                SourceLocation::MakeRegular(
                     current.GetLine(),
                     current.GetColumn())
             };
         }
 
-        *(out++) = CToken{
-            CSourceLocation::MakeRegular(
+        *(out++) = Token{
+            SourceLocation::MakeRegular(
                 current.GetLine(),
                 current.GetColumn()),
             current, atomEnd + 1 };
@@ -100,7 +100,7 @@ namespace sexpr {
         return std::find_if_not(atomEnd + 1, last, isspace);
     }
 
-    static CStrIter TryParseComments(CStrIter current, CStrIter last)
+    static StrIter TryParseComments(StrIter current, StrIter last)
     {
         if (current == last || *current != TOK_COMMENT) {
             return current;
@@ -112,9 +112,9 @@ namespace sexpr {
     }
 
 
-    std::vector<CToken> Tokenize(CStrIter current, const CStrIter& last)
+    std::vector<Token> Tokenize(StrIter current, const StrIter& last)
     {
-        std::vector<CToken> result;
+        std::vector<Token> result;
         auto inserter = std::back_inserter(result);
 
         current = std::find_if_not(current, last, isspace);

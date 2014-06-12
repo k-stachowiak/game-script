@@ -12,10 +12,10 @@
 namespace moon {
 namespace itpr {
 
-    inline std::vector<std::string> GenStackFrames(const CStack& stack)
+    inline std::vector<std::string> GenStackFrames(const Stack& stack)
     {
         std::vector<std::string> result;
-        stack.VisitCalls([&result](int level, const CStackFrame& frame) mutable {
+        stack.VisitCalls([&result](int level, const StackFrame& frame) mutable {
             std::ostringstream oss;
             oss << level << " : " << frame.GetFunction();
             result.push_back(oss.str());
@@ -24,7 +24,7 @@ namespace itpr {
     }
 
     struct ExAstArithmeticTypeMismatch : public ExInterpretationError {
-        ExAstArithmeticTypeMismatch(const CSourceLocation& location, const CStack& stack) :
+        ExAstArithmeticTypeMismatch(const SourceLocation& location, const Stack& stack) :
         ExInterpretationError{
                 location.GetLine(),
                 location.GetColumn(),
@@ -34,7 +34,7 @@ namespace itpr {
     };
 
     struct ExScopeSymbolAlreadyRegistered : public ExInterpretationError {
-        ExScopeSymbolAlreadyRegistered(const CSourceLocation& location, const CStack& stack) :
+        ExScopeSymbolAlreadyRegistered(const SourceLocation& location, const Stack& stack) :
         ExInterpretationError{
             location.GetLine(),
             location.GetColumn(),
@@ -44,7 +44,7 @@ namespace itpr {
     };
 
     struct ExScopeSymbolNotRegistered : public ExInterpretationError {
-        ExScopeSymbolNotRegistered(const CSourceLocation& location, const CStack& stack) :
+        ExScopeSymbolNotRegistered(const SourceLocation& location, const Stack& stack) :
         ExInterpretationError{
             location.GetLine(),
             location.GetColumn(),
@@ -54,7 +54,7 @@ namespace itpr {
     };
 
     struct ExScopeSymbolIsNotFunction : public ExInterpretationError {
-        ExScopeSymbolIsNotFunction(const CSourceLocation& location, const CStack& stack) :
+        ExScopeSymbolIsNotFunction(const SourceLocation& location, const Stack& stack) :
         ExInterpretationError{
             location.GetLine(),
             location.GetColumn(),
@@ -64,7 +64,7 @@ namespace itpr {
     };
 
     struct ExScopeFormalActualArgCountMismatch : public ExInterpretationError {
-        ExScopeFormalActualArgCountMismatch(const CSourceLocation& location, const CStack& stack) :
+        ExScopeFormalActualArgCountMismatch(const SourceLocation& location, const Stack& stack) :
         ExInterpretationError{
             location.GetLine(),
             location.GetColumn(),
@@ -74,7 +74,7 @@ namespace itpr {
     };
 
     struct ExInconsistentTypesInArray : public ExInterpretationError {
-        ExInconsistentTypesInArray(const CSourceLocation& location, const CStack& stack) :
+        ExInconsistentTypesInArray(const SourceLocation& location, const Stack& stack) :
         ExInterpretationError{
             location.GetLine(),
             location.GetColumn(),

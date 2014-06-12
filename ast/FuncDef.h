@@ -10,17 +10,17 @@
 namespace moon {
 namespace ast {
 
-    class CAstFuncDef : public CAstFunction {
-        const std::vector<std::unique_ptr<CAstNode>> m_expressions;
+    class AstFuncDef : public AstFunction {
+        const std::vector<std::unique_ptr<AstNode>> m_expressions;
 
     public:
-        CAstFuncDef(
-            const CSourceLocation& location,
+        AstFuncDef(
+            const SourceLocation& location,
             std::vector<std::string> formalArgs,
-            std::vector<CSourceLocation> argLocations,
-            std::vector<std::unique_ptr<CAstNode>>&& expressions);
+            std::vector<SourceLocation> argLocations,
+            std::vector<std::unique_ptr<AstNode>>&& expressions);
 
-        itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::Value Execute(itpr::Scope& scope, itpr::Stack& stack) const override;
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
     };
 

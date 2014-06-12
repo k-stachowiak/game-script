@@ -9,8 +9,8 @@
 namespace moon {
 namespace itpr {
 
-    class CStack {
-        std::vector<CStackFrame> m_calls;
+    class Stack {
+        std::vector<StackFrame> m_calls;
 
     public:
         void PushCall(const std::string& function)

@@ -13,12 +13,12 @@
 namespace moon {
 namespace itpr {
 
-    CValue CallFunction(
-        CScope& scope,
-        CStack& stack,
-        const CSourceLocation& location,
+    Value CallFunction(
+        Scope& scope,
+        Stack& stack,
+        const SourceLocation& location,
         const std::string& symbol,
-        const std::vector<CValue>& argValues);
+        const std::vector<Value>& argValues);
 
 }
 }

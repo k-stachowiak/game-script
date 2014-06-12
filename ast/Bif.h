@@ -18,52 +18,52 @@ namespace bif {
     // argument type conversion magic happening if the argument
     // type doesn't match the ewquired one but is also numeric.
 
-    class CAstUnaryArithmeticBif : public CAstFunction {
-        itpr::CValue(*m_integerImplementation)(long);
-        itpr::CValue(*m_realImplementation)(double);
+    class AstUnaryArithmeticBif : public AstFunction {
+        itpr::Value(*m_integerImplementation)(long);
+        itpr::Value(*m_realImplementation)(double);
 
     public:
-        CAstUnaryArithmeticBif(
-            itpr::CValue(integerImplementation)(long),
-            itpr::CValue(realImplementation)(double)) :
-            CAstFunction{
-                CSourceLocation::MakeBuiltInFunction(),
+        AstUnaryArithmeticBif(
+            itpr::Value(integerImplementation)(long),
+            itpr::Value(realImplementation)(double)) :
+            AstFunction{
+                SourceLocation::MakeBuiltInFunction(),
                 { "x" },
-                { CSourceLocation::MakeBuiltInFunction() }
+                { SourceLocation::MakeBuiltInFunction() }
             },
             m_integerImplementation{ integerImplementation },
             m_realImplementation{ realImplementation }
         {}
 
         void GetUsedSymbols(std::vector<std::string>&) const override {}
-        itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::Value Execute(itpr::Scope& scope, itpr::Stack& stack) const override;
     };
 
-    class CAstBinaryArithmeticBif : public CAstFunction {
+    class AstBinaryArithmeticBif : public AstFunction {
         std::vector<std::string> m_formalArgs;
-        std::vector<CSourceLocation> m_argLocations;
-        itpr::CValue(*m_integerImplementation)(long, long);
-        itpr::CValue(*m_realImplementation)(double, double);
+        std::vector<SourceLocation> m_argLocations;
+        itpr::Value(*m_integerImplementation)(long, long);
+        itpr::Value(*m_realImplementation)(double, double);
 
     public:
-        CAstBinaryArithmeticBif(
-            itpr::CValue(integerImplementation)(long, long),
-            itpr::CValue(realImplementation)(double, double)) :
-            CAstFunction{
-                CSourceLocation::MakeBuiltInFunction(),
+        AstBinaryArithmeticBif(
+            itpr::Value(integerImplementation)(long, long),
+            itpr::Value(realImplementation)(double, double)) :
+            AstFunction{
+                SourceLocation::MakeBuiltInFunction(),
                     { "lhs", "rhs" },
-                    { CSourceLocation::MakeBuiltInFunction(),
-                      CSourceLocation::MakeBuiltInFunction() }
+                    { SourceLocation::MakeBuiltInFunction(),
+                      SourceLocation::MakeBuiltInFunction() }
             },
             m_integerImplementation{ integerImplementation },
             m_realImplementation{ realImplementation }
         {}
 
         void GetUsedSymbols(std::vector<std::string>&) const {}
-        itpr::CValue Execute(itpr::CScope& scope, itpr::CStack& stack) const override;
+        itpr::Value Execute(itpr::Scope& scope, itpr::Stack& stack) const override;
     };
 
-    std::vector<std::pair<std::string, std::unique_ptr<CAstNode>>> BuildBifMap();
+    std::vector<std::pair<std::string, std::unique_ptr<AstNode>>> BuildBifMap();
 
 }
 }

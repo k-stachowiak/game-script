@@ -8,34 +8,34 @@
 namespace moon {
 namespace itpr {
 
-    SCompoundValue::SCompoundValue(
-            ECompoundType new_type,
-            std::vector<CValue> new_values) :
+    CompoundValue::CompoundValue(
+            CompoundType new_type,
+            std::vector<Value> new_values) :
         type{ new_type },
         values{ new_values }
     {}
 
-    SFunctionValue::SFunctionValue(
-            const ast::CAstFunction* new_definition,
-            std::map<std::string, SCapture> new_captures,
-            std::vector<CValue> new_appliedArgs) :
+    FunctionValue::FunctionValue(
+            const ast::AstFunction* new_definition,
+            std::map<std::string, Capture> new_captures,
+            std::vector<Value> new_appliedArgs) :
         definition{ new_definition },
         captures{ new_captures },
         appliedArgs{ new_appliedArgs }
     {}
 
-    CValue::CValue(
-        EValueType type,
+    Value::Value(
+        ValueType type,
         long integer,
         double real,
         char character,
         std::string string,
         int boolean,
-        ECompoundType compoundType,
-        std::vector<CValue> compoundValues,
-        const ast::CAstFunction* funcDefinition,
-        std::map<std::string, SCapture> funcCaptures,
-        std::vector<CValue> funcAppliedArgs) :
+        CompoundType compoundType,
+        std::vector<Value> compoundValues,
+        const ast::AstFunction* funcDefinition,
+        std::map<std::string, Capture> funcCaptures,
+        std::vector<Value> funcAppliedArgs) :
         m_type{ type },
         m_integer{ integer },
         m_real{ real },
@@ -46,72 +46,72 @@ namespace itpr {
         m_function{ funcDefinition, funcCaptures, funcAppliedArgs }
     {}
 
-    CValue CValue::MakeInteger(long value)
+    Value Value::MakeInteger(long value)
     {
-        CValue result{
-            EValueType::INTEGER, value,
+        Value result{
+            ValueType::INTEGER, value,
             0, 0, {}, 0,
-            ECompoundType::ARRAY, {},
+            CompoundType::ARRAY, {},
             nullptr, {}, {}
         };
         return result;
     }
 
-    CValue CValue::MakeReal(double value)
+    Value Value::MakeReal(double value)
     {
-        CValue result{
-            EValueType::REAL,
+        Value result{
+            ValueType::REAL,
             0,
             value,
             0, {}, 0,
-            ECompoundType::ARRAY, {},
+            CompoundType::ARRAY, {},
             nullptr, {}, {}
         };
         return result;
     }
 
-    CValue CValue::MakeCharacter(char value)
+    Value Value::MakeCharacter(char value)
     {
-        CValue result{
-            EValueType::CHARACTER,
+        Value result{
+            ValueType::CHARACTER,
             0, 0,
             value,
             {}, 0,
-            ECompoundType::ARRAY, {},
+            CompoundType::ARRAY, {},
             nullptr, {}, {}
         };
         return result;
     }
 
-    CValue CValue::MakeString(std::string value)
+    Value Value::MakeString(std::string value)
     {
-        CValue result{
-            EValueType::STRING,
+        Value result{
+            ValueType::STRING,
             0, 0, 0,
             value,
             0,
-            ECompoundType::ARRAY, {},
+            CompoundType::ARRAY, {},
             nullptr, {}, {}
         };
         return result;
     }
 
-    CValue CValue::MakeBoolean(int value)
+    Value Value::MakeBoolean(int value)
     {
-        CValue result{
-            EValueType::BOOLEAN,
+        Value result{
+            ValueType::BOOLEAN,
             0, 0, 0, {},
             value,
-            ECompoundType::ARRAY, {},
+            CompoundType::ARRAY, {},
             nullptr, {}, {}
         };
         return result;
     }
 
-    CValue CValue::MakeCompound(ECompoundType type, const std::vector<CValue>& values)
+    Value Value::MakeCompound(CompoundType type, const std::vector<Value>& values)
     {
-        CValue result{
-            EValueType::COMPOUND,
+        Value result{
+            ValueType::COMPOUND,
             0, 0, 0, {}, 0,
             type, values,
             nullptr, {}, {}
@@ -120,22 +120,22 @@ namespace itpr {
         return result;
     }
     
-    CValue CValue::MakeFunction(
-        const ast::CAstFunction* definition,
-        const std::map<std::string, SCapture>& captures,
-        const std::vector<CValue>& appliedArgs)
+    Value Value::MakeFunction(
+        const ast::AstFunction* definition,
+        const std::map<std::string, Capture>& captures,
+        const std::vector<Value>& appliedArgs)
     {
-        CValue result{
-            EValueType::FUNCTION,
+        Value result{
+            ValueType::FUNCTION,
             0, 0, 0, {}, 0,
-            ECompoundType::ARRAY, {},
+            CompoundType::ARRAY, {},
             definition, captures, appliedArgs
         };
 
         return result;
     }
     
-    bool CValue::TypesEqual(const CValue& lhs, const CValue& rhs)
+    bool Value::TypesEqual(const Value& lhs, const Value& rhs)
     {
         if (IsAtomic(lhs) && IsAtomic(rhs)) {
             return lhs.GetType() == rhs.GetType();
@@ -166,19 +166,19 @@ namespace itpr {
         }
     }
 
-    unsigned CValue::GetFuncArity() const
+    unsigned Value::GetFuncArity() const
     {
         return m_function.definition->GetArgsCount() - m_function.appliedArgs.size();
     }
 
-    const std::map<std::string, SCapture>& CValue::GetFuncCaptures() const
+    const std::map<std::string, Capture>& Value::GetFuncCaptures() const
     {
         return m_function.captures;
     }
 
-    SCapture::SCapture(
-            CValue new_value,
-            CSourceLocation new_location) :
+    Capture::Capture(
+            Value new_value,
+            SourceLocation new_location) :
         value(new_value),
         location(new_location)
     {}
