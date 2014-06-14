@@ -24,7 +24,7 @@ namespace ast {
         void GetUsedSymbols(std::vector<std::string>& symbols) const override;
         const std::string& GetSymbol() const { return m_symbol; }
         const AstNode& GetExpression() const;
-        std::unique_ptr<AstNode> TakeOverExpression();
+		std::unique_ptr<AstNode> MoveExpressionOut();
     };
 
 }

@@ -27,7 +27,7 @@ namespace ast {
             return m_location;
         }
 
-        virtual ~AstNode()    {}
+        virtual ~AstNode() {}
 
         virtual itpr::Value Evaluate(itpr::Scope& scope, itpr::Stack& stack) const = 0;
         virtual void GetUsedSymbols(std::vector<std::string>& symbols) const = 0;

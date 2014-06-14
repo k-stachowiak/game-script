@@ -27,6 +27,7 @@ namespace sexpr {
         result = node.GetAtom();
         return true;
     }
+
 }
 }
 }

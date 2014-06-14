@@ -15,7 +15,7 @@ namespace parse {
         static std::pair<std::string, std::unique_ptr<ast::AstNode>> t_StripBind(
                 std::unique_ptr<ast::AstBind>&& bind)
         {
-            return std::make_pair(bind->GetSymbol(), bind->TakeOverExpression());
+			return std::make_pair(bind->GetSymbol(), bind->MoveExpressionOut());
         }
 
     public:

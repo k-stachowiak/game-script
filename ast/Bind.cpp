@@ -16,7 +16,7 @@ namespace ast {
         m_symbol{ symbol },
         m_expression{ std::move(expression) }
     {
-        assert((bool)m_expression);
+        assert(static_cast<bool>(m_expression));
     }
 
     itpr::Value AstBind::Evaluate(itpr::Scope& scope, itpr::Stack& stack) const
@@ -36,7 +36,7 @@ namespace ast {
         return *m_expression;
     }
 
-    std::unique_ptr<AstNode> AstBind::TakeOverExpression()
+    std::unique_ptr<AstNode> AstBind::MoveExpressionOut()
     {
         return std::move(m_expression);
     }
