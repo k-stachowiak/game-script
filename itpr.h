@@ -64,6 +64,25 @@ struct Stack *stack_make(ptrdiff_t size);
 void stack_free(struct Stack *stack);
 struct Value stack_peek(struct Stack *stack, ptrdiff_t location);
 
-ptrdiff_t eval(struct AstNode *node, struct Stack *stack);
+struct SymMap {
+	struct SymMapKvp *map;
+	struct SymMapKvp *end;
+};
+
+struct SymMapKvp {
+	char *key;
+	ptrdiff_t location;
+	struct SymMapKvp *next;
+};
+
+void sym_map_init(struct SymMap *sym_map);
+void sym_map_deinit(struct SymMap *sym_map);
+void sym_map_insert(struct SymMap *sym_map, char *key, ptrdiff_t location);
+struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
+
+ptrdiff_t eval(
+		struct AstNode *node,
+		struct Stack *stack,
+		struct SymMap *sym_map);
 
 #endif

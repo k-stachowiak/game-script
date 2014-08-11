@@ -11,6 +11,7 @@
 
 static bool eof_flag;
 static struct Stack *stack;
+static struct SymMap sym_map;
 
 /*
  * Implementation copied from StackOverflow :
@@ -94,13 +95,21 @@ static void handle_line(char *line)
 
     } else {
         if (ast->type == AST_LITERAL ||
-        	ast->type == AST_COMPOUND) {
-				location = eval(ast, stack);
+        	ast->type == AST_COMPOUND ||
+        	ast->type == AST_REFERENCE) {
+				location = eval(ast, stack, &sym_map);
 				val = stack_peek(stack, location);
 				val_print(&val, true);
 
+        } else if (ast->type == AST_BIND) {
+        	location = eval(ast, stack, &sym_map);
+			val = stack_peek(stack, location);
+        	printf("Bound ");
+			val_print(&val, true);
+			printf(" to symbol \"%s\"", ast->data.bind.symbol);
+
         } else {
-            printf("Printing not handled for this type of AST node.\n");
+            printf("Printing not handled for this type of AST node.");
 
         }
         printf("\n");
@@ -113,6 +122,7 @@ int repl(void)
     LOG_TRACE_FUNC
     eof_flag = false;
     stack = stack_make(1024);
+    sym_map_init(&sym_map);
     err_reset();
 
     for (;;) {
@@ -128,6 +138,7 @@ int repl(void)
 
         } else if (eof_flag) {
             free(line);
+            sym_map_init(&sym_map);
             stack_free(stack);
             printf("\n");
             return 0;
@@ -138,6 +149,7 @@ int repl(void)
 
         free(line);
         if (result) {
+        	sym_map_init(&sym_map);
             stack_free(stack);
             return result;
         }
