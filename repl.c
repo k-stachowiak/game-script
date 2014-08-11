@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "common.h"
 #include "lex.h"
@@ -24,19 +25,19 @@ static char *XENO_getline(void)
     size_t len = lenmax;
     int c;
 
-    if(line == NULL) {
+    if (line == NULL) {
         err_set(ERR_REPL, "Allocation failed.");
         return NULL;
     }
 
-    for(;;) {
+    for (;;) {
         c = fgetc(stdin);
         if(c == EOF) {
             eof_flag = true;
             break;
         }
 
-        if(--len == 0) {
+        if (--len == 0) {
             len = lenmax;
             char *linen = realloc(linep, lenmax *= 2);
 
@@ -50,50 +51,13 @@ static char *XENO_getline(void)
             linep = linen;
         }
 
-        if((*line++ = c) == '\n') {
+        if ((*line++ = c) == '\n') {
             break;
         }
     }
 
     *line = '\0';
     return linep;
-}
-
-static int count;
-static void count_inc(struct AstNode *node)
-{
-    ++count;
-
-    switch (node->type) {
-    case AST_BIF:
-        printf("Visiting bif (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    case AST_LITERAL:
-        printf("Visiting literal (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    case AST_REFERENCE:
-        printf("Visiting reference (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    case AST_BIND:
-        printf("Visiting bind (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    case AST_COMPOUND:
-        printf("Visiting compound (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    case AST_FUNC_CALL:
-        printf("Visiting function call (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    case AST_FUNC_DEF:
-        printf("Visiting function definition (%d,%d)\n",
-                node->loc.line, node->loc.column);
-        break;
-    }
 }
 
 static struct AstNode *read(char *line)
@@ -175,4 +139,6 @@ int repl(void)
             return result;
         }
     }
+
+    exit(1);
 }

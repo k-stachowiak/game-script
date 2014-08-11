@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "repl.h"
+#include "error.h"
 
 int main()
 {
@@ -13,4 +14,3 @@ int main()
 
     return error;
 }
-

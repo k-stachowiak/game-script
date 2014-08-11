@@ -56,7 +56,7 @@ bool tok_is_spec(struct Token *tok, enum TokenType type)
         return false;
     }
 
-    return *(tok->begin) == type;
+    return *(tok->begin) == (char)type;
 }
 
 bool tok_is_open_paren(struct Token *tok)

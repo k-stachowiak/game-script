@@ -134,14 +134,14 @@ int dom_list_length(struct DomNode* current)
 {
     int result = 0;
     while (current) {
-    current = current->next;
-    ++result;
+		current = current->next;
+		++result;
     }
     return result;
 }
 
-static num_nodes;
-static void dom_count_callback(struct DomNode* node) { ++num_nodes; }
+static int num_nodes;
+static void dom_count_callback(struct DomNode* node) { (void)node; ++num_nodes; }
 int dom_tree_count(struct DomNode *dom)
 {
     num_nodes = 0;

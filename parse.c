@@ -86,7 +86,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     }
 
     // 2. Is of ARRAY or TUPLE type.
-    switch (dom->type) {
+    switch (dom->cpd_type) {
     case DOM_CPD_ARRAY:
         type = AST_CPD_ARRAY;
         break;
@@ -95,7 +95,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
         type = AST_CPD_TUPLE;
         break;
 
-    default:
+    case DOM_CPD_CORE:
         return NULL;
     }
 

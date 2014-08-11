@@ -19,7 +19,7 @@ void val_print(struct Value *value)
         break;
 
     case VAL_INT:
-        printf("integer :: %ld", value->primitive.integer);
+        printf("integer :: %lld", value->primitive.integer);
         break;
 
     case VAL_REAL:
@@ -90,6 +90,9 @@ struct Value stack_peek(struct Stack *stack, ptrdiff_t location)
         result.string.str_begin = src + 8;
         result.string.str_len = size;
         break;
+    default:
+    	printf("Unhandled value type.\n");
+    	exit(1);
     }
 
     return result;
@@ -150,7 +153,6 @@ static void stack_push_string(struct Stack *stack, char *value)
 
 static ptrdiff_t compute_size(struct AstNode *node)
 {
-    int i;
     struct AstNode *child;
     ptrdiff_t cpd_len = 0;
 
@@ -165,22 +167,31 @@ static ptrdiff_t compute_size(struct AstNode *node)
 
     case AST_LITERAL:
         switch (node->data.literal.type) {
-        AST_LIT_BOOL:
+        case AST_LIT_BOOL:
             /* TODO: Get rid of magic numbers! */
             return 1;
 
-        AST_LIT_STRING:
+        case AST_LIT_STRING:
             return strlen(node->data.literal.data.string);
 
-        AST_LIT_CHAR:
+        case AST_LIT_CHAR:
             return 1;
 
-        AST_LIT_INT:
+        case AST_LIT_INT:
             return 8;
 
-        AST_LIT_REAL:
+        case AST_LIT_REAL:
             return 8;
+
+    	default:
+    		printf("Unhandled literal type.\n");
+    		exit(1);
         }
+        break;
+
+	default:
+		printf("Unhandled value type.\n");
+		exit(1);
     }
 }
 
@@ -239,6 +250,9 @@ ptrdiff_t eval(struct AstNode *node, struct Stack *stack)
     case AST_COMPOUND:
         eval_compound(node, stack);
         break;
+	default:
+		printf("Unhandled AST node type.\n");
+		exit(1);
     }
     return begin;
 }
