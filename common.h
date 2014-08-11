@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #ifndef COMMON_H
 #define COMMON_H
 

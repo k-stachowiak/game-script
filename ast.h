@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #ifndef AST_H
 #define AST_H
 

@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #ifndef TOK_H
 #define TOK_H
 

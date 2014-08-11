@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>

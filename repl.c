@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -100,6 +102,10 @@ static void handle_line(char *line)
 				location = eval(ast, stack, &sym_map);
 				val = stack_peek(stack, location);
 				val_print(&val, true);
+
+        } else if (ast->type == AST_FUNC_CALL) {
+        	location = eval(ast, stack, &sym_map);
+        	printf("Parsed function call.");
 
         } else if (ast->type == AST_BIND) {
         	location = eval(ast, stack, &sym_map);

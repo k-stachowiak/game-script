@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #ifndef ITPR_H
 #define ITPR_H
 
@@ -22,8 +24,11 @@ enum ValueType {
     VAL_REAL,
     VAL_STRING,
     VAL_ARRAY,
-    VAL_TUPLE
+    VAL_TUPLE,
+    VAL_FUNCTION
 };
+
+struct Capture;
 
 struct Value {
 
@@ -50,9 +55,22 @@ struct Value {
         char *str_begin;
         ptrdiff_t str_len;
     } string;
+
+    struct {
+    	struct AstNode *def;
+    	struct {
+    		struct Capture *data;
+    		int size, cap;
+    	} captures;
+    	struct {
+    		struct Value *data;
+    		int size, cap;
+    	} applied;
+    } function;
 };
 
 void val_print(struct Value *value, bool annotate);
+void val_free(struct Value *value);
 
 struct Stack {
     char *buffer;
@@ -79,6 +97,12 @@ void sym_map_init(struct SymMap *sym_map);
 void sym_map_deinit(struct SymMap *sym_map);
 void sym_map_insert(struct SymMap *sym_map, char *key, ptrdiff_t location);
 struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
+
+struct Capture {
+	char *symbol;
+    struct Location loc;
+    struct Value value;
+};
 
 ptrdiff_t eval(
 		struct AstNode *node,

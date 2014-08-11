@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #include "common.h"
 
 void si_init(struct SourceIter *si, char *first, char *last)

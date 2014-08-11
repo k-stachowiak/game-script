@@ -1,3 +1,5 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #ifndef ERROR_H
 #define ERROR_H
 

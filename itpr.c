@@ -1,9 +1,12 @@
+/* Copyright (C) 2014 Krzysztof Stachowiak */
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "common.h"
 #include "itpr.h"
+#include "function_call.h"
 
 void val_print(struct Value *value, bool annotate)
 {
@@ -75,6 +78,10 @@ void val_print(struct Value *value, bool annotate)
         }
         printf("]");
         break;
+
+    case VAL_FUNCTION:
+    	printf("function");
+    	break;
     }
 }
 
@@ -276,6 +283,33 @@ static ptrdiff_t eval_reference(
 	}
 }
 
+static ptrdiff_t eval_func_call(
+		struct AstNode *node,
+		struct Stack *stack,
+		struct SymMap *sym_map)
+{
+	struct SymMapKvp *kvp = sym_map_find(sym_map, node->data.func_call.symbol);
+	ptrdiff_t location;
+	struct Value val;
+
+	if (!kvp) {
+		/* TODO: Implement unified runtime error handling (SYMBOL NOT FOUND). */
+		printf("Symbol \"%s\" not found.\n", node->data.func_call.symbol);
+		exit(1);
+	}
+
+	location = kvp->location;
+	val = stack_peek(stack, location);
+
+	if (val.header.type != VAL_FUNCTION) {
+		/* TODO: Implement unified runtime error handling (CALL TO NON-FUNCTION). */
+		printf("Symbol \"%s\" not a function.\n", node->data.func_call.symbol);
+		exit(1);
+	}
+
+	return call_function(stack, sym_map, val, node);
+}
+
 struct Stack *stack_make(ptrdiff_t size)
 {
     struct Stack *result = malloc(sizeof(*result));
@@ -417,6 +451,8 @@ ptrdiff_t eval(
     	return begin;
     case AST_REFERENCE:
     	return eval_reference(node, stack, sym_map);
+    case AST_FUNC_CALL:
+    	return eval_func_call(node, stack, sym_map);
     	break;
 	default:
 		printf("Unhandled AST node type.\n");
