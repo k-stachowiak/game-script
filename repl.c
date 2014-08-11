@@ -82,6 +82,8 @@ static struct AstNode *read(char *line)
 static void handle_line(char *line)
 {
     struct AstNode *ast;
+    ptrdiff_t location;
+    struct Value val;
 
     if (strcmp(line, "") == 0) {
         return;
@@ -91,16 +93,17 @@ static void handle_line(char *line)
         err_reset();
 
     } else {
-        if (ast->type == AST_LITERAL) {
-            ptrdiff_t location = eval(ast, stack);
-            struct Value val = stack_peek(stack, location);
-            val_print(&val);
-            printf("\n");
-        } else if (ast->type == AST_COMPOUND) {
-            
+        if (ast->type == AST_LITERAL ||
+        	ast->type == AST_COMPOUND) {
+				location = eval(ast, stack);
+				val = stack_peek(stack, location);
+				val_print(&val, true);
+
         } else {
             printf("Printing not handled for this type of AST node.\n");
+
         }
+        printf("\n");
         ast_node_free(ast);
     }
 }

@@ -2,45 +2,78 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "itpr.h"
 
-void val_print(struct Value *value)
+void val_print(struct Value *value, bool annotate)
 {
+	int i;
     char *string;
     ptrdiff_t str_len;
 
     switch ((enum ValueType)value->header.type) {
     case VAL_BOOL:
-        printf("bool :: %s", value->primitive.boolean ? "true" : "false");
+    	if (annotate) {
+    		printf("bool :: ");
+    	}
+        printf("%s", value->primitive.boolean ? "true" : "false");
         break;
 
     case VAL_CHAR:
-        printf("char :: '%c'", value->primitive.character);
+    	if (annotate) {
+    		printf("char :: ");
+    	}
+        printf("'%c'", value->primitive.character);
         break;
 
     case VAL_INT:
-        printf("integer :: %lld", value->primitive.integer);
+    	if (annotate) {
+    		printf("integer :: ");
+    	}
+        printf("%lld", value->primitive.integer);
         break;
 
     case VAL_REAL:
-        printf("real :: %f", value->primitive.real);
+    	if (annotate) {
+    		printf("real :: ");
+    	}
+        printf("%f", value->primitive.real);
         break;
 
     case VAL_STRING:
+    	if (annotate) {
+    		printf("string :: ");
+    	}
         str_len = value->string.str_len;
         string = malloc(str_len + 1);
         memcpy(string, value->string.str_begin, str_len);
         string[str_len] = '\0';
-        printf("string :: %s", string);
+        printf("%s", string);
         free(string);
         break;
 
     case VAL_ARRAY:
-        printf("array");
+    	if (annotate) {
+    		printf("array :: ");
+    	}
+        printf("[ ");
+        for (i = 0; i < value->compound.size; ++i) {
+        	val_print(value->compound.data + i, false);
+        	printf(" ");
+        }
+        printf("]");
         break;
 
     case VAL_TUPLE:
-        printf("tuple");
+    	if (annotate) {
+    		printf("tuple :: ");
+    	}
+        printf("[ ");
+        for (i = 0; i < value->compound.size; ++i) {
+        	val_print(value->compound.data + i, true);
+        	printf(" ");
+        }
+        printf("]");
         break;
     }
 }
@@ -60,14 +93,33 @@ void stack_free(struct Stack *stack)
     free(stack);
 }
 
+struct Value stack_peek(struct Stack *stack, ptrdiff_t location);
+
+static void peek_compound(struct Stack *stack, struct Value *result)
+{
+	ptrdiff_t location = result->begin + VAL_HEAD_BYTES;
+	ptrdiff_t end = result->begin + result->header.size;
+	struct Value value;
+
+	result->compound.data = NULL;
+	result->compound.cap = 0;
+	result->compound.size = 0;
+
+	while (location != end) {
+		value = stack_peek(stack, location);
+		ARRAY_APPEND(result->compound, value);
+		location += value.header.size;
+	}
+}
+
 struct Value stack_peek(struct Stack *stack, ptrdiff_t location)
 {
     uint32_t type, size;
     char *src = stack->buffer + location;
     struct Value result;
 
-    memcpy(&type, src + 0, 4);
-    memcpy(&size, src + 4, 4);
+    memcpy(&type, src, VAL_HEAD_TYPE_BYTES);
+    memcpy(&size, src + VAL_HEAD_TYPE_BYTES, VAL_HEAD_SIZE_BYTES);
 
     result.begin = location;
     result.header.type = type;
@@ -75,21 +127,38 @@ struct Value stack_peek(struct Stack *stack, ptrdiff_t location)
 
     switch ((enum ValueType)type) {
     case VAL_BOOL:
-        memcpy(&(result.primitive.boolean), src + 8, 1);
+        memcpy(
+        	&(result.primitive.boolean),
+        	src + VAL_HEAD_BYTES,
+        	VAL_BOOL_BYTES);
         break;
     case VAL_CHAR:
-        memcpy(&(result.primitive.character), src + 8, 1);
+        memcpy(
+        	&(result.primitive.character),
+        	src + VAL_HEAD_BYTES,
+        	VAL_CHAR_BYTES);
         break;
     case VAL_INT:
-        memcpy(&(result.primitive.integer), src + 8, 8);
+        memcpy(
+        	&(result.primitive.integer),
+        	src + VAL_HEAD_BYTES,
+        	VAL_INT_BYTES);
         break;
     case VAL_REAL:
-        memcpy(&(result.primitive.real), src + 8, 8);
+        memcpy(
+        	&(result.primitive.real),
+        	src + VAL_HEAD_BYTES,
+        	VAL_REAL_BYTES);
         break;
     case VAL_STRING:
-        result.string.str_begin = src + 8;
-        result.string.str_len = size;
+        result.string.str_begin = src + VAL_HEAD_BYTES;
+        result.string.str_len = size - VAL_HEAD_BYTES;
         break;
+    case VAL_ARRAY:
+    case VAL_TUPLE:
+    	peek_compound(stack, &result);
+    	break;
+
     default:
     	printf("Unhandled value type.\n");
     	exit(1);
@@ -108,46 +177,47 @@ static void stack_push(ptrdiff_t size, struct Stack *stack, char *data)
 
 static void stack_push_bool(struct Stack *stack, char *value)
 {
-    static uint32_t bool_type = (uint32_t)VAL_BOOL;
-    static uint32_t bool_size = 1;
-    stack_push(4, stack, (char*)&bool_type);
-    stack_push(4, stack, (char*)&bool_size);
-    stack_push(1, stack, value);
+    static uint32_t type = (uint32_t)VAL_BOOL;
+    static uint32_t size = VAL_HEAD_BYTES + VAL_BOOL_BYTES;
+    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
+    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
+    stack_push(VAL_BOOL_BYTES, stack, value);
 }
 
 static void stack_push_char(struct Stack *stack, char *value)
 {
-    static uint32_t char_type = (uint32_t)VAL_CHAR;
-    static uint32_t char_size = 1;
-    stack_push(4, stack, (char*)&char_type);
-    stack_push(4, stack, (char*)&char_size);
-    stack_push(1, stack, value);
+    static uint32_t type = (uint32_t)VAL_CHAR;
+    static uint32_t size = VAL_HEAD_BYTES + VAL_CHAR_BYTES;
+    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
+    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
+    stack_push(VAL_CHAR_BYTES, stack, value);
 }
 
 static void stack_push_int(struct Stack *stack, char *value)
 {
-    static uint32_t int_type = (uint32_t)VAL_INT;
-    static uint32_t int_size = 8;
-    stack_push(4, stack, (char*)&int_type);
-    stack_push(4, stack, (char*)&int_size);
-    stack_push(8, stack, value);
+    static uint32_t type = (uint32_t)VAL_INT;
+    static uint32_t size = VAL_HEAD_BYTES + VAL_INT_BYTES;
+    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
+    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
+    stack_push(VAL_INT_BYTES, stack, value);
 }
 
 static void stack_push_real(struct Stack *stack, char *value)
 {
-    static uint32_t real_type = (uint32_t)VAL_REAL;
-    static uint32_t real_size = 8;
-    stack_push(4, stack, (char*)&real_type);
-    stack_push(4, stack, (char*)&real_size);
-    stack_push(8, stack, value);
+    static uint32_t type = (uint32_t)VAL_REAL;
+    static uint32_t size = VAL_HEAD_BYTES + VAL_REAL_BYTES;
+    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
+    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
+    stack_push(VAL_REAL_BYTES, stack, value);
 }
 
 static void stack_push_string(struct Stack *stack, char *value)
 {
-    static uint32_t string_type = (uint32_t)VAL_STRING;
+    static uint32_t type = (uint32_t)VAL_STRING;
     auto   uint32_t len = strlen(value);
-    stack_push(4, stack, (char*)&string_type);
-    stack_push(4, stack, (char*)&len);
+    auto   uint32_t size = VAL_HEAD_BYTES + len;
+    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
+    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
     stack_push(len, stack, value);
 }
 
@@ -163,25 +233,24 @@ static ptrdiff_t compute_size(struct AstNode *node)
             cpd_len += compute_size(child);
             child = child->next;
         }
-        return cpd_len;
+        return VAL_HEAD_BYTES + cpd_len;
 
     case AST_LITERAL:
         switch (node->data.literal.type) {
         case AST_LIT_BOOL:
-            /* TODO: Get rid of magic numbers! */
-            return 1;
-
-        case AST_LIT_STRING:
-            return strlen(node->data.literal.data.string);
+            return VAL_HEAD_BYTES + VAL_BOOL_BYTES;
 
         case AST_LIT_CHAR:
-            return 1;
+            return VAL_HEAD_BYTES + VAL_CHAR_BYTES;
 
         case AST_LIT_INT:
-            return 8;
+            return VAL_HEAD_BYTES + VAL_INT_BYTES;
 
         case AST_LIT_REAL:
-            return 8;
+            return VAL_HEAD_BYTES + VAL_REAL_BYTES;
+
+        case AST_LIT_STRING:
+            return VAL_HEAD_BYTES + strlen(node->data.literal.data.string);
 
     	default:
     		printf("Unhandled literal type.\n");
@@ -220,19 +289,19 @@ static void eval_compound(struct AstNode *node, struct Stack *stack)
 {
     static uint32_t array_type = (uint32_t)VAL_ARRAY;
     static uint32_t tuple_type = (uint32_t)VAL_TUPLE;
-    auto   uint32_t len = compute_size(node);
+    auto   uint32_t size = compute_size(node); /* Do we have to precompute this ? */
     struct AstNode *current = node->data.compound.exprs;
 
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-            stack_push(4, stack, (char*)&array_type);
+            stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&array_type);
             break;
         case AST_CPD_TUPLE:
-            stack_push(4, stack, (char*)&tuple_type);
+            stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&tuple_type);
             break;
     }
 
-    stack_push(4, stack, (char*)&len);
+    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
 
     while (current) {
         eval(current, stack);
