@@ -99,8 +99,15 @@ static void peek_compound(struct Stack *stack, struct Value *result)
 
 static void stack_push(ptrdiff_t size, struct Stack *stack, char *data)
 {
-	/* TODO: Implement unified runtime error handling (OVERFLOW). */
-    char *dst = stack->buffer + stack->top;
+    char *dst;
+
+    if (stack->top + size >= stack->size) {
+    	/* TODO: Implement unified runtime error handling (OVERFLOW). */
+		printf("Stack overflow.\n");
+		exit(1);
+    }
+
+    dst = stack->buffer + stack->top;
     memcpy(dst, data, size);
     stack->top += size;
 }
