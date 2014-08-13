@@ -17,6 +17,9 @@
 #define VAL_INT_BYTES 8
 #define VAL_REAL_BYTES 8
 
+#define VAL_PTR_BYTES sizeof(void*)
+#define VAL_COMMON_SIZE_BYTES VAL_HEAD_SIZE_BYTES
+
 enum ValueType {
     VAL_BOOL,
     VAL_CHAR,
@@ -30,14 +33,15 @@ enum ValueType {
 
 struct Capture;
 
+struct ValueHeader {
+	uint32_t type;
+	uint32_t size;
+};
+
 struct Value {
 
     ptrdiff_t begin;
-
-    struct {
-        uint32_t type;
-        uint32_t size;
-    } header;
+    struct ValueHeader header;
 
     union {
         uint8_t boolean;
@@ -63,7 +67,7 @@ struct Value {
     		int size, cap;
     	} captures;
     	struct {
-    		struct Value *data;
+    		ptrdiff_t *data;
     		int size, cap;
     	} applied;
     } function;
@@ -80,7 +84,9 @@ struct Stack {
 
 struct Stack *stack_make(ptrdiff_t size);
 void stack_free(struct Stack *stack);
-struct Value stack_peek(struct Stack *stack, ptrdiff_t location);
+void stack_push(struct Stack *stack, ptrdiff_t size, char *data);
+struct ValueHeader stack_peek_header(struct Stack *stack, ptrdiff_t location);
+struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location);
 
 struct SymMap {
 	struct SymMapKvp *map;
@@ -101,7 +107,7 @@ struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
 struct Capture {
 	char *symbol;
     struct Location loc;
-    struct Value value;
+    ptrdiff_t location;
 };
 
 ptrdiff_t eval(

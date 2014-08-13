@@ -100,7 +100,7 @@ static void handle_line(char *line)
         	ast->type == AST_COMPOUND ||
         	ast->type == AST_REFERENCE) {
 				location = eval(ast, stack, &sym_map);
-				val = stack_peek(stack, location);
+				val = stack_peek_value(stack, location);
 				val_print(&val, true);
 
         } else if (ast->type == AST_FUNC_CALL) {
@@ -109,7 +109,7 @@ static void handle_line(char *line)
 
         } else if (ast->type == AST_BIND) {
         	location = eval(ast, stack, &sym_map);
-			val = stack_peek(stack, location);
+			val = stack_peek_value(stack, location);
         	printf("Bound ");
 			val_print(&val, true);
 			printf(" to symbol \"%s\"", ast->data.bind.symbol);

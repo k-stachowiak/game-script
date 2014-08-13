@@ -85,7 +85,7 @@ void val_print(struct Value *value, bool annotate)
     }
 }
 
-struct Value stack_peek(struct Stack *stack, ptrdiff_t location);
+struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location);
 
 static void peek_compound(struct Stack *stack, struct Value *result)
 {
@@ -98,61 +98,46 @@ static void peek_compound(struct Stack *stack, struct Value *result)
 	result->compound.size = 0;
 
 	while (location != end) {
-		value = stack_peek(stack, location);
+		value = stack_peek_value(stack, location);
 		ARRAY_APPEND(result->compound, value);
 		location += value.header.size;
 	}
-}
-
-static void stack_push(ptrdiff_t size, struct Stack *stack, char *data)
-{
-    char *dst;
-
-    if (stack->top + size >= stack->size) {
-    	/* TODO: Implement unified runtime error handling (OVERFLOW). */
-		printf("Stack overflow.\n");
-		exit(1);
-    }
-
-    dst = stack->buffer + stack->top;
-    memcpy(dst, data, size);
-    stack->top += size;
 }
 
 static void stack_push_bool(struct Stack *stack, char *value)
 {
     static uint32_t type = (uint32_t)VAL_BOOL;
     static uint32_t size = VAL_HEAD_BYTES + VAL_BOOL_BYTES;
-    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
-    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
-    stack_push(VAL_BOOL_BYTES, stack, value);
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+    stack_push(stack, VAL_BOOL_BYTES, value);
 }
 
 static void stack_push_char(struct Stack *stack, char *value)
 {
     static uint32_t type = (uint32_t)VAL_CHAR;
     static uint32_t size = VAL_HEAD_BYTES + VAL_CHAR_BYTES;
-    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
-    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
-    stack_push(VAL_CHAR_BYTES, stack, value);
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+    stack_push(stack, VAL_CHAR_BYTES, value);
 }
 
 static void stack_push_int(struct Stack *stack, char *value)
 {
     static uint32_t type = (uint32_t)VAL_INT;
     static uint32_t size = VAL_HEAD_BYTES + VAL_INT_BYTES;
-    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
-    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
-    stack_push(VAL_INT_BYTES, stack, value);
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+    stack_push(stack, VAL_INT_BYTES, value);
 }
 
 static void stack_push_real(struct Stack *stack, char *value)
 {
     static uint32_t type = (uint32_t)VAL_REAL;
     static uint32_t size = VAL_HEAD_BYTES + VAL_REAL_BYTES;
-    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
-    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
-    stack_push(VAL_REAL_BYTES, stack, value);
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+    stack_push(stack, VAL_REAL_BYTES, value);
 }
 
 static void stack_push_string(struct Stack *stack, char *value)
@@ -160,9 +145,9 @@ static void stack_push_string(struct Stack *stack, char *value)
     static uint32_t type = (uint32_t)VAL_STRING;
     auto   uint32_t len = strlen(value);
     auto   uint32_t size = VAL_HEAD_BYTES + len;
-    stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&type);
-    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
-    stack_push(len, stack, value);
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+    stack_push(stack, len, value);
 }
 
 static ptrdiff_t compute_size(struct AstNode *node)
@@ -236,19 +221,19 @@ static void eval_compound(
 {
     static uint32_t array_type = (uint32_t)VAL_ARRAY;
     static uint32_t tuple_type = (uint32_t)VAL_TUPLE;
-    auto   uint32_t size = compute_size(node); /* Do we have to precompute this ? */
+    auto   uint32_t size = compute_size(node); /* TODO:Do we have to precompute this ? */
     struct AstNode *current = node->data.compound.exprs;
 
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-            stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&array_type);
+            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&array_type);
             break;
         case AST_CPD_TUPLE:
-            stack_push(VAL_HEAD_TYPE_BYTES, stack, (char*)&tuple_type);
+            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&tuple_type);
             break;
     }
 
-    stack_push(VAL_HEAD_SIZE_BYTES, stack, (char*)&size);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 
     while (current) {
         eval(current, stack, sym_map);
@@ -265,25 +250,25 @@ static void eval_bind(
 	sym_map_insert(sym_map, node->data.bind.symbol, location);
 }
 
-static ptrdiff_t eval_reference(
+static void eval_reference(
 		struct AstNode *node,
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
 	struct SymMapKvp *kvp = sym_map_find(sym_map, node->data.reference.symbol);
-
-	(void)stack;
+	struct ValueHeader header;
 
 	if (!kvp) {
 		/* TODO: Implement unified runtime error handling (SYMBOL NOT FOUND). */
 		printf("Symbol \"%s\" not found.\n", node->data.reference.symbol);
 		exit(1);
-	} else {
-		return kvp->location;
 	}
+
+	header = stack_peek_header(stack, kvp->location);
+	stack_push(stack, header.size, stack->buffer + kvp->location);
 }
 
-static ptrdiff_t eval_func_call(
+static void eval_func_call(
 		struct AstNode *node,
 		struct Stack *stack,
 		struct SymMap *sym_map)
@@ -299,7 +284,7 @@ static ptrdiff_t eval_func_call(
 	}
 
 	location = kvp->location;
-	val = stack_peek(stack, location);
+	val = stack_peek_value(stack, location);
 
 	if (val.header.type != VAL_FUNCTION) {
 		/* TODO: Implement unified runtime error handling (CALL TO NON-FUNCTION). */
@@ -307,7 +292,7 @@ static ptrdiff_t eval_func_call(
 		exit(1);
 	}
 
-	return call_function(stack, sym_map, val, node);
+	call_function(stack, sym_map, val, node);
 }
 
 struct Stack *stack_make(ptrdiff_t size)
@@ -325,20 +310,39 @@ void stack_free(struct Stack *stack)
     free(stack);
 }
 
-struct Value stack_peek(struct Stack *stack, ptrdiff_t location)
+void stack_push(struct Stack *stack, ptrdiff_t size, char *data)
 {
-    uint32_t type, size;
+    char *dst;
+
+    if (stack->top + size >= stack->size) {
+    	/* TODO: Implement unified runtime error handling (OVERFLOW). */
+		printf("Stack overflow.\n");
+		exit(1);
+    }
+
+    dst = stack->buffer + stack->top;
+    memcpy(dst, data, size);
+    stack->top += size;
+}
+
+struct ValueHeader stack_peek_header(struct Stack *stack, ptrdiff_t location)
+{
+	struct ValueHeader result;
+	char *src = stack->buffer + location;
+	memcpy(&result.type, src, VAL_HEAD_TYPE_BYTES);
+	memcpy(&result.size, src + VAL_HEAD_TYPE_BYTES, VAL_HEAD_SIZE_BYTES);
+	return result;
+}
+
+struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location)
+{
     char *src = stack->buffer + location;
     struct Value result;
 
-    memcpy(&type, src, VAL_HEAD_TYPE_BYTES);
-    memcpy(&size, src + VAL_HEAD_TYPE_BYTES, VAL_HEAD_SIZE_BYTES);
-
     result.begin = location;
-    result.header.type = type;
-    result.header.size = size;
+    result.header = stack_peek_header(stack, location);
 
-    switch ((enum ValueType)type) {
+    switch ((enum ValueType)result.header.type) {
     case VAL_BOOL:
         memcpy(
         	&(result.primitive.boolean),
@@ -365,7 +369,7 @@ struct Value stack_peek(struct Stack *stack, ptrdiff_t location)
         break;
     case VAL_STRING:
         result.string.str_begin = src + VAL_HEAD_BYTES;
-        result.string.str_len = size - VAL_HEAD_BYTES;
+        result.string.str_len = result.header.size - VAL_HEAD_BYTES;
         break;
     case VAL_ARRAY:
     case VAL_TUPLE:
@@ -442,20 +446,22 @@ ptrdiff_t eval(
     switch (node->type) {
     case AST_LITERAL:
         eval_literal(node, stack);
-        return begin;
+        break;
     case AST_COMPOUND:
         eval_compound(node, stack, sym_map);
-        return begin;
+        break;
     case AST_BIND:
     	eval_bind(node, stack, sym_map);
-    	return begin;
+    	break;
     case AST_REFERENCE:
-    	return eval_reference(node, stack, sym_map);
+    	eval_reference(node, stack, sym_map);
+    	break;
     case AST_FUNC_CALL:
-    	return eval_func_call(node, stack, sym_map);
+    	eval_func_call(node, stack, sym_map);
     	break;
 	default:
 		printf("Unhandled AST node type.\n");
 		exit(1);
     }
+    return begin;
 }

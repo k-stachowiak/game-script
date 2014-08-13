@@ -161,6 +161,7 @@ void ast_node_free(struct AstNode *node);
  * ===========
  */
 
+int ast_list_len(struct AstNode *head);
 void ast_visit(struct AstNode *node, void (*f)(struct AstNode*));
 
 #endif

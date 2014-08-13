@@ -269,6 +269,16 @@ void ast_node_free(struct AstNode *current)
     }
 }
 
+int ast_list_len(struct AstNode *head)
+{
+	int result = 0;
+	while (head) {
+		head = head->next;
+		++result;
+	}
+	return result;
+}
+
 void ast_visit(struct AstNode *node, void (*f)(struct AstNode*))
 {
     f(node);
