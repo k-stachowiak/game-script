@@ -39,7 +39,7 @@
 
 #define ARRAY_FIND(MACRO_ARRAY, MACRO_ELEMENT, MACRO_RESULT) \
     do { \
-        int i; \
+        unsigned i; \
         for (i = 0; i < (MACRO_ARRAY).size; ++i) { \
             if ((MACRO_ARRAY).data[i] == (MACRO_ELEMENT)) { \
                 MACRO_RESULT = (MACRO_ELEMENT); \

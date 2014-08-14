@@ -195,30 +195,34 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
     }
 
     arg_child = child->cpd_children;
-    formal_args = malloc(2048 * sizeof(*formal_args));
-    if (!formal_args) {
-        err_set(ERR_PARSE, "Allocacation failed.");
-        goto fail;
-    }
-    while (arg_child) {
-        if (!dom_node_is_atom(arg_child)) {
+
+    // Argument list may be empty.
+    if (arg_child) {
+        formal_args = malloc(2048 * sizeof(*formal_args));
+        if (!formal_args) {
+            err_set(ERR_PARSE, "Allocation failed.");
             goto fail;
-        } else {
-            int len = strlen(arg_child->atom);
-            formal_args[arg_count] = malloc(len + 1);
-            if (!(formal_args[arg_count])) {
-                err_set(ERR_PARSE, "Allocacation failed.");
-                goto fail;
-            }
-            strcpy(formal_args[arg_count], arg_child->atom);
-            ++arg_count;
         }
-        arg_child = arg_child->next;
-    }
-    formal_args = realloc(formal_args, arg_count * sizeof(*formal_args));
-    if (!formal_args) {
-        err_set(ERR_PARSE, "Allocacation failed.");
-        goto fail;
+        while (arg_child) {
+            if (!dom_node_is_atom(arg_child)) {
+                goto fail;
+            } else {
+                int len = strlen(arg_child->atom);
+                formal_args[arg_count] = malloc(len + 1);
+                if (!(formal_args[arg_count])) {
+                    err_set(ERR_PARSE, "Allocacation failed.");
+                    goto fail;
+                }
+                strcpy(formal_args[arg_count], arg_child->atom);
+                ++arg_count;
+            }
+            arg_child = arg_child->next;
+        }
+        formal_args = realloc(formal_args, arg_count * sizeof(*formal_args));
+        if (!formal_args) {
+            err_set(ERR_PARSE, "Allocacation failed.");
+            goto fail;
+        }
     }
 
     child = child->next;
@@ -439,12 +443,13 @@ struct AstNode *parse(struct DomNode *dom)
     err_reset();
     while (current) {
         struct AstNode *node;
-        if ((!err_state() && (node = parse_bind(dom))) ||
-            (!err_state() && (node = parse_func_call(dom))) ||
-            (!err_state() && (node = parse_func_def(dom))) ||
-            (!err_state() && (node = parse_compound(dom))) ||
+        if (
             (!err_state() && (node = parse_literal(dom))) ||
-            (!err_state() && (node = parse_reference(dom)))) {
+            (!err_state() && (node = parse_reference(dom))) ||
+            (!err_state() && (node = parse_bind(dom))) ||
+            (!err_state() && (node = parse_func_def(dom))) ||
+            (!err_state() && (node = parse_func_call(dom))) ||
+            (!err_state() && (node = parse_compound(dom)))) {
 
             LIST_APPEND(node, &result, &result_end);
 

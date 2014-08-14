@@ -98,14 +98,15 @@ static void handle_line(char *line)
     } else {
         if (ast->type == AST_LITERAL ||
         	ast->type == AST_COMPOUND ||
-        	ast->type == AST_REFERENCE) {
+        	ast->type == AST_REFERENCE ||
+        	ast->type == AST_FUNC_DEF) {
 				location = eval(ast, stack, &sym_map);
 				val = stack_peek_value(stack, location);
 				val_print(&val, true);
 
         } else if (ast->type == AST_FUNC_CALL) {
-        	location = eval(ast, stack, &sym_map);
-        	printf("Parsed function call.");
+            location = eval(ast, stack, &sym_map);
+            printf("Evaluated function call.");
 
         } else if (ast->type == AST_BIND) {
         	location = eval(ast, stack, &sym_map);

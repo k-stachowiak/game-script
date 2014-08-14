@@ -8,8 +8,10 @@
 
 #include "ast.h"
 
+#define VAL_SIZE_BYTES 4
+
 #define VAL_HEAD_TYPE_BYTES 4
-#define VAL_HEAD_SIZE_BYTES 4
+#define VAL_HEAD_SIZE_BYTES VAL_SIZE_BYTES
 #define VAL_HEAD_BYTES (VAL_HEAD_TYPE_BYTES + VAL_HEAD_SIZE_BYTES)
 
 #define VAL_BOOL_BYTES 1
@@ -18,7 +20,6 @@
 #define VAL_REAL_BYTES 8
 
 #define VAL_PTR_BYTES sizeof(void*)
-#define VAL_COMMON_SIZE_BYTES VAL_HEAD_SIZE_BYTES
 
 enum ValueType {
     VAL_BOOL,
@@ -64,11 +65,11 @@ struct Value {
     	struct AstNode *def;
     	struct {
     		struct Capture *data;
-    		int size, cap;
+    		uint32_t size, cap;
     	} captures;
     	struct {
     		ptrdiff_t *data;
-    		int size, cap;
+    		uint32_t size, cap;
     	} applied;
     } function;
 };
