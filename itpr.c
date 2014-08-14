@@ -6,7 +6,6 @@
 
 #include "common.h"
 #include "itpr.h"
-#include "function_call.h"
 
 void val_print(struct Value *value, bool annotate)
 {
@@ -33,7 +32,7 @@ void val_print(struct Value *value, bool annotate)
     	if (annotate) {
     		printf("integer :: ");
     	}
-        printf("%lld", value->primitive.integer);
+        printf("%ld", value->primitive.integer);
         break;
 
     case VAL_REAL:
@@ -268,33 +267,6 @@ static void eval_reference(
 	stack_push(stack, header.size, stack->buffer + kvp->location);
 }
 
-static void eval_func_call(
-		struct AstNode *node,
-		struct Stack *stack,
-		struct SymMap *sym_map)
-{
-	struct SymMapKvp *kvp = sym_map_find(sym_map, node->data.func_call.symbol);
-	ptrdiff_t location;
-	struct Value val;
-
-	if (!kvp) {
-		/* TODO: Implement unified runtime error handling (SYMBOL NOT FOUND). */
-		printf("Symbol \"%s\" not found.\n", node->data.func_call.symbol);
-		exit(1);
-	}
-
-	location = kvp->location;
-	val = stack_peek_value(stack, location);
-
-	if (val.header.type != VAL_FUNCTION) {
-		/* TODO: Implement unified runtime error handling (CALL TO NON-FUNCTION). */
-		printf("Symbol \"%s\" not a function.\n", node->data.func_call.symbol);
-		exit(1);
-	}
-
-	call_function(stack, sym_map, val, node);
-}
-
 struct Stack *stack_make(ptrdiff_t size)
 {
     struct Stack *result = malloc(sizeof(*result));
@@ -455,9 +427,6 @@ ptrdiff_t eval(
     	break;
     case AST_REFERENCE:
     	eval_reference(node, stack, sym_map);
-    	break;
-    case AST_FUNC_CALL:
-    	eval_func_call(node, stack, sym_map);
     	break;
 	default:
 		printf("Unhandled AST node type.\n");
