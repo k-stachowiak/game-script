@@ -54,12 +54,12 @@ struct AstBif {
     enum AstBifType type;
 
     /* Unary. */
-    struct Value (*un_int_impl)(long);
-    struct Value (*un_real_impl)(double);
+    long (*un_int_impl)(long); /* TODO: Have BIF operate on runtime types like int64_t? */
+    double (*un_real_impl)(double);
 
     /* Binary. */
-    struct Value (*bin_int_impl)(long, long);
-    struct Value (*bin_real_impl)(double, double);
+    long (*bin_int_impl)(long, long);
+    double (*bin_real_impl)(double, double);
 };
 
 struct AstBind {

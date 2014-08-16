@@ -8,8 +8,11 @@
 #include "common.h"
 #include "lex.h"
 #include "parse.h"
-#include "itpr.h"
+#include "stack.h"
+#include "value.h"
+#include "eval.h"
 #include "error.h"
+#include "bif.h"
 
 static bool eof_flag;
 static struct Stack *stack;
@@ -129,7 +132,7 @@ int repl(void)
     LOG_TRACE_FUNC
     eof_flag = false;
     stack = stack_make(1024);
-    sym_map_init(&sym_map);
+    sym_map_init(&sym_map, NULL, stack);
     err_reset();
 
     for (;;) {
@@ -145,7 +148,7 @@ int repl(void)
 
         } else if (eof_flag) {
             free(line);
-            sym_map_init(&sym_map);
+            sym_map_deinit(&sym_map);
             stack_free(stack);
             printf("\n");
             return 0;
@@ -156,7 +159,7 @@ int repl(void)
 
         free(line);
         if (result) {
-        	sym_map_init(&sym_map);
+            sym_map_deinit(&sym_map);
             stack_free(stack);
             return result;
         }
