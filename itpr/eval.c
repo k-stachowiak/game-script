@@ -6,6 +6,12 @@
 #include "eval.h"
 #include "value.h"
 #include "bif.h"
+#include "error.h"
+
+static ptrdiff_t eval_impl(
+        struct AstNode *node,
+        struct Stack *stack,
+        struct SymMap *sym_map);
 
 /* Function call evaluation.
  * =========================
@@ -20,15 +26,13 @@ static struct Value eval_func_call_lookup_value(
     struct SymMapKvp *kvp = sym_map_find(sym_map, node->data.func_call.symbol);
 
     if (!kvp) {
-        printf("Symbol \"%s\" not found.\n", node->data.func_call.symbol);
-        exit(1);
+        err_set(ERR_EVAL, "Requested function doesn't exist.");
     }
 
     result = stack_peek_value(stack, kvp->location);
 
     if (result.header.type != (uint32_t)VAL_FUNCTION) {
-        printf("Symbol \"%s\" not a function.\n", node->data.func_call.symbol);
-        exit(1);
+        err_set(ERR_EVAL, "Requested call to a non-function value.");
     }
 
     return result;
@@ -50,7 +54,6 @@ static int eval_func_call_compute_arity(struct AstNode *def_node)
         break;
 
     case AST_FUNC_DEF:
-        /* TODO: Deal with the strong separation of the BIF and defs? Have some common data? */
         return def_node->data.func_def.func.arg_count;
         break;
 
@@ -107,7 +110,7 @@ static void eval_func_call_curry_on(
     /* New applied. */
     arg_node = call_node->data.func_call.actual_args;
     while (arg_node) {
-        eval(arg_node, stack, sym_map);
+        eval_impl(arg_node, stack, sym_map);
         arg_node = arg_node->next;
         ++applied_count;
     }
@@ -120,8 +123,8 @@ static void eval_func_call_curry_on(
     memcpy(stack->buffer + appl_count_loc, &applied_count, VAL_SIZE_BYTES);
 }
 
-static void eval_func_call_final_bif2(
-        struct AstNode *call_node, /* TODO: Does this need to take entire AstNode* ? */
+static void eval_func_call_final_bif(
+        struct AstNode *arg_list,
         struct Stack *stack,
         struct SymMap *sym_map,
         struct Value *value)
@@ -145,10 +148,10 @@ static void eval_func_call_final_bif2(
 
     /* Evaluate the missing args. */
     temp_begin = stack->top;
-    arg_node = call_node->data.func_call.actual_args;
+    arg_node = arg_list;
     while (arg_node) {
         ptrdiff_t loc = stack->top;
-        eval(arg_node, stack, sym_map);
+        eval_impl(arg_node, stack, sym_map);
         args[arg_count++] = stack_peek_value(stack, loc);
         arg_node = arg_node->next;
     }
@@ -170,8 +173,7 @@ static void eval_func_call_final_bif2(
             stack_push(stack, size_real, (char*)&result);
 
         } else {
-            printf("Unhandled BIF argument type.\n");
-            exit(1);
+            err_set(ERR_EVAL, "Non-arythmetic type passed to arithmetic BIF.");
         }
         break;
 
@@ -195,8 +197,7 @@ static void eval_func_call_final_bif2(
             stack_push(stack, size_real, (char*)&result);
 
         } else {
-            printf("Unhandled BIF argument type.\n");
-            exit(1);
+            err_set(ERR_EVAL, "Non-arythmetic type passed to arithmetic BIF.");
         }
         break;
     }
@@ -205,84 +206,8 @@ static void eval_func_call_final_bif2(
     stack_collapse(stack, temp_begin, temp_end);
 }
 
-void eval_func_call_final_bif(
-        struct AstNode *call_node, /* TODO: Does this need to take entire AstNode* ? */
-        struct Stack *stack,
-        struct SymMap *sym_map,
-        struct Value *value)
-{
-    static uint32_t type_int = (uint32_t)VAL_INT;
-    static uint32_t size_int = VAL_INT_BYTES;
-    static uint32_t type_real = (uint32_t)VAL_REAL;
-    static uint32_t size_real = VAL_REAL_BYTES;
-    ptrdiff_t temp_begin = stack->top, temp_end;
-    struct AstBif *impl = &value->function.def->data.bif;
-    ptrdiff_t x_loc, y_loc;
-    struct Value x, y;
-
-    switch(impl->type) {
-    case AST_BIF_ARYTHM_UNARY:
-
-        x_loc = stack->top;
-        eval(call_node->data.func_call.actual_args, stack, sym_map);
-        x = stack_peek_value(stack, x_loc);
-
-        temp_end = stack->top;
-        if ((enum ValueType)x.header.type == VAL_INT) {
-            long result = impl->un_int_impl(x.primitive.integer);
-            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
-            stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
-            stack_push(stack, size_int, (char*)&result);
-        } else if ((enum ValueType)x.header.type == VAL_REAL) {
-            double result = impl->un_real_impl(x.primitive.real);
-            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
-            stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
-            stack_push(stack, size_real, (char*)&result);
-        } else {
-            printf("Unhandled BIF argument type.\n");
-            exit(1);
-        }
-        break;
-
-    case AST_BIF_ARYTHM_BINARY:
-
-        x_loc = stack->top;
-        eval(call_node->data.func_call.actual_args, stack, sym_map);
-        x = stack_peek_value(stack, x_loc);
-
-        y_loc = stack->top;
-        eval(call_node->data.func_call.actual_args->next, stack, sym_map);
-        y = stack_peek_value(stack, y_loc);
-
-        temp_end = stack->top;
-        if ((enum ValueType)x.header.type == VAL_INT &&
-            (enum ValueType)y.header.type == VAL_INT) {
-                long result = impl->bin_int_impl(x.primitive.integer, y.primitive.integer);
-                stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
-                stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
-                stack_push(stack, size_int, (char*)&result);
-        } else if ((enum ValueType)x.header.type == VAL_REAL &&
-                   (enum ValueType)y.header.type == VAL_REAL) {
-            double result = impl->bin_real_impl(x.primitive.real, y.primitive.real);
-            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
-            stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
-            stack_push(stack, size_real, (char*)&result);
-        } else {
-            printf("Unhandled BIF argument type.\n");
-            exit(1);
-        }
-        break;
-
-    default:
-        printf("Unhandled BIF type.\n");
-        exit(1);
-    }
-
-    stack_collapse(stack, temp_begin, temp_end);
-}
-
 static void eval_func_call_final_def(
-        struct AstNode *call_node,
+        struct AstNode *arg_list,
         struct Stack *stack,
         struct SymMap *sym_map,
         struct Value *value)
@@ -290,9 +215,7 @@ static void eval_func_call_final_def(
     uint32_t i;
     ptrdiff_t temp_begin, temp_end;
     struct SymMap local_sym_map;
-    struct AstNode *arg_node;
-    struct AstNode *exe_node;
-    struct AstNode *impl;
+    struct AstNode *arg_node, *exe_node, *impl;
     struct AstCommonFunc *func;
     char **formal_arg;
 
@@ -319,10 +242,10 @@ static void eval_func_call_final_def(
 
     /* Insert new arguments. */
     temp_begin = stack->top;
-    arg_node = call_node->data.func_call.actual_args;
+    arg_node = arg_list;
     while (arg_node) {
         ptrdiff_t loc = stack->top;
-        eval(arg_node, stack, sym_map);
+        eval_impl(arg_node, stack, sym_map);
         sym_map_insert(&local_sym_map, *formal_arg, loc);
         ++formal_arg;
         arg_node = arg_node->next;
@@ -332,7 +255,7 @@ static void eval_func_call_final_def(
     /* Evaluate the function expression. */
     exe_node = impl->data.func_def.exprs;
     while (exe_node) {
-        eval(exe_node, stack, &local_sym_map);
+        eval_impl(exe_node, stack, &local_sym_map);
         exe_node = exe_node->next;
     }
 
@@ -345,11 +268,17 @@ static void eval_func_call(
         struct Stack *stack,
         struct SymMap *sym_map)
 {
-    struct Value value = eval_func_call_lookup_value(call_node, stack, sym_map);
+    struct Value value;
+    int arity, applied_args, new_args;
 
-    int arity = eval_func_call_compute_arity(value.function.def);
-    int applied_args = value.function.applied.size;
-    int new_args = ast_list_len(call_node->data.func_call.actual_args);
+    value = eval_func_call_lookup_value(call_node, stack, sym_map);
+    if (err_state()) {
+        return;
+    }
+
+    arity = eval_func_call_compute_arity(value.function.def);
+    applied_args = value.function.applied.size;
+    new_args = ast_list_len(call_node->data.func_call.actual_args);
 
     if (applied_args + new_args < arity) {
         eval_func_call_curry_on(call_node, stack, sym_map, &value);
@@ -357,11 +286,13 @@ static void eval_func_call(
     } else if (applied_args + new_args == arity) {
         switch (value.function.def->type) {
         case AST_BIF:
-            eval_func_call_final_bif2(call_node, stack, sym_map, &value);
+            eval_func_call_final_bif(
+                call_node->data.func_call.actual_args, stack, sym_map, &value);
             break;
 
         case AST_FUNC_DEF:
-            eval_func_call_final_def(call_node, stack, sym_map, &value);
+            eval_func_call_final_def(
+                call_node->data.func_call.actual_args, stack, sym_map, &value);
             break;
 
         default:
@@ -370,8 +301,7 @@ static void eval_func_call(
         }
 
     } else {
-        printf("Provided too many arguments to a function.\n");
-        exit(1);
+        err_set(ERR_EVAL, "Too many arguments provided to a function call.");
     }
 }
 
@@ -389,13 +319,7 @@ static bool eval_func_def_copy_non_global(
     uint32_t len = strlen(symbol);
 
     if (!kvp) {
-        kvp = sym_map_find(sym_map, symbol);
-        if (!kvp) {
-            printf("Required symbol not found for capture.\n");
-            exit(1);
-        } else {
-            return false;
-        }
+        return false;
     }
 
     header = stack_peek_header(stack, kvp->location);
@@ -425,10 +349,8 @@ static void eval_func_def_push_captures(
     static uint32_t zero = 0;
     ptrdiff_t cap_loc = stack->top;
     uint32_t cap_count = 0;
-    struct {
-        struct AstNode **data;
-        int size, cap;
-    } to_visit = { NULL, 0, 0 };
+    struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
+    bool is_argument, is_non_global;
 
     stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
 
@@ -460,23 +382,37 @@ static void eval_func_def_push_captures(
 
         case AST_FUNC_CALL:
             ARRAY_APPEND(to_visit, n->data.func_call.actual_args);
-            if (eval_func_def_is_arg(n->data.func_call.symbol, &func_def->func) == false &&
-                eval_func_def_copy_non_global(stack, sym_map, n->data.func_call.symbol)) {
-                    ++cap_count;
+            is_argument = eval_func_def_is_arg(
+                    n->data.func_call.symbol, &func_def->func);
+            is_non_global = eval_func_def_copy_non_global(
+                    stack, sym_map, n->data.func_call.symbol);
+            if (!is_argument && is_non_global) {
+                ++cap_count;
             }
+
             break;
 
         case AST_REFERENCE:
-            if (eval_func_def_is_arg(n->data.reference.symbol, &func_def->func) == false &&
-                eval_func_def_copy_non_global(stack, sym_map, n->data.reference.symbol)) {
-                    ++cap_count;
+            is_argument = eval_func_def_is_arg(
+                    n->data.reference.symbol, &func_def->func);
+            is_non_global = eval_func_def_copy_non_global(
+                    stack, sym_map, n->data.reference.symbol);
+            if (!is_argument && is_non_global) {
+                ++cap_count;
             }
             break;
+        }
+
+        if (err_state()) {
+            goto end;
         }
 
         ARRAY_REMOVE(to_visit, 0);
     }
     memcpy(stack->buffer + cap_loc, &cap_count, VAL_SIZE_BYTES);
+
+end:
+    ARRAY_FREE(to_visit);
 }
 
 static void eval_func_def(
@@ -491,16 +427,19 @@ static void eval_func_def(
 
     /* Header. */
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    size_loc = stack->top;
 
+    size_loc = stack->top;
     stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-    data_begin = stack->top;
 
     /* Pointer to implementation. */
+    data_begin = stack->top;
     stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
 
     /* Captures. */
     eval_func_def_push_captures(stack, sym_map, &node->data.func_def);
+    if (err_state()) {
+        return;
+    }
 
     /* Already applied (empty for definitnion). */
     stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
@@ -510,61 +449,18 @@ static void eval_func_def(
     memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
 }
 
-/* Compound symbol evaluation.
- * ===========================
+/* Simple evaluation functions.
+ * ============================
  */
 
-static ptrdiff_t eval_compound_compute_size(struct AstNode *node)
-{
-    struct AstNode *child;
-    ptrdiff_t cpd_len = 0;
-
-    switch (node->type) {
-    case AST_COMPOUND:
-        child = node->data.compound.exprs;
-        while (child) {
-            cpd_len += eval_compound_compute_size(child);
-            cpd_len += VAL_HEAD_BYTES;
-            child = child->next;
-        }
-        return cpd_len;
-
-    case AST_LITERAL:
-        switch (node->data.literal.type) {
-        case AST_LIT_BOOL:
-            return VAL_BOOL_BYTES;
-
-        case AST_LIT_CHAR:
-            return VAL_CHAR_BYTES;
-
-        case AST_LIT_INT:
-            return VAL_INT_BYTES;
-
-        case AST_LIT_REAL:
-            return VAL_REAL_BYTES;
-
-        case AST_LIT_STRING:
-            return strlen(node->data.literal.data.string);
-
-        default:
-            printf("Unhandled literal type.\n");
-            exit(1);
-        }
-        break;
-
-    default:
-        printf("Unhandled value type.\n");
-        exit(1);
-    }
-}
-
 static void eval_compound(
-		struct AstNode *node,
-		struct Stack *stack,
-		struct SymMap *sym_map)
+        struct AstNode *node,
+        struct Stack *stack,
+        struct SymMap *sym_map)
 {
+    static uint32_t zero = 0;
     uint32_t type;
-    uint32_t size = eval_compound_compute_size(node); /* TODO: Do we have to precompute this ? */
+    ptrdiff_t size_loc, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
 
     switch (node->data.compound.type) {
@@ -577,18 +473,23 @@ static void eval_compound(
             break;
     }
 
+    /* Header. */
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 
+    size_loc = stack->top;
+    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+
+    /* Data. */
+    data_begin = stack->top;
     while (current) {
-        eval(current, stack, sym_map);
+        eval_impl(current, stack, sym_map);
         current = current->next;
     }
-}
 
-/* Simple evaluation functions.
- * ============================
- */
+    /* Hack value size to correct value. */
+    data_size = stack->top - data_begin;
+    memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
+}
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
@@ -638,7 +539,7 @@ static void eval_bind(
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-	ptrdiff_t location = eval(node->data.bind.expr, stack, sym_map);
+	ptrdiff_t location = eval_impl(node->data.bind.expr, stack, sym_map);
 	sym_map_insert(sym_map, node->data.bind.symbol, location);
 }
 
@@ -652,9 +553,8 @@ static void eval_reference(
 	uint32_t size;
 
 	if (!kvp) {
-		/* TODO: Implement unified runtime error handling (SYMBOL NOT FOUND). */
-		printf("Symbol \"%s\" not found.\n", node->data.reference.symbol);
-		exit(1);
+	    err_set(ERR_EVAL, "Symbol not found.");
+		return;
 	}
 
 	header = stack_peek_header(stack, kvp->location);
@@ -680,14 +580,13 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
  * =========================
  */
 
-/* TODO: No longer return the ptrdiff here. Just don't return anything. */
-/* TODO: What about the function locations? Probably only important for errors. */
-ptrdiff_t eval(
+static ptrdiff_t eval_impl(
 		struct AstNode *node,
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
     ptrdiff_t begin = stack->top;
+
     switch (node->type) {
     case AST_LITERAL:
         eval_literal(node, stack);
@@ -721,5 +620,31 @@ ptrdiff_t eval(
 		printf("Unhandled AST node type.\n");
 		exit(1);
     }
-    return begin;
+
+    if (err_state()) {
+        return -1;
+    } else {
+        return begin;
+    }
+}
+
+ptrdiff_t eval(
+        struct AstNode *node,
+        struct Stack *stack,
+        struct SymMap *sym_map)
+{
+    ptrdiff_t begin, result, end;
+
+    err_reset();
+
+    begin = stack->top;
+    result = eval_impl(node, stack, sym_map);
+    end = stack->top;
+
+    if (!err_state()) {
+        return result;
+    } else {
+        stack_collapse(stack, begin, end);
+        return -1;
+    }
 }

@@ -8,6 +8,8 @@
 
 #include "ast.h"
 
+/* TODO: Also predefine the types here! */
+
 #define VAL_SIZE_BYTES 4
 
 #define VAL_HEAD_TYPE_BYTES 4
@@ -42,8 +44,9 @@ struct ValueHeader {
     uint32_t size;
 };
 
-/* TODO: This is pathological. Change it to a set of structures for each type.
- *       Rely on offsets and header peeking.
+/* TODO: Change this to a set of structures for each type.
+ *       Rely on offsets and header peeking. Then modify the evaluator code
+ *       to more often pass the substructures and not the entire Value.
  */
 struct Value {
 

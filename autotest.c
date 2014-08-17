@@ -46,7 +46,8 @@ static int autotest_perform_one(char *source)
         return 1;
     }
 
-    location = eval(ast, stack, &sym_map);
+    location = stack->top;
+    eval(ast, stack, &sym_map);
     val = stack_peek_value(stack, location);
     val_print(&val, true);
     printf("\n");

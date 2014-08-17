@@ -110,13 +110,15 @@ static void repl_handle_line(char *line)
         case AST_REFERENCE:
         case AST_FUNC_DEF:
         case AST_FUNC_CALL:
-            location = eval(ast, stack, &sym_map);
+            location = stack->top;
+            eval(ast, stack, &sym_map);
             val = stack_peek_value(stack, location);
             val_print(&val, true);
             break;
 
         case AST_BIND:
-        	location = eval(ast, stack, &sym_map);
+        	location = stack->top;
+        	eval(ast, stack, &sym_map);
 			val = stack_peek_value(stack, location);
         	printf("Bound ");
 			val_print(&val, true);

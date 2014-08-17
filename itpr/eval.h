@@ -10,8 +10,8 @@
 #include <stddef.h>
 
 ptrdiff_t eval(
-		struct AstNode *node,
-		struct Stack *stack,
-		struct SymMap *sym_map);
+    struct AstNode *node,
+    struct Stack *stack,
+    struct SymMap *sym_map);
 
 #endif

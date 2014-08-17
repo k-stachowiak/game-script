@@ -8,6 +8,15 @@
 #include "repl.h"
 #include "autotest.h"
 
+/* TODO:
+ * - Enhance error messages (pretty strings including source location)
+ * - Add colors to error messages and REPL
+ * - Algorithms:
+ * -   min_element,
+ * -   nwd, nww
+ * -   merge sort
+ */
+
 int main(int argc, char *argv[])
 {
     int error;
