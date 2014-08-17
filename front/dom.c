@@ -114,7 +114,7 @@ char *dom_node_parse_atom(struct DomNode *node)
         return NULL;
     }
 
-    strcpy(result, node->atom);
+	memcpy(result, node->atom, len + 1);
     result[len] = '\0';
 
     return result;

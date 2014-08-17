@@ -161,7 +161,7 @@ static void eval_func_call_final_bif(
     switch (impl->type) {
     case AST_BIF_ARYTHM_UNARY:
         if ((enum ValueType)args[0].header.type == VAL_INT) {
-            long result = impl->un_int_impl(args[0].primitive.integer);
+			long result = impl->un_int_impl((long)args[0].primitive.integer);
             stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
             stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
             stack_push(stack, size_int, (char*)&result);
@@ -181,8 +181,8 @@ static void eval_func_call_final_bif(
         if ((enum ValueType)args[0].header.type == VAL_INT &&
             (enum ValueType)args[1].header.type == VAL_INT) {
                 long result = impl->bin_int_impl(
-                        args[0].primitive.integer,
-                        args[1].primitive.integer);
+					(long)args[0].primitive.integer,
+					(long)args[1].primitive.integer);
                 stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
                 stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
                 stack_push(stack, size_int, (char*)&result);
@@ -495,7 +495,7 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
     uint32_t type;
     uint32_t size;
-    char *value;
+    char *value = NULL;
 
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
