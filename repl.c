@@ -12,18 +12,22 @@
 #include "value.h"
 #include "eval.h"
 #include "error.h"
-#include "bif.h"
 
 static bool eof_flag;
 static struct Stack *stack;
 static struct SymMap sym_map;
+
+static struct {
+    struct AstNode **data;
+    int size, cap;
+} stored_nodes;
 
 /*
  * Implementation copied from StackOverflow :
  * http://stackoverflow.com/questions/314401/how-to-read-a-line-from-the-console-in-c
  * It has been slightly modified to fit into the program, e.g. error handling.
  */
-static char *XENO_getline(void)
+static char *repl_getline(void)
 {
     char *line = malloc(100);
     char *linep = line;
@@ -66,7 +70,7 @@ static char *XENO_getline(void)
     return linep;
 }
 
-static struct AstNode *read(char *line)
+static struct AstNode *repl_parse(char *line)
 {
     struct DomNode *dom;
     struct AstNode *ast;
@@ -85,7 +89,7 @@ static struct AstNode *read(char *line)
     return ast;
 }
 
-static void handle_line(char *line)
+static void repl_handle_line(char *line)
 {
     struct AstNode *ast;
     ptrdiff_t location;
@@ -94,36 +98,51 @@ static void handle_line(char *line)
     if (strcmp(line, "") == 0) {
         return;
 
-    } else if (!(ast = read(line))) {
+    } else if (!(ast = repl_parse(line))) {
         printf("Error: %s\n", err_msg());
         err_reset();
 
     } else {
-        if (ast->type == AST_LITERAL ||
-        	ast->type == AST_COMPOUND ||
-        	ast->type == AST_REFERENCE ||
-        	ast->type == AST_FUNC_DEF) {
-				location = eval(ast, stack, &sym_map);
-				val = stack_peek_value(stack, location);
-				val_print(&val, true);
 
-        } else if (ast->type == AST_FUNC_CALL) {
+        switch (ast->type) {
+        case AST_LITERAL:
+        case AST_COMPOUND:
+        case AST_REFERENCE:
+        case AST_FUNC_DEF:
+        case AST_FUNC_CALL:
             location = eval(ast, stack, &sym_map);
-            printf("Evaluated function call.");
+            val = stack_peek_value(stack, location);
+            val_print(&val, true);
+            break;
 
-        } else if (ast->type == AST_BIND) {
+        case AST_BIND:
         	location = eval(ast, stack, &sym_map);
 			val = stack_peek_value(stack, location);
         	printf("Bound ");
 			val_print(&val, true);
 			printf(" to symbol \"%s\"", ast->data.bind.symbol);
+			break;
 
-        } else {
+        default:
             printf("Printing not handled for this type of AST node.");
+            break;
 
         }
         printf("\n");
-        ast_node_free(ast);
+
+        if (ast->type == AST_BIND) {
+            ARRAY_APPEND(stored_nodes, ast);
+        } else {
+            ast_node_free(ast);
+        }
+    }
+}
+
+static void repl_free_bound(void)
+{
+    while (stored_nodes.size) {
+        ast_node_free(stored_nodes.data[0]);
+        ARRAY_REMOVE(stored_nodes, 0);
     }
 }
 
@@ -141,24 +160,26 @@ int repl(void)
         char *line = NULL;
 
         printf("moon> ");
-        line = XENO_getline();
+        line = repl_getline();
 
         if (err_state()) {
             result = 1;
 
         } else if (eof_flag) {
             free(line);
+            repl_free_bound();
             sym_map_deinit(&sym_map);
             stack_free(stack);
             printf("\n");
             return 0;
 
         } else {
-            handle_line(line);
+            repl_handle_line(line);
         }
 
         free(line);
         if (result) {
+            repl_free_bound();
             sym_map_deinit(&sym_map);
             stack_free(stack);
             return result;

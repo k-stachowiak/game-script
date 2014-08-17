@@ -20,7 +20,7 @@ static void val_print_function(struct Value *value)
         applied_args_count = value->function.applied.size;
         arity = def->data.func_def.func.arg_count - applied_args_count;
         printf(
-            "function; arity = %d, captures count = %d, applied args count %d",
+            "function (ar=%d, cap=%d, appl=%d)",
             arity, captures_count, applied_args_count);
         break;
 

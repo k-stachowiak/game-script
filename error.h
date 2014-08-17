@@ -10,8 +10,10 @@ enum ErrModule {
     ERR_DOM,
     ERR_PARSE,
     ERR_REPL,
-    ERR_MAX
+    ERR_EVAL
 };
+
+#define ERR_MODULES_COUNT 5
 
 void err_reset(void);
 void err_set(enum ErrModule module, char *message);

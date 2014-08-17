@@ -11,10 +11,10 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 {
     bif_assure_init();
     sym_map_insert(sym_map, "sqrt", eval(&bif_sqrt, stack, sym_map));
-    sym_map_insert(sym_map, "add", eval(&bif_add, stack, sym_map));
-    sym_map_insert(sym_map, "sub", eval(&bif_sub, stack, sym_map));
-    sym_map_insert(sym_map, "mul", eval(&bif_mul, stack, sym_map));
-    sym_map_insert(sym_map, "div", eval(&bif_div, stack, sym_map));
+    sym_map_insert(sym_map, "+", eval(&bif_add, stack, sym_map));
+    sym_map_insert(sym_map, "-", eval(&bif_sub, stack, sym_map));
+    sym_map_insert(sym_map, "*", eval(&bif_mul, stack, sym_map));
+    sym_map_insert(sym_map, "/", eval(&bif_div, stack, sym_map));
 }
 
 void sym_map_init(

@@ -5,13 +5,13 @@
 
 #include "error.h"
 
-static bool err_state_arr[ERR_MAX];
-static char *err_msg_arr[ERR_MAX];
+static bool err_state_arr[ERR_MODULES_COUNT];
+static char *err_msg_arr[ERR_MODULES_COUNT];
 
 void err_reset(void)
 {
     int i;
-    for (i = 0; i < ERR_MAX; ++i) {
+    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
         err_state_arr[i] = false;
         err_msg_arr[i] = NULL;
     }
@@ -20,7 +20,7 @@ void err_reset(void)
 void err_set(enum ErrModule module, char *message)
 {
     int i;
-    for (i = 0; i < ERR_MAX; ++i) {
+    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
         if (err_state_arr[i]) {
             fprintf(stderr, "Error in the error system. Too embarrassed to continue.\n");
             exit(2);
@@ -34,7 +34,7 @@ void err_set(enum ErrModule module, char *message)
 bool err_state(void)
 {
     int i;
-    for (i = 0; i < ERR_MAX; ++i) {
+    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
         if (err_state_arr[i]) {
             return true;
         }
@@ -45,7 +45,7 @@ bool err_state(void)
 char *err_msg(void)
 {
     int i;
-    for (i = 0; i < ERR_MAX; ++i) {
+    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
         if (err_state_arr[i]) {
             return err_msg_arr[i];
         }

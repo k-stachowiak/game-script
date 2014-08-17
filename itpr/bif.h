@@ -5,6 +5,8 @@
 
 #include "ast.h"
 
+#define BIF_MAX_ARITY 2
+
 extern struct AstNode bif_sqrt;
 
 extern struct AstNode bif_add;

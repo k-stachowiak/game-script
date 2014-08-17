@@ -33,10 +33,14 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
     void *impl;
     uint32_t i, size;
 
+    /* TODO: Encapsulate the memcpy calls. */
+
+    /* Peek the implementation pointer. */
     memcpy(&impl, stack->buffer + location, VAL_PTR_BYTES);
     result->function.def = (struct AstNode*)impl;
     location += VAL_PTR_BYTES;
 
+    /* Peek captures. */
     memcpy(&size, stack->buffer + location, VAL_SIZE_BYTES);
     result->function.captures.data = NULL;
     result->function.captures.size = 0;
@@ -44,10 +48,31 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
     location += VAL_SIZE_BYTES;
 
     for (i = 0; i < size; ++i) {
-        /* Peek captures. */
-        exit(3);
+        uint32_t len;
+        struct Capture cap;
+        struct ValueHeader header;
+
+        memcpy(&len, stack->buffer + location, VAL_SIZE_BYTES);
+        location += VAL_SIZE_BYTES;
+
+        cap.symbol = malloc(len + 1);
+        if (!cap.symbol) {
+            printf("Allocation failure.\n");
+            exit(1);
+        }
+        memcpy(cap.symbol, stack->buffer + location, len);
+        cap.symbol[len] = '\0';
+        location += len;
+
+        cap.location = location;
+
+        ARRAY_APPEND(result->function.captures, cap);
+
+        header = stack_peek_header(stack, location);
+        location += header.size + VAL_HEAD_BYTES;
     }
 
+    /* Peek applied arguments. */
     memcpy(&size, stack->buffer + location, VAL_SIZE_BYTES);
     result->function.applied.data = NULL;
     result->function.applied.size = 0;
@@ -55,8 +80,10 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
     location += VAL_SIZE_BYTES;
 
     for (i = 0; i < size; ++i) {
-        /* Peek applied arguments. */
-        exit(3);
+        struct ValueHeader header;
+        ARRAY_APPEND(result->function.applied, location);
+        header = stack_peek_header(stack, location);
+        location += header.size + VAL_HEAD_BYTES;
     }
 }
 
