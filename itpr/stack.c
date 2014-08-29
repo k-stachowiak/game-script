@@ -12,8 +12,8 @@ struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location);
 
 static void stack_peek_compound(struct Stack *stack, struct Value *result)
 {
-    ptrdiff_t location = result->begin + VAL_HEAD_BYTES;
-    ptrdiff_t end = result->begin + result->header.size + VAL_HEAD_BYTES;
+    VAL_LOC_T location = result->begin + VAL_HEAD_BYTES;
+    VAL_LOC_T end = result->begin + result->header.size + VAL_HEAD_BYTES;
     struct Value value;
 
     result->compound.data = NULL;
@@ -29,9 +29,9 @@ static void stack_peek_compound(struct Stack *stack, struct Value *result)
 
 static void stack_peek_function(struct Stack *stack, struct Value *result)
 {
-    ptrdiff_t location = result->begin + VAL_HEAD_BYTES;
+    VAL_LOC_T location = result->begin + VAL_HEAD_BYTES;
     void *impl;
-    uint32_t i, size;
+    VAL_SIZE_T i, size;
 
     /* TODO: Encapsulate the memcpy calls. */
 
@@ -48,7 +48,7 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
     location += VAL_SIZE_BYTES;
 
     for (i = 0; i < size; ++i) {
-        uint32_t len;
+        VAL_SIZE_T len;
         struct Capture cap;
         struct ValueHeader header;
 
@@ -87,7 +87,7 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
     }
 }
 
-struct Stack *stack_make(ptrdiff_t size)
+struct Stack *stack_make(VAL_LOC_T size)
 {
     struct Stack *result = malloc(sizeof(*result));
     result->buffer = malloc(size);
@@ -102,7 +102,7 @@ void stack_free(struct Stack *stack)
     free(stack);
 }
 
-void stack_push(struct Stack *stack, ptrdiff_t size, char *data)
+void stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
 {
     char *dst;
 
@@ -117,17 +117,17 @@ void stack_push(struct Stack *stack, ptrdiff_t size, char *data)
     stack->top += size;
 }
 
-void stack_collapse(struct Stack *stack, ptrdiff_t begin, ptrdiff_t end)
+void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
 {
-    ptrdiff_t i;
-    ptrdiff_t count = end - begin;
+    VAL_LOC_T i;
+    VAL_LOC_T count = end - begin;
     for (i = 0; i < count; ++i) {
         *(stack->buffer + begin + i) = *(stack->buffer + end + i);
     }
     stack->top -= count;
 }
 
-struct ValueHeader stack_peek_header(struct Stack *stack, ptrdiff_t location)
+struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location)
 {
     struct ValueHeader result;
     char *src = stack->buffer + location;
@@ -136,7 +136,7 @@ struct ValueHeader stack_peek_header(struct Stack *stack, ptrdiff_t location)
     return result;
 }
 
-struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location)
+struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
 {
     char *src = stack->buffer + location;
     struct Value result;

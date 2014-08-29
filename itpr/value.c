@@ -8,7 +8,7 @@
 static void val_print_function(struct Value *value)
 {
     struct AstNode *def = value->function.def;
-    int arity, captures_count, applied_args_count;
+    VAL_SIZE_T arity, captures_count, applied_args_count;
 
     switch(def->type) {
     case AST_BIF:
@@ -32,9 +32,9 @@ static void val_print_function(struct Value *value)
 
 void val_print(struct Value *value, bool annotate)
 {
-    int i;
+    VAL_SIZE_T i;
     char *string;
-    ptrdiff_t str_len;
+    VAL_LOC_T str_len;
 
     switch ((enum ValueType)value->header.type) {
     case VAL_BOOL:

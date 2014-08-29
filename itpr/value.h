@@ -8,18 +8,26 @@
 
 #include "ast.h"
 
-/* TODO: Also predefine the types here! */
+#define VAL_LOC_T ptrdiff_t
 
-#define VAL_SIZE_BYTES 4
+#define VAL_SIZE_T uint32_t
+#define VAL_SIZE_BYTES sizeof(VAL_SIZE_T)
 
-#define VAL_HEAD_TYPE_BYTES 4
+#define VAL_HEAD_TYPE_T uint32_t
+#define VAL_HEAD_SIZE_T VAL_SIZE_T
+#define VAL_HEAD_TYPE_BYTES sizeof(VAL_HEAD_TYPE_T)
 #define VAL_HEAD_SIZE_BYTES VAL_SIZE_BYTES
 #define VAL_HEAD_BYTES (VAL_HEAD_TYPE_BYTES + VAL_HEAD_SIZE_BYTES)
 
-#define VAL_BOOL_BYTES 1
-#define VAL_CHAR_BYTES 1
-#define VAL_INT_BYTES 8
-#define VAL_REAL_BYTES 8
+#define VAL_BOOL_T uint8_t
+#define VAL_CHAR_T uint8_t
+#define VAL_INT_T uint64_t
+#define VAL_REAL_T double
+
+#define VAL_BOOL_BYTES sizeof(VAL_BOOL_T)
+#define VAL_CHAR_BYTES sizeof(VAL_CHAR_T)
+#define VAL_INT_BYTES sizeof(VAL_INT_T)
+#define VAL_REAL_BYTES sizeof(VAL_REAL_T)
 
 #define VAL_PTR_BYTES sizeof(void*)
 
@@ -36,12 +44,12 @@ enum ValueType {
 
 struct Capture {
     char *symbol;
-    ptrdiff_t location;
+    VAL_LOC_T location;
 };
 
 struct ValueHeader {
-    uint32_t type;
-    uint32_t size;
+    VAL_HEAD_TYPE_T type;
+    VAL_HEAD_SIZE_T size;
 };
 
 /* TODO: Change this to a set of structures for each type.
@@ -50,35 +58,35 @@ struct ValueHeader {
  */
 struct Value {
 
-    ptrdiff_t begin;
+    VAL_LOC_T begin;
     struct ValueHeader header;
 
     union {
-        uint8_t boolean;
-        uint8_t character;
-        int64_t integer;
-        double real;
+        VAL_BOOL_T boolean;
+        VAL_CHAR_T character;
+        VAL_INT_T integer;
+        VAL_REAL_T real;
     } primitive;
 
     struct {
         struct Value *data;
-        int size, cap;
+        VAL_SIZE_T size, cap;
     } compound;
 
     struct {
         char *str_begin;
-        ptrdiff_t str_len;
+        VAL_LOC_T str_len;
     } string;
 
     struct {
         struct AstNode *def;
         struct {
             struct Capture *data;
-            uint32_t size, cap;
+            VAL_SIZE_T size, cap;
         } captures;
         struct {
-            ptrdiff_t *data;
-            uint32_t size, cap;
+            VAL_LOC_T *data;
+            VAL_SIZE_T size, cap;
         } applied;
     } function;
 };

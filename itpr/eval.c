@@ -31,7 +31,7 @@ static struct Value eval_func_call_lookup_value(
 
     result = stack_peek_value(stack, kvp->location);
 
-    if (result.header.type != (uint32_t)VAL_FUNCTION) {
+    if (result.header.type != (VAL_HEAD_TYPE_T)VAL_FUNCTION) {
         err_set(ERR_EVAL, "Requested call to a non-function value.");
     }
 
@@ -69,12 +69,12 @@ static void eval_func_call_curry_on(
         struct SymMap *sym_map,
         struct Value *value)
 {
-    static uint32_t type = (uint32_t)VAL_FUNCTION;
-    static uint32_t zero = 0;
+    static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
+    static VAL_HEAD_SIZE_T zero = 0;
     struct AstNode *arg_node;
-    uint32_t applied_count = 0;
-    ptrdiff_t size_loc, appl_count_loc, data_begin, data_size;
-    uint32_t i;
+    VAL_SIZE_T applied_count = 0;
+    VAL_LOC_T size_loc, appl_count_loc, data_begin, data_size;
+    VAL_SIZE_T i;
 
     /* Header. */
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
@@ -90,7 +90,7 @@ static void eval_func_call_curry_on(
     stack_push(stack, VAL_SIZE_BYTES, (char*)&value->function.captures.size);
     for (i = 0; i < value->function.captures.size; ++i) {
         struct Capture *cap = value->function.captures.data + i;
-        uint32_t len = strlen(cap->symbol);
+        VAL_SIZE_T len = strlen(cap->symbol);
         struct ValueHeader header = stack_peek_header(stack, cap->location);
         stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
         stack_push(stack, len, cap->symbol);
@@ -101,7 +101,7 @@ static void eval_func_call_curry_on(
     appl_count_loc = stack->top;
     stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
     for (i = 0; i < value->function.applied.size; ++i) {
-        ptrdiff_t applied_loc = value->function.applied.data[i];
+        VAL_LOC_T applied_loc = value->function.applied.data[i];
         struct ValueHeader header = stack_peek_header(stack, applied_loc);
         stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + applied_loc);
         ++applied_count;
@@ -129,20 +129,20 @@ static void eval_func_call_final_bif(
         struct SymMap *sym_map,
         struct Value *value)
 {
-    static uint32_t type_int = (uint32_t)VAL_INT;
-    static uint32_t size_int = VAL_INT_BYTES;
-    static uint32_t type_real = (uint32_t)VAL_REAL;
-    static uint32_t size_real = VAL_REAL_BYTES;
+    static VAL_HEAD_TYPE_T type_int = (VAL_HEAD_TYPE_T)VAL_INT;
+    static VAL_HEAD_SIZE_T size_int = VAL_INT_BYTES;
+    static VAL_HEAD_TYPE_T type_real = (VAL_HEAD_TYPE_T)VAL_REAL;
+    static VAL_HEAD_SIZE_T size_real = VAL_REAL_BYTES;
     struct AstBif *impl = &value->function.def->data.bif;
     struct Value args[BIF_MAX_ARITY];
-    int arg_count = 0;
-    ptrdiff_t temp_begin, temp_end;
+    VAL_SIZE_T arg_count = 0;
+    VAL_LOC_T temp_begin, temp_end;
     struct AstNode *arg_node;
-    uint32_t i;
+    VAL_SIZE_T i;
 
     /* Peal out already applied args. */
     for (i = 0; i < value->function.applied.size; ++i) {
-        ptrdiff_t loc = value->function.applied.data[i];
+        VAL_LOC_T loc = value->function.applied.data[i];
         args[arg_count++] = stack_peek_value(stack, loc);
     }
 
@@ -150,7 +150,7 @@ static void eval_func_call_final_bif(
     temp_begin = stack->top;
     arg_node = arg_list;
     while (arg_node) {
-        ptrdiff_t loc = stack->top;
+        VAL_LOC_T loc = stack->top;
         eval_impl(arg_node, stack, sym_map);
         args[arg_count++] = stack_peek_value(stack, loc);
         arg_node = arg_node->next;
@@ -212,8 +212,8 @@ static void eval_func_call_final_def(
         struct SymMap *sym_map,
         struct Value *value)
 {
-    uint32_t i;
-    ptrdiff_t temp_begin, temp_end;
+    VAL_SIZE_T i;
+    VAL_LOC_T temp_begin, temp_end;
     struct SymMap local_sym_map;
     struct AstNode *arg_node, *exe_node, *impl;
     struct AstCommonFunc *func;
@@ -235,7 +235,7 @@ static void eval_func_call_final_def(
 
     /* Insert already applied arguments. */
     for (i = 0; i < value->function.applied.size; ++i) {
-        ptrdiff_t loc = value->function.applied.data[i];
+        VAL_LOC_T loc = value->function.applied.data[i];
         sym_map_insert(&local_sym_map, *formal_arg, loc);
         ++formal_arg;
     }
@@ -244,7 +244,7 @@ static void eval_func_call_final_def(
     temp_begin = stack->top;
     arg_node = arg_list;
     while (arg_node) {
-        ptrdiff_t loc = stack->top;
+        VAL_LOC_T loc = stack->top;
         eval_impl(arg_node, stack, sym_map);
         sym_map_insert(&local_sym_map, *formal_arg, loc);
         ++formal_arg;
@@ -269,7 +269,7 @@ static void eval_func_call(
         struct SymMap *sym_map)
 {
     struct Value value;
-    int arity, applied_args, new_args;
+    VAL_SIZE_T arity, applied_args, new_args;
 
     value = eval_func_call_lookup_value(call_node, stack, sym_map);
     if (err_state()) {
@@ -316,7 +316,7 @@ static bool eval_func_def_copy_non_global(
 {
     struct SymMapKvp *kvp = sym_map_find_not_global(sym_map, symbol);
     struct ValueHeader header;
-    uint32_t len = strlen(symbol);
+    VAL_SIZE_T len = strlen(symbol);
 
     if (!kvp) {
         return false;
@@ -346,9 +346,9 @@ static void eval_func_def_push_captures(
         struct SymMap *sym_map,
         struct AstFuncDef *func_def)
 {
-    static uint32_t zero = 0;
-    ptrdiff_t cap_loc = stack->top;
-    uint32_t cap_count = 0;
+    static VAL_SIZE_T zero = 0;
+    VAL_LOC_T cap_loc = stack->top;
+    VAL_SIZE_T cap_count = 0;
     struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
     bool is_argument, is_non_global;
 
@@ -420,10 +420,10 @@ static void eval_func_def(
         struct Stack *stack,
         struct SymMap *sym_map)
 {
-    static uint32_t type = (uint32_t)VAL_FUNCTION;
-    static uint32_t zero = 0;
+    static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
+    static VAL_HEAD_SIZE_T zero = 0;
     void* impl = (void*)node;
-    ptrdiff_t size_loc, data_begin, data_size;
+    VAL_LOC_T size_loc, data_begin, data_size;
 
     /* Header. */
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
@@ -458,18 +458,18 @@ static void eval_compound(
         struct Stack *stack,
         struct SymMap *sym_map)
 {
-    static uint32_t zero = 0;
-    uint32_t type;
-    ptrdiff_t size_loc, data_begin, data_size;
+    static VAL_HEAD_SIZE_T zero = 0;
+    VAL_HEAD_TYPE_T type;
+    VAL_LOC_T size_loc, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
 
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-            type = VAL_ARRAY;
+            type = (VAL_HEAD_TYPE_T)VAL_ARRAY;
             break;
 
         case AST_CPD_TUPLE:
-            type = VAL_TUPLE;
+            type = (VAL_HEAD_TYPE_T)VAL_TUPLE;
             break;
     }
 
@@ -493,38 +493,38 @@ static void eval_compound(
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
-    uint32_t type;
-    uint32_t size;
+    VAL_HEAD_TYPE_T type;
+    VAL_HEAD_SIZE_T size;
     char *value;
 
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
-        type = (uint32_t)VAL_BOOL;
+        type = (VAL_HEAD_TYPE_T)VAL_BOOL;
         size = VAL_BOOL_BYTES;
         value = (char*)&node->data.literal.data.boolean;
         break;
 
     case AST_LIT_CHAR:
-        type = (uint32_t)VAL_CHAR;
+        type = (VAL_HEAD_TYPE_T)VAL_CHAR;
         size = VAL_CHAR_BYTES;
         value = (char*)&node->data.literal.data.character;
         break;
 
     case AST_LIT_INT:
-        type = (uint32_t)VAL_INT;
+        type = (VAL_HEAD_TYPE_T)VAL_INT;
         size = VAL_INT_BYTES;
         value = (char*)&node->data.literal.data.integer;
         break;
 
     case AST_LIT_REAL:
-        type = (uint32_t)VAL_REAL;
+        type = (VAL_HEAD_TYPE_T)VAL_REAL;
         size = VAL_REAL_BYTES;
         value = (char*)&node->data.literal.data.real;
         break;
 
     case AST_LIT_STRING:
         value = node->data.literal.data.string;
-        type = (uint32_t)VAL_STRING;
+        type = (VAL_HEAD_TYPE_T)VAL_STRING;
         size = strlen(value);
         break;
     }
@@ -539,7 +539,7 @@ static void eval_bind(
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-	ptrdiff_t location = eval_impl(node->data.bind.expr, stack, sym_map);
+    VAL_LOC_T location = eval_impl(node->data.bind.expr, stack, sym_map);
 	sym_map_insert(sym_map, node->data.bind.symbol, location);
 }
 
@@ -550,7 +550,7 @@ static void eval_reference(
 {
 	struct SymMapKvp *kvp = sym_map_find(sym_map, node->data.reference.symbol);
 	struct ValueHeader header;
-	uint32_t size;
+	VAL_HEAD_SIZE_T size;
 
 	if (!kvp) {
 	    err_set(ERR_EVAL, "Symbol not found.");
@@ -564,9 +564,9 @@ static void eval_reference(
 
 static void eval_bif(struct AstNode *node, struct Stack *stack)
 {
-    static uint32_t type = (uint32_t)VAL_FUNCTION;
-    static uint32_t size = VAL_PTR_BYTES + 2 * VAL_SIZE_BYTES;
-    static uint32_t zero = 0;
+    static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
+    static VAL_HEAD_SIZE_T size = VAL_PTR_BYTES + 2 * VAL_SIZE_BYTES;
+    static VAL_HEAD_SIZE_T zero = 0;
     void* impl = (void*)node;
 
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
@@ -580,12 +580,12 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
  * =========================
  */
 
-static ptrdiff_t eval_impl(
+static VAL_LOC_T eval_impl(
 		struct AstNode *node,
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-    ptrdiff_t begin = stack->top;
+    VAL_LOC_T begin = stack->top;
 
     switch (node->type) {
     case AST_LITERAL:
@@ -628,12 +628,12 @@ static ptrdiff_t eval_impl(
     }
 }
 
-ptrdiff_t eval(
+VAL_LOC_T eval(
         struct AstNode *node,
         struct Stack *stack,
         struct SymMap *sym_map)
 {
-    ptrdiff_t begin, result, end;
+    VAL_LOC_T begin, result, end;
 
     err_reset();
 
