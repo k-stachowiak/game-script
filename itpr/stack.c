@@ -33,8 +33,6 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
     void *impl;
     VAL_SIZE_T i, size;
 
-    /* TODO: Encapsulate the memcpy calls. */
-
     /* Peek the implementation pointer. */
     memcpy(&impl, stack->buffer + location, VAL_PTR_BYTES);
     result->function.def = (struct AstNode*)impl;
@@ -141,7 +139,6 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
     char *src = stack->buffer + location;
     struct Value result;
 
-    /* TODO: Consider completely untangling value from the stack. */
     result.begin = location;
     result.header = stack_peek_header(stack, location);
 
@@ -175,7 +172,6 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
         break;
 
     case VAL_STRING:
-        /* TODO: perform a copy here. */
         result.string.str_begin = src + VAL_HEAD_BYTES;
         result.string.str_len = result.header.size;
         break;

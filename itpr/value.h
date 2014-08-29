@@ -52,43 +52,42 @@ struct ValueHeader {
     VAL_HEAD_SIZE_T size;
 };
 
-/* TODO: Change this to a set of structures for each type.
- *       Rely on offsets and header peeking. Then modify the evaluator code
- *       to more often pass the substructures and not the entire Value.
- */
-struct Value {
+union ValuePrimitive {
+    VAL_BOOL_T boolean;
+    VAL_CHAR_T character;
+    VAL_INT_T integer;
+    VAL_REAL_T real;
+};
 
-    VAL_LOC_T begin;
-    struct ValueHeader header;
+struct ValueCompound {
+    struct Value *data;
+    VAL_SIZE_T size, cap;
+};
 
-    union {
-        VAL_BOOL_T boolean;
-        VAL_CHAR_T character;
-        VAL_INT_T integer;
-        VAL_REAL_T real;
-    } primitive;
+struct ValueString {
+    char *str_begin;
+    VAL_LOC_T str_len;
+};
 
+struct ValueFunction {
+    struct AstNode *def;
     struct {
-        struct Value *data;
+        struct Capture *data;
         VAL_SIZE_T size, cap;
-    } compound;
-
+    } captures;
     struct {
-        char *str_begin;
-        VAL_LOC_T str_len;
-    } string;
+        VAL_LOC_T *data;
+        VAL_SIZE_T size, cap;
+    } applied;
+};
 
-    struct {
-        struct AstNode *def;
-        struct {
-            struct Capture *data;
-            VAL_SIZE_T size, cap;
-        } captures;
-        struct {
-            VAL_LOC_T *data;
-            VAL_SIZE_T size, cap;
-        } applied;
-    } function;
+struct Value {
+    VAL_LOC_T begin; // TODO: Is this begin necessary?
+    struct ValueHeader header;
+    union ValuePrimitive primitive;
+    struct ValueCompound compound;
+    struct ValueString string;
+    struct ValueFunction function;
 };
 
 void val_print(struct Value *value, bool annotate);
