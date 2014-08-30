@@ -1,6 +1,7 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "lex.h"
@@ -16,6 +17,26 @@ static struct {
     struct AstNode **data;
     int size, cap;
 } stored_nodes;
+
+static char *autotest_load_file(char *filename)
+{
+	char *buffer = 0;
+	long length;
+	FILE *file = fopen(filename, "rb");
+
+	if (file) {
+		fseek(file, 0, SEEK_END);
+		length = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		buffer = calloc(length + 1, 1);
+		if (buffer) {
+			fread(buffer, 1, length, file);
+		}
+		fclose(file);
+	}
+
+	return buffer;
+}
 
 static struct AstNode *autotest_parse(char *source)
 {
@@ -36,7 +57,7 @@ static struct AstNode *autotest_parse(char *source)
     return ast;
 }
 
-static int autotest_perform_one(char *source)
+static int autotest_load_module(char *source)
 {
     struct AstNode *ast = autotest_parse(source);
     struct Value val;
@@ -61,27 +82,25 @@ static int autotest_perform_one(char *source)
     return 0;
 }
 
-static int autotest_perform_all(void)
+static int autotest_perform(void)
 {
-    return autotest_perform_one("(bind add1 (+ 1))") ||
-           autotest_perform_one("(add1 2)") ||
-           autotest_perform_one("(bind sqr (func (x) (* x x)))") ||
-           autotest_perform_one("(sqr 2)");
+	return 0;
 }
 
 int autotest(void)
 {
     int error;
+	char *source;
 
     stack = stack_make(1024);
     sym_map_init(&sym_map, NULL, stack);
 
-    error = autotest_perform_all();
+	source = autotest_load_file("min-element.mn");
+	error = autotest_load_module(source);
 
-    while (stored_nodes.size) {
-        ast_node_free(stored_nodes.data[0]);
-        ARRAY_REMOVE(stored_nodes, 0);
-    }
+	if (error == 0) {
+		error = autotest_perform();
+	}
 
     sym_map_deinit(&sym_map);
     stack_free(stack);

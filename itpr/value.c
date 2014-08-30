@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "value.h"
 
@@ -62,7 +63,7 @@ void val_print(struct Value *value, bool annotate)
         if (annotate) {
             printf("integer :: ");
         }
-        printf("%ld", value->primitive.integer);
+        printf("%" PRIu64 , value->primitive.integer);
         break;
 
     case VAL_REAL:

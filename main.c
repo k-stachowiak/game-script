@@ -9,7 +9,6 @@
 #include "autotest.h"
 
 /* TODO:
- * - Enhance error messages (source location)
  * - Algorithms:
  * -   min_element,
  * -   nwd, nww
