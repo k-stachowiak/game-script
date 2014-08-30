@@ -10,10 +10,13 @@
 
 struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location);
 
-static void stack_peek_compound(struct Stack *stack, struct Value *result)
+static void stack_peek_compound(
+        struct Stack *stack,
+        struct Value *result,
+        VAL_LOC_T loc)
 {
-    VAL_LOC_T location = result->begin + VAL_HEAD_BYTES;
-    VAL_LOC_T end = result->begin + result->header.size + VAL_HEAD_BYTES;
+    VAL_LOC_T location = loc + VAL_HEAD_BYTES;
+    VAL_LOC_T end = loc + result->header.size + VAL_HEAD_BYTES;
     struct Value value;
 
     result->compound.data = NULL;
@@ -27,9 +30,12 @@ static void stack_peek_compound(struct Stack *stack, struct Value *result)
     }
 }
 
-static void stack_peek_function(struct Stack *stack, struct Value *result)
+static void stack_peek_function(
+        struct Stack *stack,
+        struct Value *result,
+        VAL_LOC_T loc)
 {
-    VAL_LOC_T location = result->begin + VAL_HEAD_BYTES;
+    VAL_LOC_T location = loc + VAL_HEAD_BYTES;
     void *impl;
     VAL_SIZE_T i, size;
 
@@ -88,7 +94,15 @@ static void stack_peek_function(struct Stack *stack, struct Value *result)
 struct Stack *stack_make(VAL_LOC_T size)
 {
     struct Stack *result = malloc(sizeof(*result));
+    if (!result) {
+        printf("Allocation failure.\n");
+        exit(1);
+    }
     result->buffer = malloc(size);
+    if (!result->buffer) {
+        printf("Allocation failure.\n");
+        exit(1);
+    }
     result->size = size;
     result->top = 0;
     return result;
@@ -100,19 +114,18 @@ void stack_free(struct Stack *stack)
     free(stack);
 }
 
-void stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
+bool stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
 {
     char *dst;
 
     if (stack->top + size >= stack->size) {
-        /* TODO: Implement unified runtime error handling (OVERFLOW). */
-        printf("Stack overflow.\n");
-        exit(1);
+        return false;
     }
 
     dst = stack->buffer + stack->top;
     memcpy(dst, data, size);
     stack->top += size;
+    return true;
 }
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
@@ -139,7 +152,6 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
     char *src = stack->buffer + location;
     struct Value result;
 
-    result.begin = location;
     result.header = stack_peek_header(stack, location);
 
     switch ((enum ValueType)result.header.type) {
@@ -178,11 +190,11 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
 
     case VAL_ARRAY:
     case VAL_TUPLE:
-        stack_peek_compound(stack, &result);
+        stack_peek_compound(stack, &result, location);
         break;
 
     case VAL_FUNCTION:
-        stack_peek_function(stack, &result);
+        stack_peek_function(stack, &result, location);
         break;
 
     default:

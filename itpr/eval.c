@@ -27,10 +27,10 @@ static struct Value eval_func_call_lookup_value(
 
     if (!kvp) {
         err_set(ERR_EVAL, "Requested function doesn't exist.");
+        return result;
     }
 
     result = stack_peek_value(stack, kvp->location);
-
     if (result.header.type != (VAL_HEAD_TYPE_T)VAL_FUNCTION) {
         err_set(ERR_EVAL, "Requested call to a non-function value.");
     }
@@ -75,52 +75,76 @@ static void eval_func_call_curry_on(
     VAL_SIZE_T applied_count = 0;
     VAL_LOC_T size_loc, appl_count_loc, data_begin, data_size;
     VAL_SIZE_T i;
+    bool stack_success = true;
 
     /* Header. */
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
     size_loc = stack->top;
 
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
+    stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
     data_begin = stack->top;
 
     /* Pointer to implementation. */
-    stack_push(stack, VAL_PTR_BYTES, (char*)&value->function.def);
+    stack_success &= stack_push(stack, VAL_PTR_BYTES, (char*)&value->function.def);
+
+    if (!stack_success) {
+        err_set(ERR_EVAL, "Stack overflow.");
+        return;
+    }
 
     /* Captures. */
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&value->function.captures.size);
+    stack_success &= stack_push(stack, VAL_SIZE_BYTES, (char*)&value->function.captures.size);
     for (i = 0; i < value->function.captures.size; ++i) {
         struct Capture *cap = value->function.captures.data + i;
         VAL_SIZE_T len = strlen(cap->symbol);
         struct ValueHeader header = stack_peek_header(stack, cap->location);
-        stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-        stack_push(stack, len, cap->symbol);
-        stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + cap->location);
+        stack_success &= stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
+        stack_success &= stack_push(stack, len, cap->symbol);
+        stack_success &= stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + cap->location);
+
+        if (!stack_success) {
+            err_set(ERR_EVAL, "Stack overflow.");
+            return;
+        }
     }
 
     /* Already applied. */
     appl_count_loc = stack->top;
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    stack_success &= stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
     for (i = 0; i < value->function.applied.size; ++i) {
         VAL_LOC_T applied_loc = value->function.applied.data[i];
         struct ValueHeader header = stack_peek_header(stack, applied_loc);
-        stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + applied_loc);
+        stack_success &= stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + applied_loc);
         ++applied_count;
+
+        if (!stack_success) {
+            err_set(ERR_EVAL, "Stack overflow.");
+            return;
+        }
     }
 
     /* New applied. */
     arg_node = call_node->data.func_call.actual_args;
     while (arg_node) {
         eval_impl(arg_node, stack, sym_map);
+        if (err_state()) {
+            return;
+        }
         arg_node = arg_node->next;
         ++applied_count;
     }
 
-    /* Hack value size to correct value. */
-    data_size = stack->top - data_begin;
-    memcpy(stack->buffer + size_loc, &data_size, VAL_SIZE_BYTES);
+    if (stack_success) {
 
-    /* Hack applied count to correct value. */
-    memcpy(stack->buffer + appl_count_loc, &applied_count, VAL_SIZE_BYTES);
+        /* Hack value size to correct value. */
+        data_size = stack->top - data_begin;
+        memcpy(stack->buffer + size_loc, &data_size, VAL_SIZE_BYTES);
+
+        /* Hack applied count to correct value. */
+        memcpy(stack->buffer + appl_count_loc, &applied_count, VAL_SIZE_BYTES);
+    } else {
+        err_set(ERR_EVAL, "Stack overflow.");
+    }
 }
 
 static void eval_func_call_final_bif(
@@ -139,6 +163,7 @@ static void eval_func_call_final_bif(
     VAL_LOC_T temp_begin, temp_end;
     struct AstNode *arg_node;
     VAL_SIZE_T i;
+    bool stack_success = true;
 
     /* Peal out already applied args. */
     for (i = 0; i < value->function.applied.size; ++i) {
@@ -152,6 +177,9 @@ static void eval_func_call_final_bif(
     while (arg_node) {
         VAL_LOC_T loc = stack->top;
         eval_impl(arg_node, stack, sym_map);
+        if (err_state()) {
+            return;
+        }
         args[arg_count++] = stack_peek_value(stack, loc);
         arg_node = arg_node->next;
     }
@@ -162,18 +190,19 @@ static void eval_func_call_final_bif(
     case AST_BIF_ARYTHM_UNARY:
         if ((enum ValueType)args[0].header.type == VAL_INT) {
             long result = impl->un_int_impl(args[0].primitive.integer);
-            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
-            stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
-            stack_push(stack, size_int, (char*)&result);
+            stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
+            stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
+            stack_success &= stack_push(stack, size_int, (char*)&result);
 
         } else if ((enum ValueType)args[0].header.type == VAL_REAL) {
             double result = impl->un_real_impl(args[0].primitive.real);
-            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
-            stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
-            stack_push(stack, size_real, (char*)&result);
+            stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
+            stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
+            stack_success &= stack_push(stack, size_real, (char*)&result);
 
         } else {
             err_set(ERR_EVAL, "Non-arythmetic type passed to arithmetic BIF.");
+            return;
         }
         break;
 
@@ -183,27 +212,32 @@ static void eval_func_call_final_bif(
                 long result = impl->bin_int_impl(
                         args[0].primitive.integer,
                         args[1].primitive.integer);
-                stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
-                stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
-                stack_push(stack, size_int, (char*)&result);
+                stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
+                stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
+                stack_success &= stack_push(stack, size_int, (char*)&result);
 
         } else if ((enum ValueType)args[0].header.type == VAL_REAL &&
                    (enum ValueType)args[1].header.type == VAL_REAL) {
             double result = impl->bin_real_impl(
                     args[0].primitive.real,
                     args[1].primitive.real);
-            stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
-            stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
-            stack_push(stack, size_real, (char*)&result);
+            stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
+            stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
+            stack_success &= stack_push(stack, size_real, (char*)&result);
 
         } else {
             err_set(ERR_EVAL, "Non-arythmetic type passed to arithmetic BIF.");
+            return;
         }
         break;
     }
 
-    /* Collapse the temporaries. */
-    stack_collapse(stack, temp_begin, temp_end);
+    if (stack_success) {
+        /* Collapse the temporaries. */
+        stack_collapse(stack, temp_begin, temp_end);
+    } else if (!err_state()) {
+        err_set(ERR_EVAL, "Stack overflow.");
+    }
 }
 
 static void eval_func_call_final_def(
@@ -246,6 +280,9 @@ static void eval_func_call_final_def(
     while (arg_node) {
         VAL_LOC_T loc = stack->top;
         eval_impl(arg_node, stack, sym_map);
+        if (err_state()) {
+            return;
+        }
         sym_map_insert(&local_sym_map, *formal_arg, loc);
         ++formal_arg;
         arg_node = arg_node->next;
@@ -256,6 +293,9 @@ static void eval_func_call_final_def(
     exe_node = impl->data.func_def.exprs;
     while (exe_node) {
         eval_impl(exe_node, stack, &local_sym_map);
+        if (err_state()) {
+            return;
+        }
         exe_node = exe_node->next;
     }
 
@@ -317,15 +357,20 @@ static bool eval_func_def_copy_non_global(
     struct SymMapKvp *kvp = sym_map_find_not_global(sym_map, symbol);
     struct ValueHeader header;
     VAL_SIZE_T len = strlen(symbol);
+    bool stack_success = true;
 
     if (!kvp) {
         return false;
     }
 
     header = stack_peek_header(stack, kvp->location);
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-    stack_push(stack, len, symbol);
-    stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + kvp->location);
+    stack_success &= stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
+    stack_success &= stack_push(stack, len, symbol);
+    stack_success &= stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + kvp->location);
+
+    if (!stack_success) {
+        err_set(ERR_EVAL, "Stack overflow.");
+    }
 
     return true;
 }
@@ -352,7 +397,11 @@ static void eval_func_def_push_captures(
     struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
     bool is_argument, is_non_global;
 
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    bool stack_success = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    if (!stack_success) {
+        err_set(ERR_EVAL, "Stack overflow.");
+        goto end;
+    }
 
     ARRAY_APPEND(to_visit, func_def->exprs);
     while (to_visit.size > 0) {
@@ -386,7 +435,9 @@ static void eval_func_def_push_captures(
                     n->data.func_call.symbol, &func_def->func);
             is_non_global = eval_func_def_copy_non_global(
                     stack, sym_map, n->data.func_call.symbol);
-            if (!is_argument && is_non_global) {
+            if (err_state()) {
+                goto end;
+            } else if (!is_argument && is_non_global) {
                 ++cap_count;
             }
 
@@ -397,14 +448,12 @@ static void eval_func_def_push_captures(
                     n->data.reference.symbol, &func_def->func);
             is_non_global = eval_func_def_copy_non_global(
                     stack, sym_map, n->data.reference.symbol);
-            if (!is_argument && is_non_global) {
+            if (err_state()) {
+                goto end;
+            } else if (!is_argument && is_non_global) {
                 ++cap_count;
             }
             break;
-        }
-
-        if (err_state()) {
-            goto end;
         }
 
         ARRAY_REMOVE(to_visit, 0);
@@ -424,16 +473,21 @@ static void eval_func_def(
     static VAL_HEAD_SIZE_T zero = 0;
     void* impl = (void*)node;
     VAL_LOC_T size_loc, data_begin, data_size;
+    bool stack_success = true;
 
     /* Header. */
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 
     size_loc = stack->top;
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
+    stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
 
     /* Pointer to implementation. */
     data_begin = stack->top;
-    stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
+    stack_success &= stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
+    if (!stack_success) {
+        err_set(ERR_EVAL, "Stack overflow.");
+        return;
+    }
 
     /* Captures. */
     eval_func_def_push_captures(stack, sym_map, &node->data.func_def);
@@ -442,7 +496,11 @@ static void eval_func_def(
     }
 
     /* Already applied (empty for definitnion). */
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    stack_success &= stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    if (!stack_success) {
+        err_set(ERR_EVAL, "Stack overflow.");
+        return;
+    }
 
     /* Hack value size to correct value. */
     data_size = stack->top - data_begin;
@@ -474,21 +532,31 @@ static void eval_compound(
     }
 
     /* Header. */
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-
+    if (!stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type)) {
+        goto stack_overflow;
+    }
     size_loc = stack->top;
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    if (!stack_push(stack, VAL_SIZE_BYTES, (char*)&zero)) {
+        goto stack_overflow;
+    }
 
     /* Data. */
     data_begin = stack->top;
     while (current) {
         eval_impl(current, stack, sym_map);
+        if (err_state()) {
+            return;
+        }
         current = current->next;
     }
 
     /* Hack value size to correct value. */
     data_size = stack->top - data_begin;
     memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
+    return;
+
+stack_overflow:
+    err_set(ERR_EVAL, "Stack overflow.");
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
@@ -529,9 +597,11 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
         break;
     }
 
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, value);
+    if (!stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type) ||
+        !stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size) ||
+        !stack_push(stack, size, value)) {
+            err_set(ERR_EVAL, "Stack overflow.");
+    }
 }
 
 static void eval_bind(
@@ -540,7 +610,9 @@ static void eval_bind(
 		struct SymMap *sym_map)
 {
     VAL_LOC_T location = eval_impl(node->data.bind.expr, stack, sym_map);
-	sym_map_insert(sym_map, node->data.bind.symbol, location);
+    if (!err_state()) {
+        sym_map_insert(sym_map, node->data.bind.symbol, location);
+    }
 }
 
 static void eval_reference(
@@ -548,18 +620,20 @@ static void eval_reference(
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-	struct SymMapKvp *kvp = sym_map_find(sym_map, node->data.reference.symbol);
+	struct SymMapKvp *kvp;
 	struct ValueHeader header;
 	VAL_HEAD_SIZE_T size;
 
-	if (!kvp) {
+	if (!(kvp = sym_map_find(sym_map, node->data.reference.symbol))) {
 	    err_set(ERR_EVAL, "Symbol not found.");
 		return;
 	}
 
 	header = stack_peek_header(stack, kvp->location);
 	size = header.size + VAL_HEAD_BYTES;
-	stack_push(stack, size, stack->buffer + kvp->location);
+	if (!stack_push(stack, size, stack->buffer + kvp->location)) {
+	    err_set(ERR_EVAL, "Stack overflow.");
+	}
 }
 
 static void eval_bif(struct AstNode *node, struct Stack *stack)
@@ -569,11 +643,13 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
     static VAL_HEAD_SIZE_T zero = 0;
     void* impl = (void*)node;
 
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    if (!stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type) ||
+         stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size) ||
+         stack_push(stack, VAL_PTR_BYTES, (char*)&impl) ||
+         stack_push(stack, VAL_SIZE_BYTES, (char*)&zero) ||
+         stack_push(stack, VAL_SIZE_BYTES, (char*)&zero)) {
+            err_set(ERR_EVAL, "Stack overflow.");
+    }
 }
 
 /* Main evaluation dispatch.

@@ -57,6 +57,8 @@ void sym_map_insert(struct SymMap *sym_map, char *key, ptrdiff_t location)
     }
 
     kvp = malloc(sizeof(*kvp));
+    /* TODO: verify allocation result. */
+    /* TODO: ensure sym map cleanup upon failures. */
 
     kvp->key = key_copy;
     kvp->location = location;

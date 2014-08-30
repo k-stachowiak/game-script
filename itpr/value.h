@@ -82,7 +82,6 @@ struct ValueFunction {
 };
 
 struct Value {
-    VAL_LOC_T begin; // TODO: Is this begin necessary?
     struct ValueHeader header;
     union ValuePrimitive primitive;
     struct ValueCompound compound;
