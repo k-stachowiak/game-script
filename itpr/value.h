@@ -8,29 +8,6 @@
 
 #include "ast.h"
 
-#define VAL_LOC_T ptrdiff_t
-
-#define VAL_SIZE_T uint32_t
-#define VAL_SIZE_BYTES sizeof(VAL_SIZE_T)
-
-#define VAL_HEAD_TYPE_T uint32_t
-#define VAL_HEAD_SIZE_T VAL_SIZE_T
-#define VAL_HEAD_TYPE_BYTES sizeof(VAL_HEAD_TYPE_T)
-#define VAL_HEAD_SIZE_BYTES VAL_SIZE_BYTES
-#define VAL_HEAD_BYTES (VAL_HEAD_TYPE_BYTES + VAL_HEAD_SIZE_BYTES)
-
-#define VAL_BOOL_T uint8_t
-#define VAL_CHAR_T uint8_t
-#define VAL_INT_T uint64_t
-#define VAL_REAL_T double
-
-#define VAL_BOOL_BYTES sizeof(VAL_BOOL_T)
-#define VAL_CHAR_BYTES sizeof(VAL_CHAR_T)
-#define VAL_INT_BYTES sizeof(VAL_INT_T)
-#define VAL_REAL_BYTES sizeof(VAL_REAL_T)
-
-#define VAL_PTR_BYTES sizeof(void*)
-
 enum ValueType {
     VAL_BOOL,
     VAL_CHAR,
@@ -89,6 +66,7 @@ struct Value {
     struct ValueFunction function;
 };
 
+void val_make_default(struct Value *value);
 void val_print(struct Value *value, bool annotate);
 void val_free(struct Value *value);
 

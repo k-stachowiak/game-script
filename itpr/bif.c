@@ -37,17 +37,17 @@ static void bif_init_common_binary(struct AstNode *node)
     node->data.bif.type = AST_BIF_ARYTHM_BINARY;
 }
 
-static long bif_sqrt_int(long x) { return sqrt(x); }
-static double bif_sqrt_real(double x) { return sqrt(x); }
+static VAL_INT_T bif_sqrt_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }
+static VAL_REAL_T bif_sqrt_real(VAL_REAL_T x) { return sqrt(x); }
 
-static long bif_add_int(long x, long y) { return x + y; }
-static long bif_sub_int(long x, long y) { return x - y; }
-static long bif_mul_int(long x, long y) { return x * y; }
-static long bif_div_int(long x, long y) { return x / y; }
-static double bif_add_real(double x, double y) { return x + y; }
-static double bif_sub_real(double x, double y) { return x - y; }
-static double bif_mul_real(double x, double y) { return x * y; }
-static double bif_div_real(double x, double y) { return x / y; }
+static VAL_INT_T bif_add_int(VAL_INT_T x, VAL_INT_T y) { return x + y; }
+static VAL_INT_T bif_sub_int(VAL_INT_T x, VAL_INT_T y) { return x - y; }
+static VAL_INT_T bif_mul_int(VAL_INT_T x, VAL_INT_T y) { return x * y; }
+static VAL_INT_T bif_div_int(VAL_INT_T x, VAL_INT_T y) { return x / y; }
+static VAL_REAL_T bif_add_real(VAL_REAL_T x, VAL_REAL_T y) { return x + y; }
+static VAL_REAL_T bif_sub_real(VAL_REAL_T x, VAL_REAL_T y) { return x - y; }
+static VAL_REAL_T bif_mul_real(VAL_REAL_T x, VAL_REAL_T y) { return x * y; }
+static VAL_REAL_T bif_div_real(VAL_REAL_T x, VAL_REAL_T y) { return x / y; }
 
 struct AstNode bif_sqrt;
 

@@ -27,6 +27,7 @@ static struct Value eval_func_call_lookup_value(
 
     if (!kvp) {
         err_set(ERR_EVAL, "Requested function doesn't exist.");
+		val_make_default(&result);
         return result;
     }
 
@@ -189,13 +190,13 @@ static void eval_func_call_final_bif(
     switch (impl->type) {
     case AST_BIF_ARYTHM_UNARY:
         if ((enum ValueType)args[0].header.type == VAL_INT) {
-            long result = impl->un_int_impl(args[0].primitive.integer);
+            VAL_INT_T result = impl->un_int_impl(args[0].primitive.integer);
             stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
             stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
             stack_success &= stack_push(stack, size_int, (char*)&result);
 
         } else if ((enum ValueType)args[0].header.type == VAL_REAL) {
-            double result = impl->un_real_impl(args[0].primitive.real);
+            VAL_REAL_T result = impl->un_real_impl(args[0].primitive.real);
             stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
             stack_success &= stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
             stack_success &= stack_push(stack, size_real, (char*)&result);
@@ -209,7 +210,7 @@ static void eval_func_call_final_bif(
     case AST_BIF_ARYTHM_BINARY:
         if ((enum ValueType)args[0].header.type == VAL_INT &&
             (enum ValueType)args[1].header.type == VAL_INT) {
-                long result = impl->bin_int_impl(
+			VAL_INT_T result = impl->bin_int_impl(
                         args[0].primitive.integer,
                         args[1].primitive.integer);
                 stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
@@ -218,7 +219,7 @@ static void eval_func_call_final_bif(
 
         } else if ((enum ValueType)args[0].header.type == VAL_REAL &&
                    (enum ValueType)args[1].header.type == VAL_REAL) {
-            double result = impl->bin_real_impl(
+			VAL_REAL_T result = impl->bin_real_impl(
                     args[0].primitive.real,
                     args[1].primitive.real);
             stack_success &= stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
@@ -563,7 +564,7 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
     VAL_HEAD_TYPE_T type;
     VAL_HEAD_SIZE_T size;
-    char *value;
+    char *value = NULL;
 
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
@@ -644,10 +645,10 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
     void* impl = (void*)node;
 
     if (!stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type) ||
-         stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size) ||
-         stack_push(stack, VAL_PTR_BYTES, (char*)&impl) ||
-         stack_push(stack, VAL_SIZE_BYTES, (char*)&zero) ||
-         stack_push(stack, VAL_SIZE_BYTES, (char*)&zero)) {
+        !stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size) ||
+        !stack_push(stack, VAL_PTR_BYTES, (char*)&impl) ||
+        !stack_push(stack, VAL_SIZE_BYTES, (char*)&zero) ||
+        !stack_push(stack, VAL_SIZE_BYTES, (char*)&zero)) {
             err_set(ERR_EVAL, "Stack overflow.");
     }
 }

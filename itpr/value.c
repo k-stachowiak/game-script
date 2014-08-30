@@ -30,6 +30,13 @@ static void val_print_function(struct Value *value)
     }
 }
 
+void val_make_default(struct Value *value)
+{
+	value->header.type = (VAL_HEAD_TYPE_T)VAL_INT;
+	value->header.size = (VAL_HEAD_SIZE_T)VAL_INT_BYTES;
+	value->primitive.integer = 0;
+}
+
 void val_print(struct Value *value, bool annotate)
 {
     VAL_SIZE_T i;
