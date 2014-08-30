@@ -213,7 +213,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
                     err_set(ERR_PARSE, "Allocacation failed.");
                     goto fail;
                 }
-                strcpy(formal_args[arg_count], arg_child->atom);
+                memcpy(formal_args[arg_count], arg_child->atom, len + 1);
                 ++arg_count;
             }
             arg_child = arg_child->next;
@@ -290,7 +290,7 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
             err_set(ERR_PARSE, "Allocacation failed.");
             return NULL;
         }
-        strcpy(atom_cpy, atom);
+        memcpy(atom_cpy, atom, len + 1);
         atom_cpy[len] = '\0';
         return ast_make_literal_string(dom->loc, atom_cpy);
     } else {
