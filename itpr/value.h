@@ -66,7 +66,6 @@ struct Value {
     struct ValueFunction function;
 };
 
-void val_make_default(struct Value *value);
 void val_print(struct Value *value, bool annotate);
 void val_free(struct Value *value);
 

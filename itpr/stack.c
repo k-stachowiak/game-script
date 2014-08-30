@@ -114,18 +114,20 @@ void stack_free(struct Stack *stack)
     free(stack);
 }
 
-bool stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
+VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
 {
     char *dst;
 
     if (stack->top + size >= stack->size) {
-        return false;
+		printf("Stack overflow.\n");
+		exit(1);
     }
 
     dst = stack->buffer + stack->top;
     memcpy(dst, data, size);
     stack->top += size;
-    return true;
+
+	return stack->top;
 }
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
