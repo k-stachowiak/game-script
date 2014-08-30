@@ -9,8 +9,7 @@
 #include "autotest.h"
 
 /* TODO:
- * - Enhance error messages (pretty strings including source location)
- * - Add colors to error messages and REPL
+ * - Enhance error messages (source location)
  * - Algorithms:
  * -   min_element,
  * -   nwd, nww
