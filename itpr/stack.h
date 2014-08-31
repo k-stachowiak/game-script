@@ -1,22 +1,24 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
-#include <stddef.h>
-#include <stdbool.h>
-
 #ifndef STACK_H
 #define STACK_H
 
+#include <stddef.h>
+#include <stdbool.h>
+
+#include "common.h"
+
 struct Stack {
     char *buffer;
-    ptrdiff_t size;
-    ptrdiff_t top;
+	VAL_LOC_T size;
+	VAL_LOC_T top;
 };
 
-struct Stack *stack_make(ptrdiff_t size);
+struct Stack *stack_make(VAL_LOC_T size);
 void stack_free(struct Stack *stack);
-void stack_push(struct Stack *stack, ptrdiff_t size, char *data);
-void stack_collapse(struct Stack *stack, ptrdiff_t begin, ptrdiff_t end);
-struct ValueHeader stack_peek_header(struct Stack *stack, ptrdiff_t location);
-struct Value stack_peek_value(struct Stack *stack, ptrdiff_t location);
+VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data);
+void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end);
+struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location);
+struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location);
 
 #endif

@@ -79,12 +79,10 @@ static void eval_func_call_curry_on(
 
     /* Header. */
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    size_loc = stack->top;
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-    data_begin = stack->top;
+    size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);    
 
     /* Pointer to implementation. */
-    stack_push(stack, VAL_PTR_BYTES, (char*)&value->function.def);
+	data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&value->function.def);
 
     /* Captures. */
     stack_push(stack, VAL_SIZE_BYTES, (char*)&value->function.captures.size);
@@ -98,8 +96,7 @@ static void eval_func_call_curry_on(
     }
 
     /* Already applied. */
-    appl_count_loc = stack->top;
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    appl_count_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
     for (i = 0; i < value->function.applied.size; ++i) {
         VAL_LOC_T applied_loc = value->function.applied.data[i];
         struct ValueHeader header = stack_peek_header(stack, applied_loc);
@@ -442,13 +439,10 @@ static void eval_func_def(
 
     /* Header. */
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-
-    size_loc = stack->top;
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
+    size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
 
     /* Pointer to implementation. */
-    data_begin = stack->top;
-    stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
+    data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
 
     /* Captures. */
     eval_func_def_push_captures(stack, sym_map, &node->data.func_def);
@@ -490,8 +484,7 @@ static void eval_compound(
 
     /* Header. */
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    size_loc = stack->top;
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    size_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
 
     /* Data. */
     data_begin = stack->top;

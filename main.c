@@ -10,9 +10,11 @@
 
 /* TODO:
  * - Algorithms:
- * -   min_element,
- * -   nwd, nww
- * -   merge sort
+ *   - min_element,
+ *     - car and cdr BIFs
+ *     - less than, equal BIFs
+ *   - nwd, nww
+ *   - merge sort
  */
 
 int main(int argc, char *argv[])

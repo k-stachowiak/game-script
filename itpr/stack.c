@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "common.h"
 #include "stack.h"
 #include "value.h"
 
@@ -127,7 +126,7 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
     memcpy(dst, data, size);
     stack->top += size;
 
-	return stack->top;
+	return stack->top - size;
 }
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)

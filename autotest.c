@@ -84,6 +84,19 @@ static int autotest_load_module(char *source)
 
 static int autotest_perform(void)
 {
+	struct AstNode *ast;
+	ptrdiff_t location;
+	struct Value val;
+
+	ast = autotest_parse("(min-element [3 1 2])");
+
+	if ((location = eval(ast, stack, &sym_map)) == -1) {
+		return 1;
+	}
+
+	val = stack_peek_value(stack, location);
+	val_print(&val, true);
+
 	return 0;
 }
 
