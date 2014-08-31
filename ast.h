@@ -21,7 +21,8 @@ enum AstNodeType {
 
 enum AstBifType {
     AST_BIF_ARYTHM_UNARY,
-    AST_BIF_ARYTHM_BINARY
+    AST_BIF_ARYTHM_BINARY,
+	AST_BIF_COMPARE
 };
 
 enum AstCompoundType {
@@ -53,13 +54,15 @@ struct AstBif {
     struct AstCommonFunc func;
     enum AstBifType type;
 
-    /* Unary. */
-	VAL_INT_T(*un_int_impl)(VAL_INT_T); /* TODO: Have BIF operate on runtime types like int64_t? */
+    /* Arithmetic */
+	VAL_INT_T(*un_int_impl)(VAL_INT_T);
 	VAL_REAL_T(*un_real_impl)(VAL_REAL_T);
-
-    /* Binary. */
 	VAL_INT_T(*bin_int_impl)(VAL_INT_T, VAL_INT_T);
 	VAL_REAL_T(*bin_real_impl)(VAL_REAL_T, VAL_REAL_T);
+
+	/* Compare */
+	VAL_BOOL_T(*cmp_int_impl)(VAL_INT_T, VAL_INT_T);
+	VAL_BOOL_T(*cmp_real_impl)(VAL_REAL_T, VAL_REAL_T);
 };
 
 struct AstBind {

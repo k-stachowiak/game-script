@@ -14,6 +14,15 @@ extern struct AstNode bif_sub;
 extern struct AstNode bif_mul;
 extern struct AstNode bif_div;
 
+extern struct AstNode bif_eq;
+extern struct AstNode bif_lt;
+extern struct AstNode bif_gt;
+extern struct AstNode bif_leq;
+extern struct AstNode bif_geq;
+
+// extern struct AstNode bif_car;
+// extern struct AstNode bif_cdr;
+
 void bif_assure_init(void);
 
 #endif

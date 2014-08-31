@@ -4,20 +4,9 @@
 #include <math.h>
 
 #include "bif.h"
+#include "bif_detail.h"
 
-static bool initialized = false;
-
-static struct Location bif_location = { -1, -1 };
-
-static struct Location bif_arg_locations[] = {
-    { -1, -1 }, { -1, -1 }
-};
-
-static char *bif_arg_names[] = {
-    "a", "b"
-};
-
-static void bif_init_common_unary(struct AstNode *node)
+static void bif_init_arythmetic_unary_ast(struct AstNode *node)
 {
     node->type = AST_BIF;
     node->loc = bif_location;
@@ -25,9 +14,11 @@ static void bif_init_common_unary(struct AstNode *node)
     node->data.bif.func.arg_locs = bif_arg_locations;
     node->data.bif.func.arg_count = 1;
     node->data.bif.type = AST_BIF_ARYTHM_UNARY;
+	node->data.bif.cmp_int_impl = NULL;
+	node->data.bif.cmp_real_impl = NULL;
 }
 
-static void bif_init_common_binary(struct AstNode *node)
+static void bif_init_arythmetic_binary_ast(struct AstNode *node)
 {
     node->type = AST_BIF;
     node->loc = bif_location;
@@ -35,6 +26,8 @@ static void bif_init_common_binary(struct AstNode *node)
     node->data.bif.func.arg_locs = bif_arg_locations;
     node->data.bif.func.arg_count = 2;
     node->data.bif.type = AST_BIF_ARYTHM_BINARY;
+	node->data.bif.cmp_int_impl = NULL;
+	node->data.bif.cmp_real_impl = NULL;
 }
 
 static VAL_INT_T bif_sqrt_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }
@@ -56,31 +49,25 @@ struct AstNode bif_sub;
 struct AstNode bif_mul;
 struct AstNode bif_div;
 
-void bif_assure_init(void)
+void bif_init_arythmetic(void)
 {
-    if (initialized) {
-        return;
-    }
+	bif_init_arythmetic_unary_ast(&bif_sqrt);
+	bif_sqrt.data.bif.un_int_impl = bif_sqrt_int;
+	bif_sqrt.data.bif.un_real_impl = bif_sqrt_real;
 
-    initialized = true;
+	bif_init_arythmetic_binary_ast(&bif_add);
+	bif_add.data.bif.bin_int_impl = bif_add_int;
+	bif_add.data.bif.bin_real_impl = bif_add_real;
 
-    bif_init_common_unary(&bif_sqrt);
-    bif_sqrt.data.bif.un_int_impl = bif_sqrt_int;
-    bif_sqrt.data.bif.un_real_impl = bif_sqrt_real;
+	bif_init_arythmetic_binary_ast(&bif_sub);
+	bif_sub.data.bif.bin_int_impl = bif_sub_int;
+	bif_sub.data.bif.bin_real_impl = bif_sub_real;
 
-    bif_init_common_binary(&bif_add);
-    bif_add.data.bif.bin_int_impl = bif_add_int;
-    bif_add.data.bif.bin_real_impl = bif_add_real;
+	bif_init_arythmetic_binary_ast(&bif_mul);
+	bif_mul.data.bif.bin_int_impl = bif_mul_int;
+	bif_mul.data.bif.bin_real_impl = bif_mul_real;
 
-    bif_init_common_binary(&bif_sub);
-    bif_sub.data.bif.bin_int_impl = bif_sub_int;
-    bif_sub.data.bif.bin_real_impl = bif_sub_real;
-
-    bif_init_common_binary(&bif_mul);
-    bif_mul.data.bif.bin_int_impl = bif_mul_int;
-    bif_mul.data.bif.bin_real_impl = bif_mul_real;
-
-    bif_init_common_binary(&bif_div);
-    bif_div.data.bif.bin_int_impl = bif_div_int;
-    bif_div.data.bif.bin_real_impl = bif_div_real;
+	bif_init_arythmetic_binary_ast(&bif_div);
+	bif_div.data.bif.bin_int_impl = bif_div_int;
+	bif_div.data.bif.bin_real_impl = bif_div_real;
 }
