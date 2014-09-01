@@ -38,7 +38,8 @@ void sym_map_init(
 
 void sym_map_deinit(struct SymMap *sym_map)
 {
-    struct SymMapKvp *temp, *kvp = sym_map->map;
+	struct SymMapKvp *temp, *kvp;
+	kvp = sym_map->map;
     while (kvp) {
         free(kvp->key);
         temp = kvp;
@@ -54,6 +55,10 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
     struct SymMapKvp *kvp;
     int len = strlen(key);
     char *key_copy = malloc(len + 1);
+	if (!key_copy) {
+		printf("Allocation failure.\n");
+		exit(1);
+	}
     memcpy(key_copy, key, len + 1);
 
     kvp = sym_map_find(sym_map, key);
@@ -62,7 +67,10 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
     }
 
     kvp = malloc(sizeof(*kvp));
-    /* TODO: verify allocation result. */
+	if (!kvp) {
+		printf("Allocation failure.\n");
+		exit(1);
+	}
     /* TODO: ensure sym map cleanup upon failures. */
 
     kvp->key = key_copy;

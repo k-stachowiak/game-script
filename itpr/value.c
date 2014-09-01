@@ -71,7 +71,11 @@ void val_print(struct Value *value, bool annotate)
             printf("string :: ");
         }
         str_len = value->string.str_len;
-		string = malloc(str_len + 1); /* TODO: test malloc result. */
+		string = malloc(str_len + 1);
+		if (!string) {
+			printf("Allocation failure.\n");
+			exit(1);
+		}
         memcpy(string, value->string.str_begin, str_len);
         string[str_len] = '\0';
         printf("%s", string);

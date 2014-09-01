@@ -347,6 +347,10 @@ static void efc_evaluate_bif(
 	/* Evaluate the missing args. */
 	temp_begin = stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
+		if (arg_count >= BIF_MAX_ARITY) {
+			printf("Argument count mismatch.\n");
+			exit(1);
+		}
 		args[arg_count++] = stack_peek_value(
 			stack, eval_impl(actual_args, stack, sym_map));
 		if (err_state()) {
