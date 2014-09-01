@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
             }
         } else {
             printf("Incorrect args.\n");
+			error = 1;
         }
     } else {
         if ((error = autotest())) {

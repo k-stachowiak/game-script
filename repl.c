@@ -110,6 +110,11 @@ static void repl_handle_command(char *cmd)
 		*(current - 1) = '\0';
 	}
 
+	if (num_pieces == 0) {
+		printf("No command provided.\n");
+		return;
+	}
+
 	printf("\"%s\"", pieces[0]);
 
 	if (strcmp(pieces[0], "ld") == 0) {

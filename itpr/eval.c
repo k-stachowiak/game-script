@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "eval.h"
+#include "eval_detail.h"
 #include "value.h"
 #include "bif.h"
 #include "error.h"
@@ -46,7 +47,8 @@ static int eval_func_call_compute_arity(struct AstNode *def_node)
         switch (def_node->data.bif.type) {
         case AST_BIF_ARYTHM_UNARY:
             return 1;
-        case AST_BIF_ARYTHM_BINARY:
+		case AST_BIF_ARYTHM_BINARY:
+		case AST_BIF_COMPARE:
             return 2;
         default:
             printf("Unhandled bif type.\n");
@@ -133,6 +135,8 @@ static void eval_func_call_final_bif(
     static VAL_HEAD_SIZE_T size_int = VAL_INT_BYTES;
     static VAL_HEAD_TYPE_T type_real = (VAL_HEAD_TYPE_T)VAL_REAL;
     static VAL_HEAD_SIZE_T size_real = VAL_REAL_BYTES;
+	static VAL_HEAD_TYPE_T type_bool = (VAL_HEAD_TYPE_T)VAL_BOOL;
+	static VAL_HEAD_SIZE_T size_bool = VAL_BOOL_BYTES;
     struct AstBif *impl = &value->function.def->data.bif;
     struct Value args[BIF_MAX_ARITY];
     VAL_SIZE_T arg_count = 0;
@@ -150,6 +154,10 @@ static void eval_func_call_final_bif(
     temp_begin = stack->top;
     arg_node = arg_list;
     while (arg_node) {
+		if (arg_count == BIF_MAX_ARITY) {
+			printf("BIF called with incorrect arguments count.\n");
+			exit(1);
+		}
         VAL_LOC_T loc = stack->top;
         eval_impl(arg_node, stack, sym_map);
         if (err_state()) {
@@ -205,6 +213,32 @@ static void eval_func_call_final_bif(
             return;
         }
         break;
+
+	case AST_BIF_COMPARE:
+		if ((enum ValueType)args[0].header.type == VAL_INT &&
+		    (enum ValueType)args[1].header.type == VAL_INT) {
+			VAL_BOOL_T result = impl->cmp_int_impl(
+				args[0].primitive.integer,
+				args[1].primitive.integer);
+			stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_bool);
+			stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_bool);
+			stack_push(stack, size_bool, (char*)&result);
+
+}
+		else if ((enum ValueType)args[0].header.type == VAL_REAL &&
+			     (enum ValueType)args[1].header.type == VAL_REAL) {
+			VAL_BOOL_T result = impl->cmp_real_impl(
+				args[0].primitive.real,
+				args[1].primitive.real);
+			stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_bool);
+			stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_bool);
+			stack_push(stack, size_bool, (char*)&result);
+
+		}
+		else {
+			err_set(ERR_EVAL, "Non-arythmetic type passed to arithmetic BIF.");
+			return;
+		}
     }
 
     /* Collapse the temporaries. */
@@ -317,147 +351,6 @@ static void eval_func_call(
     }
 }
 
-/* Function definition evaluation.
- * ===============================
- */
-
-static bool eval_func_def_copy_non_global(
-        struct Stack *stack,
-        struct SymMap *sym_map,
-        char *symbol)
-{
-    struct SymMapKvp *kvp = sym_map_find_not_global(sym_map, symbol);
-    struct ValueHeader header;
-    VAL_SIZE_T len = strlen(symbol);
-
-    if (!kvp) {
-        return false;
-    }
-
-    header = stack_peek_header(stack, kvp->location);
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-    stack_push(stack, len, symbol);
-    stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + kvp->location);
-
-    return true;
-}
-
-static bool eval_func_def_is_arg(char *symbol, struct AstCommonFunc *func)
-{
-    int i;
-    for (i = 0; i < func->arg_count; ++i) {
-        if (strcmp(symbol, func->formal_args[i]) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-static void eval_func_def_push_captures(
-        struct Stack *stack,
-        struct SymMap *sym_map,
-        struct AstFuncDef *func_def)
-{
-    static VAL_SIZE_T zero = 0;
-    VAL_LOC_T cap_loc = stack->top;
-    VAL_SIZE_T cap_count = 0;
-    struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
-    bool is_argument, is_non_global;
-
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
-
-    ARRAY_APPEND(to_visit, func_def->exprs);
-    while (to_visit.size > 0) {
-
-        struct AstNode *n = to_visit.data[0];
-
-        if (n->next) {
-            ARRAY_APPEND(to_visit, n->next);
-        }
-
-        switch (n->type) {
-        case AST_BIF:
-        case AST_LITERAL:
-            break;
-
-        case AST_BIND:
-            ARRAY_APPEND(to_visit, n->data.bind.expr);
-            break;
-
-        case AST_COMPOUND:
-            ARRAY_APPEND(to_visit, n->data.compound.exprs);
-            break;
-
-        case AST_FUNC_DEF:
-            ARRAY_APPEND(to_visit, n->data.func_def.exprs);
-            break;
-
-        case AST_FUNC_CALL:
-            ARRAY_APPEND(to_visit, n->data.func_call.actual_args);
-            is_argument = eval_func_def_is_arg(
-                    n->data.func_call.symbol, &func_def->func);
-            is_non_global = eval_func_def_copy_non_global(
-                    stack, sym_map, n->data.func_call.symbol);
-            if (err_state()) {
-                goto end;
-            } else if (!is_argument && is_non_global) {
-                ++cap_count;
-            }
-
-            break;
-
-        case AST_REFERENCE:
-            is_argument = eval_func_def_is_arg(
-                    n->data.reference.symbol, &func_def->func);
-            is_non_global = eval_func_def_copy_non_global(
-                    stack, sym_map, n->data.reference.symbol);
-            if (err_state()) {
-                goto end;
-            } else if (!is_argument && is_non_global) {
-                ++cap_count;
-            }
-            break;
-        }
-
-        ARRAY_REMOVE(to_visit, 0);
-    }
-    memcpy(stack->buffer + cap_loc, &cap_count, VAL_SIZE_BYTES);
-
-end:
-    ARRAY_FREE(to_visit);
-}
-
-static void eval_func_def(
-        struct AstNode *node,
-        struct Stack *stack,
-        struct SymMap *sym_map)
-{
-    static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
-    static VAL_HEAD_SIZE_T zero = 0;
-    void* impl = (void*)node;
-    VAL_LOC_T size_loc, data_begin, data_size;
-
-    /* Header. */
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-
-    /* Pointer to implementation. */
-    data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
-
-    /* Captures. */
-    eval_func_def_push_captures(stack, sym_map, &node->data.func_def);
-    if (err_state()) {
-        return;
-    }
-
-    /* Already applied (empty for definitnion). */
-    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
-
-    /* Hack value size to correct value. */
-    data_size = stack->top - data_begin;
-    memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
-}
-
 /* Simple evaluation functions.
  * ============================
  */
@@ -505,37 +398,52 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
     VAL_HEAD_TYPE_T type;
     VAL_HEAD_SIZE_T size;
+
+	/* Bring everything down to the values of the interpreter type.
+	 * This will be performed by the C compiler conversions from
+	 * whatever resides in the AST node object into the local variables
+	 * declared below. String is an exception as char* is general enough.
+	 */
+	VAL_BOOL_T boolean;
+	VAL_CHAR_T character;
+	VAL_INT_T integer;
+	VAL_REAL_T real;
+
     char *value = NULL;
 
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
         type = (VAL_HEAD_TYPE_T)VAL_BOOL;
         size = VAL_BOOL_BYTES;
-        value = (char*)&node->data.literal.data.boolean;
+		boolean = node->data.literal.data.boolean;
+        value = (char*)&boolean;
         break;
 
     case AST_LIT_CHAR:
         type = (VAL_HEAD_TYPE_T)VAL_CHAR;
         size = VAL_CHAR_BYTES;
-        value = (char*)&node->data.literal.data.character;
+		character = node->data.literal.data.character;
+		value = (char*)&character;
         break;
 
     case AST_LIT_INT:
         type = (VAL_HEAD_TYPE_T)VAL_INT;
         size = VAL_INT_BYTES;
-        value = (char*)&node->data.literal.data.integer;
+		integer = node->data.literal.data.integer;
+        value = (char*)&integer;
         break;
 
     case AST_LIT_REAL:
         type = (VAL_HEAD_TYPE_T)VAL_REAL;
         size = VAL_REAL_BYTES;
-        value = (char*)&node->data.literal.data.real;
+		real = node->data.literal.data.real;
+        value = (char*)&real;
         break;
 
-    case AST_LIT_STRING:
-        value = node->data.literal.data.string;
+    case AST_LIT_STRING:        
         type = (VAL_HEAD_TYPE_T)VAL_STRING;
-        size = strlen(value);
+		size = strlen(node->data.literal.data.string);
+		value = node->data.literal.data.string;
         break;
     }
 

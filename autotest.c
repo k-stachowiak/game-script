@@ -88,7 +88,7 @@ static int autotest_perform(void)
 	ptrdiff_t location;
 	struct Value val;
 
-	ast = autotest_parse("(min-element [3 1 2])");
+	ast = autotest_parse("(< 1 3)");
 
 	if ((location = eval(ast, stack, &sym_map)) == -1) {
 		return 1;
@@ -108,7 +108,7 @@ int autotest(void)
     stack = stack_make(1024);
     sym_map_init(&sym_map, NULL, stack);
 
-	source = autotest_load_file("min-element.mn");
+	source = autotest_load_file("func-def.mn");
 	error = autotest_load_module(source);
 
 	if (error == 0) {

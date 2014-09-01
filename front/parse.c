@@ -98,6 +98,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
         break;
 
     case DOM_CPD_CORE:
+	default:
         return NULL;
     }
 

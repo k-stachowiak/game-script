@@ -15,6 +15,11 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
     sym_map_insert(sym_map, "-", eval(&bif_sub, stack, sym_map));
     sym_map_insert(sym_map, "*", eval(&bif_mul, stack, sym_map));
     sym_map_insert(sym_map, "/", eval(&bif_div, stack, sym_map));
+	sym_map_insert(sym_map, "=", eval(&bif_eq, stack, sym_map));
+	sym_map_insert(sym_map, "<", eval(&bif_lt, stack, sym_map));
+	sym_map_insert(sym_map, ">", eval(&bif_gt, stack, sym_map));
+	sym_map_insert(sym_map, "<=", eval(&bif_leq, stack, sym_map));
+	sym_map_insert(sym_map, ">=", eval(&bif_geq, stack, sym_map));
 }
 
 void sym_map_init(
@@ -44,7 +49,7 @@ void sym_map_deinit(struct SymMap *sym_map)
     sym_map->end = NULL;
 }
 
-void sym_map_insert(struct SymMap *sym_map, char *key, ptrdiff_t location)
+void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
 {
     struct SymMapKvp *kvp;
     int len = strlen(key);
