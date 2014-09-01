@@ -73,6 +73,7 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 	case AST_LITERAL:
 	case AST_COMPOUND:
 	case AST_BIND:
+	case AST_FUNC_DEF:
 		return false;
 
 	case AST_REFERENCE:

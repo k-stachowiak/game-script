@@ -1,6 +1,7 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
 #include "bif.h"
+#include "bif_detail.h"
 
 bool initialized = false;
 struct Location bif_location = { -1, -1 };
