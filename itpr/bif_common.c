@@ -17,4 +17,5 @@ void bif_assure_init(void)
 	initialized = true;
 	bif_init_arythmetic();
 	bif_init_compare();
+	bif_init_array();
 }

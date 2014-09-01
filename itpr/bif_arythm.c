@@ -16,6 +16,7 @@ static void bif_init_arythmetic_unary_ast(struct AstNode *node)
     node->data.bif.type = AST_BIF_ARYTHM_UNARY;
 	node->data.bif.cmp_int_impl = NULL;
 	node->data.bif.cmp_real_impl = NULL;
+	node->data.bif.un_arr_impl = NULL;
 }
 
 static void bif_init_arythmetic_binary_ast(struct AstNode *node)
@@ -28,6 +29,7 @@ static void bif_init_arythmetic_binary_ast(struct AstNode *node)
     node->data.bif.type = AST_BIF_ARYTHM_BINARY;
 	node->data.bif.cmp_int_impl = NULL;
 	node->data.bif.cmp_real_impl = NULL;
+	node->data.bif.un_arr_impl = NULL;
 }
 
 static VAL_INT_T bif_sqrt_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }

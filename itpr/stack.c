@@ -117,6 +117,10 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
 {
     char *dst;
 
+    if (size == 0) {
+    	return stack->top;
+    }
+
     if (stack->top + size >= stack->size) {
 		printf("Stack overflow.\n");
 		exit(1);

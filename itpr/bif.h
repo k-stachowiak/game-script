@@ -20,8 +20,8 @@ extern struct AstNode bif_gt;
 extern struct AstNode bif_leq;
 extern struct AstNode bif_geq;
 
-// extern struct AstNode bif_car;
-// extern struct AstNode bif_cdr;
+extern struct AstNode bif_car;
+extern struct AstNode bif_cdr;
 
 void bif_assure_init(void);
 

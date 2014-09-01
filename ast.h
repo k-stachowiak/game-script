@@ -22,7 +22,8 @@ enum AstNodeType {
 enum AstBifType {
     AST_BIF_ARYTHM_UNARY,
     AST_BIF_ARYTHM_BINARY,
-	AST_BIF_COMPARE
+	AST_BIF_COMPARE,
+	AST_BIF_ARRAY_UNARY
 };
 
 enum AstCompoundType {
@@ -50,6 +51,9 @@ struct AstCommonFunc {
 
 struct AstNode;
 
+struct Value;
+struct Stack;
+
 struct AstBif {
     struct AstCommonFunc func;
     enum AstBifType type;
@@ -63,6 +67,9 @@ struct AstBif {
 	/* Compare */
 	VAL_BOOL_T(*cmp_int_impl)(VAL_INT_T, VAL_INT_T);
 	VAL_BOOL_T(*cmp_real_impl)(VAL_REAL_T, VAL_REAL_T);
+
+	/* Array */
+	void(*un_arr_impl)(struct Stack*, VAL_LOC_T);
 };
 
 struct AstBind {

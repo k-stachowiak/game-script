@@ -52,6 +52,7 @@ static int efc_compute_arity(struct AstNode *def_node)
 	case AST_BIF:
 		switch (def_node->data.bif.type) {
 		case AST_BIF_ARYTHM_UNARY:
+		case AST_BIF_ARRAY_UNARY:
 			return 1;
 		case AST_BIF_ARYTHM_BINARY:
 		case AST_BIF_COMPARE:
@@ -312,11 +313,10 @@ static bool efc_assert_arg_count(enum AstBifType type, int arg_count)
 {
 	switch (type) {
 	case AST_BIF_ARYTHM_UNARY:
+	case AST_BIF_ARRAY_UNARY:
 		return arg_count == 1;
 
 	case AST_BIF_ARYTHM_BINARY:
-		return arg_count == 2;
-
 	case AST_BIF_COMPARE:
 		return arg_count == 2;
 

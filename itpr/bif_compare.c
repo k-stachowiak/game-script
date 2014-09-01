@@ -15,6 +15,7 @@ static void bif_init_compare_ast(struct AstNode *node)
 	node->data.bif.un_real_impl = NULL;
 	node->data.bif.bin_int_impl = NULL;
 	node->data.bif.bin_real_impl = NULL;
+	node->data.bif.un_arr_impl = NULL;
 }
 
 static VAL_BOOL_T bif_eq_int(VAL_INT_T x, VAL_INT_T y) { return x == y; }

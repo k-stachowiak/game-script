@@ -14,5 +14,6 @@ extern char *bif_arg_names[];
 
 void bif_init_arythmetic(void);
 void bif_init_compare(void);
+void bif_init_array(void);
 
 #endif
