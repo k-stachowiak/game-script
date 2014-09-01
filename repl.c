@@ -54,10 +54,9 @@ static char *repl_getline(void)
             len = lenmax;
             char *linen = realloc(linep, lenmax *= 2);
 
-            if(linen == NULL) {
-                free(linep);
-                err_set(ERR_REPL, "Allocation failed.");
-                return NULL;
+            if(!linen) {
+                printf("Allocation failed.\n");
+                exit(1);
             }
 
             line = linen + (line - linep);
