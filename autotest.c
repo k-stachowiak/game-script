@@ -88,7 +88,7 @@ static int autotest_perform(void)
 	ptrdiff_t location;
 	struct Value val;
 
-	ast = autotest_parse("(cdr [ 1 2 3 4 ])");
+	ast = autotest_parse("(sqrt 2)");
 
 	if ((location = eval(ast, stack, &sym_map)) == -1) {
 		return 1;

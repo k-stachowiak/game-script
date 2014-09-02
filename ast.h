@@ -59,14 +59,11 @@ struct AstBif {
     enum AstBifType type;
 
     /* Arithmetic */
-	VAL_INT_T(*un_int_impl)(VAL_INT_T);
-	VAL_REAL_T(*un_real_impl)(VAL_REAL_T);
-	VAL_INT_T(*bin_int_impl)(VAL_INT_T, VAL_INT_T);
-	VAL_REAL_T(*bin_real_impl)(VAL_REAL_T, VAL_REAL_T);
+	void(*un_arythm_impl)(struct Stack*, VAL_LOC_T);
+	void(*bin_arythm_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
 
 	/* Compare */
-	VAL_BOOL_T(*cmp_int_impl)(VAL_INT_T, VAL_INT_T);
-	VAL_BOOL_T(*cmp_real_impl)(VAL_REAL_T, VAL_REAL_T);
+	void(*cmp_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
 
 	/* Array */
 	void(*un_arr_impl)(struct Stack*, VAL_LOC_T);

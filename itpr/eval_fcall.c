@@ -227,87 +227,6 @@ cleanup:
 	sym_map_deinit(&local_sym_map);
 }
 
-/** Evaluates unary arythmetic BIF. */
-static void efc_evaluate_bif_arythm_unary(
-		struct Stack *stack,
-		struct Value args[],
-		struct AstBif *impl)
-{
-	if ((enum ValueType)args[0].header.type == VAL_INT) {
-		VAL_INT_T result = impl->un_int_impl(args[0].primitive.integer);
-		stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
-		stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
-		stack_push(stack, size_int, (char*)&result);
-
-	} else if ((enum ValueType)args[0].header.type == VAL_REAL) {
-		VAL_REAL_T result = impl->un_real_impl(args[0].primitive.real);
-		stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
-		stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
-		stack_push(stack, size_real, (char*)&result);
-
-	} else {
-		err_set(ERR_EVAL, "Non-arythmetic type passed to arithmetic BIF.");
-	}
-}
-
-/** Evaluates binary arythmetic BIF. */
-static void efc_evaluate_bif_arythm_binary(
-		struct Stack *stack,
-		struct Value args[],
-		struct AstBif *impl)
-{
-	if ((enum ValueType)args[0].header.type == VAL_INT &&
-		(enum ValueType)args[1].header.type == VAL_INT) {
-		VAL_INT_T result = impl->bin_int_impl(
-			args[0].primitive.integer,
-			args[1].primitive.integer);
-		stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_int);
-		stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_int);
-		stack_push(stack, size_int, (char*)&result);
-
-	} else if ((enum ValueType)args[0].header.type == VAL_REAL &&
-		     (enum ValueType)args[1].header.type == VAL_REAL) {
-		VAL_REAL_T result = impl->bin_real_impl(
-			args[0].primitive.real,
-			args[1].primitive.real);
-		stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_real);
-		stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_real);
-		stack_push(stack, size_real, (char*)&result);
-
-	} else {
-		err_set(ERR_EVAL, "Argument types mismatch in an arithmetic BIF.");
-	}
-}
-
-/** Evaluates comparison BIF. */
-static void efc_evaluate_bif_compare(
-		struct Stack *stack,
-		struct Value args[],
-		struct AstBif *impl)
-{
-	if ((enum ValueType)args[0].header.type == VAL_INT &&
-		(enum ValueType)args[1].header.type == VAL_INT) {
-		VAL_BOOL_T result = impl->cmp_int_impl(
-			args[0].primitive.integer,
-			args[1].primitive.integer);
-		stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_bool);
-		stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_bool);
-		stack_push(stack, size_bool, (char*)&result);
-
-	} else if ((enum ValueType)args[0].header.type == VAL_REAL &&
-		       (enum ValueType)args[1].header.type == VAL_REAL) {
-		VAL_BOOL_T result = impl->cmp_real_impl(
-			args[0].primitive.real,
-			args[1].primitive.real);
-		stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type_bool);
-		stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size_bool);
-		stack_push(stack, size_bool, (char*)&result);
-
-	} else {
-		err_set(ERR_EVAL, "Argument types mismatch in a comparison BIF.");
-	}
-}
-
 /** Tests the argument count against a BIF type. */
 static bool efc_assert_arg_count(enum AstBifType type, int arg_count)
 {
@@ -334,15 +253,12 @@ static void efc_evaluate_bif(
 		struct Value *value)
 {
 	struct AstBif *impl = &value->function.def->data.bif;
-	struct Value args[BIF_MAX_ARITY];
 	VAL_LOC_T arg_locs[BIF_MAX_ARITY];
 	VAL_SIZE_T arg_count = 0, i;
 	VAL_LOC_T temp_begin, temp_end;
 
 	/* Peal out already applied args. */
 	for (i = 0; i < value->function.applied.size; ++i) {
-		args[arg_count] = stack_peek_value(
-			stack, value->function.applied.data[i]);
 		arg_locs[arg_count] = value->function.applied.data[i];
 		++arg_count;
 	}
@@ -357,7 +273,6 @@ static void efc_evaluate_bif(
 		}
 
 		temp_loc = eval_impl(actual_args, stack, sym_map);
-		args[arg_count] = stack_peek_value(stack, temp_loc);
 		arg_locs[arg_count] = temp_loc;
 		++arg_count;
 
@@ -376,13 +291,13 @@ static void efc_evaluate_bif(
 	/* Evaluate the function implementation. */
 	switch (impl->type) {
 	case AST_BIF_ARYTHM_UNARY:
-		efc_evaluate_bif_arythm_unary(stack, args, impl);
+		impl->un_arythm_impl(stack, arg_locs[0]);
 		break;
 	case AST_BIF_ARYTHM_BINARY:
-		efc_evaluate_bif_arythm_binary(stack, args, impl);
+		impl->bin_arythm_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
 	case AST_BIF_COMPARE:
-		efc_evaluate_bif_compare(stack, args, impl);
+		impl->cmp_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
 
 	case AST_BIF_ARRAY_UNARY:

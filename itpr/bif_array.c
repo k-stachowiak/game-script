@@ -14,11 +14,7 @@ static void bif_init_unary_array_ast(struct AstNode *node)
 	node->data.bif.func.arg_locs = bif_arg_locations;
 	node->data.bif.func.arg_count = 1;
 	node->data.bif.type = AST_BIF_ARRAY_UNARY;
-	node->data.bif.un_int_impl = NULL;
-	node->data.bif.un_real_impl = NULL;
-	node->data.bif.bin_int_impl = NULL;
-	node->data.bif.bin_real_impl = NULL;
-	node->data.bif.un_arr_impl = NULL;
+	bif_init_impl_ptrs(node);
 }
 
 static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
@@ -44,10 +40,6 @@ static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&head_header.size);
 	stack_push(stack, head_header.size,
 			   stack->buffer + head_loc + VAL_HEAD_BYTES);
-
-	/* TODO: consider this monadic scheme for simple BIFs as well:
-	 * BIF :: value -> stack(value)
-	 */
 }
 
 static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
