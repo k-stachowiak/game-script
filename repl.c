@@ -114,8 +114,6 @@ static void repl_handle_command(char *cmd)
 		return;
 	}
 
-	printf("\"%s\"", pieces[0]);
-
 	if (strcmp(pieces[0], "ld") == 0) {
 		repl_handle_command_load(pieces + 1, num_pieces - 1);
 	} else if (strcmp(pieces[0], "q") == 0) {
@@ -137,6 +135,7 @@ static void repl_handle_expression(char *expr)
 
 	} else {
 		switch (ast->type) {
+		case AST_IFF:
 		case AST_LITERAL:
 		case AST_COMPOUND:
 		case AST_REFERENCE:
@@ -231,7 +230,6 @@ int repl(void)
             return result;
 
 		} else if (request_quit) {
-			printf("Quit request captured.\n");
 			return 0;
 		}
     }

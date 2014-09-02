@@ -73,6 +73,57 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     return ast_make_bind(dom->loc, symbol, expr);
 }
 
+static struct AstNode *parse_iff(struct DomNode *dom)
+{
+	struct DomNode *child = NULL;
+	struct AstNode *test = NULL;
+	struct AstNode *true_expr = NULL;
+	struct AstNode *false_expr = NULL;
+
+	// 1. Is compound CORE
+	if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+		return NULL;
+	}
+
+	// 2. Has 4 children
+	if (!dom_node_is_cpd_of_size(dom, 4)) {
+		return NULL;
+	}
+
+	child = dom->cpd_children;
+
+	// 3.1. 1st child is if keyword.
+	if (!dom_node_is_spec_atom(child, "if")) {
+		return NULL;
+	}
+	child = child->next;
+
+	// 3.2. 2nd child is the test expression.
+	if (!(test = parse(child))) {
+		return NULL;
+	}
+	child = child->next;
+
+	// 3.3. 3rd child is the true expression.
+	if (!(true_expr = parse(child))) {
+		return NULL;
+	}
+	child = child->next;
+
+	// 3.4. 4th child is the false expression.
+	if (!(false_expr = parse(child))) {
+		return NULL;
+	}
+
+	/* NOTE: The expressions are linked here which is useful in a remote place
+	 * in the system. Sorry.
+	 */
+	test->next = true_expr;
+	true_expr->next = false_expr;
+
+	return ast_make_iff(dom->loc, test, true_expr, false_expr);
+}
+
 static struct AstNode *parse_compound(struct DomNode *dom)
 {
     enum AstCompoundType type;
@@ -448,6 +499,7 @@ struct AstNode *parse(struct DomNode *dom)
             (!err_state() && (node = parse_literal(dom))) ||
             (!err_state() && (node = parse_reference(dom))) ||
             (!err_state() && (node = parse_bind(dom))) ||
+            (!err_state() && (node = parse_iff(dom))) ||
             (!err_state() && (node = parse_func_def(dom))) ||
             (!err_state() && (node = parse_func_call(dom))) ||
             (!err_state() && (node = parse_compound(dom)))) {

@@ -12,6 +12,7 @@
 enum AstNodeType {
     AST_BIF,
     AST_BIND,
+	AST_IFF,
     AST_COMPOUND,
     AST_FUNC_CALL,
     AST_FUNC_DEF,
@@ -74,6 +75,12 @@ struct AstBind {
     struct AstNode *expr;
 };
 
+struct AstIff {
+	struct AstNode *test;
+	struct AstNode *true_expr;
+	struct AstNode *false_expr;
+};
+
 struct AstCompound {
     enum AstCompoundType type;
     struct AstNode *exprs;
@@ -117,6 +124,7 @@ struct AstNode {
     union {
         struct AstBif bif;
         struct AstBind bind;
+		struct AstIff iff;
         struct AstCompound compound;
         struct AstFuncCall func_call;
         struct AstFuncDef func_def;
@@ -135,6 +143,12 @@ struct AstNode {
 struct AstNode *ast_make_bind(
     struct Location loc,
     char *symbol, struct AstNode *expr);
+
+struct AstNode *ast_make_iff(
+	struct Location loc,
+	struct AstNode *test,
+	struct AstNode *true_expr,
+	struct AstNode *false_expr);
 
 struct AstNode *ast_make_compound(
     struct Location loc,

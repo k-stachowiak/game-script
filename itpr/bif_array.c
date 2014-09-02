@@ -49,7 +49,6 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 	VAL_LOC_T head_loc, tail_loc;
 	VAL_HEAD_TYPE_T new_type;
 	VAL_HEAD_SIZE_T new_size;
-	VAL_SIZE_T new_count;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
 		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
@@ -66,7 +65,6 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 
 	new_type = value.header.type;
 	new_size = value.header.size - head_header.size - VAL_HEAD_BYTES;
-	new_count = value.compound.size - 1;
 
 	tail_loc = head_loc + VAL_HEAD_BYTES + head_header.size;
 

@@ -10,12 +10,6 @@
 #include "bif.h"
 
 static VAL_HEAD_SIZE_T zero = 0;
-static VAL_HEAD_TYPE_T type_int = (VAL_HEAD_TYPE_T)VAL_INT;
-static VAL_HEAD_SIZE_T size_int = VAL_INT_BYTES;
-static VAL_HEAD_TYPE_T type_real = (VAL_HEAD_TYPE_T)VAL_REAL;
-static VAL_HEAD_SIZE_T size_real = VAL_REAL_BYTES;
-static VAL_HEAD_TYPE_T type_bool = (VAL_HEAD_TYPE_T)VAL_BOOL;
-static VAL_HEAD_SIZE_T size_bool = VAL_BOOL_BYTES;
 
 /**
  * Performs a lookup for the called function in the symbol map.

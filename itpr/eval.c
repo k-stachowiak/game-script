@@ -117,6 +117,33 @@ static void eval_bind(
     }
 }
 
+static void eval_iff(
+		struct AstNode *node,
+		struct Stack *stack,
+		struct SymMap *sym_map)
+{
+	VAL_LOC_T test_loc, temp_begin, temp_end;
+	struct Value test_val;
+
+	temp_begin = stack->top;
+	test_loc = eval_impl(node->data.iff.test, stack, sym_map);
+	test_val = stack_peek_value(stack, test_loc);
+	temp_end = stack->top;
+
+	if ((enum ValueType)test_val.header.type != VAL_BOOL) {
+		err_set(ERR_EVAL, "Text expression isn't a boolean value.");
+		return;
+	}
+
+	if (test_val.primitive.boolean) {
+		eval_impl(node->data.iff.true_expr, stack, sym_map);
+	} else {
+		eval_impl(node->data.iff.false_expr, stack, sym_map);
+	}
+
+	stack_collapse(stack, temp_begin, temp_end);
+}
+
 static void eval_reference(
 		struct AstNode *node,
 		struct Stack *stack,
@@ -177,6 +204,10 @@ VAL_LOC_T eval_impl(
     case AST_BIND:
     	eval_bind(node, stack, sym_map);
     	break;
+
+	case AST_IFF:
+		eval_iff(node, stack, sym_map);
+		break;
 
     case AST_REFERENCE:
     	eval_reference(node, stack, sym_map);

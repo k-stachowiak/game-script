@@ -136,7 +136,7 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
 {
     VAL_LOC_T i;
-    VAL_LOC_T count = end - begin;
+    VAL_LOC_T count = stack->top - end;
     for (i = 0; i < count; ++i) {
         *(stack->buffer + begin + i) = *(stack->buffer + end + i);
     }

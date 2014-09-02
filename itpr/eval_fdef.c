@@ -47,6 +47,9 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 	case AST_BIND:
 		return node->data.bind.expr;
 
+	case AST_IFF:
+		return node->data.iff.test; /* Points to branches too. */
+
 	case AST_COMPOUND:
 		return node->data.compound.exprs;
 
@@ -73,6 +76,7 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 	case AST_LITERAL:
 	case AST_COMPOUND:
 	case AST_BIND:
+	case AST_IFF:
 	case AST_FUNC_DEF:
 		return false;
 
