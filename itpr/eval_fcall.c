@@ -335,24 +335,32 @@ static void efc_evaluate_bif(
 {
 	struct AstBif *impl = &value->function.def->data.bif;
 	struct Value args[BIF_MAX_ARITY];
+	VAL_LOC_T arg_locs[BIF_MAX_ARITY];
 	VAL_SIZE_T arg_count = 0, i;
 	VAL_LOC_T temp_begin, temp_end;
 
 	/* Peal out already applied args. */
 	for (i = 0; i < value->function.applied.size; ++i) {
-		args[arg_count++] = stack_peek_value(
+		args[arg_count] = stack_peek_value(
 			stack, value->function.applied.data[i]);
+		arg_locs[arg_count] = value->function.applied.data[i];
+		++arg_count;
 	}
 
 	/* Evaluate the missing args. */
 	temp_begin = stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
+		VAL_LOC_T temp_loc;
 		if (arg_count >= BIF_MAX_ARITY) {
 			printf("Argument count mismatch.\n");
 			exit(1);
 		}
-		args[arg_count++] = stack_peek_value(
-			stack, eval_impl(actual_args, stack, sym_map));
+
+		temp_loc = eval_impl(actual_args, stack, sym_map);
+		args[arg_count] = stack_peek_value(stack, temp_loc);
+		arg_locs[arg_count] = temp_loc;
+		++arg_count;
+
 		if (err_state()) {
 			return;
 		}
@@ -375,6 +383,10 @@ static void efc_evaluate_bif(
 		break;
 	case AST_BIF_COMPARE:
 		efc_evaluate_bif_compare(stack, args, impl);
+		break;
+
+	case AST_BIF_ARRAY_UNARY:
+		impl->un_arr_impl(stack, arg_locs[0]);
 		break;
 	}
 

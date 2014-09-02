@@ -37,7 +37,7 @@ static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 		return;
 	}
 
-	head_loc = location + VAL_HEAD_BYTES + VAL_SIZE_BYTES;
+	head_loc = location + VAL_HEAD_BYTES;
 	head_header = stack_peek_header(stack, head_loc);
 
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&head_header.type);
@@ -69,7 +69,7 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 		return;
 	}
 
-	head_loc = location + VAL_HEAD_BYTES + VAL_SIZE_BYTES;
+	head_loc = location + VAL_HEAD_BYTES;
 	head_header = stack_peek_header(stack, head_loc);
 
 	new_type = value.header.type;
@@ -80,7 +80,6 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&new_type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&new_size);
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&new_count);
 	stack_push(stack, new_size, stack->buffer + tail_loc);
 }
 
