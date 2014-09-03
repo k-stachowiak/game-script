@@ -48,3 +48,78 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs)
     return lhs->current == rhs->current;
 }
 
+
+
+/*
+ * Implementation copied from StackOverflow :
+ * http://stackoverflow.com/questions/314401/how-to-read-a-line-from-the-console-in-c
+ * It has been slightly modified to fit into the program, e.g. error handling.
+ */
+char *my_getline(bool *eof)
+{
+	char *line = malloc(100);
+	char *linep = line;
+	size_t lenmax = 100;
+	size_t len = lenmax;
+	int c;
+
+	if (line == NULL) {
+		printf("Allocation failed.");
+		exit(1);
+	}
+
+	for (;;) {
+		c = fgetc(stdin);
+		if (c == EOF) {
+			*eof = true;
+			break;
+		}
+
+		if (--len == 0) {
+			len = lenmax;
+			char *linen = realloc(linep, lenmax *= 2);
+
+			if (!linen) {
+				printf("Allocation failed.\n");
+				exit(1);
+			}
+
+			line = linen + (line - linep);
+			linep = linen;
+		}
+
+		if ((*line++ = c) == '\n') {
+			break;
+		}
+	}
+
+	*line = '\0';
+	return linep;
+}
+
+/*
+ * Implementation copied from StackOverflow :
+ * http://stackoverflow.com/questions/174531/easiest-way-to-get-files-contents-in-c
+ * It has been slightly modified to fit into the program, e.g. error handling.
+ */
+char *my_getfile(char *filename)
+{
+	char *buffer = 0;
+	long length;
+	FILE *file = fopen(filename, "rb");
+
+	if (file) {
+		fseek(file, 0, SEEK_END);
+		length = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		buffer = calloc(length + 1, 1);
+		if (buffer) {
+			fread(buffer, 1, length, file);
+		}
+		fclose(file);
+	} else {
+		return NULL;
+	}
+
+	return buffer;
+}

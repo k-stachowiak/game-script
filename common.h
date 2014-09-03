@@ -157,4 +157,11 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs);
 #   define LOG_ERROR
 #endif
 
+/* Portable terminal.
+ * ==================
+ */
+
+char *my_getline(bool *eof);
+char *my_getfile(char *filename);
+
 #endif

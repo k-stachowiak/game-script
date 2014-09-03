@@ -10,10 +10,7 @@
 
 /* TODO:
  * - Algorithms:
- *   - min_element,
- *     - [v] car and cdr BIFs
- *     - [v] less than, equal BIFs
- *     - [ ] if
+ *   - min_element
  *   - nwd, nww
  *   - merge sort
  */

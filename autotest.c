@@ -18,26 +18,6 @@ static struct {
     int size, cap;
 } stored_nodes;
 
-static char *autotest_load_file(char *filename)
-{
-	char *buffer = 0;
-	long length;
-	FILE *file = fopen(filename, "rb");
-
-	if (file) {
-		fseek(file, 0, SEEK_END);
-		length = ftell(file);
-		fseek(file, 0, SEEK_SET);
-		buffer = calloc(length + 1, 1);
-		if (buffer) {
-			fread(buffer, 1, length, file);
-		}
-		fclose(file);
-	}
-
-	return buffer;
-}
-
 static struct AstNode *autotest_parse(char *source)
 {
     struct DomNode *dom;
@@ -88,7 +68,7 @@ static int autotest_perform(void)
 	ptrdiff_t location;
 	struct Value val;
 
-	ast = autotest_parse("(if false 1 2)");
+	ast = autotest_parse("(cdr 1)");
 
 	if ((location = eval(ast, stack, &sym_map)) == -1) {
 		return 1;
@@ -108,7 +88,7 @@ int autotest(void)
     stack = stack_make(1024);
     sym_map_init(&sym_map, NULL, stack);
 
-	source = autotest_load_file("func-def.mn");
+	source = my_getfile("min-element.mn");
 	error = autotest_load_module(source);
 
 	if (error == 0) {
