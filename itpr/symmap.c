@@ -121,3 +121,16 @@ struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
         return NULL;
     }
 }
+
+void sym_map_for_each(struct SymMap *sym_map, void(*f)(char*, VAL_LOC_T))
+{
+	struct SymMapKvp *kvp;
+
+	if (sym_map->parent) {
+		sym_map_for_each(sym_map->parent, f);
+	}
+
+	for (kvp = sym_map->map; kvp; kvp = kvp->next) {
+		f(kvp->key, kvp->location);
+	}
+}

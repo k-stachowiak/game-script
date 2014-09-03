@@ -62,6 +62,16 @@ VAL_LOC_T repl_state_consume(struct AstNode *ast)
 	return location;
 }
 
+void repl_state_for_each_stack_val(void(*f)(VAL_LOC_T, struct Value*))
+{
+	stack_for_each(stack, f);
+}
+
+void repl_state_for_each_sym(void(*f)(char*, VAL_LOC_T))
+{
+	sym_map_for_each(&sym_map, f);
+}
+
 struct Value repl_state_peek(VAL_LOC_T location)
 {
 	return stack_peek_value(stack, location);

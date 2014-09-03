@@ -20,5 +20,6 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data);
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end);
 struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location);
 struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location);
+void stack_for_each(struct Stack *stack, void(*f)(VAL_LOC_T, struct Value*));
 
 #endif

@@ -209,3 +209,15 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
 
     return result;
 }
+
+void stack_for_each(
+		struct Stack *stack,
+		void(*f)(VAL_LOC_T, struct Value*))
+{
+	VAL_LOC_T loc = 0;
+	while (loc != stack->top) {
+		struct Value val = stack_peek_value(stack, loc);
+		f(loc, &val);
+		loc += val.header.size + VAL_HEAD_BYTES;
+	}
+}
