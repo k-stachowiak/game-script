@@ -49,6 +49,7 @@ int tok_list_length(struct Token* tokens);
 bool tok_is_spec(struct Token *tok, enum TokenType type);
 bool tok_is_open_paren(struct Token *tok);
 bool tok_is_close_paren(struct Token *tok);
+bool tok_is_comment(struct Token *tok);
 bool tok_paren_match(struct Token *lhs, struct Token *rhs);
 
 #endif

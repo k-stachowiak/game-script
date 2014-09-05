@@ -9,6 +9,9 @@
 #include "autotest.h"
 
 /* TODO:
+ * - Memory corruption!
+ * - implement algorithm for visiting AST tree references.
+ * - encapsulate pushing of primitives on the stack.
  * - Algorithms:
  *   - min_element
  *   - nwd, nww

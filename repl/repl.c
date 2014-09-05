@@ -52,14 +52,17 @@ int repl(void)
 	int result;
     bool eof_flag = false;
 
-    err_reset();
 	repl_state_init();
 
     for (;;) {
 
         char *line;
 
-        printf("moon> ");
+		err_reset();
+
+        printf("moon [st:%ld]> ",
+			(long)repl_state_current_top());
+
         line = my_getline(&eof_flag);
 
         if (err_state()) {

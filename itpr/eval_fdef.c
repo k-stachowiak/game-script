@@ -6,6 +6,7 @@
 #include "eval.h"
 #include "value.h"
 #include "common.h"
+#include "error.h"
 
 static VAL_HEAD_SIZE_T zero = 0;
 
@@ -93,6 +94,12 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 	exit(1);
 }
 
+/** Checks whether symbol is defined in the symbol map. */
+static bool efd_is_defined(char *symbol, struct SymMap *sym_map)
+{
+	return (bool)(sym_map_find(sym_map, symbol));
+}
+
 /**
  * Simple wrapper around the non global symbol lookup.
  * As a side effect, upon success the location is stored in the loc argument.
@@ -161,6 +168,10 @@ static void efd_push_captures(
 		if (efd_has_symbol(node, &symbol) &&
 			!efd_is_global(symbol, sym_map, &cap_location) &&
 			!efd_is_argument(symbol, &func_def->func)) {
+				if (!efd_is_defined(symbol, sym_map)) {
+					err_set(ERR_EVAL, "Undefined symbol reference.");
+					return;
+				}
 				efd_copy_capture(stack, symbol, cap_location);
 				++cap_count;
 		}
@@ -182,6 +193,11 @@ void eval_func_def(
 	VAL_LOC_T size_loc = efd_push_header(stack);
 	VAL_LOC_T data_begin = efd_push_impl_prt(node, stack);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
+
+	if (err_state()) {
+		return;
+	}
+
 	stack_push(stack, VAL_SIZE_BYTES, (char*)&zero); /* No applied args. */
 
 	data_size = stack->top - data_begin;

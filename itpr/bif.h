@@ -20,6 +20,8 @@ extern struct AstNode bif_gt;
 extern struct AstNode bif_leq;
 extern struct AstNode bif_geq;
 
+extern struct AstNode bif_size;
+extern struct AstNode bif_empty;
 extern struct AstNode bif_car;
 extern struct AstNode bif_cdr;
 

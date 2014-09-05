@@ -210,7 +210,7 @@ static void efc_evaluate_general(
 	temp_end = stack->top;
 
 	/* Evaluate the function expression. */
-	efc_evaluate_impl(stack, sym_map, impl);
+	efc_evaluate_impl(stack, &local_sym_map, impl->data.func_def.exprs);
 
 	/* Collapse the temporaries. */
 	stack_collapse(stack, temp_begin, temp_end);

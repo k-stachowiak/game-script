@@ -35,29 +35,27 @@ static struct AstNode *repl_parse(char *line)
 
 enum ReplExprResult repl_expr_command(char *expression_line)
 {
-	struct AstNode *ast = repl_parse(expression_line);
+	struct AstNode *ast;
+	VAL_LOC_T location;
+	struct Value val;
 
+	ast = repl_parse(expression_line);
 	if (!ast) {
 		printf("Error: %s\n", err_msg());
 		err_reset();
 		return REPL_EXPR_ERROR;
-
-	} else {
-		
-		VAL_LOC_T location;
-		struct Value val;
-		
-		location = repl_state_consume(ast);
-		if (err_state()) {
-			printf("Error : %s", err_msg());
-			return REPL_EXPR_ERROR;
-		}
-
-		val = repl_state_peek(location);
-		val_print(&val, true);
-		
-		printf("\n");		
-
-		return REPL_EXPR_OK;
 	}
+		
+	location = repl_state_consume(ast);
+	if (err_state()) {
+		printf("Error : %s\n", err_msg());
+		return REPL_EXPR_ERROR;
+	}
+
+	val = repl_state_peek(location);
+	val_print(&val, true);
+
+	printf("\n");		
+
+	return REPL_EXPR_OK;
 }

@@ -194,34 +194,42 @@ VAL_LOC_T eval_impl(
 
     switch (node->type) {
     case AST_LITERAL:
+		LOG_DEBUG("Evaluating literal");
         eval_literal(node, stack);
         break;
 
     case AST_COMPOUND:
+		LOG_DEBUG("Evaluating compound %s", node->data.compound.type == AST_CPD_ARRAY ? "array" : "tuple");
         eval_compound(node, stack, sym_map);
         break;
 
     case AST_BIND:
+		LOG_DEBUG("Evaluating bind(%s)", node->data.bind.symbol);
     	eval_bind(node, stack, sym_map);
     	break;
 
 	case AST_IFF:
+		LOG_DEBUG("Evaluating if");
 		eval_iff(node, stack, sym_map);
 		break;
 
     case AST_REFERENCE:
+		LOG_DEBUG("Evaluating reference(%s)", node->data.reference.symbol);
     	eval_reference(node, stack, sym_map);
     	break;
 
     case AST_FUNC_DEF:
+		LOG_DEBUG("Evaluating function definition (%d)", node->data.func_def.func.arg_count);
         eval_func_def(node, stack, sym_map);
         break;
 
     case AST_BIF:
+		LOG_DEBUG("Evaluating bif");
         eval_bif(node, stack);
         break;
 
     case AST_FUNC_CALL:
+		LOG_DEBUG("Evaluating function call (%s)", node->data.func_call.symbol);
         eval_func_call(node, stack, sym_map);
         break;
 

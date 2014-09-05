@@ -48,8 +48,6 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs)
     return lhs->current == rhs->current;
 }
 
-
-
 /*
  * Implementation copied from StackOverflow :
  * http://stackoverflow.com/questions/314401/how-to-read-a-line-from-the-console-in-c

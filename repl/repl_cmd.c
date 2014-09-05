@@ -38,6 +38,7 @@ static struct AstNode *repl_cmd_load_ast_list(
 		struct DomNode *dom_list)
 {
 	struct AstNode *ast_list = NULL;
+	struct AstNode *ast_list_end = NULL;
 
 	for (; dom_list; dom_list = dom_list->next) {
 		struct AstNode *ast;
@@ -45,10 +46,8 @@ static struct AstNode *repl_cmd_load_ast_list(
 			printf("Failed parsing file \"%s\".\n", filename);
 			ast_node_free(ast_list);
 			return NULL;
-		}
-		else {
-			ast->next = ast_list;
-			ast_list = ast;
+		} else {
+			LIST_APPEND(ast, &ast_list, &ast_list_end);
 		}
 	}
 

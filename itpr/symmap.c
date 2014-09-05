@@ -20,6 +20,8 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 	sym_map_insert(sym_map, ">", eval(&bif_gt, stack, sym_map));
 	sym_map_insert(sym_map, "<=", eval(&bif_leq, stack, sym_map));
 	sym_map_insert(sym_map, ">=", eval(&bif_geq, stack, sym_map));
+	sym_map_insert(sym_map, "size", eval(&bif_size, stack, sym_map));
+	sym_map_insert(sym_map, "empty", eval(&bif_empty, stack, sym_map));
 	sym_map_insert(sym_map, "car", eval(&bif_car, stack, sym_map));
 	sym_map_insert(sym_map, "cdr", eval(&bif_cdr, stack, sym_map));
 }

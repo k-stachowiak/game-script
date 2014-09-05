@@ -68,7 +68,7 @@ static int autotest_perform(void)
 	ptrdiff_t location;
 	struct Value val;
 
-	ast = autotest_parse("(cdr 1)");
+	ast = autotest_parse("(min-element` 4 [ 2 1 ])");
 
 	if ((location = eval(ast, stack, &sym_map)) == -1) {
 		return 1;

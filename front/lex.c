@@ -42,7 +42,7 @@ static struct SourceIter find(
 
     LOG_TRACE_FUNC
 
-    while (si_eq(&result, end) && *(result.current) != value) {
+    while (!si_eq(&result, end) && *(result.current) != value) {
         si_adv(&result);
     }
 
@@ -311,8 +311,8 @@ static struct DomNode *dom_parse_atom_node(struct Token **current)
 
 static struct DomNode *dom_parse_node(struct Token **current)
 {
-    if (tok_is_open_paren(*current)) {
-        return dom_parse_compound_node(current);
+	if (tok_is_open_paren(*current)) {
+		return dom_parse_compound_node(current);
     } else {
         return dom_parse_atom_node(current);
     }
@@ -326,14 +326,24 @@ static struct DomNode *dom_build(struct Token *tokens)
 
     err_reset();
     while (current) {
-        struct DomNode *node = dom_parse_node(&current);
+
+		struct DomNode *node;
+
+		if (tok_is_comment(current)) {
+			current = current->next;
+			continue;
+		} else {
+			node = dom_parse_node(&current);
+		}
+
         if (!node) {
             if (!err_state()) {
-                err_set(ERR_DOM, "Failed reading any dom node.");
+                err_set(ERR_DOM, "Failed reading dom node.");
             }
             dom_free(result);
             return NULL;
         }
+
         LIST_APPEND(node, &result, &result_end);
     }
 

@@ -85,6 +85,12 @@ bool tok_is_close_paren(struct Token *tok)
            *(tok->begin) == TOK_TUP_CLOSE;
 }
 
+bool tok_is_comment(struct Token *tok)
+{
+	LOG_TRACE_FUNC
+	return *tok->begin == TOK_COMMENT;
+}
+
 bool tok_paren_match(struct Token *lhs, struct Token *rhs)
 {
     LOG_TRACE_FUNC

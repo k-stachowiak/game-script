@@ -17,6 +17,50 @@ static void bif_init_unary_array_ast(struct AstNode *node)
 	bif_init_impl_ptrs(node);
 }
 
+void bif_size_impl(struct Stack* stack, VAL_LOC_T location)
+{
+	struct Value value = stack_peek_value(stack, location);
+	VAL_LOC_T end = location + VAL_HEAD_BYTES + value.header.size;
+	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_INT;
+	VAL_HEAD_SIZE_T size = VAL_INT_BYTES;
+	VAL_INT_T result = 0;
+
+	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		return;
+	}
+	
+	location += VAL_HEAD_BYTES;
+	while (location != end) {
+		struct Value val = stack_peek_value(stack, location);
+		location += val.header.size + VAL_HEAD_BYTES;
+		++result;
+	}
+
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+	stack_push(stack, size, (char*)&result);
+}
+
+void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
+{
+	struct Value value = stack_peek_value(stack, location);
+	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
+	VAL_HEAD_SIZE_T size = VAL_BOOL_BYTES;
+	VAL_BOOL_T result;
+
+	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		return;
+	}
+
+	result = (VAL_BOOL_T)(value.compound.size == 0);
+
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+	stack_push(stack, size, (char*)&result);
+}
+
 static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
@@ -73,11 +117,19 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 	stack_push(stack, new_size, stack->buffer + tail_loc);
 }
 
+struct AstNode bif_size;
+struct AstNode bif_empty;
 struct AstNode bif_car;
 struct AstNode bif_cdr;
 
 void bif_init_array(void)
 {
+	bif_init_unary_array_ast(&bif_size);
+	bif_size.data.bif.un_arr_impl = bif_size_impl;
+
+	bif_init_unary_array_ast(&bif_empty);
+	bif_empty.data.bif.un_arr_impl = bif_empty_impl;
+
 	bif_init_unary_array_ast(&bif_car);
 	bif_car.data.bif.un_arr_impl = bif_car_impl;
 
