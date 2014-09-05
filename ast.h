@@ -176,7 +176,8 @@ struct AstNode *ast_make_reference(struct Location loc, char *symbol);
  * ============
  */
 
-void ast_node_free(struct AstNode *node);
+void ast_node_free_one(struct AstNode *node);
+void ast_node_free_list(struct AstNode *node);
 
 /* Operations.
  * ===========

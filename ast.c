@@ -225,30 +225,29 @@ static void ast_bif_free(struct AstBif *abif)
 static void ast_bind_free(struct AstBind *abind)
 {
     free(abind->symbol);
-    ast_node_free(abind->expr);
+    ast_node_free_one(abind->expr);
 }
 
 static void ast_iff_free(struct AstIff *aiff)
 {
-    ast_node_free(aiff->test);
-	/* NOTE: The remaining expressions are chained in a list with the test. */
+    ast_node_free_list(aiff->test);
 }
 
 static void ast_compound_free(struct AstCompound *acpd)
 {
-    ast_node_free(acpd->exprs);
+    ast_node_free_list(acpd->exprs);
 }
 
 static void ast_func_call_free(struct AstFuncCall *afcall)
 {
     free(afcall->symbol);
-    ast_node_free(afcall->actual_args);
+    ast_node_free_list(afcall->actual_args);
 }
 
 static void ast_func_def_free(struct AstFuncDef *afdef)
 {
     ast_common_func_free(&(afdef->func));
-    ast_node_free(afdef->exprs);
+    ast_node_free_list(afdef->exprs);
 }
 
 static void ast_literal_free(struct AstLiteral *alit)
@@ -263,39 +262,43 @@ static void ast_reference_free(struct AstReference *aref)
     free(aref->symbol);
 }
 
-void ast_node_free(struct AstNode *current)
+void ast_node_free_one(struct AstNode *node)
 {
-    struct AstNode *next;
+	switch (node->type) {
+	case AST_BIF:
+		ast_bif_free(&(node->data.bif));
+		break;
+	case AST_BIND:
+		ast_bind_free(&(node->data.bind));
+		break;
+	case AST_IFF:
+		ast_iff_free(&(node->data.iff));
+		break;
+	case AST_COMPOUND:
+		ast_compound_free(&(node->data.compound));
+		break;
+	case AST_FUNC_CALL:
+		ast_func_call_free(&(node->data.func_call));
+		break;
+	case AST_FUNC_DEF:
+		ast_func_def_free(&(node->data.func_def));
+		break;
+	case AST_LITERAL:
+		ast_literal_free(&(node->data.literal));
+		break;
+	case AST_REFERENCE:
+		ast_reference_free(&(node->data.reference));
+		break;
+	}
 
+	free(node);
+}
+
+void ast_node_free_list(struct AstNode *current)
+{
     while (current) {
-        switch (current->type) {
-        case AST_BIF:
-            ast_bif_free(&(current->data.bif));
-            break;
-        case AST_BIND:
-            ast_bind_free(&(current->data.bind));
-            break;
-        case AST_IFF:
-			ast_iff_free(&(current->data.iff));
-			break;
-        case AST_COMPOUND:
-            ast_compound_free(&(current->data.compound));
-            break;
-        case AST_FUNC_CALL:
-            ast_func_call_free(&(current->data.func_call));
-            break;
-        case AST_FUNC_DEF:
-            ast_func_def_free(&(current->data.func_def));
-            break;
-        case AST_LITERAL:
-            ast_literal_free(&(current->data.literal));
-            break;
-        case AST_REFERENCE:
-            ast_reference_free(&(current->data.reference));
-            break;
-        }
-        next = current->next;
-        free(current);
+		struct AstNode *next = current->next;
+		ast_node_free_one(current);
         current = next;
     }
 }

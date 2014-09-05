@@ -8,7 +8,6 @@
 #include "repl.h"
 
 /* TODO:
- * - Memory corruption!
  * - implement algorithm for visiting AST tree references.
  * - encapsulate pushing of primitives on the stack.
  * - Algorithms:
@@ -21,7 +20,7 @@ int main(int argc, char *argv[])
 {
     int error;
 
-    if (argc == 1) {
+    if (argc == 2) {
         if (strcmp(argv[1], "repl") == 0) {
             if ((error = repl())) {
                 printf("REPL error: %s\n", err_msg());

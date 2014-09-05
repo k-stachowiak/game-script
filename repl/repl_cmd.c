@@ -44,7 +44,7 @@ static struct AstNode *repl_cmd_load_ast_list(
 		struct AstNode *ast;
 		if (!(ast = parse(dom_list))) {
 			printf("Failed parsing file \"%s\".\n", filename);
-			ast_node_free(ast_list);
+			ast_node_free_list(ast_list);
 			return NULL;
 		} else {
 			LIST_APPEND(ast, &ast_list, &ast_list_end);
@@ -68,7 +68,7 @@ static bool repl_cmd_load_consume_ast(
 			* no nodes that have already been consumed will be freed.
 			* They have actually been freed upon success of the consume function.
 			*/
-			ast_node_free(ast_list);
+			ast_node_free_list(ast_list);
 			return false;
 		}
 	}

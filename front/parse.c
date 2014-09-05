@@ -158,7 +158,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     while (child) {
         struct AstNode *node = parse(child);
         if (!node) {
-            ast_node_free(exprs);
+			ast_node_free_list(exprs);
             return NULL;
         } else {
             LIST_APPEND(node, &exprs, &exprs_end);
@@ -200,7 +200,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     while (child) {
         struct AstNode *node = parse(child);
         if (!node) {
-            ast_node_free(args);
+            ast_node_free_list(args);
             return NULL;
         } else {
             LIST_APPEND(node, &args, &args_end);
@@ -302,7 +302,7 @@ fail:
     }
 
     if (exprs) {
-        ast_node_free(exprs);
+        ast_node_free_list(exprs);
     }
 
     return NULL;
@@ -510,7 +510,7 @@ struct AstNode *parse(struct DomNode *dom)
             if (!err_state()) {
                 err_set(ERR_PARSE, "Failed parsing any AST node.");
             }
-            ast_node_free(result);
+            ast_node_free_list(result);
             return NULL;
         }
         current = current->next;

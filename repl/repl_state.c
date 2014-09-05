@@ -24,7 +24,7 @@ static struct {
 static void repl_free_bound(void)
 {
 	while (stored_nodes.size) {
-		ast_node_free(stored_nodes.data[0].node);
+		ast_node_free_one(stored_nodes.data[0].node);
 		ARRAY_REMOVE(stored_nodes, 0);
 	}
 }
@@ -82,7 +82,7 @@ VAL_LOC_T repl_state_consume(struct AstNode *ast)
 
 	} else {
 		stack->top = location;
-		ast_node_free(ast);
+		ast_node_free_one(ast);
 
 	}
 
