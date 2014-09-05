@@ -74,8 +74,9 @@ char *my_getline(bool *eof)
 		}
 
 		if (--len == 0) {
+			char *linen;
 			len = lenmax;
-			char *linen = realloc(linep, lenmax *= 2);
+			linen = realloc(linep, lenmax *= 2);
 
 			if (!linen) {
 				printf("Allocation failed.\n");

@@ -75,7 +75,9 @@ VAL_LOC_T repl_state_consume(struct AstNode *ast)
 		return location;
 
 	} else if (ast->type == AST_BIND) {
-		struct NodeStore ns = { location, ast };
+		struct NodeStore ns;
+		ns.location = location;
+		ns.node = ast;
 		ARRAY_APPEND(stored_nodes, ns);
 
 	} else {

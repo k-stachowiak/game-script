@@ -40,31 +40,31 @@ static struct AstNode *parse_bind(struct DomNode *dom)
 
     LOG_TRACE_FUNC
 
-    // 1. Is compound CORE
+    /* 1. Is compound CORE */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
         return NULL;
     }
 
-    // 2. Has 3 children
+    /* 2. Has 3 children */
     if (!dom_node_is_cpd_of_size(dom, 3)) {
         return NULL;
     }
 
     child = dom->cpd_children;
 
-    // 3.1. 1st child is bind keyword.
+    /* 3.1. 1st child is bind keyword. */
     if (!dom_node_is_spec_atom(child, "bind")) {
         return NULL;
     }
     child = child->next;
 
-    // 3.2. 2nd child is symbol.
+    /* 3.2. 2nd child is symbol. */
     if (!(symbol = dom_node_parse_atom(child))) {
         return NULL;
     }
     child = child->next;
 
-    // 3.3 3rd child is any expression.
+    /* 3.3 3rd child is any expression. */
     if (!(expr = parse(child))) {
         free(symbol);
         return NULL;
@@ -80,37 +80,37 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	struct AstNode *true_expr = NULL;
 	struct AstNode *false_expr = NULL;
 
-	// 1. Is compound CORE
+	/* 1. Is compound CORE */
 	if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
 		return NULL;
 	}
 
-	// 2. Has 4 children
+	/* 2. Has 4 children */
 	if (!dom_node_is_cpd_of_size(dom, 4)) {
 		return NULL;
 	}
 
 	child = dom->cpd_children;
 
-	// 3.1. 1st child is if keyword.
+	/* 3.1. 1st child is if keyword. */
 	if (!dom_node_is_spec_atom(child, "if")) {
 		return NULL;
 	}
 	child = child->next;
 
-	// 3.2. 2nd child is the test expression.
+	/* 3.2. 2nd child is the test expression. */
 	if (!(test = parse(child))) {
 		return NULL;
 	}
 	child = child->next;
 
-	// 3.3. 3rd child is the true expression.
+	/* 3.3. 3rd child is the true expression. */
 	if (!(true_expr = parse(child))) {
 		return NULL;
 	}
 	child = child->next;
 
-	// 3.4. 4th child is the false expression.
+	/* 3.4. 4th child is the false expression. */
 	if (!(false_expr = parse(child))) {
 		return NULL;
 	}
@@ -133,12 +133,12 @@ static struct AstNode *parse_compound(struct DomNode *dom)
 
     LOG_TRACE_FUNC
 
-    // 1. Is compound.
+    /* 1. Is compound. */
     if (dom_node_is_atom(dom)) {
         return NULL;
     }
 
-    // 2. Is of ARRAY or TUPLE type.
+    /* 2. Is of ARRAY or TUPLE type. */
     switch (dom->cpd_type) {
     case DOM_CPD_ARRAY:
         type = AST_CPD_ARRAY;
@@ -153,7 +153,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
         return NULL;
     }
 
-    // 3. Has 0 or more expressions.
+    /* 3. Has 0 or more expressions. */
     child = dom->cpd_children;
     while (child) {
         struct AstNode *node = parse(child);
@@ -178,25 +178,25 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
 
     LOG_TRACE_FUNC
 
-    // 1. Is compound CORE.
+    /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
         return NULL;
     }
 
-    // 2. Has 1 or more children.
+    /* 2. Has 1 or more children. */
     if (!dom_node_is_cpd_min_size(dom, 1)) {
         return NULL;
     }
 
     child = dom->cpd_children;
 
-    // 3.1. 1st child is symbol.
+    /* 3.1. 1st child is symbol. */
     if (!(symbol = dom_node_parse_atom(child))) {
         return NULL;
     }
     child = child->next;
 
-    // 3.2. Has 0 or more further children being any expression.
+    /* 3.2. Has 0 or more further children being any expression. */
     while (child) {
         struct AstNode *node = parse(child);
         if (!node) {
@@ -223,32 +223,32 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     LOG_TRACE_FUNC
 
-    // 1. Is compound CORE.
+    /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
         return NULL;
     }
 
-    // 2. Has 3 or more children.
+    /* 2. Has 3 or more children. */
     if (!dom_node_is_cpd_min_size(dom, 3)) {
         return NULL;
     }
 
     child = dom->cpd_children;
 
-    // 3.1. 1st child is "func" keyword.
+    /* 3.1. 1st child is "func" keyword. */
     if (!dom_node_is_spec_atom(child, "func")) {
         return NULL;
     }
     child = child->next;
 
-    // 3.2. 2nd keyword is a core compound of symbols.
+    /* 3.2. 2nd keyword is a core compound of symbols. */
     if (!dom_node_is_spec_compound(child, DOM_CPD_CORE)) {
         return NULL;
     }
 
     arg_child = child->cpd_children;
 
-    // Argument list may be empty.
+    /* Argument list may be empty. */
     if (arg_child) {
         formal_args = malloc(2048 * sizeof(*formal_args));
         if (!formal_args) {
@@ -279,7 +279,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     child = child->next;
 
-    // 3.3. Has 1 or more further expressions.
+    /* 3.3. Has 1 or more further expressions. */
     while (child) {
     struct AstNode *expr = parse(child);
         if (!expr) {
@@ -476,7 +476,7 @@ static struct AstNode *parse_reference(struct DomNode *dom)
 
     LOG_TRACE_FUNC
 
-    // 1. Is a symbol.
+    /* 1. Is a symbol. */
     if (!(symbol = dom_node_parse_atom(dom))) {
         return NULL;
     }

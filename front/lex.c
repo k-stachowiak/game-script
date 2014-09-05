@@ -272,11 +272,11 @@ static struct DomNode *dom_parse_node(struct Token **current);
 
 static struct DomNode *dom_parse_compound_node(struct Token **current)
 {
-    struct Token *first = *current;
-    *current = (*current)->next;
-
     struct DomNode *children = NULL;
     struct DomNode *children_end = NULL;
+
+    struct Token *first = *current;
+    *current = (*current)->next;
 
     while (*current) {
         if (tok_is_close_paren(*current) && tok_paren_match(first, *current)) {
