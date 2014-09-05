@@ -6,7 +6,6 @@
 
 #include "error.h"
 #include "repl.h"
-#include "autotest.h"
 
 /* TODO:
  * - Memory corruption!
@@ -22,7 +21,7 @@ int main(int argc, char *argv[])
 {
     int error;
 
-    if (argc > 1) {
+    if (argc == 1) {
         if (strcmp(argv[1], "repl") == 0) {
             if ((error = repl())) {
                 printf("REPL error: %s\n", err_msg());
@@ -34,11 +33,8 @@ int main(int argc, char *argv[])
 			error = 1;
         }
     } else {
-        if ((error = autotest())) {
-            printf("Autotest error.\n");
-        } else {
-            printf("Autotest terminated correctly.\n");
-        }
+		printf("Missing command line argument.\n");
+		error = 1;
     }
 
     return error;
