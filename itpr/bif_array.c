@@ -37,9 +37,7 @@ void bif_size_impl(struct Stack* stack, VAL_LOC_T location)
 		++result;
 	}
 
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, (char*)&result);
+	stack_push_int(stack, result);
 }
 
 void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
@@ -55,16 +53,12 @@ void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
 	}
 
 	result = (VAL_BOOL_T)(value.compound.size == 0);
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, (char*)&result);
+	stack_push_bool(stack, result);
 }
 
 static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
-	struct ValueHeader head_header;
 	VAL_LOC_T head_loc;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
@@ -78,12 +72,7 @@ static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 	}
 
 	head_loc = location + VAL_HEAD_BYTES;
-	head_header = stack_peek_header(stack, head_loc);
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&head_header.type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&head_header.size);
-	stack_push(stack, head_header.size,
-			   stack->buffer + head_loc + VAL_HEAD_BYTES);
+	stack_push_copy(stack, head_loc);
 }
 
 static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
@@ -103,6 +92,8 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 		err_set(ERR_EVAL, "BIF \"cdr\" called for an empty array.");
 		return;
 	}
+
+	/* TODO: Consider generalization of this complex stack pushing below. */
 
 	head_loc = location + VAL_HEAD_BYTES;
 	head_header = stack_peek_header(stack, head_loc);

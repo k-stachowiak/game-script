@@ -67,35 +67,6 @@ static int efc_compute_arity(struct AstNode *def_node)
 	}
 }
 
-/** Pushes a capture object on the stack. */
-static void efc_push_capture(struct Stack *stack, struct Capture *cap)
-{
-	VAL_SIZE_T len = strlen(cap->symbol);
-	struct ValueHeader header = stack_peek_header(stack, cap->location);
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-	stack_push(stack, len, cap->symbol);
-	stack_push(stack,
-		header.size + VAL_HEAD_BYTES,
-		stack->buffer + cap->location);
-}
-
-/** Pushes a value pointed by a stack location on the top of the stack. */
-static void efc_push_value(struct Stack *stack, VAL_LOC_T location)
-{
-	struct ValueHeader header = stack_peek_header(stack, location);
-	stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + location);
-}
-
-/** Pushes an expression on the top of the stack by evaluating it. */
-static bool efc_push_expression(
-		struct Stack *stack,
-		struct SymMap *sym_map,
-		struct AstNode *expression)
-{
-	eval_impl(expression, stack, sym_map);
-	return !err_state();
-}
-
 /**
  * Creates a new function value based on and existing function value,
  * Its captures, already evaluated arguments and the newly applied ones.
@@ -107,39 +78,35 @@ static void efc_curry_on(
 		struct Value *value)
 {
 	static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
-	VAL_LOC_T size_loc, data_begin, data_size;
+	VAL_LOC_T size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
-	/* Header. */
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-
-	/* Pointer to implementation. */
-	data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&value->function.def);
+	stack_push_func_init(stack, &size_loc, &data_begin, value->function.def);
 
 	/* Captures. */
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&value->function.captures.size);
+	stack_push_func_cap_init(stack, value->function.captures.size);
 	for (i = 0; i < value->function.captures.size; ++i) {
-		efc_push_capture(stack, value->function.captures.data + i);
+		struct Capture *cap = value->function.captures.data + i;
+		stack_push_func_cap(stack, cap->symbol, cap->location);
 	}
 
 	/* Applied arguments. */
 	arg_count = value->function.applied.size + ast_list_len(actual_args);
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&arg_count);
+	stack_push_func_appl_init(stack, arg_count);
 
 	for (i = 0; i < value->function.applied.size; ++i) {
-		efc_push_value(stack, value->function.applied.data[i]);
+		stack_push_copy(stack, value->function.applied.data[i]);
 	}
 
 	for (; actual_args; actual_args = actual_args->next) {
-		if (!efc_push_expression(stack, sym_map, actual_args)) {
+		eval_impl(actual_args, stack, sym_map);
+		if (err_state()) {
 			break;
 		}
 	}
 
-	/* Hack value size to correct value. */
-	data_size = stack->top - data_begin;
-	memcpy(stack->buffer + size_loc, &data_size, VAL_SIZE_BYTES);
+	/* Finalize. */
+	stack_push_func_final(stack, size_loc, data_begin);
 }
 
 /** Evaluates an expression and inserts into a provided symbol map. */

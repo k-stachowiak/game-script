@@ -8,8 +8,10 @@
 #include "repl.h"
 
 /* TODO:
- * - implement algorithm for visiting AST tree references.
- * - encapsulate pushing of primitives on the stack.
+ * - Encapsulate pushing of primitives on the stack:
+ *   - find all clients of generic push,
+ *   - then find all the clients of the clients and so on,
+ *   - pick an elegant way to generalize them.
  * - Algorithms:
  *   - min_element
  *   - nwd, nww

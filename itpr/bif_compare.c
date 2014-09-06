@@ -34,28 +34,21 @@ static void common_impl(
 		VAL_BOOL_T(*impl_int)(VAL_INT_T, VAL_INT_T),
 		VAL_BOOL_T(*impl_real)(VAL_REAL_T, VAL_REAL_T))
 {
-	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
-	VAL_HEAD_SIZE_T size = VAL_BOOL_BYTES;
-	VAL_BOOL_T result;
-
 	VAL_REAL_T rx, ry;
 	VAL_INT_T ix, iy;
 	switch (bif_match_bin(stack, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
 	case BBM_BOTH_INT:
-		result = impl_int(ix, iy);
+		stack_push_bool(stack, impl_int(ix, iy));
 		break;
+
 	case BBM_BOTH_REAL:
-		result = impl_real(rx, ry);
+		stack_push_bool(stack, impl_real(rx, ry));
 		break;
+
 	case BBM_MISMATCH:
 		err_set(ERR_EVAL, "Argument types mismatch in a comparison BIF.");
 		return;
 	}
-
-	/* TODO: Unify all pushes into layers of raw push, value push, etc. */
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, (char*)&result);
 }
 
 static void bif_eq_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)

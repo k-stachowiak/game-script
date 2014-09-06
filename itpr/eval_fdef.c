@@ -11,29 +11,6 @@
 static VAL_HEAD_SIZE_T zero = 0;
 
 /**
- * Pushes incomplete function value header.
- * Returns the location of the size to be filled later on.
- */
-static VAL_LOC_T efd_push_header(struct Stack *stack)
-{
-	static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	return stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-}
-
-/**
- * Pushes the binary representation of the pointer to the AST node
- * implementing function to the stack.
- * Returns the location of the beginning of the addres, i.e. beginning
- * of the entire data block for the function value.
- */
-static VAL_LOC_T efd_push_impl_prt(struct AstNode* impl, struct Stack *stack)
-{
-	void *impl_address = (void*)impl;
-	return stack_push(stack, VAL_PTR_BYTES, (char*)&impl_address);
-}
-
-/**
  * Analyzes an AST node to find if it contains children that can potentially
  * contain symbols.
  */
@@ -127,16 +104,6 @@ static bool efd_is_argument(char *symbol, struct AstCommonFunc *func)
 	return false;
 }
 
-/** Copies a value from the given location to the top of the stack. */
-void efd_copy_capture(struct Stack *stack, char *symbol, VAL_LOC_T location)
-{
-	VAL_SIZE_T len = strlen(symbol);
-	struct ValueHeader header = stack_peek_header(stack, location);
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-	stack_push(stack, len, symbol);
-	stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + location);
-}
-
 /**
  * Searches recursively for all symbols in the given function definitions.
  * Pushes on the stack all the values refered to that are not global and 
@@ -147,8 +114,10 @@ static void efd_push_captures(
 		struct SymMap *sym_map,
 		struct AstFuncDef *func_def)
 {	
-	VAL_LOC_T cap_count_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+	VAL_LOC_T cap_count_loc;
 	VAL_SIZE_T cap_count = 0;
+
+	stack_push_func_cap_init_deferred(stack, &cap_count_loc);
 
 	struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
 	ARRAY_APPEND(to_visit, func_def->exprs);
@@ -172,14 +141,14 @@ static void efd_push_captures(
 					err_set(ERR_EVAL, "Undefined symbol reference.");
 					return;
 				}
-				efd_copy_capture(stack, symbol, cap_location);
+				stack_push_func_cap(stack, symbol, cap_location);
 				++cap_count;
 		}
 
 		ARRAY_REMOVE(to_visit, 0);
 	}
 
-	memcpy(stack->buffer + cap_count_loc, &cap_count, VAL_SIZE_BYTES);
+	stack_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
 	ARRAY_FREE(to_visit);
 }
 
@@ -188,18 +157,12 @@ void eval_func_def(
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-	VAL_SIZE_T data_size;
-
-	VAL_LOC_T size_loc = efd_push_header(stack);
-	VAL_LOC_T data_begin = efd_push_impl_prt(node, stack);
+	VAL_LOC_T size_loc, data_begin;
+	stack_push_func_init(stack, &size_loc, &data_begin, node);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
-
 	if (err_state()) {
 		return;
 	}
-
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&zero); /* No applied args. */
-
-	data_size = stack->top - data_begin;
-	memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
+	stack_push_func_appl_empty(stack);
+	stack_push_func_final(stack, size_loc, data_begin);
 }

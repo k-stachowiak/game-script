@@ -50,35 +50,22 @@ static void common_bin_impl(
 		VAL_INT_T(*impl_int)(VAL_INT_T, VAL_INT_T),
 		VAL_REAL_T(*impl_real)(VAL_REAL_T, VAL_REAL_T))
 {
-	VAL_HEAD_TYPE_T type;
-	VAL_HEAD_SIZE_T size;
-	VAL_INT_T int_result;
-	VAL_REAL_T real_result;
-	char *result;
-
 	VAL_REAL_T rx, ry;
 	VAL_INT_T ix, iy;
+
 	switch (bif_match_bin(stack, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
 	case BBM_BOTH_INT:
-		type = (VAL_HEAD_TYPE_T)VAL_INT;
-		size = VAL_INT_BYTES;
-		int_result = impl_int(ix, iy);
-		result = (char*)&int_result;
+		stack_push_int(stack, impl_int(ix, iy));
 		break;
+
 	case BBM_BOTH_REAL:
-		type = (VAL_HEAD_TYPE_T)VAL_REAL;
-		size = VAL_REAL_BYTES;
-		real_result = impl_real(rx, ry);
-		result = (char*)&real_result;
+		stack_push_real(stack, impl_real(rx, ry));
 		break;
+
 	case BBM_MISMATCH:
 		err_set(ERR_EVAL, "Argument types mismatch in a comparison BIF.");
-		return;
+		break;
 	}
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, (char*)&result);
 }
 
 static void common_un_impl(
@@ -87,35 +74,22 @@ static void common_un_impl(
 		VAL_INT_T(*impl_int)(VAL_INT_T),
 		VAL_REAL_T(*impl_real)(VAL_REAL_T))
 {
-	VAL_HEAD_TYPE_T type;
-	VAL_HEAD_SIZE_T size;
-	VAL_INT_T int_result;
-	VAL_REAL_T real_result;
-	char *result;
-
 	VAL_REAL_T r;
 	VAL_INT_T i;
+
 	switch (bif_match_un(stack, x_loc, &i, &r)) {
 	case VAL_INT:
-		type = (VAL_HEAD_TYPE_T)VAL_INT;
-		size = VAL_INT_BYTES;
-		int_result = impl_int(i);
-		result = (char*)&int_result;
+		stack_push_int(stack, impl_int(i));
 		break;
+
 	case VAL_REAL:
-		type = (VAL_HEAD_TYPE_T)VAL_REAL;
-		size = VAL_REAL_BYTES;
-		real_result = impl_real(r);
-		result = (char*)&real_result;
+		stack_push_real(stack, impl_real(r));
 		break;
+
 	default:
 		err_set(ERR_EVAL, "Arythmetic BIF called with non-numeric argument.");
-		return;
+		break;
 	}
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, result);
 }
 
 static void bif_sqrt_impl(struct Stack* stack, VAL_LOC_T x_loc)

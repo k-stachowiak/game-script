@@ -15,23 +15,19 @@ static void eval_compound(
         struct SymMap *sym_map)
 {
     static VAL_HEAD_SIZE_T zero = 0;
-    VAL_HEAD_TYPE_T type;
     VAL_LOC_T size_loc, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
 
+	/* Header. */
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-            type = (VAL_HEAD_TYPE_T)VAL_ARRAY;
+			stack_push_array_init(stack, &size_loc);
             break;
 
         case AST_CPD_TUPLE:
-            type = (VAL_HEAD_TYPE_T)VAL_TUPLE;
+			stack_push_tuple_init(stack, &size_loc);
             break;
     }
-
-    /* Header. */
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    size_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
 
     /* Data. */
     data_begin = stack->top;
@@ -45,65 +41,32 @@ static void eval_compound(
 
     /* Hack value size to correct value. */
     data_size = stack->top - data_begin;
-    memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
+	stack_push_cpd_final(stack, size_loc, data_size);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
-    VAL_HEAD_TYPE_T type;
-    VAL_HEAD_SIZE_T size;
-
-	/* Bring everything down to the values of the interpreter type.
-	 * This will be performed by the C compiler conversions from
-	 * whatever resides in the AST node object into the local variables
-	 * declared below. String is an exception as char* is general enough.
-	 */
-	VAL_BOOL_T boolean;
-	VAL_CHAR_T character;
-	VAL_INT_T integer;
-	VAL_REAL_T real;
-
-    char *value = NULL;
-
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
-        type = (VAL_HEAD_TYPE_T)VAL_BOOL;
-        size = VAL_BOOL_BYTES;
-		boolean = node->data.literal.data.boolean;
-        value = (char*)&boolean;
+		stack_push_bool(stack, node->data.literal.data.boolean);
         break;
 
     case AST_LIT_CHAR:
-        type = (VAL_HEAD_TYPE_T)VAL_CHAR;
-        size = VAL_CHAR_BYTES;
-		character = node->data.literal.data.character;
-		value = (char*)&character;
+		stack_push_char(stack, node->data.literal.data.character);
         break;
 
     case AST_LIT_INT:
-        type = (VAL_HEAD_TYPE_T)VAL_INT;
-        size = VAL_INT_BYTES;
-		integer = node->data.literal.data.integer;
-        value = (char*)&integer;
+		stack_push_int(stack, node->data.literal.data.integer);
         break;
 
-    case AST_LIT_REAL:
-        type = (VAL_HEAD_TYPE_T)VAL_REAL;
-        size = VAL_REAL_BYTES;
-		real = node->data.literal.data.real;
-        value = (char*)&real;
+	case AST_LIT_REAL:
+		stack_push_real(stack, node->data.literal.data.real);
         break;
 
-    case AST_LIT_STRING:        
-        type = (VAL_HEAD_TYPE_T)VAL_STRING;
-		size = strlen(node->data.literal.data.string);
-		value = node->data.literal.data.string;
+	case AST_LIT_STRING:
+		stack_push_string(stack, node->data.literal.data.string);
         break;
     }
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, value);
 }
 
 static void eval_bind(
@@ -150,17 +113,13 @@ static void eval_reference(
 		struct SymMap *sym_map)
 {
 	struct SymMapKvp *kvp;
-	struct ValueHeader header;
-	VAL_HEAD_SIZE_T size;
 
 	if (!(kvp = sym_map_find(sym_map, node->data.reference.symbol))) {
 	    err_set(ERR_EVAL, "Symbol not found.");
 		return;
 	}
 
-	header = stack_peek_header(stack, kvp->location);
-	size = header.size + VAL_HEAD_BYTES;
-	stack_push(stack, size, stack->buffer + kvp->location);
+	stack_push_copy(stack, kvp->location);
 }
 
 /**
@@ -174,6 +133,10 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
     static VAL_HEAD_SIZE_T zero = 0;
     void* impl = (void*)node;
 
+	/* TODO: AST related operations are stored near the bif code,
+	 * and the code below is rather placed near the logically relevant
+	 * place. Deal with this inconsistency.
+	 */
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
