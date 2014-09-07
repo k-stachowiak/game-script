@@ -13,6 +13,7 @@ extern struct AstNode bif_add;
 extern struct AstNode bif_sub;
 extern struct AstNode bif_mul;
 extern struct AstNode bif_div;
+extern struct AstNode bif_mod;
 
 extern struct AstNode bif_eq;
 extern struct AstNode bif_lt;

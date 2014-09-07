@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "error.h"
 #include "symmap.h"
 #include "eval.h"
 #include "bif.h"
@@ -15,6 +16,7 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
     sym_map_insert(sym_map, "-", eval(&bif_sub, stack, sym_map));
     sym_map_insert(sym_map, "*", eval(&bif_mul, stack, sym_map));
     sym_map_insert(sym_map, "/", eval(&bif_div, stack, sym_map));
+	sym_map_insert(sym_map, "%", eval(&bif_mod, stack, sym_map));
 	sym_map_insert(sym_map, "=", eval(&bif_eq, stack, sym_map));
 	sym_map_insert(sym_map, "<", eval(&bif_lt, stack, sym_map));
 	sym_map_insert(sym_map, ">", eval(&bif_gt, stack, sym_map));
@@ -65,9 +67,10 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
 	}
     memcpy(key_copy, key, len + 1);
 
-    kvp = sym_map_find(sym_map, key);
+    kvp = sym_map_find_shallow(sym_map, key);
     if (kvp) {
-        kvp->location = location;
+		err_set(ERR_EVAL, "Symbol already inserted.");
+		return;
     }
 
     kvp = malloc(sizeof(*kvp));
@@ -86,19 +89,29 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
 
 struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key)
 {
-    struct SymMapKvp *kvp = sym_map->map;
-    while (kvp) {
-        if (strcmp(kvp->key, key) == 0) {
-            return kvp;
-        }
-        kvp = kvp->next;
-    }
+	struct SymMapKvp *kvp;
+
+	if ((kvp = sym_map_find_shallow(sym_map, key))) {
+		return kvp;
+	}
 
     if (sym_map->parent) {
         return sym_map_find(sym_map->parent, key);
     } else {
         return NULL;
     }
+}
+
+struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key)
+{
+	struct SymMapKvp *kvp = sym_map->map;
+	while (kvp) {
+		if (strcmp(kvp->key, key) == 0) {
+			return kvp;
+		}
+		kvp = kvp->next;
+	}
+	return NULL;
 }
 
 struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
@@ -109,16 +122,12 @@ struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
         return NULL;
     }
 
-    kvp = sym_map->map;
-    while (kvp) {
-        if (strcmp(kvp->key, key) == 0) {
-            return kvp;
-        }
-        kvp = kvp->next;
-    }
+	if ((kvp = sym_map_find_shallow(sym_map, key))) {
+		return kvp;
+	}
 
     if (sym_map->parent) {
-        return sym_map_find(sym_map->parent, key);
+		return sym_map_find_not_global(sym_map->parent, key);
     } else {
         return NULL;
     }

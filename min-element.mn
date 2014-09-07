@@ -1,14 +1,9 @@
-(bind min-element`` (func (x y)
-	(if (< x y) x y)
-))
-
 (bind min-element` (func (element array)
-	(bind first (car array))
-	(if (empty (cdr array))
-		(min-element`` element first)
-		(if (< element first)
+	(if (empty array)
+		element
+		(if (< element (car array))
 			(min-element` element (cdr array))
-			(min-element` first (cdr array))
+			(min-element` (car array) (cdr array))
 		)
 	)
 ))

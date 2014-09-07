@@ -113,6 +113,7 @@ static void efc_curry_on(
 static bool efc_insert_expression(
 		struct Stack *stack,
 		struct SymMap *sym_map,
+		struct SymMap *new_sym_map,
 		struct AstNode *arg_node,
 		char *symbol)
 {
@@ -120,7 +121,12 @@ static bool efc_insert_expression(
 	if (err_state()) {
 		return false;
 	}
-	sym_map_insert(sym_map, symbol, location);
+
+	sym_map_insert(new_sym_map, symbol, location);
+	if (err_state()) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -158,19 +164,25 @@ static void efc_evaluate_general(
 	for (i = 0; i < value->function.captures.size; ++i) {
 		struct Capture *cap = value->function.captures.data + i;
 		sym_map_insert(&local_sym_map, cap->symbol, cap->location);
+		if (err_state()) {
+			return;
+		}
 	}
 
 	/* Insert already applied arguments. */
 	for (i = 0; i < value->function.applied.size; ++i) {
 		VAL_LOC_T loc = value->function.applied.data[i];
 		sym_map_insert(&local_sym_map, *(formal_args++), loc);
+		if (err_state()) {
+			return;
+		}
 	}
 
 	/* Evaluate and insert new arguments. */
 	temp_begin = stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
 		if (!efc_insert_expression(
-			stack, &local_sym_map, actual_args, *(formal_args++))) {
+			stack, sym_map, &local_sym_map, actual_args, *(formal_args++))) {
 			goto cleanup;
 		}
 	}

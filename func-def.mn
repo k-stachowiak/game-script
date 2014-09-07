@@ -1,1 +1,0 @@
-(bind sqr (func (x) (* x x)))

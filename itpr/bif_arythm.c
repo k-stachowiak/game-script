@@ -39,10 +39,12 @@ static VAL_INT_T bif_add_int(VAL_INT_T x, VAL_INT_T y) { return x + y; }
 static VAL_INT_T bif_sub_int(VAL_INT_T x, VAL_INT_T y) { return x - y; }
 static VAL_INT_T bif_mul_int(VAL_INT_T x, VAL_INT_T y) { return x * y; }
 static VAL_INT_T bif_div_int(VAL_INT_T x, VAL_INT_T y) { return x / y; }
+static VAL_INT_T bif_mod_int(VAL_INT_T x, VAL_INT_T y) { return x % y; }
 static VAL_REAL_T bif_add_real(VAL_REAL_T x, VAL_REAL_T y) { return x + y; }
 static VAL_REAL_T bif_sub_real(VAL_REAL_T x, VAL_REAL_T y) { return x - y; }
 static VAL_REAL_T bif_mul_real(VAL_REAL_T x, VAL_REAL_T y) { return x * y; }
 static VAL_REAL_T bif_div_real(VAL_REAL_T x, VAL_REAL_T y) { return x / y; }
+static VAL_REAL_T bif_mod_real(VAL_REAL_T x, VAL_REAL_T y) { return fmod(x, y); }
 
 static void common_bin_impl(
 		struct Stack *stack,
@@ -117,12 +119,18 @@ static void bif_div_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	common_bin_impl(stack, x_loc, y_loc, bif_div_int, bif_div_real);
 }
 
+static void bif_mod_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+{
+	common_bin_impl(stack, x_loc, y_loc, bif_mod_int, bif_mod_real);
+}
+
 struct AstNode bif_sqrt;
 
 struct AstNode bif_add;
 struct AstNode bif_sub;
 struct AstNode bif_mul;
 struct AstNode bif_div;
+struct AstNode bif_mod;
 
 void bif_init_arythmetic(void)
 {
@@ -140,4 +148,7 @@ void bif_init_arythmetic(void)
 
 	bif_init_arythmetic_binary_ast(&bif_div);
 	bif_div.data.bif.bin_arythm_impl = bif_div_impl;
+
+	bif_init_arythmetic_binary_ast(&bif_mod);
+	bif_mod.data.bif.bin_arythm_impl = bif_mod_impl;
 }

@@ -8,13 +8,8 @@
 #include "repl.h"
 
 /* TODO:
- * - Encapsulate pushing of primitives on the stack:
- *   - find all clients of generic push,
- *   - then find all the clients of the clients and so on,
- *   - pick an elegant way to generalize them.
+ * - ERROR: stack isn't properly cleaned up upon evaluation error.
  * - Algorithms:
- *   - min_element
- *   - nwd, nww
  *   - merge sort
  */
 
