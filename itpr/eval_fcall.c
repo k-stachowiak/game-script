@@ -50,6 +50,7 @@ static int efc_compute_arity(struct AstNode *def_node)
 
 		case AST_BIF_ARYTHM_BINARY:
 		case AST_BIF_LOGIC_BINARY:
+		case AST_BIF_ARRAY_BINARY:
 		case AST_BIF_COMPARE:
 			return 2;
 		default:
@@ -211,6 +212,7 @@ static bool efc_assert_bif_arg_count(enum AstBifType type, int arg_count)
 
 	case AST_BIF_ARYTHM_BINARY:
 	case AST_BIF_LOGIC_BINARY:
+	case AST_BIF_ARRAY_BINARY:
 	case AST_BIF_COMPARE:
 		return arg_count == 2;
 
@@ -268,21 +270,29 @@ static void efc_evaluate_bif(
 	case AST_BIF_ARYTHM_UNARY:
 		impl->un_arythm_impl(stack, arg_locs[0]);
 		break;
+
 	case AST_BIF_ARYTHM_BINARY:
 		impl->bin_arythm_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
+
 	case AST_BIF_LOGIC_UNARY:
 		impl->un_log_impl(stack, arg_locs[0]);
 		break;
+
 	case AST_BIF_LOGIC_BINARY:
 		impl->bin_log_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
+
 	case AST_BIF_COMPARE:
 		impl->cmp_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
 
 	case AST_BIF_ARRAY_UNARY:
 		impl->un_arr_impl(stack, arg_locs[0]);
+		break;
+
+	case AST_BIF_ARRAY_BINARY:
+		impl->bin_arr_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
 	}
 

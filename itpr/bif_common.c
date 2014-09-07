@@ -15,9 +15,10 @@ void bif_init_impl_ptrs(struct AstNode *node)
 	node->data.bif.un_arythm_impl = NULL;
 	node->data.bif.bin_arythm_impl = NULL;
 	node->data.bif.cmp_impl = NULL;
-	node->data.bif.un_arr_impl = NULL;
 	node->data.bif.un_log_impl = NULL;
 	node->data.bif.bin_log_impl = NULL;
+	node->data.bif.un_arr_impl = NULL;
+	node->data.bif.bin_arr_impl = NULL;
 }
 
 enum ValueType bif_match_un(

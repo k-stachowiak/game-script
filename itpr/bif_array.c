@@ -17,6 +17,17 @@ static void bif_init_unary_array_ast(struct AstNode *node)
 	bif_init_impl_ptrs(node);
 }
 
+static void bif_init_binary_array_ast(struct AstNode *node)
+{
+	node->type = AST_BIF;
+	node->loc = bif_location;
+	node->data.bif.func.formal_args = bif_arg_names;
+	node->data.bif.func.arg_locs = bif_arg_locations;
+	node->data.bif.func.arg_count = 2;
+	node->data.bif.type = AST_BIF_ARRAY_BINARY;
+	bif_init_impl_ptrs(node);
+}
+
 void bif_size_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
@@ -104,10 +115,51 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 	stack_push(stack, new_size, stack->buffer + tail_loc);
 }
 
+static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+{
+	struct Value vx, vy;
+	VAL_LOC_T size_loc, loc, end;
+
+	/* Assert input. */
+	vx = stack_peek_value(stack, x_loc);
+	vy = stack_peek_value(stack, y_loc);
+
+	if ((enum ValueType)vy.header.type != VAL_ARRAY) {
+		/* 
+		 * TODO: More refine check needed here:
+		 * assert T = U, where
+		 *    T  = (typeof x)
+		 *   [U] = (typeof y)
+		 */
+		err_set(ERR_EVAL, "Right-hand side argument of cons must be an array.");
+		return;
+	}
+
+	/* Build new header. */
+	stack_push_array_init(stack, &size_loc);
+
+	/* Append x. */
+	stack_push_copy(stack, x_loc);
+
+	/* Append Y. */
+	loc = y_loc + VAL_HEAD_BYTES;
+	end = loc + vy.header.size;
+	while (loc != end) {
+		struct ValueHeader header = stack_peek_header(stack, loc);
+		stack_push_copy(stack, loc);
+		loc += header.size + VAL_HEAD_BYTES;
+	}
+
+	stack_push_cpd_final(
+		stack, size_loc,
+		vx.header.size + vy.header.size + VAL_HEAD_BYTES);
+}
+
 struct AstNode bif_size;
 struct AstNode bif_empty;
 struct AstNode bif_car;
 struct AstNode bif_cdr;
+struct AstNode bif_cons;
 
 void bif_init_array(void)
 {
@@ -122,4 +174,7 @@ void bif_init_array(void)
 
 	bif_init_unary_array_ast(&bif_cdr);
 	bif_cdr.data.bif.un_arr_impl = bif_cdr_impl;
+
+	bif_init_binary_array_ast(&bif_cons);
+	bif_cons.data.bif.bin_arr_impl = bif_cons_impl;
 }

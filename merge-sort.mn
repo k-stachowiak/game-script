@@ -1,0 +1,27 @@
+(bind merge-non-empty (func (lhs rhs result)
+	(bind l (car lhs))
+	(bind r (car rhs))
+	(if (< l r)
+		(merge-general (cdr lhs) rhs (cons l result))
+		(merge-general lhs (cdr rhs) (cons r result))
+	)
+))
+
+(bind merge-general (func (lhs rhs result)
+	(bind left-empty (empty lhs))	
+	(bind right-empty (empty rhs))
+	(if (&& left-empty right-empty)
+		result
+		(if left-empty
+			rhs
+			(if right-empty
+				lhs
+				(merge-non-empty lhs rhs result)
+			)
+		)	
+	)
+))
+
+(bind merge (func (lhs rhs)
+	(merge-general lhs rhs [])
+))

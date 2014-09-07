@@ -28,9 +28,9 @@ static void bif_init_logic_binary_ast(struct AstNode *node)
 	bif_init_impl_ptrs(node);
 }
 
-static VAL_BOOL_T bif_log_and(VAL_BOOL_T x, VAL_BOOL_T y) { return x && y; }
-static VAL_BOOL_T bif_log_or(VAL_BOOL_T x, VAL_BOOL_T y) { return x || y; }
-static VAL_BOOL_T bif_log_not(VAL_BOOL_T x) { return !x; }
+static VAL_BOOL_T bif_log_and(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x && (bool)y; }
+static VAL_BOOL_T bif_log_or(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x || (bool)y; }
+static VAL_BOOL_T bif_log_not(VAL_BOOL_T x) { return !((bool)x); }
 
 static void common_bin_impl(
 		struct Stack *stack,

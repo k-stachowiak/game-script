@@ -262,11 +262,12 @@ void stack_push_func_final(struct Stack *stack, VAL_LOC_T size_loc, VAL_SIZE_T d
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
 {
     VAL_LOC_T i;
-    VAL_LOC_T count = stack->top - end;
-    for (i = 0; i < count; ++i) {
+	VAL_LOC_T removed = end - begin;
+    VAL_LOC_T remaining = stack->top - end;
+	for (i = 0; i < remaining; ++i) {
         *(stack->buffer + begin + i) = *(stack->buffer + end + i);
     }
-    stack->top -= count;
+	stack->top -= removed;
 }
 
 struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location)
