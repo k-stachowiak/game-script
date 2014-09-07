@@ -272,7 +272,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
         }
         formal_args = realloc(formal_args, arg_count * sizeof(*formal_args));
         if (!formal_args) {
-            printf("Allocation failed.\n");
+			LOG_ERROR("Allocation failed.\n");
             exit(1);
         }
     }

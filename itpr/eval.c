@@ -197,7 +197,7 @@ VAL_LOC_T eval_impl(
         break;
 
 	default:
-		printf("Unhandled AST node type.\n");
+		LOG_ERROR("Unhandled AST node type.\n");
 		exit(1);
     }
 

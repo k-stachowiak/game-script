@@ -60,7 +60,7 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
     int len = strlen(key);
     char *key_copy = malloc(len + 1);
 	if (!key_copy) {
-		printf("Allocation failure.\n");
+		LOG_ERROR("Allocation failure.\n");
 		exit(1);
 	}
     memcpy(key_copy, key, len + 1);
@@ -72,7 +72,7 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
 
     kvp = malloc(sizeof(*kvp));
 	if (!kvp) {
-		printf("Allocation failure.\n");
+		LOG_ERROR("Allocation failure.\n");
 		exit(1);
 	}
     /* TODO: ensure sym map cleanup upon failures. */

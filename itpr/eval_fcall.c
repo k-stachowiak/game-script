@@ -52,7 +52,7 @@ static int efc_compute_arity(struct AstNode *def_node)
 		case AST_BIF_COMPARE:
 			return 2;
 		default:
-			printf("Unhandled bif type.\n");
+			LOG_ERROR("Unhandled bif type.\n");
 			exit(1);
 		}
 		break;
@@ -62,7 +62,7 @@ static int efc_compute_arity(struct AstNode *def_node)
 		break;
 
 	default:
-		printf("Non-function AST node pointed by function value.\n");
+		LOG_ERROR("Non-function AST node pointed by function value.\n");
 		exit(1);
 	}
 }
@@ -202,7 +202,7 @@ static bool efc_assert_arg_count(enum AstBifType type, int arg_count)
 
 	}
 
-	printf("Unhandled BIF type.\n");
+	LOG_ERROR("Unhandled BIF type.\n");
 	exit(1);
 }
 
@@ -229,7 +229,7 @@ static void efc_evaluate_bif(
 	for (; actual_args; actual_args = actual_args->next) {
 		VAL_LOC_T temp_loc;
 		if (arg_count >= BIF_MAX_ARITY) {
-			printf("Argument count mismatch.\n");
+			LOG_ERROR("Argument count mismatch.\n");
 			exit(1);
 		}
 
@@ -300,7 +300,7 @@ void eval_func_call(
 			break;
 
 		default:
-			printf("Non-function AST node pointed by function value.\n");
+			LOG_ERROR("Non-function AST node pointed by function value.\n");
 			exit(1);
 		}
 

@@ -62,7 +62,7 @@ static void stack_peek_function(
 
         cap.symbol = malloc(len + 1);
         if (!cap.symbol) {
-            printf("Allocation failure.\n");
+			LOG_ERROR("Allocation failure.\n");
             exit(1);
         }
         memcpy(cap.symbol, stack->buffer + location, len);
@@ -96,12 +96,12 @@ struct Stack *stack_make(VAL_LOC_T size)
 {
     struct Stack *result = malloc(sizeof(*result));
     if (!result) {
-        printf("Allocation failure.\n");
+		LOG_ERROR("Allocation failure.\n");
         exit(1);
     }
     result->buffer = malloc(size);
     if (!result->buffer) {
-        printf("Allocation failure.\n");
+		LOG_ERROR("Allocation failure.\n");
         exit(1);
     }
     result->size = size;
@@ -124,7 +124,7 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
     }
 
     if (stack->top + size >= stack->size) {
-		printf("Stack overflow.\n");
+		LOG_ERROR("Stack overflow.\n");
 		exit(1);
     }
 
@@ -139,6 +139,8 @@ void stack_push_bool(struct Stack *stack, VAL_BOOL_T value)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
 	VAL_HEAD_SIZE_T size = VAL_BOOL_BYTES;
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, size, (char*)&value);
 }
 
@@ -146,6 +148,8 @@ void stack_push_char(struct Stack *stack, VAL_CHAR_T value)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_CHAR;
 	VAL_HEAD_SIZE_T size = VAL_CHAR_BYTES;
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, size, (char*)&value);
 }
 
@@ -153,6 +157,8 @@ void stack_push_int(struct Stack *stack, VAL_INT_T value)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_INT;
 	VAL_HEAD_SIZE_T size = VAL_INT_BYTES;
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, size, (char*)&value);
 }
 
@@ -160,6 +166,8 @@ void stack_push_real(struct Stack *stack, VAL_REAL_T value)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_REAL;
 	VAL_HEAD_SIZE_T size = VAL_REAL_BYTES;
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, size, (char*)&value);
 }
 
@@ -167,14 +175,14 @@ void stack_push_string(struct Stack *stack, char *value)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
 	VAL_HEAD_SIZE_T size = strlen(value);
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, size, value);
 }
 
 void stack_push_copy(struct Stack *stack, VAL_LOC_T location)
 {
 	struct ValueHeader header = stack_peek_header(stack, location);
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&header.type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&header.size);
 	stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + location);
 }
 
@@ -204,10 +212,11 @@ void stack_push_func_init(
 		struct AstNode *func_def)
 {
 	static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
+	void *impl = (void*)func_def;
 
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	*size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-	*data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)func_def);
+	*data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
 }
 
 void stack_push_func_cap_init_deferred(struct Stack *stack, VAL_LOC_T *cap_count_loc)
@@ -320,7 +329,7 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
         break;
 
     default:
-        printf("Unhandled value type.\n");
+		LOG_ERROR("Unhandled value type.\n");
         exit(1);
     }
 

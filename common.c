@@ -62,7 +62,7 @@ char *my_getline(bool *eof)
 	int c;
 
 	if (line == NULL) {
-		printf("Allocation failed.");
+		LOG_ERROR("Allocation failed.");
 		exit(1);
 	}
 
@@ -79,7 +79,7 @@ char *my_getline(bool *eof)
 			linen = realloc(linep, lenmax *= 2);
 
 			if (!linen) {
-				printf("Allocation failed.\n");
+				LOG_ERROR("Allocation failed.\n");
 				exit(1);
 			}
 

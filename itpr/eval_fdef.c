@@ -38,7 +38,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 		return node->data.func_call.actual_args;
 	}
 
-	printf("Unhandled AST node type.\n");
+	LOG_ERROR("Unhandled AST node type.\n");
 	exit(1);
 }
 
@@ -67,7 +67,7 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 		return true;
 	}
 
-	printf("Unhandled AST node type.\n");
+	LOG_ERROR("Unhandled AST node type.\n");
 	exit(1);
 }
 

@@ -26,7 +26,7 @@ static void val_print_function(struct Value *value)
         break;
 
     default:
-        printf("Attempting to print non-function value with function printing.\n");
+		LOG_ERROR("Attempting to print non-function value with function printing.\n");
         exit(1);
     }
 }
@@ -73,7 +73,7 @@ void val_print(struct Value *value, bool annotate)
         str_len = value->string.str_len;
 		string = malloc(str_len + 1);
 		if (!string) {
-			printf("Allocation failure.\n");
+			LOG_ERROR("Allocation failure.\n");
 			exit(1);
 		}
         memcpy(string, value->string.str_begin, str_len);

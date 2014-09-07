@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "common.h"
 #include "error.h"
 
 static bool err_state_arr[ERR_MODULES_COUNT];
@@ -22,7 +23,7 @@ void err_set(enum ErrModule module, char *message)
     int i;
     for (i = 0; i < ERR_MODULES_COUNT; ++i) {
         if (err_state_arr[i]) {
-            fprintf(stderr, "Error in the error system. Too embarrassed to continue.\n");
+			LOG_ERROR("Error in the error system. Too embarrassed to continue.\n");
             exit(2);
         }
     }
