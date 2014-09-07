@@ -14,7 +14,6 @@ static void eval_compound(
         struct Stack *stack,
         struct SymMap *sym_map)
 {
-    static VAL_HEAD_SIZE_T zero = 0;
     VAL_LOC_T size_loc, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
 

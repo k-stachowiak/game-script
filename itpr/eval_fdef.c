@@ -8,8 +8,6 @@
 #include "common.h"
 #include "error.h"
 
-static VAL_HEAD_SIZE_T zero = 0;
-
 /**
  * Analyzes an AST node to find if it contains children that can potentially
  * contain symbols.

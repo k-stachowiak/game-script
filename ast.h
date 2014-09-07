@@ -24,6 +24,8 @@ enum AstBifType {
     AST_BIF_ARYTHM_UNARY,
     AST_BIF_ARYTHM_BINARY,
 	AST_BIF_COMPARE,
+	AST_BIF_LOGIC_UNARY,
+	AST_BIF_LOGIC_BINARY,
 	AST_BIF_ARRAY_UNARY
 };
 
@@ -65,6 +67,10 @@ struct AstBif {
 
 	/* Compare */
 	void(*cmp_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
+
+	/* Logic */
+	void(*un_log_impl)(struct Stack*, VAL_LOC_T);
+	void(*bin_log_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
 
 	/* Array */
 	void(*un_arr_impl)(struct Stack*, VAL_LOC_T);

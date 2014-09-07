@@ -21,8 +21,6 @@ void bif_size_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
 	VAL_LOC_T end = location + VAL_HEAD_BYTES + value.header.size;
-	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_INT;
-	VAL_HEAD_SIZE_T size = VAL_INT_BYTES;
 	VAL_INT_T result = 0;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
@@ -43,8 +41,6 @@ void bif_size_impl(struct Stack* stack, VAL_LOC_T location)
 void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
-	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
-	VAL_HEAD_SIZE_T size = VAL_BOOL_BYTES;
 	VAL_BOOL_T result;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {

@@ -34,6 +34,7 @@ enum BifBinaryMatch bif_match_bin(
 
 void bif_init_arythmetic(void);
 void bif_init_compare(void);
+void bif_init_logic(void);
 void bif_init_array(void);
 
 #endif

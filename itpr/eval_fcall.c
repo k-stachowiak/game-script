@@ -9,8 +9,6 @@
 #include "value.h"
 #include "bif.h"
 
-static VAL_HEAD_SIZE_T zero = 0;
-
 /**
  * Performs a lookup for the called function in the symbol map.
  * Then performs the lookup of the function value on the stack.
@@ -46,9 +44,12 @@ static int efc_compute_arity(struct AstNode *def_node)
 	case AST_BIF:
 		switch (def_node->data.bif.type) {
 		case AST_BIF_ARYTHM_UNARY:
+		case AST_BIF_LOGIC_UNARY:
 		case AST_BIF_ARRAY_UNARY:
 			return 1;
+
 		case AST_BIF_ARYTHM_BINARY:
+		case AST_BIF_LOGIC_BINARY:
 		case AST_BIF_COMPARE:
 			return 2;
 		default:
@@ -77,7 +78,6 @@ static void efc_curry_on(
 		struct AstNode *actual_args,
 		struct Value *value)
 {
-	static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
 	VAL_LOC_T size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
@@ -201,14 +201,16 @@ cleanup:
 }
 
 /** Tests the argument count against a BIF type. */
-static bool efc_assert_arg_count(enum AstBifType type, int arg_count)
+static bool efc_assert_bif_arg_count(enum AstBifType type, int arg_count)
 {
 	switch (type) {
 	case AST_BIF_ARYTHM_UNARY:
+	case AST_BIF_LOGIC_UNARY:
 	case AST_BIF_ARRAY_UNARY:
 		return arg_count == 1;
 
 	case AST_BIF_ARYTHM_BINARY:
+	case AST_BIF_LOGIC_BINARY:
 	case AST_BIF_COMPARE:
 		return arg_count == 2;
 
@@ -256,7 +258,7 @@ static void efc_evaluate_bif(
 	temp_end = stack->top;
 
 	/* Assert arguments count. */
-	if (!efc_assert_arg_count(impl->type, arg_count)) {
+	if (!efc_assert_bif_arg_count(impl->type, arg_count)) {
 		err_set(ERR_EVAL, "Invalid argument count passed to BIF.");
 		return;
 	}
@@ -268,6 +270,12 @@ static void efc_evaluate_bif(
 		break;
 	case AST_BIF_ARYTHM_BINARY:
 		impl->bin_arythm_impl(stack, arg_locs[0], arg_locs[1]);
+		break;
+	case AST_BIF_LOGIC_UNARY:
+		impl->un_log_impl(stack, arg_locs[0]);
+		break;
+	case AST_BIF_LOGIC_BINARY:
+		impl->bin_log_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
 	case AST_BIF_COMPARE:
 		impl->cmp_impl(stack, arg_locs[0], arg_locs[1]);

@@ -10,6 +10,10 @@
 
 static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 {
+	/* TODO: Note that the "eval" here is artificial. This can be handled
+	 * with a special magic function that just generates a proper function
+	 * value.
+	 */
     bif_assure_init();
     sym_map_insert(sym_map, "sqrt", eval(&bif_sqrt, stack, sym_map));
     sym_map_insert(sym_map, "+", eval(&bif_add, stack, sym_map));
@@ -22,6 +26,9 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 	sym_map_insert(sym_map, ">", eval(&bif_gt, stack, sym_map));
 	sym_map_insert(sym_map, "<=", eval(&bif_leq, stack, sym_map));
 	sym_map_insert(sym_map, ">=", eval(&bif_geq, stack, sym_map));
+	sym_map_insert(sym_map, "&&", eval(&bif_and, stack, sym_map));
+	sym_map_insert(sym_map, "||", eval(&bif_or, stack, sym_map));
+	sym_map_insert(sym_map, "~~", eval(&bif_not, stack, sym_map));
 	sym_map_insert(sym_map, "size", eval(&bif_size, stack, sym_map));
 	sym_map_insert(sym_map, "empty", eval(&bif_empty, stack, sym_map));
 	sym_map_insert(sym_map, "car", eval(&bif_car, stack, sym_map));

@@ -9,8 +9,10 @@
 
 /* TODO:
  * - ERROR: stack isn't properly cleaned up upon evaluation error.
+ * - ERROR: in "stack_push_func_init" push void* already and not AstNode (dependency).
  * - Algorithms:
- *   - merge sort
+ *   - merge sort:
+ *      - implement cons
  */
 
 int main(int argc, char *argv[])

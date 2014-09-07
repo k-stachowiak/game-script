@@ -16,6 +16,8 @@ void bif_init_impl_ptrs(struct AstNode *node)
 	node->data.bif.bin_arythm_impl = NULL;
 	node->data.bif.cmp_impl = NULL;
 	node->data.bif.un_arr_impl = NULL;
+	node->data.bif.un_log_impl = NULL;
+	node->data.bif.bin_log_impl = NULL;
 }
 
 enum ValueType bif_match_un(
@@ -74,5 +76,6 @@ void bif_assure_init(void)
 	initialized = true;
 	bif_init_arythmetic();
 	bif_init_compare();
+	bif_init_logic();
 	bif_init_array();
 }
