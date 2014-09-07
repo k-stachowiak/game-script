@@ -10,9 +10,14 @@
 /* TODO:
  * - ERROR: stack isn't properly cleaned up upon evaluation error.
  * - ERROR: in "stack_push_func_init" push void* already and not AstNode (dependency).
+ * - implement do block - ALSO REQUIRED AS FUNCTION BODY
  * - Algorithms:
  *   - merge sort:
- *      - implement cons
+ *      - PREDICATE
+ *		- implement slice
+ *      - implement reverse
+ *		- implement the splitting phase
+ * - Side effects: print
  */
 
 int main(int argc, char *argv[])

@@ -137,12 +137,15 @@ static void efc_evaluate_impl(
 		struct SymMap *sym_map,
 		struct AstNode *impl)
 {
+	VAL_LOC_T begin = stack->top;
+	VAL_LOC_T end = stack->top;
 	for (; impl; impl = impl->next) {
-		eval_impl(impl, stack, sym_map);
+		end = eval_impl(impl, stack, sym_map);
 		if (err_state()) {
-			return;
+			break;
 		}
 	}
+	stack_collapse(stack, begin, end);
 }
 
 /** Evaluates a general function implementation i.e. not BIF. */

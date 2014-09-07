@@ -28,7 +28,7 @@ static void bif_init_binary_array_ast(struct AstNode *node)
 	bif_init_impl_ptrs(node);
 }
 
-void bif_size_impl(struct Stack* stack, VAL_LOC_T location)
+void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
 	VAL_LOC_T end = location + VAL_HEAD_BYTES + value.header.size;
@@ -150,21 +150,63 @@ static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 		loc += header.size + VAL_HEAD_BYTES;
 	}
 
+	/* Finalize. */
 	stack_push_cpd_final(
 		stack, size_loc,
 		vx.header.size + vy.header.size + VAL_HEAD_BYTES);
 }
 
-struct AstNode bif_size;
+static void bif_cat_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+{
+	struct Value vx, vy;
+	VAL_LOC_T size_loc, loc, end;
+
+	/* Assert input. */
+	vx = stack_peek_value(stack, x_loc);
+	vy = stack_peek_value(stack, y_loc);
+
+	if ((enum ValueType)vx.header.type != VAL_ARRAY ||
+		(enum ValueType)vy.header.type != VAL_ARRAY) {
+		err_set(ERR_EVAL, "Both arguments of cat must be arrays.");
+		return;
+	}
+
+	/* Build new header. */
+	stack_push_array_init(stack, &size_loc);
+
+	/* Append X. */
+	loc = x_loc + VAL_HEAD_BYTES;
+	end = loc + vx.header.size;
+	while (loc != end) {
+		struct ValueHeader header = stack_peek_header(stack, loc);
+		stack_push_copy(stack, loc);
+		loc += header.size + VAL_HEAD_BYTES;
+	}
+
+	/* Append Y. */
+	loc = y_loc + VAL_HEAD_BYTES;
+	end = loc + vy.header.size;
+	while (loc != end) {
+		struct ValueHeader header = stack_peek_header(stack, loc);
+		stack_push_copy(stack, loc);
+		loc += header.size + VAL_HEAD_BYTES;
+	}
+
+	/* Finalize. */
+	stack_push_cpd_final(stack, size_loc, vx.header.size + vy.header.size);
+}
+
+struct AstNode bif_length;
 struct AstNode bif_empty;
 struct AstNode bif_car;
 struct AstNode bif_cdr;
 struct AstNode bif_cons;
+struct AstNode bif_cat;
 
 void bif_init_array(void)
 {
-	bif_init_unary_array_ast(&bif_size);
-	bif_size.data.bif.un_arr_impl = bif_size_impl;
+	bif_init_unary_array_ast(&bif_length);
+	bif_length.data.bif.un_arr_impl = bif_length_impl;
 
 	bif_init_unary_array_ast(&bif_empty);
 	bif_empty.data.bif.un_arr_impl = bif_empty_impl;
@@ -177,4 +219,7 @@ void bif_init_array(void)
 
 	bif_init_binary_array_ast(&bif_cons);
 	bif_cons.data.bif.bin_arr_impl = bif_cons_impl;
+
+	bif_init_binary_array_ast(&bif_cat);
+	bif_cat.data.bif.bin_arr_impl = bif_cat_impl;
 }

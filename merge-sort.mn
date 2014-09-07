@@ -13,9 +13,9 @@
 	(if (&& left-empty right-empty)
 		result
 		(if left-empty
-			rhs
+			(cat rhs result)
 			(if right-empty
-				lhs
+				(cat lhs result)
 				(merge-non-empty lhs rhs result)
 			)
 		)	
@@ -24,4 +24,27 @@
 
 (bind merge (func (lhs rhs)
 	(merge-general lhs rhs [])
+))
+
+(bind merge-sort`` (func (x y)
+	(bind x-sorted (merge-sort x))
+	(bind y-sorted (merge-sort y))
+	(merge x-sorted y-sorted)
+))
+
+(bind merge-sort` (func (x)
+	(bind len (length x))
+	(bind h (/ len 2))
+	(if (<= len 1)
+		x
+		(do
+			(bind lt (slice x 0 (+ h 1))
+			(bind rt (slice x (+ h 2) len)
+			(merge-sort`` lt rt))
+		)
+	)
+))
+
+(bind merge-sort (func (x)
+	(reverse (merge-sort` x))
 ))

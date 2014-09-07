@@ -25,11 +25,12 @@ extern struct AstNode bif_and;
 extern struct AstNode bif_or;
 extern struct AstNode bif_not;
 
-extern struct AstNode bif_size;
+extern struct AstNode bif_length;
 extern struct AstNode bif_empty;
 extern struct AstNode bif_car;
 extern struct AstNode bif_cdr;
 extern struct AstNode bif_cons;
+extern struct AstNode bif_cat;
 
 void bif_assure_init(void);
 
