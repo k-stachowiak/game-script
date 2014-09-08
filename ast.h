@@ -11,6 +11,7 @@
 
 enum AstNodeType {
     AST_BIF,
+	AST_DO_BLOCK,
     AST_BIND,
 	AST_IFF,
     AST_COMPOUND,
@@ -54,7 +55,6 @@ struct AstCommonFunc {
 };
 
 struct AstNode;
-
 struct Value;
 struct Stack;
 
@@ -76,6 +76,10 @@ struct AstBif {
 	/* Array */
 	void(*un_arr_impl)(struct Stack*, VAL_LOC_T);
 	void(*bin_arr_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
+};
+
+struct AstDoBlock {
+	struct AstNode *exprs;
 };
 
 struct AstBind {
@@ -131,6 +135,7 @@ struct AstNode {
     /* Specific data. */
     union {
         struct AstBif bif;
+		struct AstDoBlock do_block;
         struct AstBind bind;
 		struct AstIff iff;
         struct AstCompound compound;
@@ -147,6 +152,10 @@ struct AstNode {
 /* Creation.
  * =========
  */
+
+struct AstNode *ast_make_do_block(
+	struct Location loc,
+	struct AstNode* exprs);
 
 struct AstNode *ast_make_bind(
     struct Location loc,

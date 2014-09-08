@@ -8,9 +8,10 @@
 #include "repl.h"
 
 /* TODO:
- * - ERROR: stack isn't properly cleaned up upon evaluation error.
- * - ERROR: in "stack_push_func_init" push void* already and not AstNode (dependency).
  * - implement do block - ALSO REQUIRED AS FUNCTION BODY
+ *   - do block
+ *	 - expect function to contain it
+ * - impl malloc_or_die and replace malloc calls with it.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

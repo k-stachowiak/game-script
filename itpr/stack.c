@@ -209,14 +209,13 @@ void stack_push_func_init(
 		struct Stack *stack,
 		VAL_LOC_T *size_loc,
 		VAL_LOC_T *data_begin,
-		struct AstNode *func_def)
+		void *func_def)
 {
 	static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
-	void *impl = (void*)func_def;
 
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	*size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
-	*data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
+	*data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&func_def);
 }
 
 void stack_push_func_cap_init_deferred(struct Stack *stack, VAL_LOC_T *cap_count_loc)

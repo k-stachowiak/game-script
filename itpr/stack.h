@@ -33,7 +33,7 @@ void stack_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc);
 void stack_push_tuple_init(struct Stack *stack, VAL_LOC_T *size_loc);
 void stack_push_cpd_final(struct Stack *stack, VAL_LOC_T size_loc, VAL_SIZE_T size);
 
-void stack_push_func_init(struct Stack *stack, VAL_LOC_T *size_loc, VAL_LOC_T *data_begin, struct AstNode *func_def);
+void stack_push_func_init(struct Stack *stack, VAL_LOC_T *size_loc, VAL_LOC_T *data_begin, void *func_def);
 void stack_push_func_cap_init_deferred(struct Stack *stack, VAL_LOC_T *cap_count_loc);
 void stack_push_func_cap_init(struct Stack *stack, VAL_SIZE_T cap_count);
 void stack_push_func_cap(struct Stack *stack, char *symbol, VAL_LOC_T loc);

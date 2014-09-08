@@ -32,6 +32,55 @@ static bool all_of(char *current, char *last, int (*f)(int))
     return true;
 }
 
+static struct AstNode *parse_do_block(struct DomNode *dom)
+{
+	struct AstNode *exprs = NULL;
+	struct AstNode *exprs_end = NULL;
+	struct DomNode *child = NULL;
+
+	LOG_TRACE_FUNC
+
+	/* 1. Is compound CORE. */
+	if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+		return NULL;
+	}
+
+	/* 2. Has 2 or more children. */
+	if (!dom_node_is_cpd_min_size(dom, 2)) {
+		return NULL;
+	}
+
+	child = dom->cpd_children;
+
+	/* 3.1. 1st child is "do" keyword. */
+	if (!dom_node_is_spec_atom(child, "do")) {
+		return NULL;
+	}
+	child = child->next;
+
+	/* 3.2. Has 1 or more further expressions. */
+	while (child) {
+		struct AstNode *expr = parse(child);
+		if (!expr) {
+			goto fail;
+		}
+		else {
+			LIST_APPEND(expr, &exprs, &exprs_end);
+		}
+		child = child->next;
+	}
+
+	return ast_make_do_block(dom->loc, exprs);
+
+fail:
+
+	if (exprs) {
+		ast_node_free_list(exprs);
+	}
+
+	return NULL;
+}
+
 static struct AstNode *parse_bind(struct DomNode *dom)
 {
     struct DomNode *child = NULL;
@@ -498,6 +547,7 @@ struct AstNode *parse(struct DomNode *dom)
         if (
             (!err_state() && (node = parse_literal(dom))) ||
             (!err_state() && (node = parse_reference(dom))) ||
+			(!err_state() && (node = parse_do_block(dom))) ||
             (!err_state() && (node = parse_bind(dom))) ||
             (!err_state() && (node = parse_iff(dom))) ||
             (!err_state() && (node = parse_func_def(dom))) ||

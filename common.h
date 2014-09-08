@@ -25,7 +25,7 @@
 
 #define VAL_BOOL_T uint8_t
 #define VAL_CHAR_T uint8_t
-#define VAL_INT_T uint64_t
+#define VAL_INT_T int64_t
 #define VAL_REAL_T double
 
 #define VAL_BOOL_BYTES sizeof(VAL_BOOL_T)

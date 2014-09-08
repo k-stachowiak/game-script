@@ -82,7 +82,11 @@ static void efc_curry_on(
 	VAL_LOC_T size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
-	stack_push_func_init(stack, &size_loc, &data_begin, value->function.def);
+	stack_push_func_init(
+		stack,
+		&size_loc,
+		&data_begin,
+		(void*)value->function.def);
 
 	/* Captures. */
 	stack_push_func_cap_init(stack, value->function.captures.size);

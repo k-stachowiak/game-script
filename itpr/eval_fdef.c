@@ -20,6 +20,9 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 	case AST_REFERENCE:
 		return NULL;
 
+	case AST_DO_BLOCK:
+		return node->data.do_block.exprs;
+
 	case AST_BIND:
 		return node->data.bind.expr;
 
@@ -48,6 +51,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 static bool efd_has_symbol(struct AstNode *node, char **symbol)
 {
 	switch (node->type) {
+	case AST_DO_BLOCK:
 	case AST_BIF:
 	case AST_LITERAL:
 	case AST_COMPOUND:
@@ -156,7 +160,7 @@ void eval_func_def(
 		struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
-	stack_push_func_init(stack, &size_loc, &data_begin, node);
+	stack_push_func_init(stack, &size_loc, &data_begin, (void*)node);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
 	if (err_state()) {
 		return;

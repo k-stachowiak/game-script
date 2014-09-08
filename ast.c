@@ -5,9 +5,27 @@
 #include "error.h"
 #include "ast.h"
 
+struct AstNode *ast_make_do_block(
+		struct Location loc,
+		struct AstNode* exprs)
+{
+	struct AstNode *result = malloc(sizeof(*result));
+
+	if (!result) {
+		err_set(ERR_PARSE, "Allocation failed.");
+		return NULL;
+	}
+
+	result->next = NULL;
+	result->type = AST_DO_BLOCK;
+	result->loc = loc;
+	result->data.do_block.exprs = exprs;
+	return result;
+}
+
 struct AstNode *ast_make_bind(
-    struct Location loc,
-    char *symbol, struct AstNode *expr)
+		struct Location loc,
+		char *symbol, struct AstNode *expr)
 {
     struct AstNode *result = malloc(sizeof(*result));
 
@@ -222,6 +240,11 @@ static void ast_bif_free(struct AstBif *abif)
     ast_common_func_free(&(abif->func));
 }
 
+static void ast_do_block_free(struct AstDoBlock *adb)
+{
+	ast_node_free_list(adb->exprs);
+}
+
 static void ast_bind_free(struct AstBind *abind)
 {
     free(abind->symbol);
@@ -268,24 +291,35 @@ void ast_node_free_one(struct AstNode *node)
 	case AST_BIF:
 		ast_bif_free(&(node->data.bif));
 		break;
+
+	case AST_DO_BLOCK:
+		ast_do_block_free(&(node->data.do_block));
+		break;
+
 	case AST_BIND:
 		ast_bind_free(&(node->data.bind));
 		break;
+
 	case AST_IFF:
 		ast_iff_free(&(node->data.iff));
 		break;
+
 	case AST_COMPOUND:
 		ast_compound_free(&(node->data.compound));
 		break;
+
 	case AST_FUNC_CALL:
 		ast_func_call_free(&(node->data.func_call));
 		break;
+
 	case AST_FUNC_DEF:
 		ast_func_def_free(&(node->data.func_def));
 		break;
+
 	case AST_LITERAL:
 		ast_literal_free(&(node->data.literal));
 		break;
+
 	case AST_REFERENCE:
 		ast_reference_free(&(node->data.reference));
 		break;
@@ -321,6 +355,9 @@ void ast_visit(struct AstNode *node, void (*f)(struct AstNode*))
     case AST_LITERAL:
     case AST_REFERENCE:
         break;
+	case AST_DO_BLOCK:
+		ast_visit(node->data.do_block.exprs, f);
+		break;
     case AST_BIND:
         ast_visit(node->data.bind.expr, f);
         break;

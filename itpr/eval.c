@@ -68,6 +68,23 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
     }
 }
 
+static void eval_do_block(
+		struct AstNode *node,
+		struct Stack *stack,
+		struct SymMap *sym_map)
+{
+	struct AstNode *expr = node->data.do_block.exprs;
+	VAL_LOC_T begin = stack->top;
+	VAL_LOC_T end = stack->top;
+	for (; expr; expr = expr->next) {
+		end = eval_impl(expr, stack, sym_map);
+		if (err_state()) {
+			break;
+		}
+	}
+	stack_collapse(stack, begin, end);
+}
+
 static void eval_bind(
 		struct AstNode *node,
 		struct Stack *stack,
@@ -164,6 +181,11 @@ VAL_LOC_T eval_impl(
 		LOG_DEBUG("Evaluating compound %s", node->data.compound.type == AST_CPD_ARRAY ? "array" : "tuple");
         eval_compound(node, stack, sym_map);
         break;
+
+	case AST_DO_BLOCK:
+		LOG_DEBUG("Evaluating do block");
+		eval_do_block(node, stack, sym_map);
+		break;
 
     case AST_BIND:
 		LOG_DEBUG("Evaluating bind(%s)", node->data.bind.symbol);

@@ -56,7 +56,7 @@ void val_print(struct Value *value, bool annotate)
         if (annotate) {
             printf("integer :: ");
         }
-        printf("%" PRIu64 , value->primitive.integer);
+        printf("%" PRId64 , value->primitive.integer);
         break;
 
     case VAL_REAL:
