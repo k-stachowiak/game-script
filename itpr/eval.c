@@ -203,7 +203,9 @@ VAL_LOC_T eval_impl(
     	break;
 
     case AST_FUNC_DEF:
-		LOG_DEBUG("Evaluating function definition (%d)", node->data.func_def.func.arg_count);
+		LOG_DEBUG(
+			"Evaluating function definition (%d)",
+			node->data.func_def.func.arg_count);
         eval_func_def(node, stack, sym_map);
         break;
 

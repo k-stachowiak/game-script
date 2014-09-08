@@ -8,10 +8,7 @@
 #include "repl.h"
 
 /* TODO:
- * - implement do block - ALSO REQUIRED AS FUNCTION BODY
- *   - do block
- *	 - expect function to contain it
- * - impl malloc_or_die and replace malloc calls with it.
+ * - free all memory upon parser failures! IFF, FUNC_DEF!
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

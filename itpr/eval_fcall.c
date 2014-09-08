@@ -135,23 +135,6 @@ static bool efc_insert_expression(
 	return true;
 }
 
-/** Evaluates a function implementation in a given context. */
-static void efc_evaluate_impl(
-		struct Stack *stack,
-		struct SymMap *sym_map,
-		struct AstNode *impl)
-{
-	VAL_LOC_T begin = stack->top;
-	VAL_LOC_T end = stack->top;
-	for (; impl; impl = impl->next) {
-		end = eval_impl(impl, stack, sym_map);
-		if (err_state()) {
-			break;
-		}
-	}
-	stack_collapse(stack, begin, end);
-}
-
 /** Evaluates a general function implementation i.e. not BIF. */
 static void efc_evaluate_general(
 		struct Stack *stack,
@@ -197,7 +180,7 @@ static void efc_evaluate_general(
 	temp_end = stack->top;
 
 	/* Evaluate the function expression. */
-	efc_evaluate_impl(stack, &local_sym_map, impl->data.func_def.exprs);
+	eval_impl(impl->data.func_def.expr, stack, sym_map);
 
 	/* Collapse the temporaries. */
 	stack_collapse(stack, temp_begin, temp_end);

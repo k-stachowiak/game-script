@@ -33,7 +33,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 		return node->data.compound.exprs;
 
 	case AST_FUNC_DEF:
-		return node->data.func_def.exprs;
+		return node->data.func_def.expr;
 
 	case AST_FUNC_CALL:
 		return node->data.func_call.actual_args;
@@ -122,7 +122,7 @@ static void efd_push_captures(
 	stack_push_func_cap_init_deferred(stack, &cap_count_loc);
 
 	struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
-	ARRAY_APPEND(to_visit, func_def->exprs);
+	ARRAY_APPEND(to_visit, func_def->expr);
 
 	while (to_visit.size > 0) {
 

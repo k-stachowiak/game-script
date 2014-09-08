@@ -105,7 +105,7 @@ struct AstFuncCall {
 
 struct AstFuncDef {
     struct AstCommonFunc func;
-    struct AstNode *exprs;
+    struct AstNode *expr;
 };
 
 struct AstLiteral {
@@ -180,7 +180,7 @@ struct AstNode *ast_make_func_def(
     struct Location loc,
     char **formal_args,
     int arg_count,
-    struct AstNode *exprs);
+    struct AstNode *expr);
 
 struct AstNode *ast_make_literal_bool(struct Location loc, int value);
 struct AstNode *ast_make_literal_string(struct Location loc, char *value);

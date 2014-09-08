@@ -107,7 +107,7 @@ struct AstNode *ast_make_func_def(
     struct Location loc,
     char **formal_args,
     int arg_count,
-    struct AstNode *exprs)
+    struct AstNode *expr)
 {
     struct AstNode *result = malloc(sizeof(*result));
 
@@ -121,7 +121,7 @@ struct AstNode *ast_make_func_def(
     result->loc = loc;
     result->data.func_def.func.formal_args = formal_args;
     result->data.func_def.func.arg_count = arg_count;
-    result->data.func_def.exprs = exprs;
+    result->data.func_def.expr = expr;
     return result;
 }
 
@@ -270,7 +270,7 @@ static void ast_func_call_free(struct AstFuncCall *afcall)
 static void ast_func_def_free(struct AstFuncDef *afdef)
 {
     ast_common_func_free(&(afdef->func));
-    ast_node_free_list(afdef->exprs);
+    ast_node_free_list(afdef->expr);
 }
 
 static void ast_literal_free(struct AstLiteral *alit)
@@ -373,7 +373,7 @@ void ast_visit(struct AstNode *node, void (*f)(struct AstNode*))
         ast_visit(node->data.func_call.actual_args, f);
         break;
     case AST_FUNC_DEF:
-        ast_visit(node->data.func_def.exprs, f);
+        ast_visit(node->data.func_def.expr, f);
         break;
     }
     if (node->next) {

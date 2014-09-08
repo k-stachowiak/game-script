@@ -149,19 +149,19 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 
 	/* 3.2. 2nd child is the test expression. */
 	if (!(test = parse(child))) {
-		return NULL;
+		goto fail;
 	}
 	child = child->next;
 
 	/* 3.3. 3rd child is the true expression. */
 	if (!(true_expr = parse(child))) {
-		return NULL;
+		goto fail;
 	}
 	child = child->next;
 
 	/* 3.4. 4th child is the false expression. */
 	if (!(false_expr = parse(child))) {
-		return NULL;
+		goto fail;
 	}
 
 	/* NOTE: The expressions are linked here which is useful in a remote place
@@ -171,6 +171,21 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	true_expr->next = false_expr;
 
 	return ast_make_iff(dom->loc, test, true_expr, false_expr);
+
+fail:
+	if (test) {
+		ast_node_free_one(test);
+	}
+
+	if (true_expr) {
+		ast_node_free_one(true_expr);
+	}
+
+	if (false_expr) {
+		ast_node_free_one(false_expr);
+	}
+
+	return NULL;
 }
 
 static struct AstNode *parse_compound(struct DomNode *dom)
@@ -207,8 +222,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     while (child) {
         struct AstNode *node = parse(child);
         if (!node) {
-			ast_node_free_list(exprs);
-            return NULL;
+            goto fail;
         } else {
             LIST_APPEND(node, &exprs, &exprs_end);
         }
@@ -216,6 +230,13 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     }
 
     return ast_make_compound(dom->loc, type, exprs);
+
+fail:
+	if (exprs) {
+		ast_node_free_list(exprs);
+	}
+
+	return NULL;
 }
 
 static struct AstNode *parse_func_call(struct DomNode *dom)
@@ -249,8 +270,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     while (child) {
         struct AstNode *node = parse(child);
         if (!node) {
-            ast_node_free_list(args);
-            return NULL;
+            goto fail;
         } else {
             LIST_APPEND(node, &args, &args_end);
         }
@@ -258,14 +278,20 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     }
 
     return ast_make_func_call(dom->loc, symbol, args);
+
+fail:
+	if (args) {
+		ast_node_free_list(args);
+	}
+
+	return NULL;
 }
 
 static struct AstNode *parse_func_def(struct DomNode *dom)
 {
     char **formal_args = NULL;
     int arg_count = 0;
-    struct AstNode *exprs = NULL;
-    struct AstNode *exprs_end = NULL;
+    struct AstNode *expr = NULL;
 
     struct DomNode *child = NULL;
     struct DomNode *arg_child = NULL;
@@ -277,8 +303,8 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
         return NULL;
     }
 
-    /* 2. Has 3 or more children. */
-    if (!dom_node_is_cpd_min_size(dom, 3)) {
+    /* 2. Has 3 children. */
+    if (!dom_node_is_cpd_of_size(dom, 3)) {
         return NULL;
     }
 
@@ -328,18 +354,12 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     child = child->next;
 
-    /* 3.3. Has 1 or more further expressions. */
-    while (child) {
-    struct AstNode *expr = parse(child);
-        if (!expr) {
-            goto fail;
-        } else {
-            LIST_APPEND(expr, &exprs, &exprs_end);
-        }
-        child = child->next;
-    }
+    /* 3.3. Has 1 more further expression. */
+	if (!(expr = parse(child))) {
+		goto fail;
+	}
 
-    return ast_make_func_def(dom->loc, formal_args, arg_count, exprs);
+    return ast_make_func_def(dom->loc, formal_args, arg_count, expr);
 
 fail:
     if (formal_args) {
@@ -350,8 +370,8 @@ fail:
         free(formal_args);
     }
 
-    if (exprs) {
-        ast_node_free_list(exprs);
+    if (expr) {
+        ast_node_free_one(expr);
     }
 
     return NULL;
