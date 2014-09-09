@@ -325,31 +325,19 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     /* Argument list may be empty. */
     if (arg_child) {
-        formal_args = malloc(2048 * sizeof(*formal_args));
-        if (!formal_args) {
-            err_set(ERR_PARSE, "Allocation failed.");
-            goto fail;
-        }
+		formal_args = malloc_or_die(2048 * sizeof(*formal_args));
         while (arg_child) {
             if (!dom_node_is_atom(arg_child)) {
                 goto fail;
             } else {
                 int len = strlen(arg_child->atom);
-                formal_args[arg_count] = malloc(len + 1);
-                if (!(formal_args[arg_count])) {
-                    err_set(ERR_PARSE, "Allocacation failed.");
-                    goto fail;
-                }
+				formal_args[arg_count] = malloc_or_die(len + 1);
                 memcpy(formal_args[arg_count], arg_child->atom, len + 1);
                 ++arg_count;
             }
             arg_child = arg_child->next;
         }
-        formal_args = realloc(formal_args, arg_count * sizeof(*formal_args));
-        if (!formal_args) {
-			LOG_ERROR("Allocation failed.\n");
-            exit(1);
-        }
+		formal_args = realloc_or_die(formal_args, arg_count * sizeof(*formal_args));
     }
 
     child = child->next;
@@ -406,11 +394,7 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
     len = strlen(atom);
 
     if (atom[0] == delim && atom[len - 1] == delim && len >= 2) {
-        atom_cpy = malloc(len + 1);
-        if (!atom_cpy) {
-            err_set(ERR_PARSE, "Allocacation failed.");
-            return NULL;
-        }
+		atom_cpy = malloc_or_die(len + 1);
         memcpy(atom_cpy, atom, len + 1);
         atom_cpy[len] = '\0';
         return ast_make_literal_string(dom->loc, atom_cpy);

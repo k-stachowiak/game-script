@@ -8,7 +8,9 @@
 #include "repl.h"
 
 /* TODO:
- * - free all memory upon parser failures! IFF, FUNC_DEF!
+ * - Have a single malloc-or-die function, and realloc, and calloc, etc.
+ * - parse_func_def : use list and appending instead of silly preallocation of 2048 chars
+ * - Improve error messages.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

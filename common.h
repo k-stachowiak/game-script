@@ -35,6 +35,14 @@
 
 #define VAL_PTR_BYTES sizeof(void*)
 
+/* Memory management.
+ * ==================
+ */
+
+void *malloc_or_die(size_t size);
+void *calloc_or_die(size_t count, size_t size);
+void *realloc_or_die(void *old, size_t size);
+
 /* Algorighms.
  * ===========
  */
@@ -60,7 +68,7 @@
 #define ARRAY_COPY(dst, src) \
     do { \
         int size = src.cap * sizeof(*dst.data); \
-        dst.data = malloc(size); \
+		dst.data = malloc_or_die(size); \
         memcpy(dst.data, src.data, size); \
         dst.size = src.size; \
         dst.cap = src.cap; \
@@ -80,21 +88,13 @@
 #define ARRAY_APPEND(MACRO_ARRAY, MACRO_ELEMENT) \
     do { \
         if ((MACRO_ARRAY).cap == 0) { \
-            (MACRO_ARRAY).data = malloc(sizeof(*((MACRO_ARRAY).data))); \
-            if (!(MACRO_ARRAY).data) { \
-                fprintf(stderr, "Allocation failure.\n"); \
-                exit(1); \
-            } \
+			(MACRO_ARRAY).data = malloc_or_die(sizeof(*((MACRO_ARRAY).data))); \
             (MACRO_ARRAY).cap = 1; \
         } else if ((MACRO_ARRAY).cap == (MACRO_ARRAY).size) { \
             (MACRO_ARRAY).cap *= 2; \
-            (MACRO_ARRAY).data = realloc(\
+			(MACRO_ARRAY).data = realloc_or_die(\
                     (MACRO_ARRAY).data,\
                     (MACRO_ARRAY).cap * sizeof(*((MACRO_ARRAY).data))); \
-            if (!(MACRO_ARRAY).data) { \
-                fprintf(stderr, "Allocation failure.\n"); \
-                exit(1); \
-            } \
         } \
         (MACRO_ARRAY).data[(MACRO_ARRAY).size++] = (MACRO_ELEMENT); \
     } while (0)

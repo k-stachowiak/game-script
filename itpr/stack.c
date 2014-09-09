@@ -60,11 +60,7 @@ static void stack_peek_function(
         memcpy(&len, stack->buffer + location, VAL_SIZE_BYTES);
         location += VAL_SIZE_BYTES;
 
-        cap.symbol = malloc(len + 1);
-        if (!cap.symbol) {
-			LOG_ERROR("Allocation failure.\n");
-            exit(1);
-        }
+		cap.symbol = malloc_or_die(len + 1);
         memcpy(cap.symbol, stack->buffer + location, len);
         cap.symbol[len] = '\0';
         location += len;
@@ -94,16 +90,8 @@ static void stack_peek_function(
 
 struct Stack *stack_make(VAL_LOC_T size)
 {
-    struct Stack *result = malloc(sizeof(*result));
-    if (!result) {
-		LOG_ERROR("Allocation failure.\n");
-        exit(1);
-    }
-    result->buffer = malloc(size);
-    if (!result->buffer) {
-		LOG_ERROR("Allocation failure.\n");
-        exit(1);
-    }
+	struct Stack *result = malloc_or_die(sizeof(*result));
+	result->buffer = malloc_or_die(size);
     result->size = size;
     result->top = 0;
     return result;

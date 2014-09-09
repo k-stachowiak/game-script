@@ -8,22 +8,11 @@
 
 struct DomNode *dom_make_atom(struct Location loc, char *begin, char *end)
 {
-    struct DomNode *result = malloc(sizeof(*result));
+	struct DomNode *result = malloc_or_die(sizeof(*result));
     int length = end - begin;
-
-    if (!result) {
-        err_set(ERR_DOM, "Allocation failed.");
-        return NULL;
-    }
-
     result->loc = loc;
     result->type = DOM_ATOM;
-    result->atom = malloc(length + 1);
-    if (!result->atom) {
-        err_set(ERR_DOM, "Allocation failed.");
-        return NULL;
-    }
-
+	result->atom = malloc_or_die(length + 1);
     memcpy(result->atom, begin, length);
     result->atom[length] = '\0';
     result->next = NULL;
@@ -35,12 +24,7 @@ struct DomNode *dom_make_compound(
         enum DomCpdType compound_type,
         struct DomNode *children)
 {
-    struct DomNode *result = malloc(sizeof(*result));
-    if (!result) {
-        err_set(ERR_DOM, "Allocation failed.");
-        return NULL;
-    }
-
+	struct DomNode *result = malloc_or_die(sizeof(*result));
     result->loc = loc;
     result->type = DOM_COMPOUND;
     result->cpd_type = compound_type;
@@ -108,12 +92,7 @@ char *dom_node_parse_atom(struct DomNode *node)
     }
 
     len = strlen(node->atom);
-    result = malloc(len + 1);
-    if (!result) {
-        err_set(ERR_DOM, "Allocation failed.");
-        return NULL;
-    }
-
+	result = malloc_or_die(len + 1);
 	memcpy(result, node->atom, len + 1);
     result[len] = '\0';
 

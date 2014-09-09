@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include "common.h"
 #include "error.h"
 #include "ast.h"
 
@@ -9,13 +10,7 @@ struct AstNode *ast_make_do_block(
 		struct Location loc,
 		struct AstNode* exprs)
 {
-	struct AstNode *result = malloc(sizeof(*result));
-
-	if (!result) {
-		err_set(ERR_PARSE, "Allocation failed.");
-		return NULL;
-	}
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
 	result->next = NULL;
 	result->type = AST_DO_BLOCK;
 	result->loc = loc;
@@ -27,13 +22,7 @@ struct AstNode *ast_make_bind(
 		struct Location loc,
 		char *symbol, struct AstNode *expr)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_BIND;
     result->loc = loc;
@@ -48,13 +37,7 @@ struct AstNode *ast_make_iff(
 		struct AstNode *true_expr,
 		struct AstNode *false_expr)
 {
-	struct AstNode *result = malloc(sizeof(*result));
-
-	if (!result) {
-		err_set(ERR_PARSE, "Allocation failed.");
-		return NULL;
-	}
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
 	result->next = NULL;
 	result->type = AST_IFF;
 	result->loc = loc;
@@ -69,13 +52,7 @@ struct AstNode *ast_make_compound(
     enum AstCompoundType type,
     struct AstNode *exprs)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_COMPOUND;
     result->loc = loc;
@@ -88,13 +65,7 @@ struct AstNode *ast_make_func_call(
     struct Location loc,
     char *symbol, struct AstNode *args)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_CALL;
     result->loc = loc;
@@ -109,13 +80,7 @@ struct AstNode *ast_make_func_def(
     int arg_count,
     struct AstNode *expr)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_DEF;
     result->loc = loc;
@@ -127,13 +92,7 @@ struct AstNode *ast_make_func_def(
 
 struct AstNode *ast_make_literal_bool(struct Location loc, int value)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = loc;
@@ -144,13 +103,7 @@ struct AstNode *ast_make_literal_bool(struct Location loc, int value)
 
 struct AstNode *ast_make_literal_string(struct Location loc, char *value)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = loc;
@@ -161,13 +114,7 @@ struct AstNode *ast_make_literal_string(struct Location loc, char *value)
 
 struct AstNode *ast_make_literal_character(struct Location loc, char value)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = loc;
@@ -178,13 +125,7 @@ struct AstNode *ast_make_literal_character(struct Location loc, char value)
 
 struct AstNode *ast_make_literal_int(struct Location loc, long value)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = loc;
@@ -195,13 +136,7 @@ struct AstNode *ast_make_literal_int(struct Location loc, long value)
 
 struct AstNode *ast_make_literal_real(struct Location loc, double value)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = loc;
@@ -212,13 +147,7 @@ struct AstNode *ast_make_literal_real(struct Location loc, double value)
 
 struct AstNode *ast_make_reference(struct Location loc, char *symbol)
 {
-    struct AstNode *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_PARSE, "Allocation failed.");
-        return NULL;
-    }
-
+	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_REFERENCE;
     result->loc = loc;

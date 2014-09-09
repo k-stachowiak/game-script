@@ -11,13 +11,7 @@
 
 struct Token *tok_make_token(struct SourceIter *begin, struct SourceIter *end)
 {
-    struct Token *result = malloc(sizeof(*result));
-
-    if (!result) {
-        err_set(ERR_TOK, "Allocation failed.");
-        return NULL;
-    }
-
+	struct Token *result = malloc_or_die(sizeof(*result));
     result->loc = begin->loc;
     result->begin = begin->current;
     result->end = end->current;

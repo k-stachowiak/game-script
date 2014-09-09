@@ -55,16 +55,11 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs)
  */
 char *my_getline(bool *eof)
 {
-	char *line = malloc(100);
+	char *line = malloc_or_die(100);
 	char *linep = line;
 	size_t lenmax = 100;
 	size_t len = lenmax;
 	int c;
-
-	if (line == NULL) {
-		LOG_ERROR("Allocation failed.");
-		exit(1);
-	}
 
 	for (;;) {
 		c = fgetc(stdin);
@@ -76,13 +71,7 @@ char *my_getline(bool *eof)
 		if (--len == 0) {
 			char *linen;
 			len = lenmax;
-			linen = realloc(linep, lenmax *= 2);
-
-			if (!linen) {
-				LOG_ERROR("Allocation failed.\n");
-				exit(1);
-			}
-
+			linen = realloc_or_die(linep, lenmax *= 2);
 			line = linen + (line - linep);
 			linep = linen;
 		}
@@ -111,14 +100,42 @@ char *my_getfile(char *filename)
 		fseek(file, 0, SEEK_END);
 		length = ftell(file);
 		fseek(file, 0, SEEK_SET);
-		buffer = calloc(length + 1, 1);
-		if (buffer) {
-			fread(buffer, 1, length, file);
-		}
+		buffer = calloc_or_die(length + 1, 1);
+		fread(buffer, 1, length, file);
 		fclose(file);
 	} else {
 		return NULL;
 	}
 
 	return buffer;
+}
+
+void *malloc_or_die(size_t size)
+{
+	void *result = malloc(size);
+	if (!result) {
+		LOG_ERROR("Allocation failure.");
+		exit(1);
+	}
+	return result;
+}
+
+void *calloc_or_die(size_t count, size_t size)
+{
+	void *result = calloc(count, size);
+	if (!result) {
+		LOG_ERROR("Callocation failure.");
+		exit(1);
+	}
+	return result;
+}
+
+void *realloc_or_die(void *old, size_t size)
+{
+	void *result = realloc(old, size);
+	if (result) {
+		LOG_ERROR("Reallocation failure.");
+		exit(1);
+	}
+	return result;
 }
