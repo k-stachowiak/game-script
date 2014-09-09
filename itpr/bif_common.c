@@ -7,8 +7,8 @@
 
 bool initialized = false;
 struct Location bif_location = { -1, -1 };
-struct Location bif_arg_locations[] = { { -1, -1 }, { -1, -1 } };
-char *bif_arg_names[] = { "x", "y" }; /* TODO: This is actually irrelevant. Deal with it. */
+struct Location bif_arg_locations[] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
+char *bif_arg_names[] = { "x", "y", "z" };
 
 void bif_init_impl_ptrs(struct AstNode *node)
 {
@@ -19,6 +19,7 @@ void bif_init_impl_ptrs(struct AstNode *node)
 	node->data.bif.bin_log_impl = NULL;
 	node->data.bif.un_arr_impl = NULL;
 	node->data.bif.bin_arr_impl = NULL;
+	node->data.bif.tern_arr_impl = NULL;
 }
 
 enum ValueType bif_match_un(

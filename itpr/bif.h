@@ -5,7 +5,7 @@
 
 #include "ast.h"
 
-#define BIF_MAX_ARITY 2
+#define BIF_MAX_ARITY 3
 
 extern struct AstNode bif_sqrt;
 
@@ -31,6 +31,7 @@ extern struct AstNode bif_car;
 extern struct AstNode bif_cdr;
 extern struct AstNode bif_cons;
 extern struct AstNode bif_cat;
+extern struct AstNode bif_slice;
 
 void bif_assure_init(void);
 

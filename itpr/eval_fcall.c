@@ -53,6 +53,10 @@ static int efc_compute_arity(struct AstNode *def_node)
 		case AST_BIF_ARRAY_BINARY:
 		case AST_BIF_COMPARE:
 			return 2;
+
+		case AST_BIF_ARRAY_TERNARY:
+			return 3;
+
 		default:
 			LOG_ERROR("Unhandled bif type.\n");
 			exit(1);
@@ -205,6 +209,8 @@ static bool efc_assert_bif_arg_count(enum AstBifType type, int arg_count)
 	case AST_BIF_COMPARE:
 		return arg_count == 2;
 
+	case AST_BIF_ARRAY_TERNARY:
+		return arg_count == 3;
 	}
 
 	LOG_ERROR("Unhandled BIF type.\n");
@@ -282,6 +288,10 @@ static void efc_evaluate_bif(
 
 	case AST_BIF_ARRAY_BINARY:
 		impl->bin_arr_impl(stack, arg_locs[0], arg_locs[1]);
+		break;
+
+	case AST_BIF_ARRAY_TERNARY:
+		impl->tern_arr_impl(stack, arg_locs[0], arg_locs[1], arg_locs[2]);
 		break;
 	}
 

@@ -8,7 +8,6 @@
 #include "repl.h"
 
 /* TODO:
- * - When parser encounters a reserved word, it must be more strict.
  * - Improve error messages.
  * - Algorithms:
  *   - merge sort:

@@ -35,6 +35,7 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 	sym_map_insert(sym_map, "cdr", eval(&bif_cdr, stack, sym_map));
 	sym_map_insert(sym_map, "cons", eval(&bif_cons, stack, sym_map));
 	sym_map_insert(sym_map, "cat", eval(&bif_cat, stack, sym_map));
+	sym_map_insert(sym_map, "slice", eval(&bif_slice, stack, sym_map));
 }
 
 void sym_map_init(

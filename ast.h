@@ -28,7 +28,8 @@ enum AstBifType {
 	AST_BIF_LOGIC_UNARY,
 	AST_BIF_LOGIC_BINARY,
 	AST_BIF_ARRAY_UNARY,
-	AST_BIF_ARRAY_BINARY
+	AST_BIF_ARRAY_BINARY,
+	AST_BIF_ARRAY_TERNARY
 };
 
 enum AstCompoundType {
@@ -76,6 +77,7 @@ struct AstBif {
 	/* Array */
 	void(*un_arr_impl)(struct Stack*, VAL_LOC_T);
 	void(*bin_arr_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
+	void(*tern_arr_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T, VAL_LOC_T);
 };
 
 struct AstDoBlock {

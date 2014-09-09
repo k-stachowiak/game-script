@@ -28,6 +28,17 @@ static void bif_init_binary_array_ast(struct AstNode *node)
 	bif_init_impl_ptrs(node);
 }
 
+static void bif_init_ternary_array_ast(struct AstNode *node)
+{
+	node->type = AST_BIF;
+	node->loc = bif_location;
+	node->data.bif.func.formal_args = bif_arg_names;
+	node->data.bif.func.arg_locs = bif_arg_locations;
+	node->data.bif.func.arg_count = 3;
+	node->data.bif.type = AST_BIF_ARRAY_TERNARY;
+	bif_init_impl_ptrs(node);
+}
+
 void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
@@ -196,12 +207,79 @@ static void bif_cat_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	stack_push_cpd_final(stack, size_loc, vx.header.size + vy.header.size);
 }
 
+static void bif_slice_impl(
+		struct Stack *stack,
+		VAL_LOC_T x_loc,
+		VAL_LOC_T y_loc,
+		VAL_LOC_T z_loc)
+{
+	struct Value varr, vfirst, vlast;
+	VAL_INT_T first, last;
+	VAL_LOC_T size_loc, loc, end;
+	VAL_SIZE_T index = 0, size = 0;
+
+	/* Assert input. */
+	varr = stack_peek_value(stack, x_loc);
+	vfirst = stack_peek_value(stack, y_loc);
+	vlast = stack_peek_value(stack, z_loc);
+
+	if ((enum ValueType)varr.header.type != VAL_ARRAY) {
+		err_set(ERR_EVAL, "First argumment of slice must be an array.");
+		return;
+	}
+
+	if ((enum ValueType)vfirst.header.type != VAL_INT ||
+		(enum ValueType)vlast.header.type != VAL_INT) {
+		err_set(ERR_EVAL, "Range arguments of slice must be integers.");
+		return;
+	}
+
+	first = vfirst.primitive.integer;
+	last = vlast.primitive.integer;
+
+	if (first < 0 || last < 0) {
+		err_set(ERR_EVAL, "Range arguments of slice must be non-negative.");
+		return;
+	}
+
+	/* Build new header. */
+	stack_push_array_init(stack, &size_loc);
+
+	/* Iterate over array */
+	loc = x_loc + VAL_HEAD_BYTES;
+	end = loc + varr.header.size;
+	while (loc != end) {
+		struct ValueHeader header = stack_peek_header(stack, loc);
+		if (index >= first && index < last) {
+			stack_push_copy(stack, loc);
+			size += header.size + VAL_HEAD_BYTES;
+		}
+		loc += header.size + VAL_HEAD_BYTES;
+		++index;
+	}
+
+	/* Assert validity of input in an awkward place. */
+	if (first > last) {
+		err_set(ERR_EVAL, "First greater than last in slice.");
+		return;
+	}
+
+	if (last > index) {
+		err_set(ERR_EVAL, "Last out of bounds in slice.");
+		return;
+	}
+
+	/* Finalize. */
+	stack_push_cpd_final(stack, size_loc, size);
+}
+
 struct AstNode bif_length;
 struct AstNode bif_empty;
 struct AstNode bif_car;
 struct AstNode bif_cdr;
 struct AstNode bif_cons;
 struct AstNode bif_cat;
+struct AstNode bif_slice;
 
 void bif_init_array(void)
 {
@@ -222,4 +300,7 @@ void bif_init_array(void)
 
 	bif_init_binary_array_ast(&bif_cat);
 	bif_cat.data.bif.bin_arr_impl = bif_cat_impl;
+
+	bif_init_ternary_array_ast(&bif_slice);
+	bif_slice.data.bif.tern_arr_impl = bif_slice_impl;
 }
