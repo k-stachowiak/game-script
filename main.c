@@ -12,7 +12,6 @@
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
- *		- implement slice
  *      - implement reverse
  *		- implement the splitting phase
  * - Side effects: print

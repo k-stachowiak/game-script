@@ -95,11 +95,13 @@ static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 
 static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 {
-	struct Value value = stack_peek_value(stack, location);
+	struct Value value;
 	struct ValueHeader head_header;
 	VAL_LOC_T head_loc, tail_loc;
 	VAL_HEAD_TYPE_T new_type;
 	VAL_HEAD_SIZE_T new_size;
+
+	value = stack_peek_value(stack, location);
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
 		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
@@ -124,6 +126,46 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&new_type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&new_size);
 	stack_push(stack, new_size, stack->buffer + tail_loc);
+}
+
+static void bif_reverse_impl(struct Stack* stack, VAL_LOC_T location)
+{
+	struct Value value;
+	VAL_LOC_T size_loc, loc, end;
+	VAL_SIZE_T size;
+	int i; /* NOTE: This is counting down - keep it UNSIGNED! */
+
+	struct {
+		VAL_LOC_T *data;
+		int cap, size;
+	} locs = { NULL, 0, 0 };
+
+	value = stack_peek_value(stack, location);
+	size = value.header.size;
+
+	/* Assert input. */
+	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		return;
+	}
+
+	/* Store original locations. */
+	loc = location + VAL_HEAD_BYTES;
+	end = loc + size;
+	while (loc != end) {
+		struct ValueHeader header = stack_peek_header(stack, loc);
+		ARRAY_APPEND(locs, loc);
+		loc += header.size + VAL_HEAD_BYTES;
+	}
+
+	/* Push in reverse order. */
+	stack_push_array_init(stack, &size_loc);
+	for (i = locs.size - 1; i >= 0; --i) {
+		stack_push_copy(stack, locs.data[i]);
+	}
+	stack_push_cpd_final(stack, size_loc, size);
+
+	ARRAY_FREE(locs);
 }
 
 static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
@@ -277,6 +319,7 @@ struct AstNode bif_length;
 struct AstNode bif_empty;
 struct AstNode bif_car;
 struct AstNode bif_cdr;
+struct AstNode bif_reverse;
 struct AstNode bif_cons;
 struct AstNode bif_cat;
 struct AstNode bif_slice;
@@ -294,6 +337,9 @@ void bif_init_array(void)
 
 	bif_init_unary_array_ast(&bif_cdr);
 	bif_cdr.data.bif.un_arr_impl = bif_cdr_impl;
+
+	bif_init_unary_array_ast(&bif_reverse);
+	bif_reverse.data.bif.un_arr_impl = bif_reverse_impl;
 
 	bif_init_binary_array_ast(&bif_cons);
 	bif_cons.data.bif.bin_arr_impl = bif_cons_impl;

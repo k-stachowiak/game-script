@@ -29,6 +29,7 @@ extern struct AstNode bif_length;
 extern struct AstNode bif_empty;
 extern struct AstNode bif_car;
 extern struct AstNode bif_cdr;
+extern struct AstNode bif_reverse;
 extern struct AstNode bif_cons;
 extern struct AstNode bif_cat;
 extern struct AstNode bif_slice;
