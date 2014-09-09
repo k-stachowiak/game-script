@@ -18,7 +18,9 @@ extern struct Location bif_location;
 extern struct Location bif_arg_locations[];
 extern char *bif_arg_names[];
 
-void bif_init_impl_ptrs(struct AstNode *node);
+void bif_init_unary_ast(struct AstNode *node);
+void bif_init_binary_ast(struct AstNode *node);
+void bif_init_ternary_ast(struct AstNode *node);
 
 enum ValueType bif_match_un(
 	struct Stack *stack,

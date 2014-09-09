@@ -6,39 +6,6 @@
 #include "stack.h"
 #include "error.h"
 
-static void bif_init_unary_array_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 1;
-	node->data.bif.type = AST_BIF_ARRAY_UNARY;
-	bif_init_impl_ptrs(node);
-}
-
-static void bif_init_binary_array_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 2;
-	node->data.bif.type = AST_BIF_ARRAY_BINARY;
-	bif_init_impl_ptrs(node);
-}
-
-static void bif_init_ternary_array_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 3;
-	node->data.bif.type = AST_BIF_ARRAY_TERNARY;
-	bif_init_impl_ptrs(node);
-}
-
 void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
@@ -326,27 +293,27 @@ struct AstNode bif_slice;
 
 void bif_init_array(void)
 {
-	bif_init_unary_array_ast(&bif_length);
-	bif_length.data.bif.un_arr_impl = bif_length_impl;
+	bif_init_unary_ast(&bif_length);
+	bif_length.data.bif.u_impl = bif_length_impl;
 
-	bif_init_unary_array_ast(&bif_empty);
-	bif_empty.data.bif.un_arr_impl = bif_empty_impl;
+	bif_init_unary_ast(&bif_empty);
+	bif_empty.data.bif.u_impl = bif_empty_impl;
 
-	bif_init_unary_array_ast(&bif_car);
-	bif_car.data.bif.un_arr_impl = bif_car_impl;
+	bif_init_unary_ast(&bif_car);
+	bif_car.data.bif.u_impl = bif_car_impl;
 
-	bif_init_unary_array_ast(&bif_cdr);
-	bif_cdr.data.bif.un_arr_impl = bif_cdr_impl;
+	bif_init_unary_ast(&bif_cdr);
+	bif_cdr.data.bif.u_impl = bif_cdr_impl;
 
-	bif_init_unary_array_ast(&bif_reverse);
-	bif_reverse.data.bif.un_arr_impl = bif_reverse_impl;
+	bif_init_unary_ast(&bif_reverse);
+	bif_reverse.data.bif.u_impl = bif_reverse_impl;
 
-	bif_init_binary_array_ast(&bif_cons);
-	bif_cons.data.bif.bin_arr_impl = bif_cons_impl;
+	bif_init_binary_ast(&bif_cons);
+	bif_cons.data.bif.bi_impl = bif_cons_impl;
 
-	bif_init_binary_array_ast(&bif_cat);
-	bif_cat.data.bif.bin_arr_impl = bif_cat_impl;
+	bif_init_binary_ast(&bif_cat);
+	bif_cat.data.bif.bi_impl = bif_cat_impl;
 
-	bif_init_ternary_array_ast(&bif_slice);
-	bif_slice.data.bif.tern_arr_impl = bif_slice_impl;
+	bif_init_ternary_ast(&bif_slice);
+	bif_slice.data.bif.ter_impl = bif_slice_impl;
 }

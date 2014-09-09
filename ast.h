@@ -22,14 +22,9 @@ enum AstNodeType {
 };
 
 enum AstBifType {
-    AST_BIF_ARYTHM_UNARY,
-    AST_BIF_ARYTHM_BINARY,
-	AST_BIF_COMPARE,
-	AST_BIF_LOGIC_UNARY,
-	AST_BIF_LOGIC_BINARY,
-	AST_BIF_ARRAY_UNARY,
-	AST_BIF_ARRAY_BINARY,
-	AST_BIF_ARRAY_TERNARY
+    AST_BIF_UNARY,
+    AST_BIF_BINARY,
+	AST_BIF_TERNARY
 };
 
 enum AstCompoundType {
@@ -62,22 +57,9 @@ struct Stack;
 struct AstBif {
     struct AstCommonFunc func;
     enum AstBifType type;
-
-    /* Arithmetic */
-	void(*un_arythm_impl)(struct Stack*, VAL_LOC_T);
-	void(*bin_arythm_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
-
-	/* Compare */
-	void(*cmp_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
-
-	/* Logic */
-	void(*un_log_impl)(struct Stack*, VAL_LOC_T);
-	void(*bin_log_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
-
-	/* Array */
-	void(*un_arr_impl)(struct Stack*, VAL_LOC_T);
-	void(*bin_arr_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
-	void(*tern_arr_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T, VAL_LOC_T);
+	void(*u_impl)(struct Stack*, VAL_LOC_T);
+	void(*bi_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
+	void(*ter_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T, VAL_LOC_T);
 };
 
 struct AstDoBlock {

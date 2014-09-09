@@ -9,29 +9,6 @@
 #include "value.h"
 #include "error.h"
 
-static void bif_init_arythmetic_unary_ast(struct AstNode *node)
-{
-    node->type = AST_BIF;
-    node->loc = bif_location;
-    node->data.bif.func.formal_args = bif_arg_names;
-    node->data.bif.func.arg_locs = bif_arg_locations;
-    node->data.bif.func.arg_count = 1;
-	node->data.bif.type = AST_BIF_ARYTHM_UNARY;
-	bif_init_impl_ptrs(node);
-}
-
-static void bif_init_arythmetic_binary_ast(struct AstNode *node)
-{
-    node->type = AST_BIF;
-    node->loc = bif_location;
-    node->data.bif.func.formal_args = bif_arg_names;
-    node->data.bif.func.arg_locs = bif_arg_locations;
-    node->data.bif.func.arg_count = 2;
-    node->data.bif.type = AST_BIF_ARYTHM_BINARY;
-	node->data.bif.cmp_impl = NULL;
-	node->data.bif.un_arr_impl = NULL;
-}
-
 static VAL_INT_T bif_sqrt_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }
 static VAL_REAL_T bif_sqrt_real(VAL_REAL_T x) { return sqrt(x); }
 
@@ -134,21 +111,21 @@ struct AstNode bif_mod;
 
 void bif_init_arythmetic(void)
 {
-	bif_init_arythmetic_unary_ast(&bif_sqrt);
-	bif_sqrt.data.bif.un_arythm_impl = bif_sqrt_impl;
+	bif_init_unary_ast(&bif_sqrt);
+	bif_sqrt.data.bif.u_impl = bif_sqrt_impl;
 
-	bif_init_arythmetic_binary_ast(&bif_add);
-	bif_add.data.bif.bin_arythm_impl = bif_add_impl;
+	bif_init_binary_ast(&bif_add);
+	bif_add.data.bif.bi_impl = bif_add_impl;
 
-	bif_init_arythmetic_binary_ast(&bif_sub);
-	bif_sub.data.bif.bin_arythm_impl = bif_sub_impl;
+	bif_init_binary_ast(&bif_sub);
+	bif_sub.data.bif.bi_impl = bif_sub_impl;
 
-	bif_init_arythmetic_binary_ast(&bif_mul);
-	bif_mul.data.bif.bin_arythm_impl = bif_mul_impl;
+	bif_init_binary_ast(&bif_mul);
+	bif_mul.data.bif.bi_impl = bif_mul_impl;
 
-	bif_init_arythmetic_binary_ast(&bif_div);
-	bif_div.data.bif.bin_arythm_impl = bif_div_impl;
+	bif_init_binary_ast(&bif_div);
+	bif_div.data.bif.bi_impl = bif_div_impl;
 
-	bif_init_arythmetic_binary_ast(&bif_mod);
-	bif_mod.data.bif.bin_arythm_impl = bif_mod_impl;
+	bif_init_binary_ast(&bif_mod);
+	bif_mod.data.bif.bi_impl = bif_mod_impl;
 }

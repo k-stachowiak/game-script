@@ -43,18 +43,13 @@ static int efc_compute_arity(struct AstNode *def_node)
 	switch (def_node->type) {
 	case AST_BIF:
 		switch (def_node->data.bif.type) {
-		case AST_BIF_ARYTHM_UNARY:
-		case AST_BIF_LOGIC_UNARY:
-		case AST_BIF_ARRAY_UNARY:
+		case AST_BIF_UNARY:
 			return 1;
 
-		case AST_BIF_ARYTHM_BINARY:
-		case AST_BIF_LOGIC_BINARY:
-		case AST_BIF_ARRAY_BINARY:
-		case AST_BIF_COMPARE:
+		case AST_BIF_BINARY:
 			return 2;
 
-		case AST_BIF_ARRAY_TERNARY:
+		case AST_BIF_TERNARY:
 			return 3;
 
 		default:
@@ -198,18 +193,13 @@ cleanup:
 static bool efc_assert_bif_arg_count(enum AstBifType type, int arg_count)
 {
 	switch (type) {
-	case AST_BIF_ARYTHM_UNARY:
-	case AST_BIF_LOGIC_UNARY:
-	case AST_BIF_ARRAY_UNARY:
+	case AST_BIF_UNARY:
 		return arg_count == 1;
 
-	case AST_BIF_ARYTHM_BINARY:
-	case AST_BIF_LOGIC_BINARY:
-	case AST_BIF_ARRAY_BINARY:
-	case AST_BIF_COMPARE:
+	case AST_BIF_BINARY:
 		return arg_count == 2;
 
-	case AST_BIF_ARRAY_TERNARY:
+	case AST_BIF_TERNARY:
 		return arg_count == 3;
 	}
 
@@ -262,36 +252,16 @@ static void efc_evaluate_bif(
 
 	/* Evaluate the function implementation. */
 	switch (impl->type) {
-	case AST_BIF_ARYTHM_UNARY:
-		impl->un_arythm_impl(stack, arg_locs[0]);
+	case AST_BIF_UNARY:
+		impl->u_impl(stack, arg_locs[0]);
 		break;
 
-	case AST_BIF_ARYTHM_BINARY:
-		impl->bin_arythm_impl(stack, arg_locs[0], arg_locs[1]);
+	case AST_BIF_BINARY:
+		impl->bi_impl(stack, arg_locs[0], arg_locs[1]);
 		break;
 
-	case AST_BIF_LOGIC_UNARY:
-		impl->un_log_impl(stack, arg_locs[0]);
-		break;
-
-	case AST_BIF_LOGIC_BINARY:
-		impl->bin_log_impl(stack, arg_locs[0], arg_locs[1]);
-		break;
-
-	case AST_BIF_COMPARE:
-		impl->cmp_impl(stack, arg_locs[0], arg_locs[1]);
-		break;
-
-	case AST_BIF_ARRAY_UNARY:
-		impl->un_arr_impl(stack, arg_locs[0]);
-		break;
-
-	case AST_BIF_ARRAY_BINARY:
-		impl->bin_arr_impl(stack, arg_locs[0], arg_locs[1]);
-		break;
-
-	case AST_BIF_ARRAY_TERNARY:
-		impl->tern_arr_impl(stack, arg_locs[0], arg_locs[1], arg_locs[2]);
+	case AST_BIF_TERNARY:
+		impl->ter_impl(stack, arg_locs[0], arg_locs[1], arg_locs[2]);
 		break;
 	}
 

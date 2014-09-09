@@ -6,28 +6,6 @@
 #include "stack.h"
 #include "error.h"
 
-static void bif_init_logic_unary_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 1;
-	node->data.bif.type = AST_BIF_LOGIC_UNARY;
-	bif_init_impl_ptrs(node);
-}
-
-static void bif_init_logic_binary_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 2;
-	node->data.bif.type = AST_BIF_LOGIC_BINARY;
-	bif_init_impl_ptrs(node);
-}
-
 static VAL_BOOL_T bif_log_and(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x && (bool)y; }
 static VAL_BOOL_T bif_log_or(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x || (bool)y; }
 static VAL_BOOL_T bif_log_not(VAL_BOOL_T x) { return !((bool)x); }
@@ -85,12 +63,12 @@ struct AstNode bif_not;
 
 void bif_init_logic(void)
 {
-	bif_init_logic_binary_ast(&bif_and);
-	bif_and.data.bif.bin_log_impl = bif_and_impl;
+	bif_init_binary_ast(&bif_and);
+	bif_and.data.bif.bi_impl = bif_and_impl;
 
-	bif_init_logic_binary_ast(&bif_or);
-	bif_or.data.bif.bin_log_impl = bif_or_impl;
+	bif_init_binary_ast(&bif_or);
+	bif_or.data.bif.bi_impl = bif_or_impl;
 
-	bif_init_logic_unary_ast(&bif_not);
-	bif_not.data.bif.un_log_impl = bif_not_impl;
+	bif_init_unary_ast(&bif_not);
+	bif_not.data.bif.u_impl = bif_not_impl;
 }

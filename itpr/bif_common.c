@@ -10,16 +10,44 @@ struct Location bif_location = { -1, -1 };
 struct Location bif_arg_locations[] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
 char *bif_arg_names[] = { "x", "y", "z" };
 
-void bif_init_impl_ptrs(struct AstNode *node)
+static void bif_init_impl_ptrs(struct AstNode *node)
 {
-	node->data.bif.un_arythm_impl = NULL;
-	node->data.bif.bin_arythm_impl = NULL;
-	node->data.bif.cmp_impl = NULL;
-	node->data.bif.un_log_impl = NULL;
-	node->data.bif.bin_log_impl = NULL;
-	node->data.bif.un_arr_impl = NULL;
-	node->data.bif.bin_arr_impl = NULL;
-	node->data.bif.tern_arr_impl = NULL;
+	node->data.bif.u_impl = NULL;
+	node->data.bif.bi_impl = NULL;
+	node->data.bif.ter_impl = NULL;
+}
+
+void bif_init_unary_ast(struct AstNode *node)
+{
+	node->type = AST_BIF;
+	node->loc = bif_location;
+	node->data.bif.func.formal_args = bif_arg_names;
+	node->data.bif.func.arg_locs = bif_arg_locations;
+	node->data.bif.func.arg_count = 1;
+	node->data.bif.type = AST_BIF_UNARY;
+	bif_init_impl_ptrs(node);
+}
+
+void bif_init_binary_ast(struct AstNode *node)
+{
+	node->type = AST_BIF;
+	node->loc = bif_location;
+	node->data.bif.func.formal_args = bif_arg_names;
+	node->data.bif.func.arg_locs = bif_arg_locations;
+	node->data.bif.func.arg_count = 2;
+	node->data.bif.type = AST_BIF_BINARY;
+	bif_init_impl_ptrs(node);
+}
+
+void bif_init_ternary_ast(struct AstNode *node)
+{
+	node->type = AST_BIF;
+	node->loc = bif_location;
+	node->data.bif.func.formal_args = bif_arg_names;
+	node->data.bif.func.arg_locs = bif_arg_locations;
+	node->data.bif.func.arg_count = 3;
+	node->data.bif.type = AST_BIF_TERNARY;
+	bif_init_impl_ptrs(node);
 }
 
 enum ValueType bif_match_un(
