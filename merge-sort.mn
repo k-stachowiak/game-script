@@ -1,24 +1,28 @@
 (bind merge-non-empty (func (lhs rhs result)
-	(bind l (car lhs))
-	(bind r (car rhs))
-	(if (< l r)
-		(merge-general (cdr lhs) rhs (cons l result))
-		(merge-general lhs (cdr rhs) (cons r result))
+	(do
+		(bind l (car lhs))
+		(bind r (car rhs))
+		(if (< l r)
+			(merge-general (cdr lhs) rhs (cons l result))
+			(merge-general lhs (cdr rhs) (cons r result))
+		)
 	)
 ))
 
 (bind merge-general (func (lhs rhs result)
-	(bind left-empty (empty lhs))	
-	(bind right-empty (empty rhs))
-	(if (&& left-empty right-empty)
-		result
-		(if left-empty
-			(cat rhs result)
-			(if right-empty
-				(cat lhs result)
-				(merge-non-empty lhs rhs result)
-			)
-		)	
+	(do
+		(bind left-empty (empty lhs))	
+		(bind right-empty (empty rhs))
+		(if (&& left-empty right-empty)
+			result
+			(if left-empty
+				(cat rhs result)
+				(if right-empty
+					(cat lhs result)
+					(merge-non-empty lhs rhs result)
+				)
+			)	
+		)
 	)
 ))
 
@@ -27,20 +31,24 @@
 ))
 
 (bind merge-sort`` (func (x y)
-	(bind x-sorted (merge-sort x))
-	(bind y-sorted (merge-sort y))
-	(merge x-sorted y-sorted)
+	(do
+		(bind x-sorted (merge-sort x))
+		(bind y-sorted (merge-sort y))
+		(merge x-sorted y-sorted)
+	)
 ))
 
 (bind merge-sort` (func (x)
-	(bind len (length x))
-	(bind h (/ len 2))
-	(if (<= len 1)
-		x
-		(do
-			(bind lt (slice x 0 (+ h 1))
-			(bind rt (slice x (+ h 2) len)
-			(merge-sort`` lt rt))
+	(do
+		(bind len (length x))
+		(bind h (/ len 2))
+		(if (<= len 1)
+			x
+			(do
+				(bind lt (slice x 0 (+ h 1))
+				(bind rt (slice x (+ h 2) len)
+				(merge-sort`` lt rt))
+			)
 		)
 	)
 ))
