@@ -8,8 +8,7 @@
 #include "repl.h"
 
 /* TODO:
- * - Have a single malloc-or-die function, and realloc, and calloc, etc.
- * - parse_func_def : use list and appending instead of silly preallocation of 2048 chars
+ * - When parser encounters a reserved word, it must be more strict.
  * - Improve error messages.
  * - Algorithms:
  *   - merge sort:

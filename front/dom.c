@@ -6,6 +6,17 @@
 #include "error.h"
 #include "dom.h"
 
+static char *reserved[] = {
+	"do",
+	"bind",
+	"if",
+	"func",
+	"true",
+	"false"
+};
+
+static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
+
 struct DomNode *dom_make_atom(struct Location loc, char *begin, char *end)
 {
 	struct DomNode *result = malloc_or_die(sizeof(*result));
@@ -52,13 +63,13 @@ bool dom_node_is_atom(struct DomNode *node)
     return node->type == DOM_ATOM;
 }
 
-bool dom_node_is_spec_atom(struct DomNode *node, char *atom)
+bool dom_node_is_reserved_atom(struct DomNode *node, enum Reserved res)
 {
     if (node->type != DOM_ATOM) {
         return false;
     }
 
-    return (strcmp(node->atom, atom) == 0);
+    return (strcmp(node->atom, reserved[(size_t)res]) == 0);
 }
 
 bool dom_node_is_compound(struct DomNode *node)
@@ -83,13 +94,20 @@ bool dom_node_is_cpd_min_size(struct DomNode *node, int size)
         dom_list_length(node->cpd_children) >= size;
 }
 
-char *dom_node_parse_atom(struct DomNode *node)
+char *dom_node_parse_symbol(struct DomNode *node)
 {
     char* result;
-    int len;
-    if (node->type == DOM_COMPOUND) {
+    int len, i;
+
+    if (node->type != DOM_ATOM) {
         return NULL;
     }
+
+	for (i = 0; i < reserved_count; ++i) {
+		if (strcmp(node->atom, reserved[i]) == 0) {
+			return NULL;
+		}
+	}
 
     len = strlen(node->atom);
 	result = malloc_or_die(len + 1);

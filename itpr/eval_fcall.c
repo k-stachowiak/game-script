@@ -61,7 +61,6 @@ static int efc_compute_arity(struct AstNode *def_node)
 
 	case AST_FUNC_DEF:
 		return def_node->data.func_def.func.arg_count;
-		break;
 
 	default:
 		LOG_ERROR("Non-function AST node pointed by function value.\n");
@@ -180,7 +179,7 @@ static void efc_evaluate_general(
 	temp_end = stack->top;
 
 	/* Evaluate the function expression. */
-	eval_impl(impl->data.func_def.expr, stack, sym_map);
+	eval_impl(impl->data.func_def.expr, stack, &local_sym_map);
 
 	/* Collapse the temporaries. */
 	stack_collapse(stack, temp_begin, temp_end);
@@ -310,6 +309,7 @@ void eval_func_call(
 		efc_curry_on(stack, sym_map, actual_args, &value);
 
 	} else if (arity == applied) {
+
 		switch (value.function.def->type) {
 		case AST_FUNC_DEF:
 			efc_evaluate_general(stack, sym_map, actual_args, &value);

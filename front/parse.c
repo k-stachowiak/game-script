@@ -53,7 +53,7 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
 	child = dom->cpd_children;
 
 	/* 3.1. 1st child is "do" keyword. */
-	if (!dom_node_is_spec_atom(child, "do")) {
+	if (!dom_node_is_reserved_atom(child, DOM_RES_DO)) {
 		return NULL;
 	}
 	child = child->next;
@@ -102,13 +102,13 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is bind keyword. */
-    if (!dom_node_is_spec_atom(child, "bind")) {
+    if (!dom_node_is_reserved_atom(child, DOM_RES_BIND)) {
         return NULL;
     }
     child = child->next;
 
     /* 3.2. 2nd child is symbol. */
-    if (!(symbol = dom_node_parse_atom(child))) {
+	if (!(symbol = dom_node_parse_symbol(child))) {
         return NULL;
     }
     child = child->next;
@@ -142,7 +142,7 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	child = dom->cpd_children;
 
 	/* 3.1. 1st child is if keyword. */
-	if (!dom_node_is_spec_atom(child, "if")) {
+	if (!dom_node_is_reserved_atom(child, DOM_RES_IF)) {
 		return NULL;
 	}
 	child = child->next;
@@ -261,7 +261,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is symbol. */
-    if (!(symbol = dom_node_parse_atom(child))) {
+	if (!(symbol = dom_node_parse_symbol(child))) {
         return NULL;
     }
     child = child->next;
@@ -311,7 +311,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is "func" keyword. */
-    if (!dom_node_is_spec_atom(child, "func")) {
+    if (!dom_node_is_reserved_atom(child, DOM_RES_FUNC)) {
         return NULL;
     }
     child = child->next;
@@ -369,9 +369,9 @@ static struct AstNode *parse_literal_bool(struct DomNode *dom)
 {
     LOG_TRACE_FUNC
 
-    if (dom_node_is_spec_atom(dom, "true")) {
+    if (dom_node_is_reserved_atom(dom, DOM_RES_TRUE)) {
         return ast_make_literal_bool(dom->loc, 1);
-    } else if (dom_node_is_spec_atom(dom, "false")) {
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_FALSE)) {
         return ast_make_literal_bool(dom->loc, 0);
     } else {
         return NULL;
@@ -530,7 +530,7 @@ static struct AstNode *parse_reference(struct DomNode *dom)
     LOG_TRACE_FUNC
 
     /* 1. Is a symbol. */
-    if (!(symbol = dom_node_parse_atom(dom))) {
+	if (!(symbol = dom_node_parse_symbol(dom))) {
         return NULL;
     }
 

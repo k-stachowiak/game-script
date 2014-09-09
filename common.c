@@ -133,7 +133,7 @@ void *calloc_or_die(size_t count, size_t size)
 void *realloc_or_die(void *old, size_t size)
 {
 	void *result = realloc(old, size);
-	if (result) {
+	if (!result) {
 		LOG_ERROR("Reallocation failure.");
 		exit(1);
 	}
