@@ -8,7 +8,6 @@
 #include "repl.h"
 
 /* TODO:
- * - Enforce bind only expressions in front of the do blocks
  * - Improve error messages.
  * - Algorithms:
  *   - merge sort:

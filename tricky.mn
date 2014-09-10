@@ -1,0 +1,19 @@
+# Test global symbols shadowing.
+#
+(bind x 1)
+(bind dblx (func () (* x 2)))
+(bind scope-test (func ()
+	(do
+		(bind x 100)
+		(dblx)
+	)
+))
+
+# Test curying.
+#
+(bind curry-test (func (a b)
+	(do
+		(bind add-to-a (+ a))
+		(add-to-a b)
+	)
+))

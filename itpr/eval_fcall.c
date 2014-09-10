@@ -147,7 +147,11 @@ static void efc_evaluate_general(
 	char **formal_args = impl->data.func_def.func.formal_args;
 
 	/* Create the local scope. */
-	sym_map_init(&local_sym_map, sym_map, stack);
+	if (sym_map->parent) {
+		sym_map_init(&local_sym_map, sym_map->parent, stack);
+	} else {
+		sym_map_init(&local_sym_map, sym_map, stack);
+	}	
 
 	/* Insert captures into the scope. */
 	for (i = 0; i < value->function.captures.size; ++i) {
