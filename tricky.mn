@@ -1,7 +1,37 @@
-# Test global symbols shadowing.
-#
+### Scope evaluation test
+### =====================
+
+### Global lhs symbol expected to be shadowed by the local one.
+(bind lhs 1)
+
+### Function creating a functor supposed to capture a value
+### that is supposed to shadow the above global.
+(bind make_doubler (func ()
+	(do
+		(bind lhs 2)
+		(func (rhs) (* lhs rhs) )
+	)
+))
+
+### Test for the capture to shadow a global symbol.
+(bind test (func (rhs)
+	(do
+		(bind doubler (make_doubler))
+		(doubler rhs)
+	)
+))
+
+### Test global symbols shadowing.
+### ==============================
+
+### Global x.
 (bind x 1)
+
+### Global function capturing the global x.
 (bind dblx (func () (* x 2)))
+
+### Function declating a local x and calling the function
+### that is supposed to capture the globalx.
 (bind scope-test (func ()
 	(do
 		(bind x 100)
@@ -9,8 +39,10 @@
 	)
 ))
 
-# Test curying.
-#
+### Test curying.
+### =============
+
+### Function performing a simple currying inside.
 (bind curry-test (func (a b)
 	(do
 		(bind add-to-a (+ a))

@@ -32,7 +32,7 @@ static void repl_free_bound(void)
 void repl_state_init(void)
 {
 	stack = stack_make(64 * 1024);
-	sym_map_init(&sym_map, NULL, stack);
+	sym_map_init_global(&sym_map, stack);
 }
 
 void repl_state_deinit(void)

@@ -148,10 +148,10 @@ static void efc_evaluate_general(
 
 	/* Create the local scope. */
 	if (sym_map->parent) {
-		sym_map_init(&local_sym_map, sym_map->parent, stack);
+		sym_map_init_local(&local_sym_map, sym_map->parent, stack);
 	} else {
-		sym_map_init(&local_sym_map, sym_map, stack);
-	}	
+		sym_map_init_local(&local_sym_map, sym_map, stack);
+	}
 
 	/* Insert captures into the scope. */
 	for (i = 0; i < value->function.captures.size; ++i) {

@@ -39,7 +39,17 @@ static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 	sym_map_insert(sym_map, "slice", eval(&bif_slice, stack, sym_map));
 }
 
-void sym_map_init(
+void sym_map_init_global(
+		struct SymMap *sym_map,
+		struct Stack *stack)
+{
+	sym_map->parent = NULL;
+	sym_map->map = NULL;
+	sym_map->end = NULL;
+	sym_map_init_bifs(sym_map, stack);
+}
+
+void sym_map_init_local(
         struct SymMap *sym_map,
         struct SymMap *global,
         struct Stack *stack)
@@ -47,10 +57,6 @@ void sym_map_init(
     sym_map->parent = global;
     sym_map->map = NULL;
     sym_map->end = NULL;
-
-    if (global == NULL) {
-        sym_map_init_bifs(sym_map, stack);
-    }
 }
 
 void sym_map_deinit(struct SymMap *sym_map)

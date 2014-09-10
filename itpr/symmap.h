@@ -20,7 +20,11 @@ struct SymMapKvp {
     struct SymMapKvp *next;
 };
 
-void sym_map_init(
+void sym_map_init_global(
+		struct SymMap *sym_map,
+		struct Stack *stack);
+
+void sym_map_init_local(
         struct SymMap *sym_map,
         struct SymMap *parent,
         struct Stack *stack);
