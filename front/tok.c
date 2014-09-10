@@ -98,4 +98,3 @@ bool tok_paren_match(struct Token *lhs, struct Token *rhs)
         (*(lhs->begin) == TOK_ARR_OPEN &&  *(rhs->begin) == TOK_ARR_CLOSE) ||
         (*(lhs->begin) == TOK_TUP_OPEN &&  *(rhs->begin) == TOK_TUP_CLOSE);
 }
-

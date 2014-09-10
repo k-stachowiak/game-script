@@ -13,7 +13,7 @@ void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 	VAL_INT_T result = 0;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		err_eval_bif_array_arg(NULL, 1, "length", "must be an array");
 		return;
 	}
 	
@@ -33,7 +33,7 @@ void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
 	VAL_BOOL_T result;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		err_eval_bif_array_arg(NULL, 1, "empty", "must be an array");
 		return;
 	}
 
@@ -47,12 +47,12 @@ static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 	VAL_LOC_T head_loc;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		err_eval_bif_array_arg(NULL, 1, "car", "must be an array");
 		return;
 	}
 
 	if (value.compound.size == 0) {
-		err_set(ERR_EVAL, "BIF \"car\" called for an empty array.");
+		err_eval_bif_array_arg(NULL, 1, "car", "must not be empty");
 		return;
 	}
 
@@ -71,12 +71,12 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 	value = stack_peek_value(stack, location);
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		err_eval_bif_array_arg(NULL, 1, "cdr", "must be an array");
 		return;
 	}
 
 	if (value.compound.size == 0) {
-		err_set(ERR_EVAL, "BIF \"cdr\" called for an empty array.");
+		err_eval_bif_array_arg(NULL, 1, "cdr", "must not be empty");
 		return;
 	}
 
@@ -112,7 +112,7 @@ static void bif_reverse_impl(struct Stack* stack, VAL_LOC_T location)
 
 	/* Assert input. */
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "Array BIF called with non-array argument.");
+		err_eval_bif_array_arg(NULL, 1, "reverse", "must be an array");
 		return;
 	}
 
@@ -151,7 +151,7 @@ static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 		 *    T  = (typeof x)
 		 *   [U] = (typeof y)
 		 */
-		err_set(ERR_EVAL, "Right-hand side argument of cons must be an array.");
+		err_eval_bif_array_arg(NULL, 2, "cons", "must be an array");
 		return;
 	}
 
@@ -185,9 +185,13 @@ static void bif_cat_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	vx = stack_peek_value(stack, x_loc);
 	vy = stack_peek_value(stack, y_loc);
 
-	if ((enum ValueType)vx.header.type != VAL_ARRAY ||
-		(enum ValueType)vy.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "Both arguments of cat must be arrays.");
+	if ((enum ValueType)vx.header.type != VAL_ARRAY) {
+		err_eval_bif_array_arg(NULL, 1, "cat", "must be an array");
+		return;
+	}
+
+	if ((enum ValueType)vy.header.type != VAL_ARRAY) {
+		err_eval_bif_array_arg(NULL, 2, "cat", "must be an array");
 		return;
 	}
 
@@ -233,13 +237,17 @@ static void bif_slice_impl(
 	vlast = stack_peek_value(stack, z_loc);
 
 	if ((enum ValueType)varr.header.type != VAL_ARRAY) {
-		err_set(ERR_EVAL, "First argumment of slice must be an array.");
+		err_eval_bif_array_arg(NULL, 1, "slice", "must be an array");
 		return;
 	}
 
-	if ((enum ValueType)vfirst.header.type != VAL_INT ||
-		(enum ValueType)vlast.header.type != VAL_INT) {
-		err_set(ERR_EVAL, "Range arguments of slice must be integers.");
+	if ((enum ValueType)vfirst.header.type != VAL_INT) {
+		err_eval_bif_array_arg(NULL, 2, "slice", "must be an integer");
+		return;
+	}
+
+	if ((enum ValueType)vlast.header.type != VAL_INT) {
+		err_eval_bif_array_arg(NULL, 3, "slice", "must be an integer");
 		return;
 	}
 
@@ -247,7 +255,7 @@ static void bif_slice_impl(
 	last = vlast.primitive.integer;
 
 	if (first < 0 || last < 0) {
-		err_set(ERR_EVAL, "Range arguments of slice must be non-negative.");
+		err_eval_bif_array_common(NULL, "Range of slice must be non-negative");
 		return;
 	}
 
@@ -269,12 +277,14 @@ static void bif_slice_impl(
 
 	/* Assert validity of input in an awkward place. */
 	if (first > last) {
-		err_set(ERR_EVAL, "First greater than last in slice.");
+		err_eval_bif_array_arg(NULL, 3, "slice",
+			"must be greater or equal argument 2");
 		return;
 	}
 
 	if (last > index) {
-		err_set(ERR_EVAL, "Last out of bounds in slice.");
+		err_eval_bif_array_arg(NULL, 3, "slice",
+			"must be within the bounds of the array in argument 1");
 		return;
 	}
 

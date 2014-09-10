@@ -147,8 +147,8 @@ static struct Token *tok_read_delim_atom(
     atom_begin = *current;
 
     if (si_eq(current, end) || (
-            *(current->current) != TOK_DELIM_STR &&
-            *(current->current) != TOK_DELIM_CHAR)) {
+            *current->current != TOK_DELIM_STR &&
+            *current->current != TOK_DELIM_CHAR)) {
         return NULL;
     }
 
@@ -158,7 +158,11 @@ static struct Token *tok_read_delim_atom(
     atom_end = find_nonesc_delim(current, end, delimiter);
 
     if (si_eq(&atom_end, end) || (*(atom_end.current) != delimiter)) {
-        err_set(ERR_TOK, "Undelimited string or character.");
+		if (delimiter == TOK_DELIM_STR) {
+			err_tok_undelimited_str(&atom_begin.loc);
+		} else {
+			err_tok_undelimited_char(&atom_begin.loc);
+		}
         return NULL;
     }
 
@@ -234,7 +238,7 @@ static struct Token *tokenize(
 
         if (!tok) {
             if (!err_state()) {
-                err_set(ERR_TOK, "Failed reading any token.");
+				err_tok_read_failure(&begin.loc);
             }
             tok_free(result);
             return NULL;
@@ -288,7 +292,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         } else {
             struct DomNode *child = dom_parse_node(current);
             if (!child) {
-                err_set(ERR_DOM, "Failed parsing dom node.");
+				err_dom_read_failure(&(*current)->loc);
                 dom_free(children);
                 return NULL;
             }
@@ -296,8 +300,9 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         }
     }
 
-    err_set(ERR_DOM, "Unclosed compound node found.");
+	err_dom_undelimited_node(&first->loc);
     dom_free(children);
+
     return NULL;
 }
 
@@ -338,7 +343,7 @@ static struct DomNode *dom_build(struct Token *tokens)
 
         if (!node) {
             if (!err_state()) {
-                err_set(ERR_DOM, "Failed reading dom node.");
+				err_dom_read_failure(&current->loc);
             }
             dom_free(result);
             return NULL;

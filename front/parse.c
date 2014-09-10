@@ -448,7 +448,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         }
 
     } else {
-        err_set(ERR_PARSE, "Char literal of incorrect length.");
+		err_parse_bad_char_length(&dom->loc);
         return NULL;
     }
 }
@@ -548,8 +548,7 @@ struct AstNode *parse(struct DomNode *dom)
     err_reset();
     while (current) {
         struct AstNode *node;
-        if (
-            (!err_state() && (node = parse_literal(dom))) ||
+        if ((!err_state() && (node = parse_literal(dom))) ||
             (!err_state() && (node = parse_reference(dom))) ||
 			(!err_state() && (node = parse_do_block(dom))) ||
             (!err_state() && (node = parse_bind(dom))) ||
@@ -562,7 +561,7 @@ struct AstNode *parse(struct DomNode *dom)
 
         } else {
             if (!err_state()) {
-                err_set(ERR_PARSE, "Failed parsing any AST node.");
+				err_parse_failure(&dom->loc);
             }
             ast_node_free_list(result);
             return NULL;
@@ -572,4 +571,3 @@ struct AstNode *parse(struct DomNode *dom)
 
     return result;
 }
-

@@ -9,6 +9,7 @@
 
 /* TODO:
  * - Improve error messages.
+ * - Assure always providing location in err_build_message.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
@@ -19,6 +20,12 @@
 int main(int argc, char *argv[])
 {
     int error;
+
+	/* There is an awkward memory management scheme in the error module
+	 * due to the lacking string building facilities in C and a necessity
+	 * of using them there.
+	 */
+	atexit(err_free);
 
     if (argc == 2) {
         if (strcmp(argv[1], "repl") == 0) {
