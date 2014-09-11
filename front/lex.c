@@ -308,18 +308,23 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
 
         } else {
             struct DomNode *child = dom_parse_node(current);
-            if (!child) {
+			if (err_state()) {
+				goto fail;
+
+			} else if (!child) {
 				lex_error_read("compound DOM node", &(*current)->loc);
-                dom_free(children);
-                return NULL;
-            }
-            LIST_APPEND(child, &children, &children_end);
+				goto fail;
+
+			} else {
+				LIST_APPEND(child, &children, &children_end);
+			}
         }
     }
 
 	lex_error_undelimited("compound DOM node", &first->loc);
-    dom_free(children);
 
+fail:
+    dom_free(children);
     return NULL;
 }
 
