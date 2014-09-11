@@ -9,6 +9,12 @@
 
 #include <stddef.h>
 
+void eval_location_reset(void);
+void eval_location_push(struct Location loc);
+void eval_location_swap(struct Location loc);
+void eval_location_pop(void);
+struct Location *eval_location_top(void);
+
 ptrdiff_t eval(
     struct AstNode *node,
     struct Stack *stack,

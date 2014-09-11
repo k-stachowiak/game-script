@@ -106,6 +106,11 @@ void *realloc_or_die(void *old, size_t size);
         (MACRO_ARRAY).size -= 1; \
     } while(0)
 
+#define ARRAY_POP(MACRO_ARRAY) \
+    do { \
+		ARRAY_REMOVE((MACRO_ARRAY), (MACRO_ARRAY).size - 1); \
+	} while(0)
+
 /* Cross-module data types.
  * ========================
  */

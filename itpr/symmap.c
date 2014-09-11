@@ -8,6 +8,14 @@
 #include "eval.h"
 #include "bif.h"
 
+static void symmap_error_already_inserted(char *symbol)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "SYM MAP", eval_location_top());
+	err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
+	err_set_msg(&msg);
+}
+
 static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 {
 	/* TODO: Note that the "eval" here is artificial. This can be handled
@@ -82,7 +90,7 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
 
     kvp = sym_map_find_shallow(sym_map, key);
     if (kvp) {
-		err_set(ERR_EVAL, "Symbol already inserted.");
+		symmap_error_already_inserted(key);
 		return;
     }
 
@@ -154,3 +162,4 @@ void sym_map_for_each(struct SymMap *sym_map, void(*f)(char*, VAL_LOC_T))
 		f(kvp->key, kvp->location);
 	}
 }
+

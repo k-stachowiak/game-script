@@ -2,10 +2,29 @@
 
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 
 #include "error.h"
 #include "lex.h"
+
+/* Error reporting.
+ * ================
+ */
+
+static void lex_error_undelimited(char *what, struct Location *where)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "LEX", where);
+	err_msg_append(&msg, "Undelimited %s.", what);
+	err_set_msg(&msg);
+}
+
+static void lex_error_read(char *what, struct Location *where)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "LEX", where);
+	err_msg_append(&msg, "Failed reading %s.", what);
+	err_set_msg(&msg);
+}
 
 /* Tokenization.
  * =============
@@ -158,11 +177,9 @@ static struct Token *tok_read_delim_atom(
     atom_end = find_nonesc_delim(current, end, delimiter);
 
     if (si_eq(&atom_end, end) || (*(atom_end.current) != delimiter)) {
-		if (delimiter == TOK_DELIM_STR) {
-			err_tok_undelimited_str(&atom_begin.loc);
-		} else {
-			err_tok_undelimited_char(&atom_begin.loc);
-		}
+		lex_error_undelimited(
+			delimiter == TOK_DELIM_STR ? "string" : "character",
+			&atom_begin.loc);
         return NULL;
     }
 
@@ -238,7 +255,7 @@ static struct Token *tokenize(
 
         if (!tok) {
             if (!err_state()) {
-				err_tok_read_failure(&begin.loc);
+				lex_error_read("token", &begin.loc);
             }
             tok_free(result);
             return NULL;
@@ -292,7 +309,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         } else {
             struct DomNode *child = dom_parse_node(current);
             if (!child) {
-				err_dom_read_failure(&(*current)->loc);
+				lex_error_read("compound DOM node", &(*current)->loc);
                 dom_free(children);
                 return NULL;
             }
@@ -300,7 +317,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         }
     }
 
-	err_dom_undelimited_node(&first->loc);
+	lex_error_undelimited("compound DOM node", &first->loc);
     dom_free(children);
 
     return NULL;
@@ -343,7 +360,7 @@ static struct DomNode *dom_build(struct Token *tokens)
 
         if (!node) {
             if (!err_state()) {
-				err_dom_read_failure(&current->loc);
+				lex_error_read("DOM node", &current->loc);
             }
             dom_free(result);
             return NULL;

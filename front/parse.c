@@ -9,6 +9,22 @@
 #include "tok.h"
 #include "dom.h"
 
+static void parse_error_char_length(int len, struct Location *where)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "PARSE", where);
+	err_msg_append(&msg, "Incorrect character length (%d).", len);
+	err_set_msg(&msg);
+}
+
+static void parse_error_read(char *what, struct Location *where)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "PARSE", where);
+	err_msg_append(&msg, "Failed reading %s.", what);
+	err_set_msg(&msg);
+}
+
 static char *find(char * current, char *last, char value)
 {
     while (current != last) {
@@ -448,7 +464,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         }
 
     } else {
-		err_parse_bad_char_length(&dom->loc);
+		parse_error_char_length(len, &dom->loc);
         return NULL;
     }
 }
@@ -561,7 +577,7 @@ struct AstNode *parse(struct DomNode *dom)
 
         } else {
             if (!err_state()) {
-				err_parse_failure(&dom->loc);
+				parse_error_read("AST node", &dom->loc);
             }
             ast_node_free_list(result);
             return NULL;

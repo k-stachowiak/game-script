@@ -3,11 +3,20 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "eval.h"
 #include "bif.h"
 #include "bif_detail.h"
 #include "stack.h"
 #include "value.h"
 #include "error.h"
+
+static void bif_arythm_error_arg_mismatch(void)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
+	err_msg_append(&msg, "Arguments of arythmetic BIF must be of equal numeric type");
+	err_set_msg(&msg);
+}
 
 static VAL_INT_T bif_sqrt_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }
 static VAL_REAL_T bif_sqrt_real(VAL_REAL_T x) { return sqrt(x); }
@@ -42,7 +51,7 @@ static void common_bin_impl(
 		break;
 
 	case BBM_MISMATCH:
-		err_set(ERR_EVAL, "Argument types mismatch in a comparison BIF.");
+		bif_arythm_error_arg_mismatch();
 		break;
 	}
 }
@@ -66,7 +75,7 @@ static void common_un_impl(
 		break;
 
 	default:
-		err_set(ERR_EVAL, "Arythmetic BIF called with non-numeric argument.");
+		bif_arythm_error_arg_mismatch();
 		break;
 	}
 }
@@ -129,3 +138,4 @@ void bif_init_arythmetic(void)
 	bif_init_binary_ast(&bif_mod);
 	bif_mod.data.bif.bi_impl = bif_mod_impl;
 }
+

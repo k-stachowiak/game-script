@@ -1,10 +1,19 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
+#include "eval.h"
 #include "bif.h"
 #include "bif_detail.h"
 #include "value.h"
 #include "stack.h"
 #include "error.h"
+
+static void bif_logic_error_arg_mismatch(void)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL BIF LOGIC", eval_location_top());
+	err_msg_append(&msg, "Arguments of logic BIF must be of boolean type");
+	err_set_msg(&msg);
+}
 
 static VAL_BOOL_T bif_log_and(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x && (bool)y; }
 static VAL_BOOL_T bif_log_or(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x || (bool)y; }
@@ -20,7 +29,7 @@ static void common_bin_impl(
 
 	if ((enum ValueType)vx.header.type != VAL_BOOL ||
 		(enum ValueType)vy.header.type != VAL_BOOL) {
-		err_set(ERR_EVAL, "Logical BIF performed on a non-boolean values.");
+		bif_logic_error_arg_mismatch();
 		return;
 	}
 
@@ -35,7 +44,7 @@ static void common_un_impl(
 	struct Value vx = stack_peek_value(stack, x_loc);
 
 	if ((enum ValueType)vx.header.type != VAL_BOOL) {
-		err_set(ERR_EVAL, "Logical BIF performed on a non-boolean value.");
+		bif_logic_error_arg_mismatch();
 		return;
 	}
 
@@ -72,3 +81,4 @@ void bif_init_logic(void)
 	bif_init_unary_ast(&bif_not);
 	bif_not.data.bif.u_impl = bif_not_impl;
 }
+

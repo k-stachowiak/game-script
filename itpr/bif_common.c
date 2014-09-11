@@ -109,3 +109,4 @@ void bif_assure_init(void)
 	bif_init_logic();
 	bif_init_array();
 }
+

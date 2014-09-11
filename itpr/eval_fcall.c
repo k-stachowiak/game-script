@@ -9,6 +9,22 @@
 #include "value.h"
 #include "bif.h"
 
+static void fcall_error_nonfunc_value(char *symbol)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL FUNC CALL", eval_location_top());
+	err_msg_append(&msg, "Called non-function symbol \"%s\"", symbol);
+	err_set_msg(&msg);
+}
+
+static void fcall_error_too_many_args(char *symbol)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL FUNC CALL", eval_location_top());
+	err_msg_append(&msg, "Passed too many arguments to \"%s\"", symbol);
+	err_set_msg(&msg);
+}
+
 /**
  * Performs a lookup for the called function in the symbol map.
  * Then performs the lookup of the function value on the stack.
@@ -16,21 +32,21 @@
  * lookup failed.
  */
 static bool efc_lookup_value(
-		struct AstNode *call_node,
+		char *symbol,
 		struct SymMap *sym_map,
 		struct Stack *stack,
 		struct Value *result)
 {
 	struct SymMapKvp *kvp;
 
-	if (!(kvp = sym_map_find(sym_map, call_node->data.func_call.symbol))) {
-		err_set(ERR_EVAL, "Requested function doesn't exist.");
+	if (!(kvp = sym_map_find(sym_map, symbol))) {
+		eval_error_not_found(symbol);
 		return false;
 	}
 
 	*result = stack_peek_value(stack, kvp->location);
 	if (result->header.type != (VAL_HEAD_TYPE_T)VAL_FUNCTION) {
-		err_set(ERR_EVAL, "Requested call to a non-function value.");
+		fcall_error_nonfunc_value(symbol);
 		return false;
 	}
 
@@ -250,8 +266,8 @@ static void efc_evaluate_bif(
 
 	/* Assert arguments count. */
 	if (!efc_assert_bif_arg_count(impl->type, arg_count)) {
-		err_set(ERR_EVAL, "Invalid argument count passed to BIF.");
-		return;
+		LOG_ERROR("Invalid argument count passed to BIF.");
+		exit(1);
 	}
 
 	/* Evaluate the function implementation. */
@@ -281,8 +297,9 @@ void eval_func_call(
 	struct Value value;
 	int arity, applied;
 	struct AstNode *actual_args = node->data.func_call.actual_args;
+	char *symbol = node->data.func_call.symbol;
 
-	if (!efc_lookup_value(node, sym_map, stack, &value)) {
+	if (!efc_lookup_value(symbol, sym_map, stack, &value)) {
         return;
     }
 
@@ -309,7 +326,8 @@ void eval_func_call(
 		}
 
 	} else {
-		err_set(ERR_EVAL, "Too many arguments provided to a function call.");
+		fcall_error_too_many_args(symbol);
 
 	}
 }
+

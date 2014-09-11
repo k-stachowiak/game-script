@@ -9,6 +9,48 @@
 #include "bif.h"
 #include "error.h"
 
+struct {
+	struct Location *data;
+	int size, cap;
+} location_stack = { NULL, 0, 0 };
+
+void eval_location_reset(void)
+{
+	ARRAY_FREE(location_stack);
+}
+
+void eval_location_push(struct Location loc)
+{
+	ARRAY_APPEND(location_stack, loc);
+}
+
+void eval_location_pop(void)
+{
+	ARRAY_POP(location_stack);
+}
+
+struct Location *eval_location_top(void)
+{
+	return location_stack.data + location_stack.size - 1;
+}
+
+static void eval_common_error(char *issue)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL", eval_location_top());
+	err_msg_append(&msg, "%s", issue);
+	err_set_msg(&msg);
+}
+
+/* NOTE: this is not static as it is shared in other modules. */
+void eval_error_not_found(char *symbol)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL", eval_location_top());
+	err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
+	err_set_msg(&msg);
+}
+
 static void eval_compound(
         struct AstNode *node,
         struct Stack *stack,
@@ -110,7 +152,7 @@ static void eval_iff(
 	temp_end = stack->top;
 
 	if ((enum ValueType)test_val.header.type != VAL_BOOL) {
-		err_set(ERR_EVAL, "Text expression isn't a boolean value.");
+		eval_common_error("Test expression isn't a boolean value.");
 		return;
 	}
 
@@ -129,9 +171,10 @@ static void eval_reference(
 		struct SymMap *sym_map)
 {
 	struct SymMapKvp *kvp;
+	char *symbol = node->data.reference.symbol;
 
-	if (!(kvp = sym_map_find(sym_map, node->data.reference.symbol))) {
-	    err_set(ERR_EVAL, "Symbol not found.");
+	if (!(kvp = sym_map_find(sym_map, symbol))) {
+		eval_error_not_found(symbol);
 		return;
 	}
 
@@ -170,52 +213,42 @@ VAL_LOC_T eval_impl(
 		struct SymMap *sym_map)
 {
     VAL_LOC_T begin = stack->top;
+	eval_location_push(node->loc);
 
     switch (node->type) {
     case AST_LITERAL:
-		LOG_DEBUG("Evaluating literal");
         eval_literal(node, stack);
         break;
 
     case AST_COMPOUND:
-		LOG_DEBUG("Evaluating compound %s", node->data.compound.type == AST_CPD_ARRAY ? "array" : "tuple");
         eval_compound(node, stack, sym_map);
         break;
 
 	case AST_DO_BLOCK:
-		LOG_DEBUG("Evaluating do block");
 		eval_do_block(node, stack, sym_map);
 		break;
 
     case AST_BIND:
-		LOG_DEBUG("Evaluating bind(%s)", node->data.bind.symbol);
     	eval_bind(node, stack, sym_map);
     	break;
 
 	case AST_IFF:
-		LOG_DEBUG("Evaluating if");
 		eval_iff(node, stack, sym_map);
 		break;
 
     case AST_REFERENCE:
-		LOG_DEBUG("Evaluating reference(%s)", node->data.reference.symbol);
     	eval_reference(node, stack, sym_map);
     	break;
 
     case AST_FUNC_DEF:
-		LOG_DEBUG(
-			"Evaluating function definition (%d)",
-			node->data.func_def.func.arg_count);
         eval_func_def(node, stack, sym_map);
         break;
 
     case AST_BIF:
-		LOG_DEBUG("Evaluating bif");
         eval_bif(node, stack);
         break;
 
     case AST_FUNC_CALL:
-		LOG_DEBUG("Evaluating function call (%s)", node->data.func_call.symbol);
         eval_func_call(node, stack, sym_map);
         break;
 
@@ -223,6 +256,8 @@ VAL_LOC_T eval_impl(
 		LOG_ERROR("Unhandled AST node type.\n");
 		exit(1);
     }
+
+	eval_location_pop();
 
     if (err_state()) {
         return -1;
@@ -239,6 +274,7 @@ VAL_LOC_T eval(
     VAL_LOC_T begin, result, end;
 
     err_reset();
+	eval_location_reset();
 
     begin = stack->top;
     result = eval_impl(node, stack, sym_map);
@@ -251,3 +287,4 @@ VAL_LOC_T eval(
         return -1;
     }
 }
+

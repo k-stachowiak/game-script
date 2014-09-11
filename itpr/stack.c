@@ -335,3 +335,4 @@ void stack_for_each(
 		loc += val.header.size + VAL_HEAD_BYTES;
 	}
 }
+

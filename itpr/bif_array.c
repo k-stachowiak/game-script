@@ -1,19 +1,36 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
+#include "eval.h"
 #include "bif.h"
 #include "bif_detail.h"
 #include "value.h"
 #include "stack.h"
 #include "error.h"
 
-void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
+static void bif_arr_error_arg(int arg, char *func, char *condition)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL BIF ARRAY", eval_location_top());
+	err_msg_append(&msg, "Argument %d of _%s_ %s.", arg, func, condition);
+	err_set_msg(&msg);
+}
+
+static void bif_arr_error_range(char *condition)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "BIF EVAL", eval_location_top());
+	err_msg_append(&msg, "In _slice_ : %s.", condition);
+	err_set_msg(&msg);
+}
+
+static void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
 	VAL_LOC_T end = location + VAL_HEAD_BYTES + value.header.size;
 	VAL_INT_T result = 0;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "length", "must be an array");
+		bif_arr_error_arg(1, "length", "must be an array");
 		return;
 	}
 	
@@ -27,13 +44,13 @@ void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 	stack_push_int(stack, result);
 }
 
-void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
+static void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
 {
 	struct Value value = stack_peek_value(stack, location);
 	VAL_BOOL_T result;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "empty", "must be an array");
+		bif_arr_error_arg(1, "empty", "must be an array");
 		return;
 	}
 
@@ -47,12 +64,12 @@ static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 	VAL_LOC_T head_loc;
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "car", "must be an array");
+		bif_arr_error_arg(1, "car", "must be an array");
 		return;
 	}
 
 	if (value.compound.size == 0) {
-		err_eval_bif_array_arg(NULL, 1, "car", "must not be empty");
+		bif_arr_error_arg(1, "car", "must not be empty");
 		return;
 	}
 
@@ -71,12 +88,12 @@ static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 	value = stack_peek_value(stack, location);
 
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "cdr", "must be an array");
+		bif_arr_error_arg(1, "cdr", "must be an array");
 		return;
 	}
 
 	if (value.compound.size == 0) {
-		err_eval_bif_array_arg(NULL, 1, "cdr", "must not be empty");
+		bif_arr_error_arg(1, "cdr", "must not be empty");
 		return;
 	}
 
@@ -112,7 +129,7 @@ static void bif_reverse_impl(struct Stack* stack, VAL_LOC_T location)
 
 	/* Assert input. */
 	if ((enum ValueType)value.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "reverse", "must be an array");
+		bif_arr_error_arg(1, "reverse", "must be an array");
 		return;
 	}
 
@@ -151,7 +168,7 @@ static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 		 *    T  = (typeof x)
 		 *   [U] = (typeof y)
 		 */
-		err_eval_bif_array_arg(NULL, 2, "cons", "must be an array");
+		bif_arr_error_arg(2, "cons", "must be an array");
 		return;
 	}
 
@@ -186,12 +203,12 @@ static void bif_cat_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	vy = stack_peek_value(stack, y_loc);
 
 	if ((enum ValueType)vx.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "cat", "must be an array");
+		bif_arr_error_arg(1, "cat", "must be an array");
 		return;
 	}
 
 	if ((enum ValueType)vy.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 2, "cat", "must be an array");
+		bif_arr_error_arg(2, "cat", "must be an array");
 		return;
 	}
 
@@ -237,17 +254,17 @@ static void bif_slice_impl(
 	vlast = stack_peek_value(stack, z_loc);
 
 	if ((enum ValueType)varr.header.type != VAL_ARRAY) {
-		err_eval_bif_array_arg(NULL, 1, "slice", "must be an array");
+		bif_arr_error_arg(1, "slice", "must be an array");
 		return;
 	}
 
 	if ((enum ValueType)vfirst.header.type != VAL_INT) {
-		err_eval_bif_array_arg(NULL, 2, "slice", "must be an integer");
+		bif_arr_error_arg(2, "slice", "must be an integer");
 		return;
 	}
 
 	if ((enum ValueType)vlast.header.type != VAL_INT) {
-		err_eval_bif_array_arg(NULL, 3, "slice", "must be an integer");
+		bif_arr_error_arg(3, "slice", "must be an integer");
 		return;
 	}
 
@@ -255,7 +272,7 @@ static void bif_slice_impl(
 	last = vlast.primitive.integer;
 
 	if (first < 0 || last < 0) {
-		err_eval_bif_array_common(NULL, "Range of slice must be non-negative");
+		bif_arr_error_range("slice delimiters must be non-negative.");
 		return;
 	}
 
@@ -277,14 +294,12 @@ static void bif_slice_impl(
 
 	/* Assert validity of input in an awkward place. */
 	if (first > last) {
-		err_eval_bif_array_arg(NULL, 3, "slice",
-			"must be greater or equal argument 2");
+		bif_arr_error_range("slice end must be greater or equal slice begin.");
 		return;
 	}
 
 	if (last > index) {
-		err_eval_bif_array_arg(NULL, 3, "slice",
-			"must be within the bounds of the array in argument 1");
+		bif_arr_error_range("slice end must be within array bounds.");
 		return;
 	}
 
@@ -327,3 +342,4 @@ void bif_init_array(void)
 	bif_init_ternary_ast(&bif_slice);
 	bif_slice.data.bif.ter_impl = bif_slice_impl;
 }
+

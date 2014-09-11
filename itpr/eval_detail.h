@@ -5,6 +5,8 @@
 #include "symmap.h"
 #include "value.h"
 
+void eval_error_not_found(char *symbol);
+
 void eval_func_def(
 	struct AstNode *node,
 	struct Stack *stack,

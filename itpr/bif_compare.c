@@ -1,10 +1,19 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
+#include "eval.h"
 #include "bif.h"
 #include "bif_detail.h"
 #include "value.h"
 #include "stack.h"
 #include "error.h"
+
+static void bif_compare_error_arg_mismatch(void)
+{
+	struct ErrMessage msg;
+	err_msg_init(&msg, "EVAL BIF COMPARE", eval_location_top());
+	err_msg_append(&msg, "Arguments of comparison BIF must be of equal numeric type");
+	err_set_msg(&msg);
+}
 
 static VAL_BOOL_T bif_eq_int(VAL_INT_T x, VAL_INT_T y) { return x == y; }
 static VAL_BOOL_T bif_lt_int(VAL_INT_T x, VAL_INT_T y) { return x < y; }
@@ -35,7 +44,7 @@ static void common_impl(
 		break;
 
 	case BBM_MISMATCH:
-		err_set(ERR_EVAL, "Argument types mismatch in a comparison BIF.");
+		bif_compare_error_arg_mismatch();
 		return;
 	}
 }
@@ -88,3 +97,4 @@ void bif_init_compare(void)
 	bif_init_binary_ast(&bif_geq);
 	bif_geq.data.bif.bi_impl = bif_geq_impl;
 }
+

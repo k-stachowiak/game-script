@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "error.h"
 #include "tok.h"
 
 struct Token *tok_make_token(struct SourceIter *begin, struct SourceIter *end)
