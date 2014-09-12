@@ -46,7 +46,7 @@ enum AstLiteralType {
 
 struct AstCommonFunc {
     char **formal_args;
-    struct Location *arg_locs;
+    struct SourceLocation *arg_locs;
     int arg_count;
 };
 
@@ -114,7 +114,7 @@ struct AstReference {
 struct AstNode {
     /* Base data. */
     enum AstNodeType type;
-    struct Location loc;
+    struct SourceLocation loc;
 
     /* Specific data. */
     union {
@@ -138,40 +138,40 @@ struct AstNode {
  */
 
 struct AstNode *ast_make_do_block(
-	struct Location loc,
+	struct SourceLocation loc,
 	struct AstNode* exprs);
 
 struct AstNode *ast_make_bind(
-    struct Location loc,
+    struct SourceLocation loc,
     char *symbol, struct AstNode *expr);
 
 struct AstNode *ast_make_iff(
-	struct Location loc,
+	struct SourceLocation loc,
 	struct AstNode *test,
 	struct AstNode *true_expr,
 	struct AstNode *false_expr);
 
 struct AstNode *ast_make_compound(
-    struct Location loc,
+    struct SourceLocation loc,
     enum AstCompoundType type,
     struct AstNode *exprs);
 
 struct AstNode *ast_make_func_call(
-    struct Location loc,
+    struct SourceLocation loc,
     char *symbol, struct AstNode *args);
 
 struct AstNode *ast_make_func_def(
-    struct Location loc,
+    struct SourceLocation loc,
     char **formal_args,
     int arg_count,
     struct AstNode *expr);
 
-struct AstNode *ast_make_literal_bool(struct Location loc, int value);
-struct AstNode *ast_make_literal_string(struct Location loc, char *value);
-struct AstNode *ast_make_literal_character(struct Location loc, char value);
-struct AstNode *ast_make_literal_int(struct Location loc, long value);
-struct AstNode *ast_make_literal_real(struct Location loc, double value);
-struct AstNode *ast_make_reference(struct Location loc, char *symbol);
+struct AstNode *ast_make_literal_bool(struct SourceLocation loc, int value);
+struct AstNode *ast_make_literal_string(struct SourceLocation loc, char *value);
+struct AstNode *ast_make_literal_character(struct SourceLocation loc, char value);
+struct AstNode *ast_make_literal_int(struct SourceLocation loc, long value);
+struct AstNode *ast_make_literal_real(struct SourceLocation loc, double value);
+struct AstNode *ast_make_reference(struct SourceLocation loc, char *symbol);
 
 /* Destruction.
  * ============

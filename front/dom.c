@@ -16,7 +16,7 @@ static char *reserved[] = {
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
 
-struct DomNode *dom_make_atom(struct Location loc, char *begin, char *end)
+struct DomNode *dom_make_atom(struct SourceLocation loc, char *begin, char *end)
 {
 	struct DomNode *result = malloc_or_die(sizeof(*result));
     int length = end - begin;
@@ -30,7 +30,7 @@ struct DomNode *dom_make_atom(struct Location loc, char *begin, char *end)
 }
 
 struct DomNode *dom_make_compound(
-        struct Location loc,
+        struct SourceLocation loc,
         enum DomCpdType compound_type,
         struct DomNode *children)
 {

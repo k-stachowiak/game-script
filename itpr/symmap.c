@@ -51,7 +51,7 @@ void sym_map_init_global(
 		struct SymMap *sym_map,
 		struct Stack *stack)
 {
-	sym_map->parent = NULL;
+	sym_map->global = NULL;
 	sym_map->map = NULL;
 	sym_map->end = NULL;
 	sym_map_init_bifs(sym_map, stack);
@@ -59,10 +59,9 @@ void sym_map_init_global(
 
 void sym_map_init_local(
         struct SymMap *sym_map,
-        struct SymMap *global,
-        struct Stack *stack)
+        struct SymMap *global)
 {
-    sym_map->parent = global;
+    sym_map->global = global;
     sym_map->map = NULL;
     sym_map->end = NULL;
 }
@@ -112,8 +111,8 @@ struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key)
 		return kvp;
 	}
 
-    if (sym_map->parent) {
-        return sym_map_find(sym_map->parent, key);
+    if (sym_map->global) {
+        return sym_map_find(sym_map->global, key);
     } else {
         return NULL;
     }
@@ -135,7 +134,7 @@ struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
 {
     struct SymMapKvp *kvp;
 
-    if (sym_map->parent == NULL) {
+    if (sym_map->global == NULL) {
         return NULL;
     }
 
@@ -143,8 +142,8 @@ struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
 		return kvp;
 	}
 
-    if (sym_map->parent) {
-		return sym_map_find_not_global(sym_map->parent, key);
+    if (sym_map->global) {
+		return sym_map_find_not_global(sym_map->global, key);
     } else {
         return NULL;
     }
@@ -154,8 +153,8 @@ void sym_map_for_each(struct SymMap *sym_map, void(*f)(char*, VAL_LOC_T))
 {
 	struct SymMapKvp *kvp;
 
-	if (sym_map->parent) {
-		sym_map_for_each(sym_map->parent, f);
+	if (sym_map->global) {
+		sym_map_for_each(sym_map->global, f);
 	}
 
 	for (kvp = sym_map->map; kvp; kvp = kvp->next) {

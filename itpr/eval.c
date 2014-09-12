@@ -10,7 +10,7 @@
 #include "error.h"
 
 struct {
-	struct Location *data;
+	struct SourceLocation *data;
 	int size, cap;
 } location_stack = { NULL, 0, 0 };
 
@@ -19,7 +19,7 @@ void eval_location_reset(void)
 	ARRAY_FREE(location_stack);
 }
 
-void eval_location_push(struct Location loc)
+void eval_location_push(struct SourceLocation loc)
 {
 	ARRAY_APPEND(location_stack, loc);
 }
@@ -29,7 +29,7 @@ void eval_location_pop(void)
 	ARRAY_POP(location_stack);
 }
 
-struct Location *eval_location_top(void)
+struct SourceLocation *eval_location_top(void)
 {
 	return location_stack.data + location_stack.size - 1;
 }

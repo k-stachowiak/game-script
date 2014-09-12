@@ -10,7 +10,7 @@
  * ================
  */
 
-static void lex_error_undelimited(char *what, struct Location *where)
+static void lex_error_undelimited(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init(&msg, "LEX", where);
@@ -18,7 +18,7 @@ static void lex_error_undelimited(char *what, struct Location *where)
 	err_set_msg(&msg);
 }
 
-static void lex_error_read(char *what, struct Location *where)
+static void lex_error_read(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init(&msg, "LEX", where);

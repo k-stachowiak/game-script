@@ -21,7 +21,7 @@ enum Reserved {
 
 struct DomNode {
     /* Data */
-    struct Location loc;
+    struct SourceLocation loc;
     enum DomNodeType type;
     char *atom;
     enum DomCpdType cpd_type;
@@ -35,9 +35,9 @@ struct DomNode {
  * =========
  */
 
-struct DomNode *dom_make_atom(struct Location loc, char *begin, char *end);
+struct DomNode *dom_make_atom(struct SourceLocation loc, char *begin, char *end);
 struct DomNode *dom_make_compound(
-        struct Location loc,
+        struct SourceLocation loc,
         enum DomCpdType compound_type,
         struct DomNode *children);
 

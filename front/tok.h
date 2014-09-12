@@ -9,7 +9,7 @@
 
 struct Token {
     /* Data */
-    struct Location loc;
+    struct SourceLocation loc;
     char *begin, *end;
 
     /* Intrusive list */

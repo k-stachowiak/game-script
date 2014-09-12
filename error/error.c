@@ -16,17 +16,21 @@ static void err_internal_error(void)
 	exit(2);
 }
 
-void err_msg_init(struct ErrMessage *msg, char *module, struct Location *loc)
+void err_msg_init(struct ErrMessage *msg, char *module, struct SourceLocation *loc)
 {
-	/* TODO: Get rid of this. */
-	struct Location dummy_loc = { -6, -66 };
-
-	if (!loc) {
-		loc = &dummy_loc;
-	}
-
 	char buffer[ERR_TEM_BUFFER_SIZE];
-	int len = sprintf(buffer, "[%s] (%d:%d) :", module, loc->line, loc->column);
+	int len;
+	switch (loc->type) {
+	case SRC_LOC_REGULAR:
+		len = sprintf(buffer, "[%s] (%d:%d) :", module, loc->line, loc->column);
+		break;
+	case SRC_LOC_BIF:
+		len = sprintf(buffer, "[%s] (BIF) :", module);
+		break;
+	case SRC_LOC_FUNC_CONTAINED:
+		len = sprintf(buffer, "[%s] (FUNC) :", module);
+		break;
+	}
 	if (len >= (ERR_TEM_BUFFER_SIZE) - 1) {
 		LOG_ERROR("Memory corruption while building error string.");
 		exit(2);

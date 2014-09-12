@@ -14,8 +14,8 @@ enum BifBinaryMatch {
 };
 
 extern bool initialized;
-extern struct Location bif_location;
-extern struct Location bif_arg_locations[];
+extern struct SourceLocation bif_location;
+extern struct SourceLocation bif_arg_locations[];
 extern char *bif_arg_names[];
 
 void bif_init_unary_ast(struct AstNode *node);

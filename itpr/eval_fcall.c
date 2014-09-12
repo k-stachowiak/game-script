@@ -163,10 +163,10 @@ static void efc_evaluate_general(
 	char **formal_args = impl->data.func_def.func.formal_args;
 
 	/* Create the local scope. */
-	if (sym_map->parent) {
-		sym_map_init_local(&local_sym_map, sym_map->parent, stack);
+	if (sym_map->global) {
+		sym_map_init_local(&local_sym_map, sym_map->global);
 	} else {
-		sym_map_init_local(&local_sym_map, sym_map, stack);
+		sym_map_init_local(&local_sym_map, sym_map);
 	}
 
 	/* Insert captures into the scope. */

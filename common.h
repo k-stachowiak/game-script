@@ -115,7 +115,14 @@ void *realloc_or_die(void *old, size_t size);
  * ========================
  */
 
-struct Location {
+enum SourceLocationType {
+	SRC_LOC_REGULAR,
+	SRC_LOC_BIF,
+	SRC_LOC_FUNC_CONTAINED
+};
+
+struct SourceLocation {
+	enum SourceLocationType type;
     int line;
     int column;
 };
@@ -124,7 +131,7 @@ struct SourceIter {
     char *first;
     char *current;
     char *last;
-    struct Location loc;
+    struct SourceLocation loc;
 };
 
 void si_init(struct SourceIter *si, char *first, char *last);

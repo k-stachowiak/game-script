@@ -9,7 +9,7 @@
 #define SYMMAP_H
 
 struct SymMap {
-    struct SymMap *parent;
+    struct SymMap *global;
     struct SymMapKvp *map;
     struct SymMapKvp *end;
 };
@@ -26,8 +26,7 @@ void sym_map_init_global(
 
 void sym_map_init_local(
         struct SymMap *sym_map,
-        struct SymMap *parent,
-        struct Stack *stack);
+        struct SymMap *global);
 
 void sym_map_deinit(struct SymMap *sym_map);
 void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location);

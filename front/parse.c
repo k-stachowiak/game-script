@@ -9,7 +9,7 @@
 #include "tok.h"
 #include "dom.h"
 
-static void parse_error_char_length(int len, struct Location *where)
+static void parse_error_char_length(int len, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init(&msg, "PARSE", where);
@@ -17,7 +17,7 @@ static void parse_error_char_length(int len, struct Location *where)
 	err_set_msg(&msg);
 }
 
-static void parse_error_read(char *what, struct Location *where)
+static void parse_error_read(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init(&msg, "PARSE", where);

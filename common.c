@@ -7,6 +7,7 @@ void si_init(struct SourceIter *si, char *first, char *last)
     si->first = first;
     si->current = first;
     si->last = last;
+    si->loc.type = SRC_LOC_REGULAR;
     si->loc.line = 0;
     si->loc.column = 0;
 }

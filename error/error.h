@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-struct Location;
+struct SourceLocation;
 
 enum ErrModule {
 	ERR_NEU,
@@ -32,7 +32,7 @@ bool err_state(void);
 char *err_msg(void);
 
 /* NEU API. */
-void err_msg_init(struct ErrMessage *msg, char *module, struct Location *loc);
+void err_msg_init(struct ErrMessage *msg, char *module, struct SourceLocation *loc);
 void err_set_msg(struct ErrMessage *msg);
 
 #define err_msg_append(MSG, FORMAT, ...) \

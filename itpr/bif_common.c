@@ -6,8 +6,15 @@
 #include "stack.h"
 
 bool initialized = false;
-struct Location bif_location = { -1, -1 };
-struct Location bif_arg_locations[] = { { -1, -1 }, { -1, -1 }, { -1, -1 } };
+
+struct SourceLocation bif_location = { SRC_LOC_BIF, -1, -1 };
+
+struct SourceLocation bif_arg_locations[] = {
+	{ SRC_LOC_BIF, -1, -1 },
+	{ SRC_LOC_BIF, -1, -1 },
+	{ SRC_LOC_BIF, -1, -1 }
+};
+
 char *bif_arg_names[] = { "x", "y", "z" };
 
 static void bif_init_impl_ptrs(struct AstNode *node)
