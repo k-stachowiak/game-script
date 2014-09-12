@@ -35,9 +35,9 @@ struct DomNode {
  * =========
  */
 
-struct DomNode *dom_make_atom(struct SourceLocation loc, char *begin, char *end);
+struct DomNode *dom_make_atom(struct SourceLocation *loc, char *begin, char *end);
 struct DomNode *dom_make_compound(
-        struct SourceLocation loc,
+        struct SourceLocation *loc,
         enum DomCpdType compound_type,
         struct DomNode *children);
 

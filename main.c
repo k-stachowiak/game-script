@@ -8,7 +8,6 @@
 #include "repl.h"
 
 /* TODO:
- * - Pass source location by pointer wherever possible.
  * - Insert locations into the symbol map then substitute them when evaluating.
  * - Provide location for symbol map inserts will eval stack be OK?.
  * - Algorithms:

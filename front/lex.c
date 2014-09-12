@@ -302,7 +302,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
     while (*current) {
         if (tok_is_close_paren(*current) && tok_paren_match(first, *current)) {
             struct DomNode *result = dom_make_compound(
-                first->loc, dom_infer_cpd_type(first), children);
+                &first->loc, dom_infer_cpd_type(first), children);
             *current = (*current)->next;
             return result;
 
@@ -331,7 +331,7 @@ fail:
 static struct DomNode *dom_parse_atom_node(struct Token **current)
 {
     struct DomNode *result;
-    result = dom_make_atom((*current)->loc, (*current)->begin, (*current)->end);
+    result = dom_make_atom(&(*current)->loc, (*current)->begin, (*current)->end);
     *current = (*current)->next;
     return result;
 }

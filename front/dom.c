@@ -16,11 +16,11 @@ static char *reserved[] = {
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
 
-struct DomNode *dom_make_atom(struct SourceLocation loc, char *begin, char *end)
+struct DomNode *dom_make_atom(struct SourceLocation *loc, char *begin, char *end)
 {
 	struct DomNode *result = malloc_or_die(sizeof(*result));
     int length = end - begin;
-    result->loc = loc;
+    result->loc = *loc;
     result->type = DOM_ATOM;
 	result->atom = malloc_or_die(length + 1);
     memcpy(result->atom, begin, length);
@@ -30,12 +30,12 @@ struct DomNode *dom_make_atom(struct SourceLocation loc, char *begin, char *end)
 }
 
 struct DomNode *dom_make_compound(
-        struct SourceLocation loc,
+        struct SourceLocation *loc,
         enum DomCpdType compound_type,
         struct DomNode *children)
 {
 	struct DomNode *result = malloc_or_die(sizeof(*result));
-    result->loc = loc;
+    result->loc = *loc;
     result->type = DOM_COMPOUND;
     result->cpd_type = compound_type;
     result->cpd_children = children;

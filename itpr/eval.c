@@ -19,9 +19,9 @@ void eval_location_reset(void)
 	ARRAY_FREE(location_stack);
 }
 
-void eval_location_push(struct SourceLocation loc)
+void eval_location_push(struct SourceLocation *loc)
 {
-	ARRAY_APPEND(location_stack, loc);
+	ARRAY_APPEND(location_stack, *loc);
 }
 
 void eval_location_pop(void)
@@ -213,7 +213,7 @@ VAL_LOC_T eval_impl(
 		struct SymMap *sym_map)
 {
     VAL_LOC_T begin = stack->top;
-	eval_location_push(node->loc);
+	eval_location_push(&node->loc);
 
     switch (node->type) {
     case AST_LITERAL:

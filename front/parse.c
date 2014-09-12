@@ -86,7 +86,7 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
 		child = child->next;
 	}
 
-	return ast_make_do_block(dom->loc, exprs);
+	return ast_make_do_block(&dom->loc, exprs);
 
 fail:
 
@@ -135,7 +135,7 @@ static struct AstNode *parse_bind(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_bind(dom->loc, symbol, expr);
+    return ast_make_bind(&dom->loc, symbol, expr);
 }
 
 static struct AstNode *parse_iff(struct DomNode *dom)
@@ -186,7 +186,7 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	test->next = true_expr;
 	true_expr->next = false_expr;
 
-	return ast_make_iff(dom->loc, test, true_expr, false_expr);
+	return ast_make_iff(&dom->loc, test, true_expr, false_expr);
 
 fail:
 	if (test) {
@@ -245,7 +245,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
         child = child->next;
     }
 
-    return ast_make_compound(dom->loc, type, exprs);
+    return ast_make_compound(&dom->loc, type, exprs);
 
 fail:
 	if (exprs) {
@@ -293,7 +293,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
         child = child->next;
     }
 
-    return ast_make_func_call(dom->loc, symbol, args);
+    return ast_make_func_call(&dom->loc, symbol, args);
 
 fail:
 	if (args) {
@@ -363,7 +363,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 		goto fail;
 	}
 
-    return ast_make_func_def(dom->loc, formal_args, arg_count, expr);
+    return ast_make_func_def(&dom->loc, formal_args, arg_count, expr);
 
 fail:
     if (formal_args) {
@@ -386,9 +386,9 @@ static struct AstNode *parse_literal_bool(struct DomNode *dom)
     LOG_TRACE_FUNC
 
     if (dom_node_is_reserved_atom(dom, DOM_RES_TRUE)) {
-        return ast_make_literal_bool(dom->loc, 1);
+        return ast_make_literal_bool(&dom->loc, 1);
     } else if (dom_node_is_reserved_atom(dom, DOM_RES_FALSE)) {
-        return ast_make_literal_bool(dom->loc, 0);
+        return ast_make_literal_bool(&dom->loc, 0);
     } else {
         return NULL;
     }
@@ -413,7 +413,7 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
 		atom_cpy = malloc_or_die(len + 1);
         memcpy(atom_cpy, atom, len + 1);
         atom_cpy[len] = '\0';
-        return ast_make_literal_string(dom->loc, atom_cpy);
+        return ast_make_literal_string(&dom->loc, atom_cpy);
     } else {
         return NULL;
     }
@@ -439,26 +439,26 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
     }
 
     if (len == 3) {
-        return ast_make_literal_character(dom->loc, atom[1]);
+        return ast_make_literal_character(&dom->loc, atom[1]);
 
     } else if (len == 4 && atom[1] == '\\') {
         switch(atom[2]) {
          case 'b':
-            return ast_make_literal_character(dom->loc, '\b');
+            return ast_make_literal_character(&dom->loc, '\b');
          case 't':
-            return ast_make_literal_character(dom->loc, '\t');
+            return ast_make_literal_character(&dom->loc, '\t');
          case 'n':
-            return ast_make_literal_character(dom->loc, '\n');
+            return ast_make_literal_character(&dom->loc, '\n');
          case 'f':
-            return ast_make_literal_character(dom->loc, '\f');
+            return ast_make_literal_character(&dom->loc, '\f');
          case 'r':
-            return ast_make_literal_character(dom->loc, '\r');
+            return ast_make_literal_character(&dom->loc, '\r');
          case '\\':
-            return ast_make_literal_character(dom->loc, '\\');
+            return ast_make_literal_character(&dom->loc, '\\');
          case '"':
-            return ast_make_literal_character(dom->loc, '\"');
+            return ast_make_literal_character(&dom->loc, '\"');
          case '\'':
-            return ast_make_literal_character(dom->loc, '\'');
+            return ast_make_literal_character(&dom->loc, '\'');
          default:
             return NULL;
         }
@@ -486,7 +486,7 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
     if (len > 0 && (isdigit(atom[0]) || atom[0] == '-' || atom[0] == '+') &&
         all_of(atom, atom + len, isdigit)) {
         long value = atol(atom);
-        return ast_make_literal_int(dom->loc, value);
+        return ast_make_literal_int(&dom->loc, value);
     } else {
         return NULL;
     }
@@ -518,7 +518,7 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
     }
 
     value = atof(atom);
-    return ast_make_literal_real(dom->loc, value);
+    return ast_make_literal_real(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal(struct DomNode *dom)
@@ -550,7 +550,7 @@ static struct AstNode *parse_reference(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_reference(dom->loc, symbol);
+    return ast_make_reference(&dom->loc, symbol);
 }
 
 struct AstNode *parse(struct DomNode *dom)
