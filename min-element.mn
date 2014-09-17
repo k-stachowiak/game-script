@@ -8,6 +8,7 @@
 	)
 ))
 
+# Finds the minimum element in an array
 (bind min-element (func (array)
 	(if (= (length array) 1)
 		(car array)
