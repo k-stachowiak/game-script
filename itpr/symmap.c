@@ -18,10 +18,6 @@ static void symmap_error_already_inserted(char *symbol)
 
 static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 {
-	/* TODO: Note that the "eval" here is artificial. This can be handled
-	 * with a special magic function that just generates a proper function
-	 * value.
-	 */
     bif_assure_init();
     sym_map_insert(sym_map, "sqrt", eval(&bif_sqrt, stack, sym_map));
     sym_map_insert(sym_map, "+", eval(&bif_add, stack, sym_map));
@@ -94,8 +90,6 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
     }
 
 	kvp = malloc_or_die(sizeof(*kvp));
-    /* TODO: ensure sym map cleanup upon failures. */
-
     kvp->key = key_copy;
     kvp->location = location;
     kvp->next = NULL;

@@ -174,7 +174,7 @@ static void efc_evaluate_general(
 		struct Capture *cap = value->function.captures.data + i;
 		sym_map_insert(&local_sym_map, cap->symbol, cap->location);
 		if (err_state()) {
-			return;
+			goto cleanup;
 		}
 	}
 
@@ -183,7 +183,7 @@ static void efc_evaluate_general(
 		VAL_LOC_T loc = value->function.applied.data[i];
 		sym_map_insert(&local_sym_map, *(formal_args++), loc);
 		if (err_state()) {
-			return;
+			goto cleanup;
 		}
 	}
 

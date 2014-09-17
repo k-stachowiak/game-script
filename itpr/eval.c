@@ -192,10 +192,6 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
     static VAL_HEAD_SIZE_T zero = 0;
     void* impl = (void*)node;
 
-	/* TODO: AST related operations are stored near the bif code,
-	 * and the code below is rather placed near the logically relevant
-	 * place. Deal with this inconsistency.
-	 */
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
