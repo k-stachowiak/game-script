@@ -9,6 +9,8 @@
 
 extern struct AstNode bif_sqrt;
 
+extern struct SourceLocation bif_location;
+
 extern struct AstNode bif_add;
 extern struct AstNode bif_sub;
 extern struct AstNode bif_mul;

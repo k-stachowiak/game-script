@@ -8,13 +8,18 @@
 #include "repl.h"
 
 /* TODO:
- * - Insert locations into the symbol map then substitute them when evaluating.
- * - Provide location for symbol map inserts will eval stack be OK?.
+ * - Implement interpreter
+ *   - parse files into ast maps
+ *   - enable imports
+ *   - establish common code for the interpreter and for the repl into runtime module
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
  *		- implement the splitting phase
  * - Side effects: print
+ *
+ * Questions:
+ * - should source locations be pushed to the stack? In debug mode?
  */
 
 int main(int argc, char *argv[])

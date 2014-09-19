@@ -132,9 +132,10 @@ static void eval_bind(
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-    VAL_LOC_T location = eval_impl(node->data.bind.expr, stack, sym_map);
+    struct AstNode *expr = node->data.bind.expr;
+    VAL_LOC_T location = eval_impl(expr, stack, sym_map);
     if (!err_state()) {
-        sym_map_insert(sym_map, node->data.bind.symbol, location);
+        sym_map_insert(sym_map, node->data.bind.symbol, location, &expr->loc);
     }
 }
 
@@ -178,7 +179,7 @@ static void eval_reference(
 		return;
 	}
 
-	stack_push_copy(stack, kvp->location);
+	stack_push_copy(stack, kvp->stack_loc);
 }
 
 /**

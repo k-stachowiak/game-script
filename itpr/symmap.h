@@ -16,7 +16,8 @@ struct SymMap {
 
 struct SymMapKvp {
     char *key;
-	VAL_LOC_T location;
+	VAL_LOC_T stack_loc;
+    struct SourceLocation source_loc;
     struct SymMapKvp *next;
 };
 
@@ -29,7 +30,13 @@ void sym_map_init_local(
         struct SymMap *global);
 
 void sym_map_deinit(struct SymMap *sym_map);
-void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location);
+
+void sym_map_insert(
+        struct SymMap *sym_map,
+        char *key,
+        VAL_LOC_T stack_loc,
+        struct SourceLocation *source_loc);
+
 struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key);

@@ -44,7 +44,7 @@ static bool efc_lookup_value(
 		return false;
 	}
 
-	*result = stack_peek_value(stack, kvp->location);
+	*result = stack_peek_value(stack, kvp->stack_loc);
 	if (result->header.type != (VAL_HEAD_TYPE_T)VAL_FUNCTION) {
 		fcall_error_nonfunc_value(symbol);
 		return false;
@@ -134,6 +134,7 @@ static bool efc_insert_expression(
 		struct SymMap *sym_map,
 		struct SymMap *new_sym_map,
 		struct AstNode *arg_node,
+        struct SourceLocation *arg_loc,
 		char *symbol)
 {
 	VAL_LOC_T location = eval_impl(arg_node, stack, sym_map);
@@ -141,7 +142,7 @@ static bool efc_insert_expression(
 		return false;
 	}
 
-	sym_map_insert(new_sym_map, symbol, location);
+	sym_map_insert(new_sym_map, symbol, location, arg_loc);
 	if (err_state()) {
 		return false;
 	}
@@ -161,6 +162,8 @@ static void efc_evaluate_general(
 	struct SymMap local_sym_map;
 	struct AstNode *impl = value->function.def;
 	char **formal_args = impl->data.func_def.func.formal_args;
+    struct SourceLocation *arg_locs = impl->data.func_def.func.arg_locs;
+    struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED };
 
 	/* Create the local scope. */
 	if (sym_map->global) {
@@ -172,7 +175,7 @@ static void efc_evaluate_general(
 	/* Insert captures into the scope. */
 	for (i = 0; i < value->function.captures.size; ++i) {
 		struct Capture *cap = value->function.captures.data + i;
-		sym_map_insert(&local_sym_map, cap->symbol, cap->location);
+		sym_map_insert(&local_sym_map, cap->symbol, cap->location, &cont_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
@@ -181,7 +184,7 @@ static void efc_evaluate_general(
 	/* Insert already applied arguments. */
 	for (i = 0; i < value->function.applied.size; ++i) {
 		VAL_LOC_T loc = value->function.applied.data[i];
-		sym_map_insert(&local_sym_map, *(formal_args++), loc);
+		sym_map_insert(&local_sym_map, *(formal_args++), loc, &cont_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
@@ -190,8 +193,9 @@ static void efc_evaluate_general(
 	/* Evaluate and insert new arguments. */
 	temp_begin = stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
-		if (!efc_insert_expression(
-			stack, sym_map, &local_sym_map, actual_args, *(formal_args++))) {
+		if (!efc_insert_expression(stack,
+                sym_map, &local_sym_map,
+                actual_args, arg_locs++, *(formal_args++))) {
 			goto cleanup;
 		}
 	}

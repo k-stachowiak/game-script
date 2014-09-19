@@ -19,28 +19,28 @@ static void symmap_error_already_inserted(char *symbol)
 static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)
 {
     bif_assure_init();
-    sym_map_insert(sym_map, "sqrt", eval(&bif_sqrt, stack, sym_map));
-    sym_map_insert(sym_map, "+", eval(&bif_add, stack, sym_map));
-    sym_map_insert(sym_map, "-", eval(&bif_sub, stack, sym_map));
-    sym_map_insert(sym_map, "*", eval(&bif_mul, stack, sym_map));
-    sym_map_insert(sym_map, "/", eval(&bif_div, stack, sym_map));
-	sym_map_insert(sym_map, "%", eval(&bif_mod, stack, sym_map));
-	sym_map_insert(sym_map, "=", eval(&bif_eq, stack, sym_map));
-	sym_map_insert(sym_map, "<", eval(&bif_lt, stack, sym_map));
-	sym_map_insert(sym_map, ">", eval(&bif_gt, stack, sym_map));
-	sym_map_insert(sym_map, "<=", eval(&bif_leq, stack, sym_map));
-	sym_map_insert(sym_map, ">=", eval(&bif_geq, stack, sym_map));
-	sym_map_insert(sym_map, "&&", eval(&bif_and, stack, sym_map));
-	sym_map_insert(sym_map, "||", eval(&bif_or, stack, sym_map));
-	sym_map_insert(sym_map, "~~", eval(&bif_not, stack, sym_map));
-	sym_map_insert(sym_map, "length", eval(&bif_length, stack, sym_map));
-	sym_map_insert(sym_map, "empty", eval(&bif_empty, stack, sym_map));
-	sym_map_insert(sym_map, "car", eval(&bif_car, stack, sym_map));
-	sym_map_insert(sym_map, "cdr", eval(&bif_cdr, stack, sym_map));
-	sym_map_insert(sym_map, "reverse", eval(&bif_reverse, stack, sym_map));
-	sym_map_insert(sym_map, "cons", eval(&bif_cons, stack, sym_map));
-	sym_map_insert(sym_map, "cat", eval(&bif_cat, stack, sym_map));
-	sym_map_insert(sym_map, "slice", eval(&bif_slice, stack, sym_map));
+    sym_map_insert(sym_map, "sqrt", eval(&bif_sqrt, stack, sym_map), &bif_location);
+    sym_map_insert(sym_map, "+", eval(&bif_add, stack, sym_map), &bif_location);
+    sym_map_insert(sym_map, "-", eval(&bif_sub, stack, sym_map), &bif_location);
+    sym_map_insert(sym_map, "*", eval(&bif_mul, stack, sym_map), &bif_location);
+    sym_map_insert(sym_map, "/", eval(&bif_div, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "%", eval(&bif_mod, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "=", eval(&bif_eq, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "<", eval(&bif_lt, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, ">", eval(&bif_gt, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "<=", eval(&bif_leq, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, ">=", eval(&bif_geq, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "&&", eval(&bif_and, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "||", eval(&bif_or, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "~~", eval(&bif_not, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "length", eval(&bif_length, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "empty", eval(&bif_empty, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "car", eval(&bif_car, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "cdr", eval(&bif_cdr, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "reverse", eval(&bif_reverse, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "cons", eval(&bif_cons, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "cat", eval(&bif_cat, stack, sym_map), &bif_location);
+	sym_map_insert(sym_map, "slice", eval(&bif_slice, stack, sym_map), &bif_location);
 }
 
 void sym_map_init_global(
@@ -76,7 +76,11 @@ void sym_map_deinit(struct SymMap *sym_map)
     sym_map->end = NULL;
 }
 
-void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
+void sym_map_insert(
+        struct SymMap *sym_map,
+        char *key,
+        VAL_LOC_T stack_loc,
+        struct SourceLocation *source_loc)
 {
     struct SymMapKvp *kvp;
     int len = strlen(key);
@@ -91,7 +95,8 @@ void sym_map_insert(struct SymMap *sym_map, char *key, VAL_LOC_T location)
 
 	kvp = malloc_or_die(sizeof(*kvp));
     kvp->key = key_copy;
-    kvp->location = location;
+    kvp->stack_loc = stack_loc;
+    kvp->source_loc = *source_loc;
     kvp->next = NULL;
 
     LIST_APPEND(kvp, &sym_map->map, &sym_map->end);
@@ -152,7 +157,7 @@ void sym_map_for_each(struct SymMap *sym_map, void(*f)(char*, VAL_LOC_T))
 	}
 
 	for (kvp = sym_map->map; kvp; kvp = kvp->next) {
-		f(kvp->key, kvp->location);
+		f(kvp->key, kvp->stack_loc);
 	}
 }
 

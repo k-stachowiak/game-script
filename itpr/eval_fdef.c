@@ -89,7 +89,7 @@ static bool efd_is_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *loc)
 	struct SymMapKvp *kvp = sym_map_find(sym_map, symbol);
 
 	if (kvp) {
-		*loc = kvp->location;
+		*loc = kvp->stack_loc;
 	}
 
 	return kvp != sym_map_find_not_global(sym_map, symbol);

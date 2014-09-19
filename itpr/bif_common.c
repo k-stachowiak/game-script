@@ -7,7 +7,7 @@
 
 bool initialized = false;
 
-struct SourceLocation bif_location = { SRC_LOC_BIF, -1, -1 };
+struct SourceLocation bif_location = { SRC_LOC_BIF };
 
 struct SourceLocation bif_arg_locations[] = {
 	{ SRC_LOC_BIF, -1, -1 },
