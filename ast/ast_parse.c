@@ -4,23 +4,24 @@
 #include "lex.h"
 #include "parse.h"
 #include "dom.h"
+#include "error.h"
 
 struct AstNode *ast_parse_source(char *source)
 {
 	struct DomNode *dom;
 	struct AstNode *ast;
 
-	if (!(dom = lex(source))) {
+	dom = lex(source);
+    if (err_state()) {
 		return NULL;
 	}
 
-	if (!(ast = parse(dom))) {
-		dom_free(dom);
+	ast = parse(dom);
+    if (err_state()) {
 		return NULL;
 	}
 
 	dom_free(dom);
-
 	return ast;
 }
 
@@ -28,7 +29,10 @@ struct AstNode *ast_parse_file(char *filename)
 {
 	char *source = my_getfile(filename);
 	if (!source) {
-		printf("Failed loading file \"%s\".\n", filename);
+        struct ErrMessage msg;
+        err_msg_init(&msg, "PARSE");
+        err_msg_append(&msg, "Failed loading file \"%s\".\n", filename);
+        err_msg_set(&msg);
 		return NULL;
 	}
 

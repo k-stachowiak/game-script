@@ -10,9 +10,9 @@
 static void bif_compare_error_arg_mismatch(void)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL BIF COMPARE", eval_location_top());
+	err_msg_init_src(&msg, "EVAL BIF COMPARE", eval_location_top());
 	err_msg_append(&msg, "Arguments of comparison BIF must be of equal numeric type");
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static VAL_BOOL_T bif_eq_int(VAL_INT_T x, VAL_INT_T y) { return x == y; }

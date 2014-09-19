@@ -11,38 +11,53 @@
 #include "runtime.h"
 #include "ast_parse.h"
 
-static bool repl_cmd_load_consume_ast(char *filename, struct AstNode *ast_list)
+static void repl_cmd_error_bad(void)
 {
-	if (rt_consume_list(ast_list)) {
-		printf("Failed evaluating file \"%s\".\n", filename);
-		return false;
-	}
-	return true;
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg, "Bad command or file name.");
+    err_msg_set(&msg);
 }
 
-static bool repl_cmd_load(char *pieces[], int num_pieces)
+static void repl_cmd_error_no(void)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg, "No command provided.");
+    err_msg_set(&msg);
+}
+
+static void repl_cmd_error_args(char *cmd, int expected, int actual)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg,
+        "Invalid arguments to command \"%s\" : %d (expected %d).",
+        cmd, actual, expected);
+    err_msg_set(&msg);
+}
+
+static enum ReplCmdResult repl_cmd_load(char *pieces[], int num_pieces)
 {
 	char *filename;
 	struct AstNode *ast_list;
 
 	if (num_pieces != 1) {
-		printf("Load command expects 1 argument.\n");
-		return false;
+        repl_cmd_error_args("load", 1, num_pieces);
+		return REPL_CMD_ERROR;
 	}
 
 	filename = pieces[0];
 
 	if (!(ast_list = ast_parse_file(filename))) {
-		printf("Failed parsing file.\n");
-		return false;
+		return REPL_CMD_INTERNAL_ERROR;
 	}
 
-	if (!repl_cmd_load_consume_ast(filename, ast_list)) {
-		printf("Failed consuming AST.\n");
-		return false;
+	if (!rt_consume_list(ast_list)) {
+		return REPL_CMD_INTERNAL_ERROR;
 	}
 
-	return true;
+	return REPL_CMD_OK;
 }
 
 void repl_cmd_print_stack_value(VAL_LOC_T loc, struct Value *val)
@@ -69,15 +84,6 @@ static void repl_cmd_print_sym_map(void)
 	rt_for_each_sym(repl_cmd_print_sym_map_kvp);
 }
 
-static enum ReplCmdResult bool2result(bool x)
-{
-	if (x) {
-		return REPL_CMD_OK;
-	} else {
-		return REPL_CMD_ERROR;
-	}
-}
-
 enum ReplCmdResult repl_cmd_command(char *command_line)
 {
 	char *pieces[2];
@@ -92,7 +98,7 @@ enum ReplCmdResult repl_cmd_command(char *command_line)
 	}
 
 	if (num_pieces == 0) {
-		printf("No command provided.\n");
+        repl_cmd_error_no();
 		return REPL_CMD_ERROR;
 	}
 
@@ -100,7 +106,7 @@ enum ReplCmdResult repl_cmd_command(char *command_line)
 		return REPL_CMD_QUIT;
 
 	} else if (strcmp(pieces[0], "ld") == 0) {
-		return bool2result(repl_cmd_load(pieces + 1, num_pieces - 1));
+		return repl_cmd_load(pieces + 1, num_pieces - 1);
 
 	} else if (strcmp(pieces[0], "pst") == 0) {
 		repl_cmd_print_stack();
@@ -109,9 +115,10 @@ enum ReplCmdResult repl_cmd_command(char *command_line)
 		repl_cmd_print_sym_map();
 
 	} else {
-		printf("Bad command or file name.\n");
+        repl_cmd_error_bad();
 		return REPL_CMD_ERROR;
 	}
 
 	return REPL_CMD_OK;
 }
+

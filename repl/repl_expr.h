@@ -5,7 +5,8 @@
 
 enum ReplExprResult {
 	REPL_EXPR_OK,
-	REPL_EXPR_ERROR
+	REPL_EXPR_ERROR,
+	REPL_EXPR_INTERNAL_ERROR
 };
 
 enum ReplExprResult repl_expr_command(char *expression_line);

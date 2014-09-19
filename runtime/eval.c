@@ -37,18 +37,18 @@ struct SourceLocation *eval_location_top(void)
 static void eval_common_error(char *issue)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL", eval_location_top());
+	err_msg_init_src(&msg, "EVAL", eval_location_top());
 	err_msg_append(&msg, "%s", issue);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 /* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL", eval_location_top());
+	err_msg_init_src(&msg, "EVAL", eval_location_top());
 	err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static void eval_compound(

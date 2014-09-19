@@ -10,9 +10,9 @@
 static void bif_logic_error_arg_mismatch(void)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL BIF LOGIC", eval_location_top());
+	err_msg_init_src(&msg, "EVAL BIF LOGIC", eval_location_top());
 	err_msg_append(&msg, "Arguments of logic BIF must be of boolean type");
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static VAL_BOOL_T bif_log_and(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x && (bool)y; }

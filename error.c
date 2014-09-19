@@ -7,8 +7,7 @@
 #include "common.h"
 #include "error.h"
 
-static bool err_state_arr[ERR_MODULES_COUNT];
-static char *err_msg_arr[ERR_MODULES_COUNT];
+static char *err_message = NULL;
 
 static void err_internal_error(void)
 {
@@ -16,7 +15,19 @@ static void err_internal_error(void)
 	exit(2);
 }
 
-void err_msg_init(struct ErrMessage *msg, char *module, struct SourceLocation *loc)
+void err_msg_init(struct ErrMessage *msg, char *module)
+{
+	char buffer[ERR_TEM_BUFFER_SIZE];
+	int len = sprintf(buffer, "[%s] :", module);
+	if (len >= (ERR_TEM_BUFFER_SIZE) - 1) {
+		LOG_ERROR("Memory corruption while building error string.");
+		exit(2);
+	}
+	msg->text = malloc_or_die(len + 1);
+	memcpy(msg->text, buffer, len + 1);
+}
+
+void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocation *loc)
 {
 	char buffer[ERR_TEM_BUFFER_SIZE];
 	int len;
@@ -39,64 +50,29 @@ void err_msg_init(struct ErrMessage *msg, char *module, struct SourceLocation *l
 	memcpy(msg->text, buffer, len + 1);
 }
 
-void err_set_msg(struct ErrMessage *msg)
+void err_msg_set(struct ErrMessage *msg)
 {
-	err_set(ERR_NEU, msg->text);
-}
-
-void err_free(void)
-{
-	int i;
-	for (i = 0; i < ERR_MODULES_COUNT; ++i) {
-		if (err_msg_arr[i]) {
-			free(err_msg_arr[i]);
-		}
-	}
+    if (err_message) {
+        err_internal_error();
+    }
+	err_message = msg->text;
 }
 
 void err_reset(void)
 {
-    int i;
-    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
-		err_msg_arr[i] = NULL;
-        err_state_arr[i] = false;
+    if (err_message) {
+        free(err_message);
+        err_message = NULL;
     }
-	err_free();
-}
-
-void err_set(enum ErrModule module, char *message)
-{
-	int i;
-	for (i = 0; i < ERR_MODULES_COUNT; ++i) {
-		if (err_state_arr[i]) {
-			err_internal_error();
-		}
-	}
-
-	err_state_arr[module] = true;
-	err_msg_arr[module] = message;
 }
 
 bool err_state(void)
 {
-    int i;
-    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
-        if (err_state_arr[i]) {
-            return true;
-        }
-    }
-    return false;
+    return (bool)err_message;
 }
 
 char *err_msg(void)
 {
-    int i;
-    for (i = 0; i < ERR_MODULES_COUNT; ++i) {
-        if (err_state_arr[i]) {
-            return err_msg_arr[i];
-        }
-    }
-
-    return NULL;
+    return err_message;
 }
 

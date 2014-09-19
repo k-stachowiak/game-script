@@ -24,7 +24,7 @@ static struct {
 static void repl_free_bound(void)
 {
 	while (stored_nodes.size) {
-		ast_node_free_one(stored_nodes.data[0].node);
+		ast_node_free(stored_nodes.data[0].node);
 		ARRAY_REMOVE(stored_nodes, 0);
 	}
 }
@@ -82,7 +82,7 @@ VAL_LOC_T rt_consume_one(struct AstNode *ast)
 
 	} else {
 		stack->top = location;
-		ast_node_free_one(ast);
+		ast_node_free(ast);
 
 	}
 
@@ -100,7 +100,7 @@ bool rt_consume_list(struct AstNode *ast_list)
 			* no nodes that have already been consumed will be freed.
 			* They have actually been freed upon success of the consume function.
 			*/
-			ast_node_free_list(ast_list);
+			ast_node_free(ast_list);
 			return false;
 		}
 	}

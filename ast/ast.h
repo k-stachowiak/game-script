@@ -177,15 +177,12 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol);
  * ============
  */
 
-void ast_node_free_one(struct AstNode *node);
-void ast_node_free_list(struct AstNode *node);
+void ast_node_free(struct AstNode *node);
 
 /* Operations.
  * ===========
  */
 
 int ast_list_len(struct AstNode *head);
-void ast_visit(struct AstNode *node, void (*f)(struct AstNode*));
-void ast_print(struct AstNode *node);
 
 #endif

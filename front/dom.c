@@ -16,6 +16,16 @@ static char *reserved[] = {
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
 
+static int dom_list_length(struct DomNode* current)
+{
+    int result = 0;
+    while (current) {
+		current = current->next;
+		++result;
+    }
+    return result;
+}
+
 struct DomNode *dom_make_atom(struct SourceLocation *loc, char *begin, char *end)
 {
 	struct DomNode *result = malloc_or_die(sizeof(*result));
@@ -116,33 +126,3 @@ char *dom_node_parse_symbol(struct DomNode *node)
     return result;
 }
 
-void dom_visit(struct DomNode *dom, void (*f)(struct DomNode*))
-{
-    f(dom);
-    if (dom->type == DOM_COMPOUND) {
-        struct DomNode *child = dom->cpd_children;
-        while (child) {
-            dom_visit(child, f);
-            child = child->next;
-        }
-    }
-}
-
-int dom_list_length(struct DomNode* current)
-{
-    int result = 0;
-    while (current) {
-		current = current->next;
-		++result;
-    }
-    return result;
-}
-
-static int num_nodes;
-static void dom_count_callback(struct DomNode* node) { (void)node; ++num_nodes; }
-int dom_tree_count(struct DomNode *dom)
-{
-    num_nodes = 0;
-    dom_visit(dom, dom_count_callback);
-    return num_nodes;
-}

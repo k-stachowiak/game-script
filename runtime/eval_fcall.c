@@ -12,17 +12,17 @@
 static void fcall_error_nonfunc_value(char *symbol)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL FUNC CALL", eval_location_top());
+	err_msg_init_src(&msg, "EVAL FUNC CALL", eval_location_top());
 	err_msg_append(&msg, "Called non-function symbol \"%s\"", symbol);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static void fcall_error_too_many_args(char *symbol)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL FUNC CALL", eval_location_top());
+	err_msg_init_src(&msg, "EVAL FUNC CALL", eval_location_top());
 	err_msg_append(&msg, "Passed too many arguments to \"%s\"", symbol);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 /**

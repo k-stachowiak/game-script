@@ -12,17 +12,17 @@
 static void parse_error_char_length(int len, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "PARSE", where);
+	err_msg_init_src(&msg, "PARSE", where);
 	err_msg_append(&msg, "Incorrect character length (%d).", len);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static void parse_error_read(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "PARSE", where);
+	err_msg_init_src(&msg, "PARSE", where);
 	err_msg_append(&msg, "Failed reading %s.", what);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static char *find(char * current, char *last, char value)
@@ -91,7 +91,7 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
 fail:
 
 	if (exprs) {
-		ast_node_free_list(exprs);
+		ast_node_free(exprs);
 	}
 
 	return NULL;
@@ -190,15 +190,15 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 
 fail:
 	if (test) {
-		ast_node_free_one(test);
+		ast_node_free(test);
 	}
 
 	if (true_expr) {
-		ast_node_free_one(true_expr);
+		ast_node_free(true_expr);
 	}
 
 	if (false_expr) {
-		ast_node_free_one(false_expr);
+		ast_node_free(false_expr);
 	}
 
 	return NULL;
@@ -249,7 +249,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
 
 fail:
 	if (exprs) {
-		ast_node_free_list(exprs);
+		ast_node_free(exprs);
 	}
 
 	return NULL;
@@ -297,7 +297,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
 
 fail:
 	if (args) {
-		ast_node_free_list(args);
+		ast_node_free(args);
 	}
 
 	return NULL;
@@ -375,7 +375,7 @@ fail:
     }
 
     if (expr) {
-        ast_node_free_one(expr);
+        ast_node_free(expr);
     }
 
     return NULL;
@@ -579,7 +579,7 @@ struct AstNode *parse(struct DomNode *dom)
             if (!err_state()) {
 				parse_error_read("AST node", &dom->loc);
             }
-            ast_node_free_list(result);
+            ast_node_free(result);
             return NULL;
         }
         current = current->next;

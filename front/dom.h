@@ -58,9 +58,5 @@ bool dom_node_is_spec_compound(struct DomNode *node, enum DomCpdType type);
 bool dom_node_is_cpd_of_size(struct DomNode *node, int size);
 bool dom_node_is_cpd_min_size(struct DomNode *node, int size);
 char *dom_node_parse_symbol(struct DomNode *node);
-void dom_visit(struct DomNode *dom, void (*f)(struct DomNode*));
-
-int dom_list_length(struct DomNode *dom);
-int dom_tree_count(struct DomNode *dom);
 
 #endif

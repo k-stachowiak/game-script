@@ -13,23 +13,36 @@
 #include "repl_expr.h"
 #include "runtime.h"
 
+static void repl_expr_error_ast_len(int actual)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg,
+        "Parsed more than one AST node (%d) - only one allowed.", actual);
+    err_msg_set(&msg);
+}
+
 enum ReplExprResult repl_expr_command(char *expression_line)
 {
 	struct AstNode *ast;
+    int ast_len;
 	VAL_LOC_T location;
 	struct Value val;
 
 	ast = ast_parse_source(expression_line);
 	if (!ast) {
-		printf("Error: %s\n", err_msg());
-		err_reset();
-		return REPL_EXPR_ERROR;
+		return REPL_EXPR_INTERNAL_ERROR;
 	}
+
+    ast_len = ast_list_len(ast);
+    if (ast_len != 1) {
+        repl_expr_error_ast_len(ast_len);
+        return REPL_EXPR_ERROR;
+    }
 		
 	location = rt_consume_one(ast);
 	if (err_state()) {
-		printf("Error : %s\n", err_msg());
-		return REPL_EXPR_ERROR;
+		return REPL_EXPR_INTERNAL_ERROR;
 	}
 
 	val = rt_peek(location);

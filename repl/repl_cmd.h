@@ -6,6 +6,7 @@
 enum ReplCmdResult {
 	REPL_CMD_OK,
 	REPL_CMD_ERROR,
+	REPL_CMD_INTERNAL_ERROR,
 	REPL_CMD_QUIT
 };
 

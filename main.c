@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	 * due to the lacking string building facilities in C and a necessity
 	 * of using them there.
 	 */
-	atexit(err_free);
+	atexit(err_reset);
 
     if (argc == 2) {
         if (strcmp(argv[1], "repl") == 0) {

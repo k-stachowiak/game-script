@@ -155,6 +155,8 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
     return result;
 }
 
+static void ast_node_free_one(struct AstNode *node);
+
 static void ast_common_func_free(struct AstCommonFunc *acf)
 {
     int i;
@@ -171,7 +173,7 @@ static void ast_bif_free(struct AstBif *abif)
 
 static void ast_do_block_free(struct AstDoBlock *adb)
 {
-	ast_node_free_list(adb->exprs);
+	ast_node_free(adb->exprs);
 }
 
 static void ast_bind_free(struct AstBind *abind)
@@ -182,24 +184,24 @@ static void ast_bind_free(struct AstBind *abind)
 
 static void ast_iff_free(struct AstIff *aiff)
 {
-    ast_node_free_list(aiff->test);
+    ast_node_free(aiff->test);
 }
 
 static void ast_compound_free(struct AstCompound *acpd)
 {
-    ast_node_free_list(acpd->exprs);
+    ast_node_free(acpd->exprs);
 }
 
 static void ast_func_call_free(struct AstFuncCall *afcall)
 {
     free(afcall->symbol);
-    ast_node_free_list(afcall->actual_args);
+    ast_node_free(afcall->actual_args);
 }
 
 static void ast_func_def_free(struct AstFuncDef *afdef)
 {
     ast_common_func_free(&(afdef->func));
-    ast_node_free_list(afdef->expr);
+    ast_node_free(afdef->expr);
 }
 
 static void ast_literal_free(struct AstLiteral *alit)
@@ -214,7 +216,7 @@ static void ast_reference_free(struct AstReference *aref)
     free(aref->symbol);
 }
 
-void ast_node_free_one(struct AstNode *node)
+static void ast_node_free_one(struct AstNode *node)
 {
 	switch (node->type) {
 	case AST_BIF:
@@ -257,7 +259,7 @@ void ast_node_free_one(struct AstNode *node)
 	free(node);
 }
 
-void ast_node_free_list(struct AstNode *current)
+void ast_node_free(struct AstNode *current)
 {
     while (current) {
 		struct AstNode *next = current->next;
@@ -274,39 +276,5 @@ int ast_list_len(struct AstNode *head)
 		++result;
 	}
 	return result;
-}
-
-void ast_visit(struct AstNode *node, void (*f)(struct AstNode*))
-{
-    f(node);
-    switch (node->type) {
-    case AST_BIF:
-    case AST_LITERAL:
-    case AST_REFERENCE:
-        break;
-	case AST_DO_BLOCK:
-		ast_visit(node->data.do_block.exprs, f);
-		break;
-    case AST_BIND:
-        ast_visit(node->data.bind.expr, f);
-        break;
-    case AST_IFF:
-		ast_visit(node->data.iff.test, f); /* Points to branches too. */
-		break;
-    case AST_COMPOUND:
-        if (node->data.compound.exprs) {
-            ast_visit(node->data.compound.exprs, f);
-        }
-        break;
-    case AST_FUNC_CALL:
-        ast_visit(node->data.func_call.actual_args, f);
-        break;
-    case AST_FUNC_DEF:
-        ast_visit(node->data.func_def.expr, f);
-        break;
-    }
-    if (node->next) {
-        ast_visit(node->next, f);
-    }
 }
 

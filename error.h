@@ -8,32 +8,19 @@
 
 struct SourceLocation;
 
-enum ErrModule {
-	ERR_NEU,
-    ERR_TOK,
-    ERR_DOM,
-    ERR_PARSE,
-    ERR_REPL,
-    ERR_EVAL
-};
-
-#define ERR_MODULES_COUNT 6
-
-#define ERR_TEM_BUFFER_SIZE 2048
+#define ERR_TEM_BUFFER_SIZE 4096
 
 struct ErrMessage {
 	char *text;
 };
 
-/* Common API. */
-void err_free(void);
 void err_reset(void);
 bool err_state(void);
 char *err_msg(void);
 
-/* NEU API. */
-void err_msg_init(struct ErrMessage *msg, char *module, struct SourceLocation *loc);
-void err_set_msg(struct ErrMessage *msg);
+void err_msg_init(struct ErrMessage *msg, char *module);
+void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocation *loc);
+void err_msg_set(struct ErrMessage *msg);
 
 #define err_msg_append(MSG, FORMAT, ...) \
 	do { \
@@ -52,9 +39,5 @@ void err_set_msg(struct ErrMessage *msg);
 		free((MSG)->text); \
 		(MSG)->text = new_text; \
 	} while(0)
-
-/* Alt API. */
-void err_set(enum ErrModule module, char *message);
-
 
 #endif

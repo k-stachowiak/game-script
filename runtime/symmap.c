@@ -11,9 +11,9 @@
 static void symmap_error_already_inserted(char *symbol)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "SYM MAP", eval_location_top());
+	err_msg_init_src(&msg, "SYM MAP", eval_location_top());
 	err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static void sym_map_init_bifs(struct SymMap *sym_map, struct Stack *stack)

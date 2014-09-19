@@ -13,9 +13,9 @@
 static void bif_arythm_error_arg_mismatch(void)
 {
 	struct ErrMessage msg;
-	err_msg_init(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
+	err_msg_init_src(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
 	err_msg_append(&msg, "Arguments of arythmetic BIF must be of equal numeric type");
-	err_set_msg(&msg);
+	err_msg_set(&msg);
 }
 
 static VAL_INT_T bif_sqrt_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }

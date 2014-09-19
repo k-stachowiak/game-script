@@ -15,8 +15,12 @@ static bool request_quit = false;
 static void repl_handle_command(char *cmd)
 {
 	switch (repl_cmd_command(cmd)) {
-	case REPL_CMD_ERROR:
 	case REPL_CMD_OK:
+        break;
+
+	case REPL_CMD_ERROR:
+	case REPL_CMD_INTERNAL_ERROR:
+        printf("Command error : %s.\n", err_msg());
 		break;
 
 	case REPL_CMD_QUIT:
@@ -29,7 +33,11 @@ static void repl_handle_expression(char *expr)
 {
 	switch (repl_expr_command(expr)) {
 	case REPL_EXPR_OK:
+        break;
+
 	case REPL_EXPR_ERROR:
+	case REPL_EXPR_INTERNAL_ERROR:
+        printf("Expr error : %s.\n", err_msg());
 		break;
 	}
 }
@@ -44,6 +52,7 @@ static void repl_handle_line(char *line)
 
 	} else {
 		repl_handle_expression(line);
+
 	}
 }
 
@@ -85,6 +94,5 @@ int repl(void)
     }
 
 	rt_deinit();
-	printf("\n");
 	return result;
 }
