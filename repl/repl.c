@@ -7,7 +7,7 @@
 
 #include "repl_cmd.h"
 #include "repl_expr.h"
-#include "repl_state.h"
+#include "runtime.h"
 #include "error.h"
 
 static bool request_quit = false;
@@ -52,7 +52,7 @@ int repl(void)
 	int result;
     bool eof_flag = false;
 
-	repl_state_init();
+	rt_init();
 
     for (;;) {
 
@@ -60,8 +60,7 @@ int repl(void)
 
 		err_reset();
 
-        printf("moon [st:%ld]> ",
-			(long)repl_state_current_top());
+        printf("moon [st:%ld]> ", (long)rt_current_top());
 
         line = my_getline(&eof_flag);
 
@@ -85,7 +84,7 @@ int repl(void)
 		}
     }
 
-	repl_state_deinit();
+	rt_deinit();
 	printf("\n");
 	return result;
 }

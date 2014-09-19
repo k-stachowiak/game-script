@@ -6,71 +6,16 @@
 #include <stdbool.h>
 
 #include "error.h"
-#include "lex.h"
-#include "parse.h"
 #include "common.h"
-#include "dom.h"
 #include "repl_cmd.h"
-#include "repl_state.h"
+#include "runtime.h"
+#include "ast_parse.h"
 
-static struct DomNode *repl_cmd_load_dom_list(char *filename)
+static bool repl_cmd_load_consume_ast(char *filename, struct AstNode *ast_list)
 {
-	struct DomNode *dom_list;
-	char *source;
-
-	source = my_getfile(filename);
-
-	if (!source) {
-		printf("Failed loading file \"%s\".\n", filename);
-		return NULL;
-	}
-
-	if (!(dom_list = lex(source))) {
-		printf("Failed lexing file \"%s\".\n", filename);
-		return NULL;
-	}
-
-	return dom_list;
-}
-
-static struct AstNode *repl_cmd_load_ast_list(
-		char *filename,
-		struct DomNode *dom_list)
-{
-	struct AstNode *ast_list = NULL;
-	struct AstNode *ast_list_end = NULL;
-
-	for (; dom_list; dom_list = dom_list->next) {
-		struct AstNode *ast;
-		if (!(ast = parse(dom_list))) {
-			printf("Failed parsing file \"%s\".\n", filename);
-			ast_node_free_list(ast_list);
-			return NULL;
-		} else {
-			LIST_APPEND(ast, &ast_list, &ast_list_end);
-		}
-	}
-
-	return ast_list;
-}
-
-static bool repl_cmd_load_consume_ast(
-		char *filename,
-		struct AstNode *ast_list)
-{
-	repl_state_save();
-	for (; ast_list; ast_list = ast_list->next) {
-		repl_state_consume(ast_list);
-		if (err_state()) {
-			printf("Failed evaluating file \"%s\".\n", filename);
-			repl_state_restore();
-			/* NOTE: ast_list is used for the iteration so upon error,
-			* no nodes that have already been consumed will be freed.
-			* They have actually been freed upon success of the consume function.
-			*/
-			ast_node_free_list(ast_list);
-			return false;
-		}
+	if (rt_consume_list(ast_list)) {
+		printf("Failed evaluating file \"%s\".\n", filename);
+		return false;
 	}
 	return true;
 }
@@ -78,8 +23,6 @@ static bool repl_cmd_load_consume_ast(
 static bool repl_cmd_load(char *pieces[], int num_pieces)
 {
 	char *filename;
-
-	struct DomNode *dom_list;
 	struct AstNode *ast_list;
 
 	if (num_pieces != 1) {
@@ -89,10 +32,17 @@ static bool repl_cmd_load(char *pieces[], int num_pieces)
 
 	filename = pieces[0];
 
-	return
-		(dom_list = repl_cmd_load_dom_list(filename)) &&
-		(ast_list = repl_cmd_load_ast_list(filename, dom_list)) &&
-		(repl_cmd_load_consume_ast(filename, ast_list));
+	if (!(ast_list = ast_parse_file(filename))) {
+		printf("Failed parsing file.\n");
+		return false;
+	}
+
+	if (!repl_cmd_load_consume_ast(filename, ast_list)) {
+		printf("Failed consuming AST.\n");
+		return false;
+	}
+
+	return true;
 }
 
 void repl_cmd_print_stack_value(VAL_LOC_T loc, struct Value *val)
@@ -103,12 +53,12 @@ void repl_cmd_print_stack_value(VAL_LOC_T loc, struct Value *val)
 
 static void repl_cmd_print_stack(void)
 {
-	repl_state_for_each_stack_val(repl_cmd_print_stack_value);
+	rt_for_each_stack_val(repl_cmd_print_stack_value);
 }
 
 static void repl_cmd_print_sym_map_kvp(char *symbol, VAL_LOC_T location)
 {
-	struct Value val = repl_state_peek(location);
+	struct Value val = rt_peek(location);
 	printf("%s -> ", symbol);
 	val_print(&val, true);
 	printf(" @ %ld\n", (long)location);
@@ -116,7 +66,7 @@ static void repl_cmd_print_sym_map_kvp(char *symbol, VAL_LOC_T location)
 
 static void repl_cmd_print_sym_map(void)
 {
-	repl_state_for_each_sym(repl_cmd_print_sym_map_kvp);
+	rt_for_each_sym(repl_cmd_print_sym_map_kvp);
 }
 
 static enum ReplCmdResult bool2result(bool x)

@@ -11,7 +11,6 @@
  * - Implement interpreter
  *   - parse files into ast maps
  *   - enable imports
- *   - establish common code for the interpreter and for the repl into runtime module
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
