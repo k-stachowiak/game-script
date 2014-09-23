@@ -14,7 +14,7 @@ static void lex_error_undelimited(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "LEX", where);
-	err_msg_append(&msg, "Undelimited %s.", what);
+	err_msg_append(&msg, "Undelimited %s", what);
 	err_msg_set(&msg);
 }
 
@@ -22,7 +22,7 @@ static void lex_error_read(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "LEX", where);
-	err_msg_append(&msg, "Failed reading %s.", what);
+	err_msg_append(&msg, "Failed reading %s", what);
 	err_msg_set(&msg);
 }
 

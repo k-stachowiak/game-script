@@ -116,7 +116,6 @@ void *realloc_or_die(void *old, size_t size);
  */
 
 enum SourceLocationType {
-    SRC_LOC_NONE,
 	SRC_LOC_REGULAR,
 	SRC_LOC_BIF,
 	SRC_LOC_FUNC_CONTAINED

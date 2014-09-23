@@ -163,7 +163,7 @@ static void efc_evaluate_general(
 	struct AstNode *impl = value->function.def;
 	char **formal_args = impl->data.func_def.func.formal_args;
     struct SourceLocation *arg_locs = impl->data.func_def.func.arg_locs;
-    struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED };
+    struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
 
 	/* Create the local scope. */
 	if (sym_map->global) {

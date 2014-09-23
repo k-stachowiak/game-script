@@ -15,7 +15,7 @@ static void repl_cmd_error_bad(void)
 {
     struct ErrMessage msg;
     err_msg_init(&msg, "REPL");
-    err_msg_append(&msg, "Bad command or file name.");
+    err_msg_append(&msg, "Bad command or file name");
     err_msg_set(&msg);
 }
 
@@ -23,7 +23,7 @@ static void repl_cmd_error_no(void)
 {
     struct ErrMessage msg;
     err_msg_init(&msg, "REPL");
-    err_msg_append(&msg, "No command provided.");
+    err_msg_append(&msg, "No command provided");
     err_msg_set(&msg);
 }
 
@@ -32,7 +32,7 @@ static void repl_cmd_error_args(char *cmd, int expected, int actual)
     struct ErrMessage msg;
     err_msg_init(&msg, "REPL");
     err_msg_append(&msg,
-        "Invalid arguments to command \"%s\" : %d (expected %d).",
+        "Invalid arguments to command \"%s\" : %d (expected %d)",
         cmd, actual, expected);
     err_msg_set(&msg);
 }

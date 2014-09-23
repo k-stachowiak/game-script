@@ -14,7 +14,7 @@
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
- *		- implement the splitting phase
+ *      - implement the splitting phase
  * - Side effects: print
  *
  * Questions:
@@ -25,11 +25,11 @@ int main(int argc, char *argv[])
 {
     int error;
 
-	/* There is an awkward memory management scheme in the error module
-	 * due to the lacking string building facilities in C and a necessity
-	 * of using them there.
-	 */
-	atexit(err_reset);
+    /* There is an awkward memory management scheme in the error module
+     * due to the lacking string building facilities in C and a necessity
+     * of using them there.
+     */
+    atexit(err_reset);
 
     if (argc == 2) {
         if (strcmp(argv[1], "repl") == 0) {
@@ -40,11 +40,11 @@ int main(int argc, char *argv[])
             }
         } else {
             printf("Incorrect args.\n");
-			error = 1;
+            error = 1;
         }
     } else {
-		printf("Missing command line argument.\n");
-		error = 1;
+        printf("Missing command line argument.\n");
+        error = 1;
     }
 
     return error;

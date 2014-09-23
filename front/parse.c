@@ -13,7 +13,7 @@ static void parse_error_char_length(int len, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "PARSE", where);
-	err_msg_append(&msg, "Incorrect character length (%d).", len);
+	err_msg_append(&msg, "Incorrect character length (%d)", len);
 	err_msg_set(&msg);
 }
 
@@ -21,7 +21,7 @@ static void parse_error_read(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "PARSE", where);
-	err_msg_append(&msg, "Failed reading %s.", what);
+	err_msg_append(&msg, "Failed reading %s", what);
 	err_msg_set(&msg);
 }
 

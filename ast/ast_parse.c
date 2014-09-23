@@ -31,7 +31,7 @@ struct AstNode *ast_parse_file(char *filename)
 	if (!source) {
         struct ErrMessage msg;
         err_msg_init(&msg, "PARSE");
-        err_msg_append(&msg, "Failed loading file \"%s\".\n", filename);
+        err_msg_append(&msg, "Failed loading file \"%s\"", filename);
         err_msg_set(&msg);
 		return NULL;
 	}

@@ -11,7 +11,7 @@ static void bif_arr_error_arg(int arg, char *func, char *condition)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "EVAL BIF ARRAY", eval_location_top());
-	err_msg_append(&msg, "Argument %d of _%s_ %s.", arg, func, condition);
+	err_msg_append(&msg, "Argument %d of _%s_ %s", arg, func, condition);
 	err_msg_set(&msg);
 }
 
@@ -19,7 +19,7 @@ static void bif_arr_error_range(char *condition)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "BIF EVAL", eval_location_top());
-	err_msg_append(&msg, "In _slice_ : %s.", condition);
+	err_msg_append(&msg, "In _slice_ : %s", condition);
 	err_msg_set(&msg);
 }
 

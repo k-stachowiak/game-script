@@ -74,6 +74,7 @@ int repl(void)
         line = my_getline(&eof_flag);
 
         if (err_state()) {
+            printf("IO error in line \"%s\" : \"%s\".\n", line, err_msg());
             result = 1;
 			free(line);
 			break;
