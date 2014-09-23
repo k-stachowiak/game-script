@@ -24,7 +24,7 @@ static struct {
 static void repl_free_bound(void)
 {
 	while (stored_nodes.size) {
-		ast_node_free(stored_nodes.data[0].node);
+		ast_node_free_one(stored_nodes.data[0].node);
 		ARRAY_REMOVE(stored_nodes, 0);
 	}
 }

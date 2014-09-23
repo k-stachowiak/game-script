@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "error.h"
 #include "parse.h"
@@ -305,7 +306,16 @@ fail:
 
 static struct AstNode *parse_func_def(struct DomNode *dom)
 {
-    char **formal_args = NULL;
+    struct {
+        char **data;
+        int cap, size;
+    } formal_args = { NULL, 0, 0 };
+
+    struct {
+        struct SourceLocation *data;
+        int cap, size;
+    } arg_locs = { NULL, 0, 0 };
+
     int arg_count = 0;
     struct AstNode *expr = NULL;
 
@@ -341,19 +351,18 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     /* Argument list may be empty. */
     if (arg_child) {
-		formal_args = malloc_or_die(2048 * sizeof(*formal_args));
         while (arg_child) {
             if (!dom_node_is_atom(arg_child)) {
                 goto fail;
             } else {
                 int len = strlen(arg_child->atom);
-				formal_args[arg_count] = malloc_or_die(len + 1);
-                memcpy(formal_args[arg_count], arg_child->atom, len + 1);
-                ++arg_count;
+                char *formal_arg = malloc_or_die(len + 1);
+                memcpy(formal_arg, arg_child->atom, len + 1);
+                ARRAY_APPEND(formal_args, formal_arg);
+                ARRAY_APPEND(arg_locs, arg_child->loc);
             }
             arg_child = arg_child->next;
         }
-		formal_args = realloc_or_die(formal_args, arg_count * sizeof(*formal_args));
     }
 
     child = child->next;
@@ -363,15 +372,27 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 		goto fail;
 	}
 
-    return ast_make_func_def(&dom->loc, formal_args, arg_count, expr);
+	assert(arg_locs.size == formal_args.size);
+	arg_count = arg_locs.size;
+
+    return ast_make_func_def(
+        &dom->loc,
+        realloc_or_die(
+            formal_args.data,
+            formal_args.size * sizeof(*formal_args.data)),
+        realloc_or_die(
+            arg_locs.data,
+            arg_locs.size * sizeof(*arg_locs.data)),
+        arg_count,
+        expr);
 
 fail:
-    if (formal_args) {
-        int i;
-        for (i = 0; i < arg_count; ++i) {
-            free(formal_args + i);
-        }
-        free(formal_args);
+    if (formal_args.size) {
+        ARRAY_FREE(formal_args);
+    }
+
+    if (arg_locs.size) {
+        ARRAY_FREE(arg_locs);
     }
 
     if (expr) {
@@ -555,14 +576,13 @@ static struct AstNode *parse_reference(struct DomNode *dom)
 
 struct AstNode *parse(struct DomNode *dom)
 {
-    struct DomNode *current = dom;
     struct AstNode *result = NULL;
     struct AstNode *result_end = NULL;
 
     LOG_TRACE_FUNC
 
     err_reset();
-    while (current) {
+    while (dom) {
         struct AstNode *node;
         if ((!err_state() && (node = parse_literal(dom))) ||
             (!err_state() && (node = parse_reference(dom))) ||
@@ -582,7 +602,7 @@ struct AstNode *parse(struct DomNode *dom)
             ast_node_free(result);
             return NULL;
         }
-        current = current->next;
+        dom = dom->next;
     }
 
     return result;

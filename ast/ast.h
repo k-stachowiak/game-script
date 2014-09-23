@@ -163,6 +163,7 @@ struct AstNode *ast_make_func_call(
 struct AstNode *ast_make_func_def(
     struct SourceLocation *loc,
     char **formal_args,
+    struct SourceLocation *arg_locs,
     int arg_count,
     struct AstNode *expr);
 
@@ -178,6 +179,7 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol);
  */
 
 void ast_node_free(struct AstNode *node);
+void ast_node_free_one(struct AstNode *node);
 
 /* Operations.
  * ===========

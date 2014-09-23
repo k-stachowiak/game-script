@@ -75,16 +75,18 @@ struct AstNode *ast_make_func_call(
 }
 
 struct AstNode *ast_make_func_def(
-    struct SourceLocation *loc,
-    char **formal_args,
-    int arg_count,
-    struct AstNode *expr)
+        struct SourceLocation *loc,
+        char **formal_args,
+        struct SourceLocation *arg_locs,
+        int arg_count,
+        struct AstNode *expr)
 {
 	struct AstNode *result = malloc_or_die(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_DEF;
     result->loc = *loc;
     result->data.func_def.func.formal_args = formal_args;
+    result->data.func_def.func.arg_locs = arg_locs;
     result->data.func_def.func.arg_count = arg_count;
     result->data.func_def.expr = expr;
     return result;
@@ -155,8 +157,6 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
     return result;
 }
 
-static void ast_node_free_one(struct AstNode *node);
-
 static void ast_common_func_free(struct AstCommonFunc *acf)
 {
     int i;
@@ -216,7 +216,7 @@ static void ast_reference_free(struct AstReference *aref)
     free(aref->symbol);
 }
 
-static void ast_node_free_one(struct AstNode *node)
+void ast_node_free_one(struct AstNode *node)
 {
 	switch (node->type) {
 	case AST_BIF:
