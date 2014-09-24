@@ -95,5 +95,12 @@ int repl(void)
     }
 
 	rt_deinit();
+
+	if (result != 0) {
+		printf("REPL error: %s\n", err_msg());
+	} else {
+		printf("REPL terminated correctly.\n");
+	}
+
 	return result;
 }

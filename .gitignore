@@ -28,7 +28,8 @@ memcheck.sh
 Debug/*
 /Debug
 cmake
-CMakeLists.txt
 *.out
 gmon.out
 build/
+*[#]
+*~

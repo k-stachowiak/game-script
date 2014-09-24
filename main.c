@@ -6,10 +6,12 @@
 
 #include "error.h"
 #include "repl.h"
+#include "test.h"
 
 /* TODO:
  * - Implement interpreter
- *   - parse files into ast maps
+ *   - implement test sub-program
+ *     - test parsing each of the AST nodes individually (test non-trivial structures later)
  *   - enable imports
  * - Algorithms:
  *   - merge sort:
@@ -33,11 +35,11 @@ int main(int argc, char *argv[])
 
     if (argc == 2) {
         if (strcmp(argv[1], "repl") == 0) {
-            if ((error = repl())) {
-                printf("REPL error: %s\n", err_msg());
-            } else {
-                printf("REPL terminated correctly.\n");
-            }
+            error = repl();
+
+		} else if (strcmp(argv[1], "test") == 0) {
+			error = test();
+			
         } else {
             printf("Incorrect args.\n");
             error = 1;
