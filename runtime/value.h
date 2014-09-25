@@ -67,6 +67,7 @@ struct Value {
 };
 
 void val_print(struct Value *value, bool annotate);
+bool val_eq_int(struct Value *value, VAL_INT_T x);
 void val_free(struct Value *value);
 
 #endif

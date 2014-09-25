@@ -107,3 +107,12 @@ void val_print(struct Value *value, bool annotate)
         break;
     }
 }
+
+bool val_eq_int(struct Value *value, VAL_INT_T x)
+{
+	if ((enum ValueType)value->header.type != VAL_INT) {
+		return false;
+	}
+
+	return value->primitive.integer == x;
+}
