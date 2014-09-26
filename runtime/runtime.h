@@ -15,7 +15,7 @@ void rt_restore(void);
 
 VAL_LOC_T rt_current_top(void);
 
-VAL_LOC_T rt_consume_one(struct AstNode *ast);
+void rt_consume_one(struct AstNode *ast, VAL_LOC_T *loc, struct AstNode **next);
 bool rt_consume_list(struct AstNode *ast);
 
 void rt_for_each_stack_val(void(*f)(VAL_LOC_T, struct Value*));

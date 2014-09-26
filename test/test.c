@@ -34,8 +34,7 @@ static bool test_source_eval(char *source,
 	rt_init();
 	locations = malloc_or_die(ast_len * sizeof(*locations));
 	while (ast_list) {
-		next = ast_list->next;
-		locations[i++] = rt_consume_one(ast_list);
+		rt_consume_one(ast_list, locations + (i++), &next);
 		if (err_state()) {
 			printf("Failed consuming an AST node into runtime.\n");
 			printf("Error : %s.\n", err_msg());

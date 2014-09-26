@@ -1,6 +1,7 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include "common.h"
 #include "error.h"

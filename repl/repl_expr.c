@@ -40,7 +40,7 @@ enum ReplExprResult repl_expr_command(char *expression_line)
         return REPL_EXPR_ERROR;
     }
 		
-	location = rt_consume_one(ast);
+	rt_consume_one(ast, &location, NULL);
 	if (err_state()) {
 		return REPL_EXPR_INTERNAL_ERROR;
 	}

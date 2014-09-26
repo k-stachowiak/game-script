@@ -58,25 +58,29 @@ VAL_LOC_T rt_current_top(void)
 	return stack->top;
 }
 
-VAL_LOC_T rt_consume_one(struct AstNode *ast)
+void rt_consume_one(struct AstNode *ast, VAL_LOC_T *loc, struct AstNode **next)
 {
-	VAL_LOC_T location = stack->top;
+	if (loc) {
+		*loc = stack->top;
+	}
+	if (next) {
+		*next = ast->next;
+	}
+
 	eval(ast, stack, &sym_map);
 
 	if (err_state()) {
-		return location;
+		return;
 
 	} else if (ast->type == AST_BIND) {
 		ast->next = node_store;
 		node_store = ast;
 
 	} else {
-		stack->top = location;
+		stack->top = *loc;
 		ast_node_free_one(ast);
 
 	}
-
-	return location;
 }
 
 bool rt_consume_list(struct AstNode *ast_list)
@@ -86,8 +90,7 @@ bool rt_consume_list(struct AstNode *ast_list)
 	rt_save();
 
 	while (ast_list) {
-		next = ast_list->next;
-		rt_consume_one(ast_list);
+		rt_consume_one(ast_list, NULL, &next);
 		if (err_state()) {
 			rt_restore();
 			/* NOTE: ast_list is used for the iteration so upon error,
