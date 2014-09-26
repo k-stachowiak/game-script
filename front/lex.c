@@ -213,8 +213,12 @@ static struct Token *tok_read_comment(
     comment_end = find(current, end, '\n');
     result = tok_make_token(current, &comment_end);
 
-    si_adv(&comment_end);
-    *current = find_if_not(&comment_end, end, isspace);
+	if (!si_eq(&comment_end, end)) {
+		si_adv(&comment_end);
+		*current = find_if_not(&comment_end, end, isspace);
+	} else {
+		*current = *end;
+	}
 
     return result;
 }

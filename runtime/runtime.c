@@ -9,30 +9,24 @@
 
 static struct Stack *stack;
 static struct SymMap sym_map;
+static struct AstNode *node_store;
+
 static VAL_LOC_T saved_loc;
-
-struct NodeStore {
-	VAL_LOC_T location;
-	struct AstNode *node;
-};
-
-static struct {
-	struct NodeStore *data;
-	int size, cap;
-} stored_nodes;
+static struct AstNode *saved_store;
 
 static void repl_free_bound(void)
 {
-	while (stored_nodes.size) {
-		ast_node_free_one(stored_nodes.data[0].node);
-		ARRAY_REMOVE(stored_nodes, 0);
+	if (node_store) {
+		ast_node_free(node_store);
 	}
+	node_store = NULL;
 }
 
 void rt_init(void)
 {
 	stack = stack_make(64 * 1024);
 	sym_map_init_global(&sym_map, stack);
+	node_store = NULL;
 }
 
 void rt_deinit(void)
@@ -45,17 +39,15 @@ void rt_deinit(void)
 void rt_save(void)
 {
 	saved_loc = stack->top;
+	saved_store = node_store;
 }
 
 void rt_restore(void)
 {
-	int i;
-
-	for (i = 0; i < stored_nodes.size; ++i) {
-		if (stored_nodes.data[i].location >= saved_loc) {
-			ARRAY_REMOVE(stored_nodes, i);
-			--i;
-		}
+	while (node_store != saved_store) {
+		struct AstNode *temp = node_store;
+		ast_node_free_one(temp);
+		node_store = node_store->next;
 	}
 
 	stack_collapse(stack, saved_loc, stack->top);
@@ -75,14 +67,12 @@ VAL_LOC_T rt_consume_one(struct AstNode *ast)
 		return location;
 
 	} else if (ast->type == AST_BIND) {
-		struct NodeStore ns;
-		ns.location = location;
-		ns.node = ast;
-		ARRAY_APPEND(stored_nodes, ns);
+		ast->next = node_store;
+		node_store = ast;
 
 	} else {
 		stack->top = location;
-		ast_node_free(ast);
+		ast_node_free_one(ast);
 
 	}
 
@@ -91,8 +81,12 @@ VAL_LOC_T rt_consume_one(struct AstNode *ast)
 
 bool rt_consume_list(struct AstNode *ast_list)
 {
+	struct AstNode *next;
+
 	rt_save();
-	for (; ast_list; ast_list = ast_list->next) {
+
+	while (ast_list) {
+		next = ast_list->next;
 		rt_consume_one(ast_list);
 		if (err_state()) {
 			rt_restore();
@@ -103,6 +97,7 @@ bool rt_consume_list(struct AstNode *ast_list)
 			ast_node_free(ast_list);
 			return false;
 		}
+		ast_list = next;
 	}
 	return true;
 }

@@ -11,7 +11,53 @@
 #include "ast_parse.h"
 #include "runtime.h"
 
-static bool lexer_test()
+static bool test_source_eval(char *source,
+							 int result_offset,
+							 struct Value *values)
+{
+	int i = 0, ast_len;
+	struct AstNode *ast_list = NULL, *next;
+	VAL_LOC_T *locations = NULL;
+
+	err_reset();
+
+	/* 1. Parse the input source. */
+	ast_list = ast_parse_source(source);
+	if (!ast_list) {
+		printf("Error parsing source: %s.\n", source);
+		printf("Error : %s.\n", err_msg());
+		return false;
+	}
+	ast_len = ast_list_len(ast_list);
+
+	/* 2. Evaluate the source nodes. */
+	rt_init();
+	locations = malloc_or_die(ast_len * sizeof(*locations));
+	while (ast_list) {
+		next = ast_list->next;
+		locations[i++] = rt_consume_one(ast_list);
+		if (err_state()) {
+			printf("Failed consuming an AST node into runtime.\n");
+			printf("Error : %s.\n", err_msg());
+			rt_deinit();
+			ast_node_free(ast_list);
+			free(locations);
+			return false;
+		}
+		ast_list = next;
+	}
+
+	/* 3. Retrieve values from the runtime. */
+	for (i = 0; i < (ast_len - result_offset); ++i) {
+		values[i] = rt_peek(locations[result_offset + i]);
+	}
+
+	free(locations);
+	rt_deinit();
+	return true;
+}
+
+static bool test_lexer()
 {
 	struct DomNode *dom_node;
 
@@ -34,61 +80,8 @@ static bool lexer_test()
 	return true;
 }
 
-static bool eval_source(char *source,
-						int result_offset,
-						struct Value *values)
-{
-	int i = 0, ast_len;
-	struct AstNode *ast_list = NULL, *ast_current;
-	VAL_LOC_T *locations = NULL;
-	bool result = true;
 
-	err_reset();
-
-	/* 1. Parse the input source. */
-	ast_list = ast_parse_source(source);
-	if (!ast_list) {
-		result = false;
-		goto end;
-	}
-
-	ast_len = ast_list_len(ast_list);
-	ast_current = ast_list;
-
-	/* 2. Evaluate the source nodes. */
-	rt_init();
-	locations = malloc_or_die(ast_len * sizeof(*locations));
-	while (ast_current) {
-		locations[i++] = rt_consume_one(ast_current);
-		if (err_state()) {
-			printf("Failed consuming an AST node into runtime.\n");
-			printf("Error : %s.\n", err_msg());
-			result = false;
-			goto end;
-		}
-		ast_current = ast_current->next;
-	}
-
-	/* 3. Retrieve values from the runtime. */
-	for (i = 0; i < (ast_len - result_offset); ++i) {
-		values[i] = rt_peek(locations[result_offset + i]);
-	}
-
-end:
-	if (ast_list) {
-		ast_node_free(ast_list);
-	}
-
-	if (locations) {
-		free(locations);
-	}
-
-	rt_deinit();
-
-	return result;
-}
-
-static bool parser_test()
+static bool test_parser()
 {
 	int i;
 
@@ -115,7 +108,13 @@ static bool parser_test()
 	return true;
 }
 
-static bool simple_algorithm_test(void)
+static bool test_runtime_sanity(void)
+{
+	char *source = "(bind x \"x\")";
+	return test_source_eval(source, 1, NULL);
+}
+
+static bool test_simple_algorithm(void)
 {
 	char *source =
 		"(bind gcd (func (x y) (if (= y 0) x (gcd y (% x y)) ) ))\n"
@@ -125,7 +124,7 @@ static bool simple_algorithm_test(void)
 
 	struct Value results[2];
 
-	if (!eval_source(source, 2, results)) {
+	if (!test_source_eval(source, 2, results)) {
 		return false;
 	}
 
@@ -144,7 +143,7 @@ static bool simple_algorithm_test(void)
 	return true;
 }
 
-static bool array_lookup_test(void)
+static bool test_array_lookup(void)
 {
 	char *source =
 		"(bind min-element` (func (element array)\n"
@@ -161,7 +160,7 @@ static bool array_lookup_test(void)
 
 	struct Value results[1];
 
-	if (!eval_source(source, 2, results)) {
+	if (!test_source_eval(source, 2, results)) {
 		return false;
 	}
 
@@ -176,18 +175,17 @@ static bool array_lookup_test(void)
 
 int test(void)
 {
-	int result = 0;
+	bool success = true;
 
-	if (/*!lexer_test() ||
-		!parser_test() ||
-		*/		!simple_algorithm_test() /*||
-		!array_lookup_test()*/) {
-		result = 1;
-	}
+	success &= test_lexer();
+	success &= test_parser();
+	success &= test_runtime_sanity();
+	success &= test_simple_algorithm();
+	success &= test_array_lookup();
 
-	if (result == 0) {
+	if (success) {
 		printf("Tests ran successfully.\n");
 	}
 
-	return result;
+	return !success;
 }

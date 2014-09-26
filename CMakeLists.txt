@@ -13,7 +13,7 @@ include_directories(
     .
     )
 
-set(CMAKE_C_FLAGS "-Wall -Werror -g -O0")
+set(CMAKE_C_FLAGS "-Wall -g -O0")
 
 add_executable(moon-lang
     ./ast/ast_parse.c

@@ -7,4 +7,4 @@
 
 (bind lcm (func (x y)
 	(* (/ x (gcd x y)) y)
-))
+)) # comment at the end of a file.
