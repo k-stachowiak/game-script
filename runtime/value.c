@@ -75,7 +75,7 @@ void val_print(struct Value *value, bool annotate)
         memcpy(string, value->string.str_begin, str_len);
         string[str_len] = '\0';
         printf("%s", string);
-        free(string);
+        free_or_die(string);
         break;
 
     case VAL_ARRAY:

@@ -118,6 +118,7 @@ void *malloc_or_die(size_t size)
 		LOG_ERROR("Allocation failure.");
 		exit(1);
 	}
+	LOG_DEBUG("*malloc* (%p)", result);
 	return result;
 }
 
@@ -128,6 +129,7 @@ void *calloc_or_die(size_t count, size_t size)
 		LOG_ERROR("Callocation failure.");
 		exit(1);
 	}
+	LOG_DEBUG("*calloc* (%p)", result);
 	return result;
 }
 
@@ -138,5 +140,12 @@ void *realloc_or_die(void *old, size_t size)
 		LOG_ERROR("Reallocation failure.");
 		exit(1);
 	}
+	LOG_DEBUG("*realloc* (%p)", result);
 	return result;
+}
+
+void free_or_die(void *ptr)
+{
+	LOG_DEBUG("*free* (%p)", ptr);
+	free(ptr);
 }

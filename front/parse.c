@@ -52,7 +52,6 @@ static bool all_of(char *current, char *last, int (*f)(int))
 static struct AstNode *parse_do_block(struct DomNode *dom)
 {
 	struct AstNode *exprs = NULL;
-	struct AstNode *exprs_end = NULL;
 	struct DomNode *child = NULL;
 
 	LOG_TRACE_FUNC
@@ -76,26 +75,11 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
 	child = child->next;
 
 	/* 3.2. Has 1 or more further expressions. */
-	while (child) {
-		struct AstNode *expr = parse(child);
-		if (!expr) {
-			goto fail;
-		}
-		else {
-			LIST_APPEND(expr, &exprs, &exprs_end);
-		}
-		child = child->next;
+	if (!(exprs = parse_list(child))) {
+		return NULL;
 	}
 
 	return ast_make_do_block(&dom->loc, exprs);
-
-fail:
-
-	if (exprs) {
-		ast_node_free(exprs);
-	}
-
-	return NULL;
 }
 
 static struct AstNode *parse_bind(struct DomNode *dom)
@@ -131,8 +115,8 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     child = child->next;
 
     /* 3.3 3rd child is any expression. */
-    if (!(expr = parse(child))) {
-        free(symbol);
+    if (!(expr = parse_one(child))) {
+        free_or_die(symbol);
         return NULL;
     }
 
@@ -165,19 +149,22 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	child = child->next;
 
 	/* 3.2. 2nd child is the test expression. */
-	if (!(test = parse(child))) {
+	LOG_DEBUG("Evaluating if test expression.");
+	if (!(test = parse_one(child))) {
 		goto fail;
 	}
 	child = child->next;
 
 	/* 3.3. 3rd child is the true expression. */
-	if (!(true_expr = parse(child))) {
+	LOG_DEBUG("Evaluating if true expression.");
+	if (!(true_expr = parse_one(child))) {
 		goto fail;
 	}
 	child = child->next;
 
 	/* 3.4. 4th child is the false expression. */
-	if (!(false_expr = parse(child))) {
+	LOG_DEBUG("Evaluating if false expression.");
+	if (!(false_expr = parse_one(child))) {
 		goto fail;
 	}
 
@@ -186,6 +173,7 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	 */
 	test->next = true_expr;
 	true_expr->next = false_expr;
+	false_expr->next = NULL;
 
 	return ast_make_iff(&dom->loc, test, true_expr, false_expr);
 
@@ -209,8 +197,6 @@ static struct AstNode *parse_compound(struct DomNode *dom)
 {
     enum AstCompoundType type;
     struct AstNode *exprs = NULL;
-    struct AstNode *exprs_end = NULL;
-    struct DomNode *child = NULL;
 
     LOG_TRACE_FUNC
 
@@ -235,32 +221,18 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     }
 
     /* 3. Has 0 or more expressions. */
-    child = dom->cpd_children;
-    while (child) {
-        struct AstNode *node = parse(child);
-        if (!node) {
-            goto fail;
-        } else {
-            LIST_APPEND(node, &exprs, &exprs_end);
-        }
-        child = child->next;
-    }
-
-    return ast_make_compound(&dom->loc, type, exprs);
-
-fail:
-	if (exprs) {
-		ast_node_free(exprs);
+	exprs = parse_list(dom->cpd_children);
+	if (err_state()) {
+		return NULL;
+	} else {
+		return ast_make_compound(&dom->loc, type, exprs);
 	}
-
-	return NULL;
 }
 
 static struct AstNode *parse_func_call(struct DomNode *dom)
 {
     char *symbol = NULL;
     struct AstNode *args = NULL;
-    struct AstNode *args_end = NULL;
     struct DomNode *child = NULL;
 
     LOG_TRACE_FUNC
@@ -284,24 +256,12 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     child = child->next;
 
     /* 3.2. Has 0 or more further children being any expression. */
-    while (child) {
-        struct AstNode *node = parse(child);
-        if (!node) {
-            goto fail;
-        } else {
-            LIST_APPEND(node, &args, &args_end);
-        }
-        child = child->next;
-    }
-
-    return ast_make_func_call(&dom->loc, symbol, args);
-
-fail:
-	if (args) {
-		ast_node_free(args);
+	args = parse_list(child);
+	if (err_state()) {
+		return NULL;
+	} else {
+		return ast_make_func_call(&dom->loc, symbol, args);
 	}
-
-	return NULL;
 }
 
 static struct AstNode *parse_func_def(struct DomNode *dom)
@@ -368,7 +328,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
     child = child->next;
 
     /* 3.3. Has 1 more further expression. */
-	if (!(expr = parse(child))) {
+	if (!(expr = parse_one(child))) {
 		goto fail;
 	}
 
@@ -393,10 +353,6 @@ fail:
 
     if (arg_locs.size) {
         ARRAY_FREE(arg_locs);
-    }
-
-    if (expr) {
-        ast_node_free(expr);
     }
 
     return NULL;
@@ -574,31 +530,39 @@ static struct AstNode *parse_reference(struct DomNode *dom)
     return ast_make_reference(&dom->loc, symbol);
 }
 
-struct AstNode *parse(struct DomNode *dom)
+struct AstNode *parse_one(struct DomNode *dom)
 {
+	err_reset();
+	struct AstNode *node;
+	if ((!err_state() && (node = parse_literal(dom))) ||
+		(!err_state() && (node = parse_reference(dom))) ||
+		(!err_state() && (node = parse_do_block(dom))) ||
+		(!err_state() && (node = parse_bind(dom))) ||
+		(!err_state() && (node = parse_iff(dom))) ||
+		(!err_state() && (node = parse_func_def(dom))) ||
+		(!err_state() && (node = parse_func_call(dom))) ||
+		(!err_state() && (node = parse_compound(dom)))) {
+		return node;
+		
+	} else {
+		if (!err_state()) {
+			parse_error_read("AST node", &dom->loc);
+		}
+		return NULL;
+	}
+}
+
+struct AstNode *parse_list(struct DomNode *dom)
+{
+	struct AstNode *node;
     struct AstNode *result = NULL;
     struct AstNode *result_end = NULL;
 
-    LOG_TRACE_FUNC
-
-    err_reset();
     while (dom) {
-        struct AstNode *node;
-        if ((!err_state() && (node = parse_literal(dom))) ||
-            (!err_state() && (node = parse_reference(dom))) ||
-			(!err_state() && (node = parse_do_block(dom))) ||
-            (!err_state() && (node = parse_bind(dom))) ||
-            (!err_state() && (node = parse_iff(dom))) ||
-            (!err_state() && (node = parse_func_def(dom))) ||
-            (!err_state() && (node = parse_func_call(dom))) ||
-            (!err_state() && (node = parse_compound(dom)))) {
-
+		if ((node = parse_one(dom))) {
             LIST_APPEND(node, &result, &result_end);
 
         } else {
-            if (!err_state()) {
-				parse_error_read("AST node", &dom->loc);
-            }
             ast_node_free(result);
             return NULL;
         }

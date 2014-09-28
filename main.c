@@ -10,9 +10,6 @@
 
 /* TODO:
  * - Implement interpreter
- *   - implement test sub-program
- *     - test parsing each of the AST nodes individually (test non-trivial structures later)
- *   - enable imports
  * - IMPLEMENT AND USE VAL_FREE!!!
  * - Algorithms:
  *   - merge sort:

@@ -76,17 +76,17 @@ int repl(void)
         if (err_state()) {
             printf("IO error in line \"%s\" : \"%s\".\n", line, err_msg());
             result = 1;
-			free(line);
+			free_or_die(line);
 			break;
 
         } else if (eof_flag) {
 			result = 0;
-			free(line);
+			free_or_die(line);
 			break;
         }
 
         repl_handle_line(line);
-		free(line);
+		free_or_die(line);
 
         if (request_quit) {
 			result = 0;

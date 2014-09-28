@@ -26,7 +26,7 @@ void tok_free(struct Token *current)
 
     while (current) {
         next = current->next;
-        free(current);
+        free_or_die(current);
         current = next;
     }
 }

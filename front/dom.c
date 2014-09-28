@@ -58,11 +58,11 @@ void dom_free(struct DomNode *current)
     while (current) {
         struct DomNode *next = current->next;
         if (current->type == DOM_ATOM) {
-            free(current->atom);
+            free_or_die(current->atom);
         } else {
             dom_free(current->cpd_children);
         }
-        free(current);
+        free_or_die(current);
         current = next;
     }
 }

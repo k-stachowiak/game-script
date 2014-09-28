@@ -43,6 +43,7 @@
 void *malloc_or_die(size_t size);
 void *calloc_or_die(size_t count, size_t size);
 void *realloc_or_die(void *old, size_t size);
+void free_or_die(void *ptr);
 
 /* Algorighms.
  * ===========
@@ -60,7 +61,7 @@ void *realloc_or_die(void *old, size_t size);
 
 #define ARRAY_FREE(MACRO_ARRAY) \
     do { \
-        free((MACRO_ARRAY).data); \
+        free_or_die((MACRO_ARRAY).data); \
         (MACRO_ARRAY).data = NULL; \
         (MACRO_ARRAY).size = 0; \
         (MACRO_ARRAY).cap = 0; \
@@ -161,13 +162,13 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs);
 #if LOG_LEVEL <= LLVL_DEBUG
 #   define LOG_DEBUG(FORMAT, ...) printf("[DEBUG] %s:%d " FORMAT "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #else
-#   define LOG_DEBUG
+#   define LOG_DEBUG(...)
 #endif
 
 #if LOG_LEVEL <= LLVL_ERROR
 #   define LOG_ERROR(FORMAT, ...) fprintf(stderr, "[ERROR] %s:%d " FORMAT "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 #else
-#   define LOG_ERROR
+#   define LOG_ERROR(...)
 #endif
 
 /* Portable terminal.

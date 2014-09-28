@@ -40,7 +40,7 @@ static bool test_source_eval(char *source,
 			printf("Error : %s.\n", err_msg());
 			rt_deinit();
 			ast_node_free(ast_list);
-			free(locations);
+			free_or_die(locations);
 			return false;
 		}
 		ast_list = next;
@@ -51,7 +51,7 @@ static bool test_source_eval(char *source,
 		values[i] = rt_peek(locations[result_offset + i]);
 	}
 
-	free(locations);
+	free_or_die(locations);
 	rt_deinit();
 	return true;
 }
@@ -62,20 +62,22 @@ static bool test_lexer()
 
 	if ((dom_node = lex("\"undelimited atom")) != NULL) {
 		printf("Failed recognizing undelimited atom.\n");
+		dom_free(dom_node);
 		return false;
 	}
 
 	if ((dom_node = lex("( atom ( )")) != NULL) {
 		printf("Failed recognizing undelimited compound DOM node.\n");
+		dom_free(dom_node);
 		return false;
 	}
 
 	if ((dom_node = lex("this (should () be (lexed) nicely)")) == NULL) {
 		printf("Failed lexing a valid symbolic expression document.\n");
+		dom_free(dom_node);
 		return false;
 	}
 
-	dom_free(dom_node); /* Let valgrind keep an eye on this. */
 	return true;
 }
 
@@ -85,12 +87,14 @@ static bool test_parser()
 	int i;
 
 	char *good_sources[] = {
-		"a\nb",                           /* Lack of whitespaces, */
-		"(do (bind x \"ex\") (cat x x))", /* parsing DO, BIND and func call, */
-		"(if true 1 2)",                  /* parsing IF, */
-		"[ 1 { 1.0 1.0 [ 'a' 'b' ] } ]",  /* parsing nested array and tuple, */
-		"(func (x) (* x x))",             /* parsing function definition, */
-		"{ true \"as\" '\\t' 6.0 1 x }",  /* parsing some literals. */
+		//"a\nb",
+		"(if true [][])",
+		//"(bind two (+ 1 1))",
+		//"(do (bind x \"ex\") (cat x x))",
+		//"(if true 1 2)",
+		//"[ 1 { 1.0 1.0 [ 'a' 'b' ] } ]",
+		//"(func (x) (* x x))",
+		//"{ true \"as\" '\\t' 6.0 1 x }",
 	};
 
 	int good_sources_count = sizeof(good_sources) / sizeof(good_sources[0]);
@@ -176,11 +180,11 @@ int test(void)
 {
 	bool success = true;
 
-	success &= test_lexer();
+	// success &= test_lexer();
 	success &= test_parser();
-	success &= test_runtime_sanity();
-	success &= test_simple_algorithm();
-	success &= test_array_lookup();
+	// success &= test_runtime_sanity();
+	// success &= test_simple_algorithm();
+	// success &= test_array_lookup();
 
 	if (success) {
 		printf("Tests ran successfully.\n");

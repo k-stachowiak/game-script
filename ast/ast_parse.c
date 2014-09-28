@@ -16,7 +16,7 @@ struct AstNode *ast_parse_source(char *source)
 		return NULL;
 	}
 
-	ast = parse(dom);
+	ast = parse_list(dom);
     if (err_state()) {
 		return NULL;
 	}

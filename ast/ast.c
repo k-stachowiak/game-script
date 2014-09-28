@@ -162,9 +162,10 @@ static void ast_common_func_free(struct AstCommonFunc *acf)
 {
     int i;
     for (i = 0; i < acf->arg_count; ++i) {
-        free(acf->formal_args[i]);
+        free_or_die(acf->formal_args[i]);
     }
-    free(acf->formal_args);
+    free_or_die(acf->formal_args);
+	free_or_die(acf->arg_locs);
 }
 
 static void ast_bif_free(struct AstBif *abif)
@@ -179,7 +180,7 @@ static void ast_do_block_free(struct AstDoBlock *adb)
 
 static void ast_bind_free(struct AstBind *abind)
 {
-    free(abind->symbol);
+    free_or_die(abind->symbol);
     ast_node_free_one(abind->expr);
 }
 
@@ -195,7 +196,7 @@ static void ast_compound_free(struct AstCompound *acpd)
 
 static void ast_func_call_free(struct AstFuncCall *afcall)
 {
-    free(afcall->symbol);
+    free_or_die(afcall->symbol);
     ast_node_free(afcall->actual_args);
 }
 
@@ -208,13 +209,13 @@ static void ast_func_def_free(struct AstFuncDef *afdef)
 static void ast_literal_free(struct AstLiteral *alit)
 {
     if (alit->type == AST_LIT_STRING) {
-        free(alit->data.string);
+        free_or_die(alit->data.string);
     }
 }
 
 static void ast_reference_free(struct AstReference *aref)
 {
-    free(aref->symbol);
+    free_or_die(aref->symbol);
 }
 
 void ast_node_free_one(struct AstNode *node)
@@ -257,7 +258,7 @@ void ast_node_free_one(struct AstNode *node)
 		break;
 	}
 
-	free(node);
+	free_or_die(node);
 }
 
 void ast_node_free(struct AstNode *current)

@@ -67,10 +67,10 @@ void sym_map_deinit(struct SymMap *sym_map)
 	struct SymMapKvp *temp, *kvp;
 	kvp = sym_map->map;
     while (kvp) {
-        free(kvp->key);
+        free_or_die(kvp->key);
         temp = kvp;
         kvp = kvp->next;
-        free(temp);
+        free_or_die(temp);
     }
     sym_map->map = NULL;
     sym_map->end = NULL;

@@ -99,8 +99,8 @@ struct Stack *stack_make(VAL_LOC_T size)
 
 void stack_free(struct Stack *stack)
 {
-    free(stack->buffer);
-    free(stack);
+    free_or_die(stack->buffer);
+    free_or_die(stack);
 }
 
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)

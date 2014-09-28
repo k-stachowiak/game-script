@@ -61,7 +61,7 @@ void err_msg_set(struct ErrMessage *msg)
 void err_reset(void)
 {
     if (err_message) {
-        free(err_message);
+        free_or_die(err_message);
         err_message = NULL;
     }
 }

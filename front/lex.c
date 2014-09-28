@@ -404,6 +404,7 @@ struct DomNode *lex(char *source)
     }
 
     if (!(dom = dom_build(tokens))) {
+		tok_free(tokens);
         return NULL;
     }
 

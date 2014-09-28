@@ -6,6 +6,7 @@
 #include "ast.h"
 #include "dom.h"
 
-struct AstNode *parse(struct DomNode *dom);
+struct AstNode *parse_one(struct DomNode *dom);
+struct AstNode *parse_list(struct DomNode *dom);
 
 #endif
