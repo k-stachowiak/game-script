@@ -74,8 +74,9 @@ static bool test_lexer()
 
 	if ((dom_node = lex("this (should () be (lexed) nicely)")) == NULL) {
 		printf("Failed lexing a valid symbolic expression document.\n");
-		dom_free(dom_node);
 		return false;
+	} else {
+		dom_free(dom_node);
 	}
 
 	return true;
@@ -87,14 +88,14 @@ static bool test_parser()
 	int i;
 
 	char *good_sources[] = {
-		//"a\nb",
+		"a\nb",
 		"(if true [][])",
-		//"(bind two (+ 1 1))",
-		//"(do (bind x \"ex\") (cat x x))",
-		//"(if true 1 2)",
-		//"[ 1 { 1.0 1.0 [ 'a' 'b' ] } ]",
-		//"(func (x) (* x x))",
-		//"{ true \"as\" '\\t' 6.0 1 x }",
+		"(bind two (+ 1 1))",
+		"(do (bind x \"ex\") (cat x x))",
+		"(if true 1 2)",
+		"[ 1 { 1.0 1.0 [ 'a' 'b' ] } ]",
+		"(func (x) (* x x))",
+		"{ true \"as\" '\\t' 6.0 1 x }",
 	};
 
 	int good_sources_count = sizeof(good_sources) / sizeof(good_sources[0]);
@@ -180,11 +181,11 @@ int test(void)
 {
 	bool success = true;
 
-	// success &= test_lexer();
+	success &= test_lexer();
 	success &= test_parser();
-	// success &= test_runtime_sanity();
-	// success &= test_simple_algorithm();
-	// success &= test_array_lookup();
+	success &= test_runtime_sanity();
+	success &= test_simple_algorithm();
+	success &= test_array_lookup();
 
 	if (success) {
 		printf("Tests ran successfully.\n");
