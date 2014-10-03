@@ -46,28 +46,28 @@ void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate)
         if (annotate) {
             printf("bool :: ");
         }
-        printf("%s", value.primitive.boolean ? "true" : "false");
+        printf("%s", val_bool(stack, loc) ? "true" : "false");
         break;
 
     case VAL_CHAR:
         if (annotate) {
             printf("char :: ");
         }
-        printf("'%c'", value.primitive.character);
+        printf("'%c'", val_char(stack, loc));
         break;
 
     case VAL_INT:
         if (annotate) {
             printf("integer :: ");
         }
-        printf("%" PRId64 , value.primitive.integer);
+        printf("%" PRId64 , val_int(stack, loc));
         break;
 
     case VAL_REAL:
         if (annotate) {
             printf("real :: ");
         }
-        printf("%f", value.primitive.real);
+        printf("%f", val_real(stack, loc));
         break;
 
     case VAL_STRING:
@@ -131,5 +131,33 @@ enum ValueType val_type(struct Stack *stack, VAL_LOC_T loc)
 {
     struct ValueHeader header = stack_peek_header(stack, loc);
     return (enum ValueType)header.type;
+}
+
+VAL_BOOL_T val_bool(struct Stack *stack, VAL_LOC_T loc)
+{
+    VAL_BOOL_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_BOOL_BYTES);
+    return result;
+}
+
+VAL_CHAR_T val_char(struct Stack *stack, VAL_LOC_T loc)
+{
+    VAL_CHAR_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_CHAR_BYTES);
+    return result;
+}
+
+VAL_INT_T val_int(struct Stack *stack, VAL_LOC_T loc)
+{
+    VAL_INT_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_INT_BYTES);
+    return result;
+}
+
+VAL_REAL_T val_real(struct Stack *stack, VAL_LOC_T loc)
+{
+    VAL_REAL_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
+    return result;
 }
 
