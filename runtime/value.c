@@ -35,8 +35,6 @@ static void val_print_function(struct Value *value)
 void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate)
 {
     VAL_SIZE_T i;
-    char *string;
-    VAL_LOC_T str_len;
     VAL_LOC_T cpd_loc;
     struct ValueHeader cpd_header;
     struct Value value = stack_peek_value(stack, loc);
@@ -74,12 +72,7 @@ void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate)
         if (annotate) {
             printf("string :: ");
         }
-        str_len = value.string.str_len;
-		string = malloc_or_die(str_len + 1);
-        memcpy(string, value.string.str_begin, str_len);
-        string[str_len] = '\0';
-        printf("%s", string);
-        free_or_die(string);
+        printf("%s", val_string(stack, loc));
         break;
 
     case VAL_ARRAY:
@@ -159,5 +152,10 @@ VAL_REAL_T val_real(struct Stack *stack, VAL_LOC_T loc)
     VAL_REAL_T result;
     memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
     return result;
+}
+
+char* val_string(struct Stack *stack, VAL_LOC_T loc)
+{
+    return stack->buffer + loc + VAL_HEAD_BYTES;
 }
 

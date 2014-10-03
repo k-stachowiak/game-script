@@ -162,7 +162,7 @@ void stack_push_real(struct Stack *stack, VAL_REAL_T value)
 void stack_push_string(struct Stack *stack, char *value)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_STRING;
-	VAL_HEAD_SIZE_T size = strlen(value);
+	VAL_HEAD_SIZE_T size = strlen(value) + 1;
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
 	stack_push(stack, size, value);
@@ -304,7 +304,7 @@ struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location)
 
     case VAL_STRING:
         result.string.str_begin = src + VAL_HEAD_BYTES;
-        result.string.str_len = result.header.size;
+        result.string.str_len = result.header.size - 1; /* account for NUL */
         break;
 
     case VAL_ARRAY:

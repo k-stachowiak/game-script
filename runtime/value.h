@@ -78,6 +78,6 @@ VAL_BOOL_T val_bool(struct Stack *stack, VAL_LOC_T loc);
 VAL_CHAR_T val_char(struct Stack *stack, VAL_LOC_T loc);
 VAL_INT_T val_int(struct Stack *stack, VAL_LOC_T loc);
 VAL_REAL_T val_real(struct Stack *stack, VAL_LOC_T loc);
-// char val_string(struct Stack *stack, VAL_LOC_T loc);
+char* val_string(struct Stack *stack, VAL_LOC_T loc);
 
 #endif
