@@ -10,7 +10,6 @@
 
 /* TODO:
  * - Refactor printing to new API
- * - ERROR: evaluate string -> results in printing a boolean.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

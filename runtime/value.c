@@ -36,6 +36,7 @@ void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate)
 {
     VAL_SIZE_T i;
     VAL_LOC_T cpd_loc;
+    int cpd_size;
     struct ValueHeader cpd_header;
     struct Value value = stack_peek_value(stack, loc);
 
@@ -76,31 +77,31 @@ void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate)
         break;
 
     case VAL_ARRAY:
-        cpd_loc = loc + VAL_HEAD_BYTES;
         if (annotate) {
             printf("array :: ");
         }
         printf("[ ");
-        for (i = 0; i < value.compound.size; ++i) {
+        cpd_size = val_cpd_size(stack, loc);
+        cpd_loc = val_cpd_first(stack, loc);
+        for (i = 0; i < cpd_size; ++i) {
             val_print(stack, cpd_loc, false);
             printf(" ");
-            cpd_header = stack_peek_header(stack, cpd_loc);
-            cpd_loc += cpd_header.size + VAL_HEAD_BYTES;
+            cpd_loc = val_cpd_next(stack, cpd_loc);
         }
         printf("]");
         break;
 
     case VAL_TUPLE:
-        cpd_loc = loc + VAL_HEAD_BYTES;
         if (annotate) {
             printf("tuple :: ");
         }
         printf("{ ");
+        cpd_size = val_cpd_size(stack, loc);
+        cpd_loc = val_cpd_first(stack, loc);
         for (i = 0; i < value.compound.size; ++i) {
             val_print(stack, cpd_loc, false);
             printf(" ");
-            cpd_header = stack_peek_header(stack, cpd_loc);
-            cpd_loc += cpd_header.size + VAL_HEAD_BYTES;
+            cpd_loc = val_cpd_next(stack, cpd_loc);
         }
         printf("}");
         break;
@@ -157,5 +158,29 @@ VAL_REAL_T val_real(struct Stack *stack, VAL_LOC_T loc)
 char* val_string(struct Stack *stack, VAL_LOC_T loc)
 {
     return stack->buffer + loc + VAL_HEAD_BYTES;
+}
+
+int val_cpd_size(struct Stack *stack, VAL_LOC_T loc)
+{
+    struct ValueHeader header = stack_peek_header(stack, loc);
+    VAL_LOC_T current = val_cpd_first(stack, loc), end = current + header.size;
+    int result = 0;
+    while (current != end) {
+        header = stack_peek_header(stack, current);
+        current += VAL_HEAD_BYTES + header.size;
+        ++result;
+    }
+    return result;
+}
+
+VAL_LOC_T val_cpd_first(struct Stack *stack, VAL_LOC_T loc)
+{
+    return loc + VAL_HEAD_BYTES;
+}
+
+VAL_LOC_T val_cpd_next(struct Stack *stack, VAL_LOC_T loc)
+{
+    struct ValueHeader header = stack_peek_header(stack, loc);
+    return loc + VAL_HEAD_BYTES + header.size;
 }
 

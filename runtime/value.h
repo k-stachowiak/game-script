@@ -80,4 +80,8 @@ VAL_INT_T val_int(struct Stack *stack, VAL_LOC_T loc);
 VAL_REAL_T val_real(struct Stack *stack, VAL_LOC_T loc);
 char* val_string(struct Stack *stack, VAL_LOC_T loc);
 
+int val_cpd_size(struct Stack *stack, VAL_LOC_T loc);
+VAL_LOC_T val_cpd_first(struct Stack *stack, VAL_LOC_T loc);
+VAL_LOC_T val_cpd_next(struct Stack *stack, VAL_LOC_T loc);
+
 #endif
