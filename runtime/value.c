@@ -5,6 +5,7 @@
 #include <inttypes.h>
 
 #include "value.h"
+#include "stack.h"
 
 static void val_print_function(struct Value *value)
 {
@@ -31,79 +32,88 @@ static void val_print_function(struct Value *value)
     }
 }
 
-void val_print(struct Value *value, bool annotate)
+void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate)
 {
     VAL_SIZE_T i;
     char *string;
     VAL_LOC_T str_len;
+    VAL_LOC_T cpd_loc;
+    struct ValueHeader cpd_header;
+    struct Value value = stack_peek_value(stack, loc);
 
-    switch ((enum ValueType)value->header.type) {
+    switch (val_type(stack, loc)) {
     case VAL_BOOL:
         if (annotate) {
             printf("bool :: ");
         }
-        printf("%s", value->primitive.boolean ? "true" : "false");
+        printf("%s", value.primitive.boolean ? "true" : "false");
         break;
 
     case VAL_CHAR:
         if (annotate) {
             printf("char :: ");
         }
-        printf("'%c'", value->primitive.character);
+        printf("'%c'", value.primitive.character);
         break;
 
     case VAL_INT:
         if (annotate) {
             printf("integer :: ");
         }
-        printf("%" PRId64 , value->primitive.integer);
+        printf("%" PRId64 , value.primitive.integer);
         break;
 
     case VAL_REAL:
         if (annotate) {
             printf("real :: ");
         }
-        printf("%f", value->primitive.real);
+        printf("%f", value.primitive.real);
         break;
 
     case VAL_STRING:
         if (annotate) {
             printf("string :: ");
         }
-        str_len = value->string.str_len;
+        str_len = value.string.str_len;
 		string = malloc_or_die(str_len + 1);
-        memcpy(string, value->string.str_begin, str_len);
+        memcpy(string, value.string.str_begin, str_len);
         string[str_len] = '\0';
         printf("%s", string);
         free_or_die(string);
         break;
 
     case VAL_ARRAY:
+        cpd_loc = loc + VAL_HEAD_BYTES;
         if (annotate) {
             printf("array :: ");
         }
         printf("[ ");
-        for (i = 0; i < value->compound.size; ++i) {
-            val_print(value->compound.data + i, false);
+        for (i = 0; i < value.compound.size; ++i) {
+            val_print(stack, cpd_loc, false);
             printf(" ");
+            cpd_header = stack_peek_header(stack, cpd_loc);
+            cpd_loc += cpd_header.size + VAL_HEAD_BYTES;
         }
         printf("]");
         break;
 
     case VAL_TUPLE:
+        cpd_loc = loc + VAL_HEAD_BYTES;
         if (annotate) {
             printf("tuple :: ");
         }
-        printf("[ ");
-        for (i = 0; i < value->compound.size; ++i) {
-            val_print(value->compound.data + i, true);
+        printf("{ ");
+        for (i = 0; i < value.compound.size; ++i) {
+            val_print(stack, cpd_loc, false);
             printf(" ");
+            cpd_header = stack_peek_header(stack, cpd_loc);
+            cpd_loc += cpd_header.size + VAL_HEAD_BYTES;
         }
-        printf("]");
+        printf("}");
         break;
 
     case VAL_FUNCTION:
-        val_print_function(value);
+        val_print_function(&value);
         break;
     }
 }
@@ -116,3 +126,10 @@ bool val_eq_int(struct Value *value, VAL_INT_T x)
 
 	return value->primitive.integer == x;
 }
+
+enum ValueType val_type(struct Stack *stack, VAL_LOC_T loc)
+{
+    struct ValueHeader header = stack_peek_header(stack, loc);
+    return (enum ValueType)header.type;
+}
+

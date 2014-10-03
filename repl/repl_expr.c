@@ -27,7 +27,6 @@ enum ReplExprResult repl_expr_command(char *expression_line)
 	struct AstNode *ast;
     int ast_len;
 	VAL_LOC_T location;
-	struct Value val;
 
 	ast = ast_parse_source(expression_line);
 	if (!ast) {
@@ -45,8 +44,7 @@ enum ReplExprResult repl_expr_command(char *expression_line)
 		return REPL_EXPR_INTERNAL_ERROR;
 	}
 
-	val = rt_peek(location);
-	val_print(&val, true);
+	rt_print(location, true);
 
 	printf("\n");		
 

@@ -161,7 +161,7 @@ void stack_push_real(struct Stack *stack, VAL_REAL_T value)
 
 void stack_push_string(struct Stack *stack, char *value)
 {
-	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
+	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_STRING;
 	VAL_HEAD_SIZE_T size = strlen(value);
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);

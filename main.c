@@ -9,8 +9,8 @@
 #include "test.h"
 
 /* TODO:
- * - Implement interpreter
- * - IMPLEMENT AND USE VAL_FREE!!!
+ * - Refactor printing to new API
+ * - ERROR: evaluate string -> results in printing a boolean.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

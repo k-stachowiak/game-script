@@ -4,4 +4,5 @@
 #define TEST_H
 
 int test(void);
+
 #endif

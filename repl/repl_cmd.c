@@ -60,9 +60,10 @@ static enum ReplCmdResult repl_cmd_load(char *pieces[], int num_pieces)
 	return REPL_CMD_OK;
 }
 
-void repl_cmd_print_stack_value(VAL_LOC_T loc, struct Value *val)
+static void repl_cmd_print_stack_value(VAL_LOC_T loc, struct Value* val)
 {
-	val_print(val, true);
+    (void)val;
+	rt_print(loc, true);
 	printf(" @ %ld\n", (long)loc);
 }
 
@@ -73,9 +74,8 @@ static void repl_cmd_print_stack(void)
 
 static void repl_cmd_print_sym_map_kvp(char *symbol, VAL_LOC_T location)
 {
-	struct Value val = rt_peek(location);
 	printf("%s -> ", symbol);
-	val_print(&val, true);
+	rt_print(location, true);
 	printf(" @ %ld\n", (long)location);
 }
 

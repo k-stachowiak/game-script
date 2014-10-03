@@ -66,8 +66,12 @@ struct Value {
     struct ValueFunction function;
 };
 
-void val_print(struct Value *value, bool annotate);
+void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate);
 bool val_eq_int(struct Value *value, VAL_INT_T x);
 void val_free(struct Value *value);
+
+/* NEW API */
+
+enum ValueType val_type(struct Stack *stack, VAL_LOC_T loc);
 
 #endif

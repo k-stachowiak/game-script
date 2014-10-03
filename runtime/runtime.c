@@ -119,3 +119,9 @@ struct Value rt_peek(VAL_LOC_T location)
 {
 	return stack_peek_value(stack, location);
 }
+
+void rt_print(VAL_LOC_T loc, bool annotate)
+{
+    val_print(stack, loc, annotate);
+}
+

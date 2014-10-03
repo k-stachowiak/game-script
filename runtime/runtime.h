@@ -21,5 +21,6 @@ bool rt_consume_list(struct AstNode *ast);
 void rt_for_each_stack_val(void(*f)(VAL_LOC_T, struct Value*));
 void rt_for_each_sym(void(*f)(char*, VAL_LOC_T));
 struct Value rt_peek(VAL_LOC_T loc);
+void rt_print(VAL_LOC_T loc, bool annotate);
 
 #endif
