@@ -66,22 +66,4 @@ struct Value {
     struct ValueFunction function;
 };
 
-void val_print(struct Stack* stack, VAL_LOC_T loc, bool annotate);
-bool val_eq_int(struct Value *value, VAL_INT_T x);
-void val_free(struct Value *value);
-
-/* NEW API */
-
-enum ValueType val_type(struct Stack *stack, VAL_LOC_T loc);
-
-VAL_BOOL_T val_bool(struct Stack *stack, VAL_LOC_T loc);
-VAL_CHAR_T val_char(struct Stack *stack, VAL_LOC_T loc);
-VAL_INT_T val_int(struct Stack *stack, VAL_LOC_T loc);
-VAL_REAL_T val_real(struct Stack *stack, VAL_LOC_T loc);
-char* val_string(struct Stack *stack, VAL_LOC_T loc);
-
-int val_cpd_size(struct Stack *stack, VAL_LOC_T loc);
-VAL_LOC_T val_cpd_first(struct Stack *stack, VAL_LOC_T loc);
-VAL_LOC_T val_cpd_next(struct Stack *stack, VAL_LOC_T loc);
-
 #endif

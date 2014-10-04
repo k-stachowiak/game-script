@@ -22,6 +22,14 @@ static void repl_expr_error_ast_len(int actual)
     err_msg_set(&msg);
 }
 
+static void repl_expr_error_ast_illegal(char *reason)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg, "Illegal expression: %s", reason);
+    err_msg_set(&msg);
+}
+
 enum ReplExprResult repl_expr_command(char *expression_line)
 {
 	struct AstNode *ast;
@@ -31,11 +39,16 @@ enum ReplExprResult repl_expr_command(char *expression_line)
 	ast = ast_parse_source(expression_line);
 	if (!ast) {
 		return REPL_EXPR_INTERNAL_ERROR;
-	}
+	} 
 
     ast_len = ast_list_len(ast);
     if (ast_len != 1) {
         repl_expr_error_ast_len(ast_len);
+        return REPL_EXPR_ERROR;
+
+    } else if (ast->type == AST_FUNC_DEF) {
+        repl_expr_error_ast_illegal(
+            "Function definition cannot prsist without being bound");
         return REPL_EXPR_ERROR;
     }
 		
@@ -44,9 +57,8 @@ enum ReplExprResult repl_expr_command(char *expression_line)
 		return REPL_EXPR_INTERNAL_ERROR;
 	}
 
-	rt_print(location, true);
-
+	rt_val_print(location, true);
 	printf("\n");		
-
 	return REPL_EXPR_OK;
 }
+

@@ -200,7 +200,6 @@ void stack_push_func_init(
 		void *func_def)
 {
 	static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
-
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	*size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
 	*data_begin = stack_push(stack, VAL_PTR_BYTES, (char*)&func_def);
@@ -237,7 +236,7 @@ void stack_push_func_appl_init(struct Stack *stack, VAL_SIZE_T appl_count)
 
 void stack_push_func_appl_empty(struct Stack *stack)
 {
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
 }
 
 void stack_push_func_final(struct Stack *stack, VAL_LOC_T size_loc, VAL_SIZE_T data_begin)

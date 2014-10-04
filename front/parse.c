@@ -149,21 +149,18 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	child = child->next;
 
 	/* 3.2. 2nd child is the test expression. */
-	LOG_DEBUG("Evaluating if test expression.");
 	if (!(test = parse_one(child))) {
 		goto fail;
 	}
 	child = child->next;
 
 	/* 3.3. 3rd child is the true expression. */
-	LOG_DEBUG("Evaluating if true expression.");
 	if (!(true_expr = parse_one(child))) {
 		goto fail;
 	}
 	child = child->next;
 
 	/* 3.4. 4th child is the false expression. */
-	LOG_DEBUG("Evaluating if false expression.");
 	if (!(false_expr = parse_one(child))) {
 		goto fail;
 	}

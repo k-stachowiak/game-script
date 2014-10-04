@@ -11,13 +11,10 @@
 #include "ast_parse.h"
 #include "runtime.h"
 
-static bool test_source_eval(char *source,
-							 int result_offset,
-							 struct Value *values)
+static bool test_source_eval(char *source, VAL_LOC_T *locs)
 {
-	int i = 0, ast_len;
+	int i = 0;
 	struct AstNode *ast_list = NULL, *next;
-	VAL_LOC_T *locations = NULL;
 
 	err_reset();
 
@@ -28,31 +25,20 @@ static bool test_source_eval(char *source,
 		printf("Error : %s.\n", err_msg());
 		return false;
 	}
-	ast_len = ast_list_len(ast_list);
 
 	/* 2. Evaluate the source nodes. */
-	rt_init();
-	locations = malloc_or_die(ast_len * sizeof(*locations));
 	while (ast_list) {
-		rt_consume_one(ast_list, locations + (i++), &next);
+		rt_consume_one(ast_list, locs + (i++), &next);
 		if (err_state()) {
 			printf("Failed consuming an AST node into runtime.\n");
 			printf("Error : %s.\n", err_msg());
 			rt_deinit();
 			ast_node_free(ast_list);
-			free_or_die(locations);
 			return false;
 		}
 		ast_list = next;
 	}
 
-	/* 3. Retrieve values from the runtime. */
-	for (i = 0; i < (ast_len - result_offset); ++i) {
-		values[i] = rt_peek(locations[result_offset + i]);
-	}
-
-	free_or_die(locations);
-	rt_deinit();
 	return true;
 }
 
@@ -114,41 +100,53 @@ static bool test_parser()
 
 static bool test_runtime_sanity(void)
 {
+    bool success;
+    VAL_LOC_T results[1];
 	char *source = "(bind x \"x\")";
-	return test_source_eval(source, 1, NULL);
+
+	rt_init();
+    success = test_source_eval(source, results);
+	rt_deinit();
+
+    return success;
 }
 
 static bool test_simple_algorithm(void)
 {
+	VAL_LOC_T results[4];
 	char *source =
 		"(bind gcd (func (x y) (if (= y 0) x (gcd y (% x y)) ) ))\n"
 		"(bind lcm (func (x y) (* (/ x (gcd x y)) y ) ))\n"
 		"(bind x (gcd 54 24)) # Expected to be 6\n"
 		"(bind y (lcm 21 6)) # Expected to be 42";
 
-	struct Value results[2];
+	rt_init();
 
-	if (!test_source_eval(source, 2, results)) {
-		return false;
+	if (!test_source_eval(source, results)) {
+        goto fail;
 	}
 
-	if (!val_eq_int(results + 0, 6)) {
-		printf("gcd returned %ld, instead of 6.\n",
-			   (long)results[0].primitive.integer);
-		return false;
+	if (rt_val_int(results[2]) != 6) {
+		printf("gcd returned %ld, instead of 6.\n", rt_val_int(results[0]));
+        goto fail;
 	}
 
-	if (!val_eq_int(results + 1, 42)) {
-		printf("lcm returned %ld, instead of 42.\n",
-			   (long)results[1].primitive.integer);
-		return false;
+	if (rt_val_int(results[3]) != 42) {
+		printf("lcm returned %ld, instead of 42.\n", rt_val_int(results[1]));
+        goto fail;
 	}
 
+	rt_deinit();
 	return true;
+
+fail:
+	rt_deinit();
+    return false;
 }
 
 static bool test_array_lookup(void)
 {
+	VAL_LOC_T results[3];
 	char *source =
 		"(bind min-element` (func (element array)\n"
 		"    (if (empty array)\n"
@@ -162,19 +160,24 @@ static bool test_array_lookup(void)
 		"		(min-element` (car array) (cdr array)) ) ))\n"
 		"(bind x (min-element [ 3 1 2 ]))";
 
-	struct Value results[1];
 
-	if (!test_source_eval(source, 2, results)) {
-		return false;
+	rt_init();
+
+	if (!test_source_eval(source, results)) {
+        goto fail;
 	}
 
-	if (!val_eq_int(results + 0, 1)) {
-		printf("min-element found %ld, instead of 1.\n",
-			   (long)results[0].primitive.integer);
-		return false;
+	if (!rt_val_int(results[2]) == 1) {
+		printf("min-element found %ld, instead of 1.\n", rt_val_int(results[0]));
+        goto fail;
 	}
 
+	rt_deinit();
 	return true;
+
+fail:
+	rt_deinit();
+    return false;
 }
 
 int test(void)

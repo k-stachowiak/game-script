@@ -1,6 +1,7 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "stack.h"
 #include "eval.h"
@@ -120,8 +121,207 @@ struct Value rt_peek(VAL_LOC_T location)
 	return stack_peek_value(stack, location);
 }
 
-void rt_print(VAL_LOC_T loc, bool annotate)
+static void rt_val_print_compound(
+        VAL_LOC_T loc, char open, char close)
 {
-    val_print(stack, loc, annotate);
+    VAL_SIZE_T i;
+    VAL_LOC_T cpd_loc;
+    int cpd_size;
+
+    printf("%c ", open);
+
+    cpd_size = rt_val_cpd_size(loc);
+    cpd_loc = rt_val_cpd_first(loc);
+    for (i = 0; i < cpd_size; ++i) {
+        rt_val_print(cpd_loc, false);
+        printf(" ");
+        cpd_loc = rt_val_next(cpd_loc);
+    }
+
+    printf("%c", close);
+}
+
+static void rt_val_print_function(VAL_LOC_T loc)
+{
+    VAL_LOC_T impl_loc, cap_start, appl_start;
+    VAL_SIZE_T captures, applied, arity;
+    struct AstNode *def;
+
+    rt_val_fun_locs(loc, &impl_loc, &cap_start, &appl_start);
+
+    def = (struct AstNode*)rt_val_ptr(impl_loc);
+
+    if (def->type == AST_BIF) {
+        printf("built-in function");
+        return;
+    }
+
+    if (def->type != AST_FUNC_DEF) {
+		LOG_ERROR("Attempting to print non-func value with func printing.\n");
+        exit(1);
+    }
+
+    captures = rt_val_size(cap_start);
+    applied = rt_val_size(appl_start);
+    arity = def->data.func_def.func.arg_count - applied;
+    printf("function (ar=%d, cap=%d, appl=%d)", arity, captures, applied);
+}
+
+void rt_val_print(VAL_LOC_T loc, bool annotate)
+{
+    switch (rt_val_type(loc)) {
+    case VAL_BOOL:
+        if (annotate) {
+            printf("bool :: ");
+        }
+        printf("%s", rt_val_bool(loc) ? "true" : "false");
+        break;
+
+    case VAL_CHAR:
+        if (annotate) {
+            printf("char :: ");
+        }
+        printf("'%c'", rt_val_char(loc));
+        break;
+
+    case VAL_INT:
+        if (annotate) {
+            printf("integer :: ");
+        }
+        printf("%" PRId64 , rt_val_int(loc));
+        break;
+
+    case VAL_REAL:
+        if (annotate) {
+            printf("real :: ");
+        }
+        printf("%f", rt_val_real(loc));
+        break;
+
+    case VAL_STRING:
+        if (annotate) {
+            printf("string :: ");
+        }
+        printf("%s", rt_val_string(loc));
+        break;
+
+    case VAL_ARRAY:
+        if (annotate) {
+            printf("array :: ");
+        }
+        rt_val_print_compound(loc, '[', ']');
+        break;
+
+    case VAL_TUPLE:
+        if (annotate) {
+            printf("tuple :: ");
+        }
+        rt_val_print_compound(loc, '{', '}');
+        break;
+
+    case VAL_FUNCTION:
+        rt_val_print_function(loc);
+        break;
+    }
+}
+
+enum ValueType rt_val_type(VAL_LOC_T loc)
+{
+    struct ValueHeader header = stack_peek_header(stack, loc);
+    return (enum ValueType)header.type;
+}
+
+VAL_LOC_T rt_val_next(VAL_LOC_T loc)
+{
+    struct ValueHeader header = stack_peek_header(stack, loc);
+    return loc + VAL_HEAD_BYTES + header.size;
+}
+
+VAL_SIZE_T rt_val_size(VAL_LOC_T loc)
+{
+    VAL_SIZE_T result;
+    memcpy(&result, stack->buffer + loc, VAL_SIZE_BYTES);
+    return result;
+}
+
+void *rt_val_ptr(VAL_LOC_T loc)
+{
+    void *result;
+    memcpy((char*)&result, stack->buffer + loc, VAL_PTR_BYTES);
+    return result;
+}
+
+VAL_BOOL_T rt_val_bool(VAL_LOC_T loc)
+{
+    VAL_BOOL_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_BOOL_BYTES);
+    return result;
+}
+
+VAL_CHAR_T rt_val_char(VAL_LOC_T loc)
+{
+    VAL_CHAR_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_CHAR_BYTES);
+    return result;
+}
+
+VAL_INT_T rt_val_int(VAL_LOC_T loc)
+{
+    VAL_INT_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_INT_BYTES);
+    return result;
+}
+
+VAL_REAL_T rt_val_real(VAL_LOC_T loc)
+{
+    VAL_REAL_T result;
+    memcpy(&result, stack->buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
+    return result;
+}
+
+char* rt_val_string(VAL_LOC_T loc)
+{
+    return stack->buffer + loc + VAL_HEAD_BYTES;
+}
+
+int rt_val_cpd_size(VAL_LOC_T loc)
+{
+    struct ValueHeader header = stack_peek_header(stack, loc);
+    VAL_LOC_T current = rt_val_cpd_first(loc), end = current + header.size;
+    int result = 0;
+    while (current != end) {
+        header = stack_peek_header(stack, current);
+        current += VAL_HEAD_BYTES + header.size;
+        ++result;
+    }
+    return result;
+}
+
+VAL_LOC_T rt_val_cpd_first(VAL_LOC_T loc)
+{
+    return loc + VAL_HEAD_BYTES;
+}
+
+void rt_val_fun_locs(
+        VAL_LOC_T loc,
+        VAL_LOC_T *impl_loc,
+        VAL_LOC_T *cap_start,
+        VAL_LOC_T *appl_start)
+{
+    int cap_count, i;
+    loc += VAL_HEAD_BYTES;
+
+    *impl_loc = loc;
+    loc = rt_val_next(loc);
+
+    *cap_start = loc;
+    cap_count = rt_val_size(loc);
+    loc += VAL_SIZE_BYTES;
+
+    for (i = 0; i < cap_count; ++i) {
+        loc = rt_val_next(loc);
+    }
+
+    *appl_start = loc;
 }
 

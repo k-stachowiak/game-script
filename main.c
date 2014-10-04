@@ -9,7 +9,6 @@
 #include "test.h"
 
 /* TODO:
- * - Refactor printing to new API
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
