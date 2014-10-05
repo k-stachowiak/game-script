@@ -8,6 +8,7 @@
 #include "value.h"
 #include "bif.h"
 #include "error.h"
+#include "runtime.h"
 
 struct {
 	struct SourceLocation *data;
@@ -145,25 +146,26 @@ static void eval_iff(
 		struct SymMap *sym_map)
 {
 	VAL_LOC_T test_loc, temp_begin, temp_end;
-	struct Value test_val;
+	VAL_BOOL_T test_val;
 
 	temp_begin = stack->top;
 	test_loc = eval_impl(node->data.iff.test, stack, sym_map);
-	test_val = stack_peek_value(stack, test_loc);
 	temp_end = stack->top;
 
-	if ((enum ValueType)test_val.header.type != VAL_BOOL) {
+    if (rt_val_type(test_loc) != VAL_BOOL) {
 		eval_common_error("Test expression isn't a boolean value.");
+        stack_collapse(stack, temp_begin, temp_end);
 		return;
-	}
+    }
 
-	if (test_val.primitive.boolean) {
+	test_val = rt_val_bool(test_loc);
+    stack_collapse(stack, temp_begin, temp_end);
+
+	if (test_val) {
 		eval_impl(node->data.iff.true_expr, stack, sym_map);
 	} else {
 		eval_impl(node->data.iff.false_expr, stack, sym_map);
 	}
-
-	stack_collapse(stack, temp_begin, temp_end);
 }
 
 static void eval_reference(
