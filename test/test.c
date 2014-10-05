@@ -126,13 +126,13 @@ static bool test_simple_algorithm(void)
         goto fail;
 	}
 
-	if (rt_val_int(results[2]) != 6) {
-		printf("gcd returned %ld, instead of 6.\n", rt_val_int(results[0]));
+	if (rt_peek_val_int(results[2]) != 6) {
+		printf("gcd returned %ld, instead of 6.\n", rt_peek_val_int(results[0]));
         goto fail;
 	}
 
-	if (rt_val_int(results[3]) != 42) {
-		printf("lcm returned %ld, instead of 42.\n", rt_val_int(results[1]));
+	if (rt_peek_val_int(results[3]) != 42) {
+		printf("lcm returned %ld, instead of 42.\n", rt_peek_val_int(results[1]));
         goto fail;
 	}
 
@@ -167,8 +167,8 @@ static bool test_array_lookup(void)
         goto fail;
 	}
 
-	if (!rt_val_int(results[2]) == 1) {
-		printf("min-element found %ld, instead of 1.\n", rt_val_int(results[0]));
+	if (!rt_peek_val_int(results[2]) == 1) {
+		printf("min-element found %ld, instead of 1.\n", rt_peek_val_int(results[0]));
         goto fail;
 	}
 

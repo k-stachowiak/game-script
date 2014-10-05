@@ -5,6 +5,7 @@
 #include "bif_detail.h"
 #include "value.h"
 #include "stack.h"
+#include "runtime.h"
 #include "error.h"
 
 static void bif_arr_error_arg(int arg, char *func, char *condition)
@@ -25,129 +26,107 @@ static void bif_arr_error_range(char *condition)
 
 static void bif_length_impl(struct Stack* stack, VAL_LOC_T location)
 {
-	struct Value value = stack_peek_value(stack, location);
-	VAL_LOC_T end = location + VAL_HEAD_BYTES + value.header.size;
-	VAL_INT_T result = 0;
+    VAL_LOC_T current, end;
+    VAL_INT_T size = 0;
 
-	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+    if (rt_val_type(location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "length", "must be an array");
 		return;
 	}
-	
-	location += VAL_HEAD_BYTES;
-	while (location != end) {
-		struct Value val = stack_peek_value(stack, location);
-		location += val.header.size + VAL_HEAD_BYTES;
-		++result;
-	}
 
-	stack_push_int(stack, result);
+    current = location + VAL_HEAD_BYTES;
+    end = current + rt_val_size(location);
+
+    while (current != end) {
+        current = rt_next_loc(current);
+        ++size;
+    }
+
+	stack_push_int(stack, size);
 }
 
 static void bif_empty_impl(struct Stack* stack, VAL_LOC_T location)
 {
-	struct Value value = stack_peek_value(stack, location);
-	VAL_BOOL_T result;
-
-	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+    if (rt_val_type(location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "empty", "must be an array");
-		return;
-	}
-
-	result = (VAL_BOOL_T)(value.compound.size == 0);
-	stack_push_bool(stack, result);
+	} else {
+        stack_push_bool(stack, rt_val_size(location) == 0);
+    }
 }
 
 static void bif_car_impl(struct Stack* stack, VAL_LOC_T location)
 {
-	struct Value value = stack_peek_value(stack, location);
-	VAL_LOC_T head_loc;
-
-	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+    if (rt_val_type(location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "car", "must be an array");
 		return;
 	}
 
-	if (value.compound.size == 0) {
+    if (rt_val_size(location) == 0) {
 		bif_arr_error_arg(1, "car", "must not be empty");
 		return;
-	}
+    }
 
-	head_loc = location + VAL_HEAD_BYTES;
-	stack_push_copy(stack, head_loc);
+	stack_push_copy(stack, location + VAL_HEAD_BYTES);
 }
 
 static void bif_cdr_impl(struct Stack* stack, VAL_LOC_T location)
 {
-	struct Value value;
-	struct ValueHeader head_header;
-	VAL_LOC_T head_loc, tail_loc;
-	VAL_HEAD_TYPE_T new_type;
-	VAL_HEAD_SIZE_T new_size;
+    VAL_LOC_T head_loc, size_loc;
+    VAL_LOC_T current_loc, end_loc;
+    VAL_SIZE_T full_size, head_size, tail_size;
 
-	value = stack_peek_value(stack, location);
-
-	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+    if (rt_val_type(location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "cdr", "must be an array");
 		return;
 	}
 
-	if (value.compound.size == 0) {
+    if (rt_val_size(location) == 0) {
 		bif_arr_error_arg(1, "cdr", "must not be empty");
 		return;
-	}
+    }
 
-	/* TODO: Consider generalization of this complex stack pushing below. */
+    head_loc = rt_peek_val_cpd_first(location);
 
-	head_loc = location + VAL_HEAD_BYTES;
-	head_header = stack_peek_header(stack, head_loc);
+    full_size = rt_val_size(location);
+    head_size = rt_val_size(head_loc);
+    tail_size = full_size - head_size - VAL_HEAD_BYTES;
 
-	new_type = value.header.type;
-	new_size = value.header.size - head_header.size - VAL_HEAD_BYTES;
+    current_loc = rt_next_loc(head_loc);
+    end_loc = head_loc + full_size;
 
-	tail_loc = head_loc + VAL_HEAD_BYTES + head_header.size;
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&new_type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&new_size);
-	stack_push(stack, new_size, stack->buffer + tail_loc);
+    stack_push_array_init(stack, &size_loc);
+    while (current_loc != end_loc) {
+        stack_push_copy(stack, current_loc);
+        current_loc = rt_next_loc(current_loc);
+    }
+    stack_push_cpd_final(stack, size_loc, tail_size);
 }
 
 static void bif_reverse_impl(struct Stack* stack, VAL_LOC_T location)
 {
-	struct Value value;
-	VAL_LOC_T size_loc, loc, end;
-	VAL_SIZE_T size;
-	int i; /* NOTE: This is counting down - keep it UNSIGNED! */
+    VAL_SIZE_T i, size;
+    VAL_LOC_T size_loc, current_loc, end_loc;
+	struct { VAL_LOC_T *data; int cap, size; } locs = { NULL, 0, 0 };
 
-	struct {
-		VAL_LOC_T *data;
-		int cap, size;
-	} locs = { NULL, 0, 0 };
-
-	value = stack_peek_value(stack, location);
-	size = value.header.size;
-
-	/* Assert input. */
-	if ((enum ValueType)value.header.type != VAL_ARRAY) {
+    if (rt_val_type(location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "reverse", "must be an array");
 		return;
 	}
 
-	/* Store original locations. */
-	loc = location + VAL_HEAD_BYTES;
-	end = loc + size;
-	while (loc != end) {
-		struct ValueHeader header = stack_peek_header(stack, loc);
-		ARRAY_APPEND(locs, loc);
-		loc += header.size + VAL_HEAD_BYTES;
-	}
+    size = rt_val_size(location);
+    current_loc = rt_peek_val_cpd_first(location);
+    end_loc = current_loc + size;
+    
+    while (current_loc != end_loc) {
+        ARRAY_APPEND(locs, current_loc);
+        current_loc = rt_next_loc(current_loc);
+    }
 
-	/* Push in reverse order. */
-	stack_push_array_init(stack, &size_loc);
-	for (i = locs.size - 1; i >= 0; --i) {
-		stack_push_copy(stack, locs.data[i]);
-	}
-	stack_push_cpd_final(stack, size_loc, size);
+    stack_push_array_init(stack, &size_loc);
+    for (i = 0; i < locs.size; ++i) {
+        stack_push_copy(stack, locs.data[locs.size - i - 1]);
+    }
+    stack_push_cpd_final(stack, size_loc, size);
 
 	ARRAY_FREE(locs);
 }

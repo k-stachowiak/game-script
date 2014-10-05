@@ -158,7 +158,7 @@ static void eval_iff(
 		return;
     }
 
-	test_val = rt_val_bool(test_loc);
+	test_val = rt_peek_val_bool(test_loc);
     stack_collapse(stack, temp_begin, temp_end);
 
 	if (test_val) {
