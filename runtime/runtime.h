@@ -46,5 +46,4 @@ void rt_peek_val_fun_locs(
         VAL_LOC_T *cap_start,
         VAL_LOC_T *appl_start);
 
-
 #endif

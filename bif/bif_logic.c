@@ -5,6 +5,7 @@
 #include "bif_detail.h"
 #include "value.h"
 #include "stack.h"
+#include "runtime.h"
 #include "error.h"
 
 static void bif_logic_error_arg_mismatch(void)
@@ -24,16 +25,17 @@ static void common_bin_impl(
 		VAL_LOC_T x_loc, VAL_LOC_T y_loc,
 		VAL_BOOL_T(*impl)(VAL_BOOL_T, VAL_BOOL_T))
 {
-	struct Value vx = stack_peek_value(stack, x_loc);
-	struct Value vy = stack_peek_value(stack, y_loc);
+    enum ValueType x_type = rt_val_type(x_loc);
+    enum ValueType y_type = rt_val_type(y_loc);
 
-	if ((enum ValueType)vx.header.type != VAL_BOOL ||
-		(enum ValueType)vy.header.type != VAL_BOOL) {
+	if (x_type != VAL_BOOL || y_type != VAL_BOOL) {
 		bif_logic_error_arg_mismatch();
 		return;
 	}
 
-	stack_push_bool(stack, impl(vx.primitive.boolean, vy.primitive.boolean));
+	stack_push_bool(stack, impl(
+            rt_peek_val_bool(x_loc),
+            rt_peek_val_bool(y_loc)));
 }
 
 static void common_un_impl(
@@ -41,14 +43,14 @@ static void common_un_impl(
 		VAL_LOC_T x_loc,
 		VAL_BOOL_T(*impl)(VAL_BOOL_T))
 {
-	struct Value vx = stack_peek_value(stack, x_loc);
+    enum ValueType x_type = rt_val_type(x_loc);
 
-	if ((enum ValueType)vx.header.type != VAL_BOOL) {
+	if (x_type != VAL_BOOL) {
 		bif_logic_error_arg_mismatch();
 		return;
 	}
 
-	stack_push_bool(stack, impl(vx.primitive.boolean));
+	stack_push_bool(stack, impl(rt_peek_val_bool(x_loc)));
 }
 
 static void bif_and_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)

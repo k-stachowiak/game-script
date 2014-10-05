@@ -35,7 +35,7 @@ static bool efc_lookup_value(
 		char *symbol,
 		struct SymMap *sym_map,
 		struct Stack *stack,
-		struct Value *result)
+        VAL_LOC_T *loc)
 {
 	struct SymMapKvp *kvp;
 
@@ -44,12 +44,7 @@ static bool efc_lookup_value(
 		return false;
 	}
 
-	*result = stack_peek_value(stack, kvp->stack_loc);
-	if (result->header.type != (VAL_HEAD_TYPE_T)VAL_FUNCTION) {
-		fcall_error_nonfunc_value(symbol);
-		return false;
-	}
-
+    *loc = kvp->stack_loc;
 	return true;
 }
 
@@ -298,17 +293,23 @@ void eval_func_call(
 		struct Stack *stack,
 		struct SymMap *sym_map)
 {
-	struct Value value;
+    VAL_LOC_T val_loc, impl_loc, cap_start, appl_start;
+    struct AstNode *impl;
+    VAL_SIZE_T appl_size;
 	int arity, applied;
 	struct AstNode *actual_args = node->data.func_call.actual_args;
 	char *symbol = node->data.func_call.symbol;
 
-	if (!efc_lookup_value(symbol, sym_map, stack, &value)) {
+	if (!efc_lookup_value(symbol, sym_map, stack, &val_loc)) {
         return;
     }
+    rt_peek_val_fun_locs(val_loc, &impl_loc, &cap_start, &appl_start);
 
-	arity = efc_compute_arity(value.function.def);
-	applied = value.function.applied.size + ast_list_len(actual_args);
+    impl = (struct AstNode*)rt_peek_ptr(impl_loc);
+    appl_size = rt_peek_size(appl_start);
+
+	arity = efc_compute_arity(impl);
+	applied = appl_size + ast_list_len(actual_args);
 
 	if (arity > applied) {
 		efc_curry_on(stack, sym_map, actual_args, &value);

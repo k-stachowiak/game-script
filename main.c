@@ -9,6 +9,8 @@
 #include "test.h"
 
 /* TODO:
+ * - Define runtime struct and remove global runtime state.
+ * - Test BIF.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

@@ -133,14 +133,10 @@ static void bif_reverse_impl(struct Stack* stack, VAL_LOC_T location)
 
 static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	struct Value vx, vy;
 	VAL_LOC_T size_loc, loc, end;
+    VAL_SIZE_T x_size, y_size;
 
-	/* Assert input. */
-	vx = stack_peek_value(stack, x_loc);
-	vy = stack_peek_value(stack, y_loc);
-
-	if ((enum ValueType)vy.header.type != VAL_ARRAY) {
+	if (rt_val_type(y_loc) != VAL_ARRAY) {
 		/* 
 		 * TODO: More refine check needed here:
 		 * assert T = U, where
@@ -151,6 +147,9 @@ static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 		return;
 	}
 
+    x_size = rt_val_size(x_loc);
+    y_size = rt_val_size(y_loc);
+
 	/* Build new header. */
 	stack_push_array_init(stack, &size_loc);
 
@@ -158,62 +157,57 @@ static void bif_cons_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	stack_push_copy(stack, x_loc);
 
 	/* Append Y. */
-	loc = y_loc + VAL_HEAD_BYTES;
-	end = loc + vy.header.size;
+	loc = rt_peek_val_cpd_first(y_loc);
+	end = loc + y_size;
 	while (loc != end) {
-		struct ValueHeader header = stack_peek_header(stack, loc);
 		stack_push_copy(stack, loc);
-		loc += header.size + VAL_HEAD_BYTES;
+        loc = rt_next_loc(loc);
 	}
 
 	/* Finalize. */
-	stack_push_cpd_final(
-		stack, size_loc,
-		vx.header.size + vy.header.size + VAL_HEAD_BYTES);
+	stack_push_cpd_final(stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
 }
 
 static void bif_cat_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	struct Value vx, vy;
 	VAL_LOC_T size_loc, loc, end;
+    VAL_SIZE_T x_size, y_size;
 
 	/* Assert input. */
-	vx = stack_peek_value(stack, x_loc);
-	vy = stack_peek_value(stack, y_loc);
-
-	if ((enum ValueType)vx.header.type != VAL_ARRAY) {
+	if (rt_val_type(x_loc) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "cat", "must be an array");
 		return;
 	}
 
-	if ((enum ValueType)vy.header.type != VAL_ARRAY) {
+	if (rt_val_type(y_loc) != VAL_ARRAY) {
 		bif_arr_error_arg(2, "cat", "must be an array");
 		return;
 	}
+
+    x_size = rt_val_size(x_loc);
+    y_size = rt_val_size(y_loc);
 
 	/* Build new header. */
 	stack_push_array_init(stack, &size_loc);
 
 	/* Append X. */
-	loc = x_loc + VAL_HEAD_BYTES;
-	end = loc + vx.header.size;
+	loc = rt_peek_val_cpd_first(x_loc);
+	end = loc + x_size;
 	while (loc != end) {
-		struct ValueHeader header = stack_peek_header(stack, loc);
 		stack_push_copy(stack, loc);
-		loc += header.size + VAL_HEAD_BYTES;
+        loc = rt_next_loc(loc);
 	}
 
 	/* Append Y. */
-	loc = y_loc + VAL_HEAD_BYTES;
-	end = loc + vy.header.size;
+	loc = rt_peek_val_cpd_first(y_loc);
+	end = loc + y_size;
 	while (loc != end) {
-		struct ValueHeader header = stack_peek_header(stack, loc);
 		stack_push_copy(stack, loc);
-		loc += header.size + VAL_HEAD_BYTES;
+        loc = rt_next_loc(loc);
 	}
 
 	/* Finalize. */
-	stack_push_cpd_final(stack, size_loc, vx.header.size + vy.header.size);
+	stack_push_cpd_final(stack, size_loc, x_size + y_size);
 }
 
 static void bif_slice_impl(
@@ -222,33 +216,28 @@ static void bif_slice_impl(
 		VAL_LOC_T y_loc,
 		VAL_LOC_T z_loc)
 {
-	struct Value varr, vfirst, vlast;
 	VAL_INT_T first, last;
 	VAL_LOC_T size_loc, loc, end;
 	VAL_SIZE_T index = 0, size = 0;
 
 	/* Assert input. */
-	varr = stack_peek_value(stack, x_loc);
-	vfirst = stack_peek_value(stack, y_loc);
-	vlast = stack_peek_value(stack, z_loc);
-
-	if ((enum ValueType)varr.header.type != VAL_ARRAY) {
+	if (rt_val_type(x_loc) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "slice", "must be an array");
 		return;
 	}
 
-	if ((enum ValueType)vfirst.header.type != VAL_INT) {
+	if (rt_val_type(y_loc) != VAL_INT) {
 		bif_arr_error_arg(2, "slice", "must be an integer");
 		return;
 	}
 
-	if ((enum ValueType)vlast.header.type != VAL_INT) {
+	if (rt_val_type(z_loc) != VAL_INT) {
 		bif_arr_error_arg(3, "slice", "must be an integer");
 		return;
 	}
 
-	first = vfirst.primitive.integer;
-	last = vlast.primitive.integer;
+	first = rt_peek_val_int(y_loc);
+	last = rt_peek_val_int(z_loc);
 
 	if (first < 0 || last < 0) {
 		bif_arr_error_range("slice delimiters must be non-negative.");
@@ -259,15 +248,14 @@ static void bif_slice_impl(
 	stack_push_array_init(stack, &size_loc);
 
 	/* Iterate over array */
-	loc = x_loc + VAL_HEAD_BYTES;
-	end = loc + varr.header.size;
+	loc = rt_peek_val_cpd_first(x_loc);
+	end = loc + rt_val_size(x_loc);
 	while (loc != end) {
-		struct ValueHeader header = stack_peek_header(stack, loc);
 		if (index >= first && index < last) {
 			stack_push_copy(stack, loc);
-			size += header.size + VAL_HEAD_BYTES;
+			size += rt_val_size(loc) + VAL_HEAD_BYTES;
 		}
-		loc += header.size + VAL_HEAD_BYTES;
+        loc = rt_next_loc(loc);
 		++index;
 	}
 

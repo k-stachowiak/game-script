@@ -4,6 +4,7 @@
 #include "bif_detail.h"
 #include "value.h"
 #include "stack.h"
+#include "runtime.h"
 
 bool initialized = false;
 
@@ -63,18 +64,18 @@ enum ValueType bif_match_un(
 		VAL_INT_T *i,
 		VAL_REAL_T *r)
 {
-	struct Value x = stack_peek_value(stack, x_loc);
+    enum ValueType type = rt_val_type(x_loc);
 
-	if ((enum ValueType)x.header.type == VAL_INT) {
-		*i = x.primitive.integer;
+	if (type == VAL_INT) {
+		*i = rt_peek_val_int(x_loc);
 		return VAL_INT;
 
-	} else if ((enum ValueType)x.header.type == VAL_REAL) {
-		*r = x.primitive.real;
+	} else if (type == VAL_REAL) {
+		*r = rt_peek_val_real(x_loc);
 		return VAL_REAL;
 
 	} else {
-		return (enum ValueType)x.header.type;
+		return type;
 	}
 }
 
@@ -84,19 +85,17 @@ enum BifBinaryMatch bif_match_bin(
 		VAL_INT_T *ix, VAL_INT_T *iy,
 		VAL_REAL_T *rx, VAL_REAL_T *ry)
 {
-	struct Value x = stack_peek_value(stack, x_loc);
-	struct Value y = stack_peek_value(stack, y_loc);
+    enum ValueType x_type = rt_val_type(x_loc);
+    enum ValueType y_type = rt_val_type(y_loc);
 
-	if ((enum ValueType)x.header.type == VAL_INT &&
-		(enum ValueType)y.header.type == VAL_INT) {
-		*ix = x.primitive.integer;
-		*iy = y.primitive.integer;
+	if (x_type == VAL_INT && y_type == VAL_INT) {
+		*ix = rt_peek_val_int(x_loc);
+		*iy = rt_peek_val_int(y_loc);
 		return BBM_BOTH_INT;
 
-	} else if ((enum ValueType)x.header.type == VAL_REAL &&
-		(enum ValueType)y.header.type == VAL_REAL) {
-		*rx = x.primitive.real;
-		*ry = y.primitive.real;
+	} else if (x_type == VAL_REAL && y_type == VAL_REAL) {
+		*rx = rt_peek_val_real(x_loc);
+		*ry = rt_peek_val_real(y_loc);
 		return BBM_BOTH_REAL;
 
 	} else {
