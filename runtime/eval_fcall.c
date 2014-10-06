@@ -6,7 +6,6 @@
 #include "eval_detail.h"
 
 #include "error.h"
-#include "value.h"
 #include "bif.h"
 #include "runtime.h"
 

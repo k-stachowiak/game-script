@@ -8,6 +8,22 @@
 
 #include "common.h"
 
+enum ValueType {
+    VAL_BOOL,
+    VAL_CHAR,
+    VAL_INT,
+    VAL_REAL,
+    VAL_STRING,
+    VAL_ARRAY,
+    VAL_TUPLE,
+    VAL_FUNCTION
+};
+
+struct ValueHeader {
+    VAL_HEAD_TYPE_T type;
+    VAL_HEAD_SIZE_T size;
+};
+
 struct Stack {
     char *buffer;
 	VAL_LOC_T size;
@@ -46,10 +62,7 @@ void stack_push_func_final(struct Stack *stack, VAL_LOC_T size_loc, VAL_SIZE_T d
 /* Others. */
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end);
-
 struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location);
-struct Value stack_peek_value(struct Stack *stack, VAL_LOC_T location);
-
-void stack_for_each(struct Stack *stack, void(*f)(VAL_LOC_T, struct Value*));
+void stack_for_each(struct Stack *stack, void(*f)(VAL_LOC_T));
 
 #endif

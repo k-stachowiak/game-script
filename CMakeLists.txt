@@ -34,7 +34,6 @@ add_executable(moon-lang
     ./runtime/eval_fdef.c
     ./runtime/stack.c
     ./runtime/eval_fcall.c
-    ./runtime/value.c
     ./runtime/eval.c
     ./runtime/runtime.c
     ./runtime/symmap.c

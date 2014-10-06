@@ -5,7 +5,8 @@
 
 #include <stdbool.h>
 
-#include "value.h"
+#include "ast.h"
+#include "stack.h"
 
 void rt_init(void);
 void rt_deinit(void);
@@ -18,9 +19,8 @@ VAL_LOC_T rt_current_top(void);
 void rt_consume_one(struct AstNode *ast, VAL_LOC_T *loc, struct AstNode **next);
 bool rt_consume_list(struct AstNode *ast);
 
-void rt_for_each_stack_val(void(*f)(VAL_LOC_T, struct Value*));
+void rt_for_each_stack_val(void(*f)(VAL_LOC_T));
 void rt_for_each_sym(void(*f)(char*, VAL_LOC_T));
-struct Value rt_peek(VAL_LOC_T loc);
 
 void rt_val_print(VAL_LOC_T loc, bool annotate);
 VAL_LOC_T rt_next_loc(VAL_LOC_T loc);

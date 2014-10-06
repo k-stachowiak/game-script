@@ -7,7 +7,6 @@
 #include "bif.h"
 #include "bif_detail.h"
 #include "stack.h"
-#include "value.h"
 #include "error.h"
 
 static void bif_arythm_error_arg_mismatch(void)

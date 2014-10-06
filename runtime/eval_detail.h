@@ -3,7 +3,6 @@
 #include "ast.h"
 #include "stack.h"
 #include "symmap.h"
-#include "value.h"
 
 void eval_error_not_found(char *symbol);
 

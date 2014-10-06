@@ -2,7 +2,6 @@
 
 #include "bif.h"
 #include "bif_detail.h"
-#include "value.h"
 #include "stack.h"
 #include "runtime.h"
 

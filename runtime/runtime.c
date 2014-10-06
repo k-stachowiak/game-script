@@ -106,7 +106,7 @@ bool rt_consume_list(struct AstNode *ast_list)
 	return true;
 }
 
-void rt_for_each_stack_val(void(*f)(VAL_LOC_T, struct Value*))
+void rt_for_each_stack_val(void(*f)(VAL_LOC_T))
 {
 	stack_for_each(stack, f);
 }
@@ -114,11 +114,6 @@ void rt_for_each_stack_val(void(*f)(VAL_LOC_T, struct Value*))
 void rt_for_each_sym(void(*f)(char*, VAL_LOC_T))
 {
 	sym_map_for_each(&sym_map, f);
-}
-
-struct Value rt_peek(VAL_LOC_T location)
-{
-	return stack_peek_value(stack, location);
 }
 
 static void rt_val_print_compound(

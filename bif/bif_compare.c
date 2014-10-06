@@ -3,7 +3,6 @@
 #include "eval.h"
 #include "bif.h"
 #include "bif_detail.h"
-#include "value.h"
 #include "stack.h"
 #include "error.h"
 

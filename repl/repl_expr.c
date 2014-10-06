@@ -4,7 +4,6 @@
 
 #include "ast.h"
 #include "ast_parse.h"
-#include "value.h"
 #include "error.h"
 #include "stack.h"
 #include "eval.h"
