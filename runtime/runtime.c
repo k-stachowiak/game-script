@@ -288,20 +288,7 @@ char* rt_peek_val_string(VAL_LOC_T loc)
 {
     return stack->buffer + loc + VAL_HEAD_BYTES;
 }
-/*
-int rt_peek_val_cpd_size(VAL_LOC_T loc)
-{
-    struct ValueHeader header = stack_peek_header(stack, loc);
-    VAL_LOC_T current = rt_peek_val_cpd_first(loc), end = current + header.size;
-    int result = 0;
-    while (current != end) {
-        header = stack_peek_header(stack, current);
-        current += VAL_HEAD_BYTES + header.size;
-        ++result;
-    }
-    return result;
-}
-*/
+
 VAL_LOC_T rt_peek_val_cpd_first(VAL_LOC_T loc)
 {
     return loc + VAL_HEAD_BYTES;
@@ -328,5 +315,26 @@ void rt_peek_val_fun_locs(
     }
 
     *appl_start = loc;
+}
+
+char *rt_fun_cap_symbol(VAL_LOC_T cap_loc)
+{
+    return stack->buffer + cap_loc; 
+}
+
+VAL_LOC_T rt_fun_cap_val_loc(VAL_LOC_T cap_loc)
+{
+    VAL_SIZE_T len = strlen(rt_fun_cap_symbol(cap_loc));
+    return cap_loc + len + 1;
+}
+
+VAL_LOC_T rt_fun_next_cap_loc(VAL_LOC_T loc)
+{
+    return rt_next_loc(rt_fun_cap_val_loc(loc));
+}
+
+VAL_LOC_T rt_fun_next_appl_loc(VAL_LOC_T loc)
+{
+    return rt_next_loc(loc);
 }
 

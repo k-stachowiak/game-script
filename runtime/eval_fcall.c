@@ -8,14 +8,7 @@
 #include "error.h"
 #include "value.h"
 #include "bif.h"
-
-static void fcall_error_nonfunc_value(char *symbol)
-{
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "EVAL FUNC CALL", eval_location_top());
-	err_msg_append(&msg, "Called non-function symbol \"%s\"", symbol);
-	err_msg_set(&msg);
-}
+#include "runtime.h"
 
 static void fcall_error_too_many_args(char *symbol)
 {
@@ -86,32 +79,35 @@ static void efc_curry_on(
 		struct Stack *stack,
 		struct SymMap *sym_map,
 		struct AstNode *actual_args,
-		struct Value *value)
+        struct AstNode *impl,
+        VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
+        VAL_SIZE_T appl_count, VAL_LOC_T appl_loc)
 {
-	VAL_LOC_T size_loc, data_begin;
+	VAL_LOC_T current_loc, size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
-	stack_push_func_init(
-		stack,
-		&size_loc,
-		&data_begin,
-		(void*)value->function.def);
+	stack_push_func_init(stack, &size_loc, &data_begin, impl);
 
 	/* Captures. */
-	stack_push_func_cap_init(stack, value->function.captures.size);
-	for (i = 0; i < value->function.captures.size; ++i) {
-		struct Capture *cap = value->function.captures.data + i;
-		stack_push_func_cap(stack, cap->symbol, cap->location);
+	stack_push_func_cap_init(stack, cap_count);
+    current_loc = cap_loc;
+	for (i = 0; i < cap_count; ++i) {
+        stack_push_func_cap_copy(stack, current_loc);
+        current_loc += rt_fun_next_cap_loc(current_loc);
 	}
 
 	/* Applied arguments. */
-	arg_count = value->function.applied.size + ast_list_len(actual_args);
-	stack_push_func_appl_init(stack, arg_count);
+	arg_count = appl_count + ast_list_len(actual_args);
 
-	for (i = 0; i < value->function.applied.size; ++i) {
-		stack_push_copy(stack, value->function.applied.data[i]);
+    /* ...already applied, */
+	stack_push_func_appl_init(stack, arg_count);
+    current_loc = appl_loc;
+	for (i = 0; i < appl_count; ++i) {
+		stack_push_copy(stack, current_loc);
+        current_loc += rt_fun_next_appl_loc(current_loc);
 	}
 
+    /* ...currently applied. */
 	for (; actual_args; actual_args = actual_args->next) {
 		eval_impl(actual_args, stack, sym_map);
 		if (err_state()) {
@@ -150,12 +146,13 @@ static void efc_evaluate_general(
 		struct Stack *stack,
 		struct SymMap *sym_map,
 		struct AstNode *actual_args,
-		struct Value *value)
+        struct AstNode *impl,
+        VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
+        VAL_SIZE_T appl_count, VAL_LOC_T appl_loc)
 {
 	VAL_SIZE_T i;
 	VAL_LOC_T temp_begin, temp_end;
 	struct SymMap local_sym_map;
-	struct AstNode *impl = value->function.def;
 	char **formal_args = impl->data.func_def.func.formal_args;
     struct SourceLocation *arg_locs = impl->data.func_def.func.arg_locs;
     struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
@@ -168,18 +165,20 @@ static void efc_evaluate_general(
 	}
 
 	/* Insert captures into the scope. */
-	for (i = 0; i < value->function.captures.size; ++i) {
-		struct Capture *cap = value->function.captures.data + i;
-		sym_map_insert(&local_sym_map, cap->symbol, cap->location, &cont_loc);
+	for (i = 0; i < cap_count; ++i) {
+        char *cap_symbol = rt_fun_cap_symbol(cap_loc);
+        VAL_LOC_T cap_val_loc = rt_fun_cap_val_loc(cap_loc);
+		sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, &cont_loc);
+        cap_loc = rt_fun_next_cap_loc(cap_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
 	}
 
 	/* Insert already applied arguments. */
-	for (i = 0; i < value->function.applied.size; ++i) {
-		VAL_LOC_T loc = value->function.applied.data[i];
-		sym_map_insert(&local_sym_map, *(formal_args++), loc, &cont_loc);
+	for (i = 0; i < appl_count; ++i) {
+		sym_map_insert(&local_sym_map, *(formal_args++), appl_loc, &cont_loc);
+        appl_loc = rt_fun_next_appl_loc(appl_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
@@ -231,16 +230,17 @@ static void efc_evaluate_bif(
 		struct Stack *stack,
 		struct SymMap *sym_map,
 		struct AstNode *actual_args,
-		struct Value *value)
+        VAL_SIZE_T appl_count, VAL_LOC_T appl_loc,
+		struct AstBif *impl)
 {
-	struct AstBif *impl = &value->function.def->data.bif;
 	VAL_LOC_T arg_locs[BIF_MAX_ARITY];
 	VAL_SIZE_T arg_count = 0, i;
 	VAL_LOC_T temp_begin, temp_end;
 
 	/* Peal out already applied args. */
-	for (i = 0; i < value->function.applied.size; ++i) {
-		arg_locs[arg_count] = value->function.applied.data[i];
+	for (i = 0; i < appl_count; ++i) {
+		arg_locs[arg_count] = appl_loc;
+        appl_loc = rt_next_loc(appl_loc);
 		++arg_count;
 	}
 
@@ -295,7 +295,7 @@ void eval_func_call(
 {
     VAL_LOC_T val_loc, impl_loc, cap_start, appl_start;
     struct AstNode *impl;
-    VAL_SIZE_T appl_size;
+    VAL_SIZE_T appl_count, cap_count;
 	int arity, applied;
 	struct AstNode *actual_args = node->data.func_call.actual_args;
 	char *symbol = node->data.func_call.symbol;
@@ -303,26 +303,31 @@ void eval_func_call(
 	if (!efc_lookup_value(symbol, sym_map, stack, &val_loc)) {
         return;
     }
-    rt_peek_val_fun_locs(val_loc, &impl_loc, &cap_start, &appl_start);
 
+    rt_peek_val_fun_locs(val_loc, &impl_loc, &cap_start, &appl_start);
     impl = (struct AstNode*)rt_peek_ptr(impl_loc);
-    appl_size = rt_peek_size(appl_start);
+    cap_count = rt_peek_size(cap_start);
+    cap_start += VAL_SIZE_BYTES;
+    appl_count = rt_peek_size(appl_start);
+    appl_start += VAL_SIZE_BYTES;
 
 	arity = efc_compute_arity(impl);
-	applied = appl_size + ast_list_len(actual_args);
+	applied = appl_count + ast_list_len(actual_args);
 
 	if (arity > applied) {
-		efc_curry_on(stack, sym_map, actual_args, &value);
+		efc_curry_on(stack, sym_map, actual_args, impl,
+                cap_count, cap_start, appl_count, appl_start);
 
 	} else if (arity == applied) {
-
-		switch (value.function.def->type) {
+		switch (impl->type) {
 		case AST_FUNC_DEF:
-			efc_evaluate_general(stack, sym_map, actual_args, &value);
+			efc_evaluate_general(stack, sym_map, actual_args, impl,
+                    cap_count, cap_start, appl_count, appl_start);
 			break;
 
 		case AST_BIF:
-			efc_evaluate_bif(stack, sym_map, actual_args, &value);
+			efc_evaluate_bif(stack, sym_map, actual_args,
+                    appl_count, appl_start, &impl->data.bif);
 			break;
 
 		default:

@@ -217,11 +217,19 @@ void stack_push_func_cap_init(struct Stack *stack, VAL_SIZE_T cap_count)
 
 void stack_push_func_cap(struct Stack *stack, char *symbol, VAL_LOC_T loc)
 {
-	VAL_SIZE_T len = strlen(symbol);
-	struct ValueHeader header = stack_peek_header(stack, loc);
+	VAL_SIZE_T len = strlen(symbol) + 1;
 	stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-	stack_push(stack, len, symbol);
-	stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + loc);
+	stack_push(stack, len + 1, symbol);
+	stack_push_copy(stack, loc);
+}
+
+void stack_push_func_cap_copy(struct Stack *stack, VAL_LOC_T loc)
+{
+    char *symbol = stack->buffer + loc;
+    VAL_SIZE_T len = strlen(symbol);
+	stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
+	stack_push(stack, len + 1, symbol);
+	stack_push_copy(stack, loc + len + 1);
 }
 
 void stack_push_func_cap_final_deferred(struct Stack *stack, VAL_LOC_T cap_count_loc, VAL_SIZE_T cap_count)

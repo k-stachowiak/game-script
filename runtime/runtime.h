@@ -37,7 +37,6 @@ VAL_INT_T rt_peek_val_int(VAL_LOC_T loc);
 VAL_REAL_T rt_peek_val_real(VAL_LOC_T loc);
 char* rt_peek_val_string(VAL_LOC_T loc);
 
-// int rt_peek_val_cpd_size(VAL_LOC_T loc);
 VAL_LOC_T rt_peek_val_cpd_first(VAL_LOC_T loc);
 
 void rt_peek_val_fun_locs(
@@ -45,5 +44,11 @@ void rt_peek_val_fun_locs(
         VAL_LOC_T *impl_loc,
         VAL_LOC_T *cap_start,
         VAL_LOC_T *appl_start);
+
+char *rt_fun_cap_symbol(VAL_LOC_T cap_loc);
+VAL_LOC_T rt_fun_cap_val_loc(VAL_LOC_T cap_loc);
+
+VAL_LOC_T rt_fun_next_cap_loc(VAL_LOC_T loc);
+VAL_LOC_T rt_fun_next_appl_loc(VAL_LOC_T loc);
 
 #endif
