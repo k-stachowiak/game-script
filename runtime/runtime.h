@@ -1,7 +1,7 @@
 /* Copyright (C) 2014 Krzysztof Stachowiak */
 
-#ifndef RT_H
-#define RT_H
+#ifndef RUNTIME_H
+#define RUNTIME_H
 
 #include <stdbool.h>
 

@@ -10,7 +10,8 @@
 
 /* TODO:
  * - Define runtime struct and remove global runtime state.
- * - Test BIF.
+ * - Have an elegant runtime push/peek API over the basic stack API.
+ * - Test runtime
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
