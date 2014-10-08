@@ -165,13 +165,13 @@ int test(void)
 	bool success = true;
 
 
-	success &= test_lexer();
-	success &= test_parser();
+	//success &= test_lexer();
+	//success &= test_parser();
 
     struct Runtime *rt = rt_make(64 * 1024);
-	success &= test_runtime_sanity(rt);
+	//success &= test_runtime_sanity(rt);
 	success &= test_simple_algorithm(rt);
-	success &= test_array_lookup(rt);
+	//success &= test_array_lookup(rt);
     rt_free(rt);
 
 	if (success) {
