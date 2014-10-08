@@ -104,6 +104,32 @@ static bool test_runtime_sanity(struct Runtime *rt)
     return test_source_eval(rt, source, results);
 }
 
+static bool test_local_scope(struct Runtime *rt)
+{
+	VAL_LOC_T results[4];
+	char *source =
+		"(bind sqr (func (x) (* x x)))\n"
+		"(bind select (func (cond x y) (if cond (sqr x) (sqr y))))\n"
+		"(select true 2 3)\n"
+		"(select false 2 3)\n";
+
+	if (!test_source_eval(rt, source, results)) {
+		return false;
+	}
+
+	if (rt_peek_val_int(rt, results[2]) != 4) {
+		printf("Incorrect test result.\n");
+		return false;
+	}
+
+	if (rt_peek_val_int(rt, results[3]) != 9) {
+		printf("Incorrect test result.\n");
+		return false;
+	}
+
+	return true;
+}
+
 static bool test_simple_algorithm(struct Runtime *rt)
 {
 	VAL_LOC_T results[4];
@@ -164,14 +190,14 @@ int test(void)
 {
 	bool success = true;
 
-
-	//success &= test_lexer();
-	//success &= test_parser();
+	// success &= test_lexer();
+	// success &= test_parser();
 
     struct Runtime *rt = rt_make(64 * 1024);
-	//success &= test_runtime_sanity(rt);
-	success &= test_simple_algorithm(rt);
-	//success &= test_array_lookup(rt);
+	// success &= test_runtime_sanity(rt);
+	success &= test_local_scope(rt);
+	// success &= test_simple_algorithm(rt);
+	// success &= test_array_lookup(rt);
     rt_free(rt);
 
 	if (success) {

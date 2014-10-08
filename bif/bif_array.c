@@ -103,7 +103,8 @@ static void bif_cdr_impl(struct Runtime* rt, VAL_LOC_T location)
 
 static void bif_reverse_impl(struct Runtime* rt, VAL_LOC_T location)
 {
-    VAL_SIZE_T i, size;
+	int i;
+    VAL_SIZE_T size;
     VAL_LOC_T size_loc, current_loc, end_loc;
 	struct { VAL_LOC_T *data; int cap, size; } locs = { NULL, 0, 0 };
 
