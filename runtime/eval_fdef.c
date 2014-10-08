@@ -112,8 +112,8 @@ static bool efd_is_argument(char *symbol, struct AstCommonFunc *func)
  * not passed in as an argument.
  */
 static void efd_push_captures(
-		struct Stack *stack,
-		struct SymMap *sym_map,
+        struct Stack *stack,
+        struct SymMap *sym_map,
 		struct AstFuncDef *func_def)
 {	
 	VAL_LOC_T cap_count_loc;
@@ -156,8 +156,8 @@ static void efd_push_captures(
 
 void eval_func_def(
 		struct AstNode *node,
-		struct Stack *stack,
-		struct SymMap *sym_map)
+        struct Stack *stack,
+        struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
 	stack_push_func_init(stack, &size_loc, &data_begin, (void*)node);

@@ -15,9 +15,6 @@ void eval_location_swap(struct SourceLocation *loc);
 void eval_location_pop(void);
 struct SourceLocation *eval_location_top(void);
 
-ptrdiff_t eval(
-    struct AstNode *node,
-    struct Stack *stack,
-    struct SymMap *sym_map);
+ptrdiff_t eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 
 #endif

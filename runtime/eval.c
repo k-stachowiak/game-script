@@ -53,7 +53,7 @@ void eval_error_not_found(char *symbol)
 
 static void eval_compound(
         struct AstNode *node,
-        struct Stack *stack,
+        struct Runtime *rt,
         struct SymMap *sym_map)
 {
     VAL_LOC_T size_loc, data_begin, data_size;
@@ -62,18 +62,18 @@ static void eval_compound(
 	/* Header. */
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-			stack_push_array_init(stack, &size_loc);
+			stack_push_array_init(rt->stack, &size_loc);
             break;
 
         case AST_CPD_TUPLE:
-			stack_push_tuple_init(stack, &size_loc);
+			stack_push_tuple_init(rt->stack, &size_loc);
             break;
     }
 
     /* Data. */
-    data_begin = stack->top;
+    data_begin = rt->stack->top;
     while (current) {
-        eval_impl(current, stack, sym_map);
+        eval_impl(current, rt, sym_map);
         if (err_state()) {
             return;
         }
@@ -81,8 +81,8 @@ static void eval_compound(
     }
 
     /* Hack value size to correct value. */
-    data_size = stack->top - data_begin;
-	stack_push_cpd_final(stack, size_loc, data_size);
+    data_size = rt->stack->top - data_begin;
+	stack_push_cpd_final(rt->stack, size_loc, data_size);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
@@ -112,28 +112,28 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
 
 static void eval_do_block(
 		struct AstNode *node,
-		struct Stack *stack,
+		struct Runtime *rt,
 		struct SymMap *sym_map)
 {
 	struct AstNode *expr = node->data.do_block.exprs;
-	VAL_LOC_T begin = stack->top;
-	VAL_LOC_T end = stack->top;
+	VAL_LOC_T begin = rt->stack->top;
+	VAL_LOC_T end = rt->stack->top;
 	for (; expr; expr = expr->next) {
-		end = eval_impl(expr, stack, sym_map);
+		end = eval_impl(expr, rt, sym_map);
 		if (err_state()) {
 			break;
 		}
 	}
-	stack_collapse(stack, begin, end);
+	stack_collapse(rt->stack, begin, end);
 }
 
 static void eval_bind(
 		struct AstNode *node,
-		struct Stack *stack,
+		struct Runtime *rt,
 		struct SymMap *sym_map)
 {
     struct AstNode *expr = node->data.bind.expr;
-    VAL_LOC_T location = eval_impl(expr, stack, sym_map);
+    VAL_LOC_T location = eval_impl(expr, rt, sym_map);
     if (!err_state()) {
         sym_map_insert(sym_map, node->data.bind.symbol, location, &expr->loc);
     }
@@ -141,29 +141,29 @@ static void eval_bind(
 
 static void eval_iff(
 		struct AstNode *node,
-		struct Stack *stack,
+		struct Runtime *rt,
 		struct SymMap *sym_map)
 {
 	VAL_LOC_T test_loc, temp_begin, temp_end;
 	VAL_BOOL_T test_val;
 
-	temp_begin = stack->top;
-	test_loc = eval_impl(node->data.iff.test, stack, sym_map);
-	temp_end = stack->top;
+	temp_begin = rt->stack->top;
+	test_loc = eval_impl(node->data.iff.test, rt, sym_map);
+	temp_end = rt->stack->top;
 
-    if (rt_val_type(test_loc) != VAL_BOOL) {
+    if (rt_val_type(rt, test_loc) != VAL_BOOL) {
 		eval_common_error("Test expression isn't a boolean value.");
-        stack_collapse(stack, temp_begin, temp_end);
+        stack_collapse(rt->stack, temp_begin, temp_end);
 		return;
     }
 
-	test_val = rt_peek_val_bool(test_loc);
-    stack_collapse(stack, temp_begin, temp_end);
+	test_val = rt_peek_val_bool(rt, test_loc);
+    stack_collapse(rt->stack, temp_begin, temp_end);
 
 	if (test_val) {
-		eval_impl(node->data.iff.true_expr, stack, sym_map);
+		eval_impl(node->data.iff.true_expr, rt, sym_map);
 	} else {
-		eval_impl(node->data.iff.false_expr, stack, sym_map);
+		eval_impl(node->data.iff.false_expr, rt, sym_map);
 	}
 }
 
@@ -207,47 +207,47 @@ static void eval_bif(struct AstNode *node, struct Stack *stack)
 
 VAL_LOC_T eval_impl(
 		struct AstNode *node,
-		struct Stack *stack,
+		struct Runtime *rt,
 		struct SymMap *sym_map)
 {
-    VAL_LOC_T begin = stack->top;
+    VAL_LOC_T begin = rt->stack->top;
 	eval_location_push(&node->loc);
 
     switch (node->type) {
-    case AST_LITERAL:
-        eval_literal(node, stack);
+    case AST_COMPOUND:
+        eval_compound(node, rt, sym_map);
         break;
 
-    case AST_COMPOUND:
-        eval_compound(node, stack, sym_map);
+    case AST_LITERAL:
+        eval_literal(node, rt->stack);
         break;
 
 	case AST_DO_BLOCK:
-		eval_do_block(node, stack, sym_map);
+		eval_do_block(node, rt, sym_map);
 		break;
 
     case AST_BIND:
-    	eval_bind(node, stack, sym_map);
+    	eval_bind(node, rt, sym_map);
     	break;
 
 	case AST_IFF:
-		eval_iff(node, stack, sym_map);
+		eval_iff(node, rt, sym_map);
 		break;
 
     case AST_REFERENCE:
-    	eval_reference(node, stack, sym_map);
+    	eval_reference(node, rt->stack, sym_map);
     	break;
 
     case AST_FUNC_DEF:
-        eval_func_def(node, stack, sym_map);
+        eval_func_def(node, rt->stack, sym_map);
         break;
 
     case AST_BIF:
-        eval_bif(node, stack);
+        eval_bif(node, rt->stack);
         break;
 
     case AST_FUNC_CALL:
-        eval_func_call(node, stack, sym_map);
+        eval_func_call(node, rt, sym_map);
         break;
 
 	default:
@@ -264,24 +264,21 @@ VAL_LOC_T eval_impl(
     }
 }
 
-VAL_LOC_T eval(
-        struct AstNode *node,
-        struct Stack *stack,
-        struct SymMap *sym_map)
+VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 {
     VAL_LOC_T begin, result, end;
 
     err_reset();
 	eval_location_reset();
 
-    begin = stack->top;
-    result = eval_impl(node, stack, sym_map);
-    end = stack->top;
+    begin = rt->stack->top;
+    result = eval_impl(node, rt, sym_map);
+    end = rt->stack->top;
 
     if (!err_state()) {
         return result;
     } else {
-        stack_collapse(stack, begin, end);
+        stack_collapse(rt->stack, begin, end);
         return -1;
     }
 }

@@ -10,8 +10,9 @@
 
 /* TODO:
  * - Define runtime struct and remove global runtime state.
+ * - Initialize bif values in a non-pathological way - no EVAL.
  * - Have an elegant runtime push/peek API over the basic stack API.
- * - Test runtime
+ * - Test runtime.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
@@ -50,3 +51,4 @@ int main(int argc, char *argv[])
 
     return error;
 }
+

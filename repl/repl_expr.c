@@ -29,7 +29,7 @@ static void repl_expr_error_ast_illegal(char *reason)
     err_msg_set(&msg);
 }
 
-enum ReplExprResult repl_expr_command(char *expression_line)
+enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
 {
 	struct AstNode *ast;
     int ast_len;
@@ -51,12 +51,12 @@ enum ReplExprResult repl_expr_command(char *expression_line)
         return REPL_EXPR_ERROR;
     }
 		
-	rt_consume_one(ast, &location, NULL);
+	rt_consume_one(rt, ast, &location, NULL);
 	if (err_state()) {
 		return REPL_EXPR_INTERNAL_ERROR;
 	}
 
-	rt_val_print(location, true);
+	rt_val_print(rt, location, true);
 	printf("\n");		
 	return REPL_EXPR_OK;
 }

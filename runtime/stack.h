@@ -63,6 +63,6 @@ void stack_push_func_final(struct Stack *stack, VAL_LOC_T size_loc, VAL_SIZE_T d
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end);
 struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location);
-void stack_for_each(struct Stack *stack, void(*f)(VAL_LOC_T));
+void stack_for_each(struct Stack *stack, void *state, void(*f)(void*, VAL_LOC_T));
 
 #endif

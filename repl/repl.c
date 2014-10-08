@@ -12,9 +12,9 @@
 
 static bool request_quit = false;
 
-static void repl_handle_command(char *cmd)
+static void repl_handle_command(struct Runtime *rt, char *cmd)
 {
-	switch (repl_cmd_command(cmd)) {
+	switch (repl_cmd_command(rt, cmd)) {
 	case REPL_CMD_OK:
         break;
 
@@ -29,9 +29,9 @@ static void repl_handle_command(char *cmd)
 	}
 }
 
-static void repl_handle_expression(char *expr)
+static void repl_handle_expression(struct Runtime *rt, char *expr)
 {
-	switch (repl_expr_command(expr)) {
+	switch (repl_expr_command(rt, expr)) {
 	case REPL_EXPR_OK:
         break;
 
@@ -42,17 +42,14 @@ static void repl_handle_expression(char *expr)
 	}
 }
 
-static void repl_handle_line(char *line)
+static void repl_handle_line(struct Runtime *rt, char *line)
 {
     if (strcmp(line, "") == 0) {
         return;
-
 	} else if (*line == ':') {
-		repl_handle_command(line + 1);
-
+		repl_handle_command(rt, line + 1);
 	} else {
-		repl_handle_expression(line);
-
+		repl_handle_expression(rt, line);
 	}
 }
 
@@ -60,8 +57,7 @@ int repl(void)
 {
 	int result;
     bool eof_flag = false;
-
-	rt_init();
+    struct Runtime *rt = rt_make(64 * 1024);
 
     for (;;) {
 
@@ -69,7 +65,7 @@ int repl(void)
 
 		err_reset();
 
-        printf("moon [st:%ld]> ", (long)rt_current_top());
+        printf("moon [st:%ld]> ", (long)rt_current_top(rt));
 
         line = my_getline(&eof_flag);
 
@@ -85,7 +81,7 @@ int repl(void)
 			break;
         }
 
-        repl_handle_line(line);
+        repl_handle_line(rt, line);
 		free_or_die(line);
 
         if (request_quit) {
@@ -94,7 +90,7 @@ int repl(void)
 		}
     }
 
-	rt_deinit();
+	rt_free(rt);
 
 	if (result != 0) {
 		printf("REPL error: %s\n", err_msg());

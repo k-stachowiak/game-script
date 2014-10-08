@@ -20,51 +20,51 @@ static VAL_BOOL_T bif_log_or(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x || (bo
 static VAL_BOOL_T bif_log_not(VAL_BOOL_T x) { return !((bool)x); }
 
 static void common_bin_impl(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc, VAL_LOC_T y_loc,
 		VAL_BOOL_T(*impl)(VAL_BOOL_T, VAL_BOOL_T))
 {
-    enum ValueType x_type = rt_val_type(x_loc);
-    enum ValueType y_type = rt_val_type(y_loc);
+    enum ValueType x_type = rt_val_type(rt, x_loc);
+    enum ValueType y_type = rt_val_type(rt, y_loc);
 
 	if (x_type != VAL_BOOL || y_type != VAL_BOOL) {
 		bif_logic_error_arg_mismatch();
 		return;
 	}
 
-	stack_push_bool(stack, impl(
-            rt_peek_val_bool(x_loc),
-            rt_peek_val_bool(y_loc)));
+	stack_push_bool(rt->stack, impl(
+            rt_peek_val_bool(rt, x_loc),
+            rt_peek_val_bool(rt, y_loc)));
 }
 
 static void common_un_impl(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc,
 		VAL_BOOL_T(*impl)(VAL_BOOL_T))
 {
-    enum ValueType x_type = rt_val_type(x_loc);
+    enum ValueType x_type = rt_val_type(rt, x_loc);
 
 	if (x_type != VAL_BOOL) {
 		bif_logic_error_arg_mismatch();
 		return;
 	}
 
-	stack_push_bool(stack, impl(rt_peek_val_bool(x_loc)));
+	stack_push_bool(rt->stack, impl(rt_peek_val_bool(rt, x_loc)));
 }
 
-static void bif_and_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_and_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_log_and);
+	common_bin_impl(rt, x_loc, y_loc, bif_log_and);
 }
 
-static void bif_or_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_or_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_log_or);
+	common_bin_impl(rt, x_loc, y_loc, bif_log_or);
 }
 
-static void bif_not_impl(struct Stack* stack, VAL_LOC_T x_loc)
+static void bif_not_impl(struct Runtime *rt, VAL_LOC_T x_loc)
 {
-	common_un_impl(stack, x_loc, bif_log_not);
+	common_un_impl(rt, x_loc, bif_log_not);
 }
 
 struct AstNode bif_and;

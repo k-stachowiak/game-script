@@ -26,7 +26,6 @@ static void fcall_error_too_many_args(char *symbol)
 static bool efc_lookup_value(
 		char *symbol,
 		struct SymMap *sym_map,
-		struct Stack *stack,
         VAL_LOC_T *loc)
 {
 	struct SymMapKvp *kvp;
@@ -75,8 +74,8 @@ static int efc_compute_arity(struct AstNode *def_node)
  * Its captures, already evaluated arguments and the newly applied ones.
  */
 static void efc_curry_on(
-		struct Stack *stack,
-		struct SymMap *sym_map,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
 		struct AstNode *actual_args,
         struct AstNode *impl,
         VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
@@ -85,49 +84,48 @@ static void efc_curry_on(
 	VAL_LOC_T current_loc, size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
-	stack_push_func_init(stack, &size_loc, &data_begin, impl);
+	stack_push_func_init(rt->stack, &size_loc, &data_begin, impl);
 
 	/* Captures. */
-	stack_push_func_cap_init(stack, cap_count);
+	stack_push_func_cap_init(rt->stack, cap_count);
     current_loc = cap_loc;
 	for (i = 0; i < cap_count; ++i) {
-        stack_push_func_cap_copy(stack, current_loc);
-        current_loc += rt_fun_next_cap_loc(current_loc);
+        stack_push_func_cap_copy(rt->stack, current_loc);
+        current_loc += rt_fun_next_cap_loc(rt, current_loc);
 	}
 
 	/* Applied arguments. */
 	arg_count = appl_count + ast_list_len(actual_args);
 
     /* ...already applied, */
-	stack_push_func_appl_init(stack, arg_count);
+	stack_push_func_appl_init(rt->stack, arg_count);
     current_loc = appl_loc;
 	for (i = 0; i < appl_count; ++i) {
-		stack_push_copy(stack, current_loc);
-        current_loc += rt_fun_next_appl_loc(current_loc);
+		stack_push_copy(rt->stack, current_loc);
+        current_loc += rt_fun_next_appl_loc(rt, current_loc);
 	}
 
     /* ...currently applied. */
 	for (; actual_args; actual_args = actual_args->next) {
-		eval_impl(actual_args, stack, sym_map);
+		eval_impl(actual_args, rt, sym_map);
 		if (err_state()) {
 			break;
 		}
 	}
 
 	/* Finalize. */
-	stack_push_func_final(stack, size_loc, data_begin);
+	stack_push_func_final(rt->stack, size_loc, data_begin);
 }
 
 /** Evaluates an expression and inserts into a provided symbol map. */
 static bool efc_insert_expression(
-		struct Stack *stack,
-		struct SymMap *sym_map,
+        struct Runtime *rt,
 		struct SymMap *new_sym_map,
 		struct AstNode *arg_node,
         struct SourceLocation *arg_loc,
 		char *symbol)
 {
-	VAL_LOC_T location = eval_impl(arg_node, stack, sym_map);
+	VAL_LOC_T location = eval_impl(arg_node, rt, new_sym_map);
 	if (err_state()) {
 		return false;
 	}
@@ -142,8 +140,8 @@ static bool efc_insert_expression(
 
 /** Evaluates a general function implementation i.e. not BIF. */
 static void efc_evaluate_general(
-		struct Stack *stack,
-		struct SymMap *sym_map,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
 		struct AstNode *actual_args,
         struct AstNode *impl,
         VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
@@ -165,10 +163,10 @@ static void efc_evaluate_general(
 
 	/* Insert captures into the scope. */
 	for (i = 0; i < cap_count; ++i) {
-        char *cap_symbol = rt_fun_cap_symbol(cap_loc);
-        VAL_LOC_T cap_val_loc = rt_fun_cap_val_loc(cap_loc);
+        char *cap_symbol = rt_fun_cap_symbol(rt, cap_loc);
+        VAL_LOC_T cap_val_loc = rt_fun_cap_val_loc(rt, cap_loc);
 		sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, &cont_loc);
-        cap_loc = rt_fun_next_cap_loc(cap_loc);
+        cap_loc = rt_fun_next_cap_loc(rt, cap_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
@@ -177,28 +175,27 @@ static void efc_evaluate_general(
 	/* Insert already applied arguments. */
 	for (i = 0; i < appl_count; ++i) {
 		sym_map_insert(&local_sym_map, *(formal_args++), appl_loc, &cont_loc);
-        appl_loc = rt_fun_next_appl_loc(appl_loc);
+        appl_loc = rt_fun_next_appl_loc(rt, appl_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
 	}
 
 	/* Evaluate and insert new arguments. */
-	temp_begin = stack->top;
+	temp_begin = rt->stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
-		if (!efc_insert_expression(stack,
-                sym_map, &local_sym_map,
+		if (!efc_insert_expression(rt, &local_sym_map,
                 actual_args, arg_locs++, *(formal_args++))) {
 			goto cleanup;
 		}
 	}
-	temp_end = stack->top;
+	temp_end = rt->stack->top;
 
 	/* Evaluate the function expression. */
-	eval_impl(impl->data.func_def.expr, stack, &local_sym_map);
+	eval_impl(impl->data.func_def.expr, rt, &local_sym_map);
 
 	/* Collapse the temporaries. */
-	stack_collapse(stack, temp_begin, temp_end);
+	stack_collapse(rt->stack, temp_begin, temp_end);
 
 cleanup:
 
@@ -226,7 +223,7 @@ static bool efc_assert_bif_arg_count(enum AstBifType type, int arg_count)
 
 /** Evaluates a BIF. */
 static void efc_evaluate_bif(
-		struct Stack *stack,
+		struct Runtime *rt,
 		struct SymMap *sym_map,
 		struct AstNode *actual_args,
         VAL_SIZE_T appl_count, VAL_LOC_T appl_loc,
@@ -239,12 +236,12 @@ static void efc_evaluate_bif(
 	/* Peal out already applied args. */
 	for (i = 0; i < appl_count; ++i) {
 		arg_locs[arg_count] = appl_loc;
-        appl_loc = rt_next_loc(appl_loc);
+        appl_loc = rt_next_loc(rt, appl_loc);
 		++arg_count;
 	}
 
 	/* Evaluate the missing args. */
-	temp_begin = stack->top;
+	temp_begin = rt->stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
 		VAL_LOC_T temp_loc;
 		if (arg_count >= BIF_MAX_ARITY) {
@@ -252,7 +249,7 @@ static void efc_evaluate_bif(
 			exit(1);
 		}
 
-		temp_loc = eval_impl(actual_args, stack, sym_map);
+		temp_loc = eval_impl(actual_args, rt, sym_map);
 		arg_locs[arg_count] = temp_loc;
 		++arg_count;
 
@@ -260,7 +257,7 @@ static void efc_evaluate_bif(
 			return;
 		}
 	}
-	temp_end = stack->top;
+	temp_end = rt->stack->top;
 
 	/* Assert arguments count. */
 	if (!efc_assert_bif_arg_count(impl->type, arg_count)) {
@@ -271,25 +268,25 @@ static void efc_evaluate_bif(
 	/* Evaluate the function implementation. */
 	switch (impl->type) {
 	case AST_BIF_UNARY:
-		impl->u_impl(stack, arg_locs[0]);
+		impl->u_impl(rt, arg_locs[0]);
 		break;
 
 	case AST_BIF_BINARY:
-		impl->bi_impl(stack, arg_locs[0], arg_locs[1]);
+		impl->bi_impl(rt, arg_locs[0], arg_locs[1]);
 		break;
 
 	case AST_BIF_TERNARY:
-		impl->ter_impl(stack, arg_locs[0], arg_locs[1], arg_locs[2]);
+		impl->ter_impl(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
 		break;
 	}
 
 	/* Collapse the temporaries. */
-	stack_collapse(stack, temp_begin, temp_end);
+	stack_collapse(rt->stack, temp_begin, temp_end);
 }
 
 void eval_func_call(
 		struct AstNode *node,
-		struct Stack *stack,
+		struct Runtime *rt,
 		struct SymMap *sym_map)
 {
     VAL_LOC_T val_loc, impl_loc, cap_start, appl_start;
@@ -299,33 +296,33 @@ void eval_func_call(
 	struct AstNode *actual_args = node->data.func_call.actual_args;
 	char *symbol = node->data.func_call.symbol;
 
-	if (!efc_lookup_value(symbol, sym_map, stack, &val_loc)) {
+	if (!efc_lookup_value(symbol, sym_map, &val_loc)) {
         return;
     }
 
-    rt_peek_val_fun_locs(val_loc, &impl_loc, &cap_start, &appl_start);
-    impl = (struct AstNode*)rt_peek_ptr(impl_loc);
-    cap_count = rt_peek_size(cap_start);
+    rt_peek_val_fun_locs(rt, val_loc, &impl_loc, &cap_start, &appl_start);
+    impl = (struct AstNode*)rt_peek_ptr(rt, impl_loc);
+    cap_count = rt_peek_size(rt, cap_start);
     cap_start += VAL_SIZE_BYTES;
-    appl_count = rt_peek_size(appl_start);
+    appl_count = rt_peek_size(rt, appl_start);
     appl_start += VAL_SIZE_BYTES;
 
 	arity = efc_compute_arity(impl);
 	applied = appl_count + ast_list_len(actual_args);
 
 	if (arity > applied) {
-		efc_curry_on(stack, sym_map, actual_args, impl,
+		efc_curry_on(rt, sym_map, actual_args, impl,
                 cap_count, cap_start, appl_count, appl_start);
 
 	} else if (arity == applied) {
 		switch (impl->type) {
 		case AST_FUNC_DEF:
-			efc_evaluate_general(stack, sym_map, actual_args, impl,
+			efc_evaluate_general(rt, sym_map, actual_args, impl,
                     cap_count, cap_start, appl_count, appl_start);
 			break;
 
 		case AST_BIF:
-			efc_evaluate_bif(stack, sym_map, actual_args,
+			efc_evaluate_bif(rt, sym_map, actual_args,
                     appl_count, appl_start, &impl->data.bif);
 			break;
 

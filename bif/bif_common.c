@@ -58,19 +58,19 @@ void bif_init_ternary_ast(struct AstNode *node)
 }
 
 enum ValueType bif_match_un(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc,
 		VAL_INT_T *i,
 		VAL_REAL_T *r)
 {
-    enum ValueType type = rt_val_type(x_loc);
+    enum ValueType type = rt_val_type(rt, x_loc);
 
 	if (type == VAL_INT) {
-		*i = rt_peek_val_int(x_loc);
+		*i = rt_peek_val_int(rt, x_loc);
 		return VAL_INT;
 
 	} else if (type == VAL_REAL) {
-		*r = rt_peek_val_real(x_loc);
+		*r = rt_peek_val_real(rt, x_loc);
 		return VAL_REAL;
 
 	} else {
@@ -79,22 +79,22 @@ enum ValueType bif_match_un(
 }
 
 enum BifBinaryMatch bif_match_bin(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc, VAL_LOC_T y_loc,
 		VAL_INT_T *ix, VAL_INT_T *iy,
 		VAL_REAL_T *rx, VAL_REAL_T *ry)
 {
-    enum ValueType x_type = rt_val_type(x_loc);
-    enum ValueType y_type = rt_val_type(y_loc);
+    enum ValueType x_type = rt_val_type(rt, x_loc);
+    enum ValueType y_type = rt_val_type(rt, y_loc);
 
 	if (x_type == VAL_INT && y_type == VAL_INT) {
-		*ix = rt_peek_val_int(x_loc);
-		*iy = rt_peek_val_int(y_loc);
+		*ix = rt_peek_val_int(rt, x_loc);
+		*iy = rt_peek_val_int(rt, y_loc);
 		return BBM_BOTH_INT;
 
 	} else if (x_type == VAL_REAL && y_type == VAL_REAL) {
-		*rx = rt_peek_val_real(x_loc);
-		*ry = rt_peek_val_real(y_loc);
+		*rx = rt_peek_val_real(rt, x_loc);
+		*ry = rt_peek_val_real(rt, y_loc);
 		return BBM_BOTH_REAL;
 
 	} else {

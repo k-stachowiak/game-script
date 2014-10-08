@@ -52,14 +52,14 @@ struct AstCommonFunc {
 
 struct AstNode;
 struct Value;
-struct Stack;
+struct Runtime;
 
 struct AstBif {
     struct AstCommonFunc func;
     enum AstBifType type;
-	void(*u_impl)(struct Stack*, VAL_LOC_T);
-	void(*bi_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T);
-	void(*ter_impl)(struct Stack*, VAL_LOC_T, VAL_LOC_T, VAL_LOC_T);
+	void(*u_impl)(struct Runtime*, VAL_LOC_T);
+	void(*bi_impl)(struct Runtime*, VAL_LOC_T, VAL_LOC_T);
+	void(*ter_impl)(struct Runtime*, VAL_LOC_T, VAL_LOC_T, VAL_LOC_T);
 };
 
 struct AstDoBlock {

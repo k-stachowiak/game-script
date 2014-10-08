@@ -32,7 +32,7 @@ static VAL_REAL_T bif_div_real(VAL_REAL_T x, VAL_REAL_T y) { return x / y; }
 static VAL_REAL_T bif_mod_real(VAL_REAL_T x, VAL_REAL_T y) { return fmod(x, y); }
 
 static void common_bin_impl(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc, VAL_LOC_T y_loc,
 		VAL_INT_T(*impl_int)(VAL_INT_T, VAL_INT_T),
 		VAL_REAL_T(*impl_real)(VAL_REAL_T, VAL_REAL_T))
@@ -40,13 +40,13 @@ static void common_bin_impl(
 	VAL_REAL_T rx, ry;
 	VAL_INT_T ix, iy;
 
-	switch (bif_match_bin(stack, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
+	switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
 	case BBM_BOTH_INT:
-		stack_push_int(stack, impl_int(ix, iy));
+		stack_push_int(rt->stack, impl_int(ix, iy));
 		break;
 
 	case BBM_BOTH_REAL:
-		stack_push_real(stack, impl_real(rx, ry));
+		stack_push_real(rt->stack, impl_real(rx, ry));
 		break;
 
 	case BBM_MISMATCH:
@@ -56,7 +56,7 @@ static void common_bin_impl(
 }
 
 static void common_un_impl(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc,
 		VAL_INT_T(*impl_int)(VAL_INT_T),
 		VAL_REAL_T(*impl_real)(VAL_REAL_T))
@@ -64,13 +64,13 @@ static void common_un_impl(
 	VAL_REAL_T r;
 	VAL_INT_T i;
 
-	switch (bif_match_un(stack, x_loc, &i, &r)) {
+	switch (bif_match_un(rt, x_loc, &i, &r)) {
 	case VAL_INT:
-		stack_push_int(stack, impl_int(i));
+		stack_push_int(rt->stack, impl_int(i));
 		break;
 
 	case VAL_REAL:
-		stack_push_real(stack, impl_real(r));
+		stack_push_real(rt->stack, impl_real(r));
 		break;
 
 	default:
@@ -79,34 +79,34 @@ static void common_un_impl(
 	}
 }
 
-static void bif_sqrt_impl(struct Stack* stack, VAL_LOC_T x_loc)
+static void bif_sqrt_impl(struct Runtime* rt, VAL_LOC_T x_loc)
 {
-	common_un_impl(stack, x_loc, bif_sqrt_int, bif_sqrt_real);
+	common_un_impl(rt, x_loc, bif_sqrt_int, bif_sqrt_real);
 }
 
-static void bif_add_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_add_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_add_int, bif_add_real);
+	common_bin_impl(rt, x_loc, y_loc, bif_add_int, bif_add_real);
 }
 
-static void bif_sub_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_sub_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_sub_int, bif_sub_real);
+	common_bin_impl(rt, x_loc, y_loc, bif_sub_int, bif_sub_real);
 }
 
-static void bif_mul_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_mul_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_mul_int, bif_mul_real);
+	common_bin_impl(rt, x_loc, y_loc, bif_mul_int, bif_mul_real);
 }
 
-static void bif_div_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_div_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_div_int, bif_div_real);
+	common_bin_impl(rt, x_loc, y_loc, bif_div_int, bif_div_real);
 }
 
-static void bif_mod_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_mod_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_bin_impl(stack, x_loc, y_loc, bif_mod_int, bif_mod_real);
+	common_bin_impl(rt, x_loc, y_loc, bif_mod_int, bif_mod_real);
 }
 
 struct AstNode bif_sqrt;

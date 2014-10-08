@@ -193,12 +193,12 @@ struct ValueHeader stack_peek_header(struct Stack *stack, VAL_LOC_T location)
     return result;
 }
 
-void stack_for_each(struct Stack *stack, void(*f)(VAL_LOC_T))
+void stack_for_each(struct Stack *stack, void *state, void(*f)(void*, VAL_LOC_T))
 {
 	VAL_LOC_T loc = 0;
 	while (loc != stack->top) {
 		struct ValueHeader header = stack_peek_header(stack, loc);
-		f(loc);
+		f(state, loc);
 		loc += header.size + VAL_HEAD_BYTES;
 	}
 }

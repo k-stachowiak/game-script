@@ -37,7 +37,10 @@ static void repl_cmd_error_args(char *cmd, int expected, int actual)
     err_msg_set(&msg);
 }
 
-static enum ReplCmdResult repl_cmd_load(char *pieces[], int num_pieces)
+static enum ReplCmdResult repl_cmd_load(
+        struct Runtime *rt,
+        char *pieces[],
+        int num_pieces)
 {
 	char *filename;
 	struct AstNode *ast_list;
@@ -53,37 +56,39 @@ static enum ReplCmdResult repl_cmd_load(char *pieces[], int num_pieces)
 		return REPL_CMD_INTERNAL_ERROR;
 	}
 
-	if (!rt_consume_list(ast_list)) {
+	if (!rt_consume_list(rt, ast_list)) {
 		return REPL_CMD_INTERNAL_ERROR;
 	}
 
 	return REPL_CMD_OK;
 }
 
-static void repl_cmd_print_stack_value(VAL_LOC_T loc)
+static void repl_cmd_print_stack_value(void *state, VAL_LOC_T loc)
 {
-	rt_val_print(loc, true);
+    struct Runtime *rt = (struct Runtime *)state;
+	rt_val_print(rt, loc, true);
 	printf(" @ %ld\n", (long)loc);
 }
 
-static void repl_cmd_print_stack(void)
+static void repl_cmd_print_stack(struct Runtime *rt)
 {
-	rt_for_each_stack_val(repl_cmd_print_stack_value);
+	rt_for_each_stack_val(rt, repl_cmd_print_stack_value);
 }
 
-static void repl_cmd_print_sym_map_kvp(char *symbol, VAL_LOC_T location)
+static void repl_cmd_print_sym_map_kvp(void *state, char *symbol, VAL_LOC_T location)
 {
+    struct Runtime *rt = (struct Runtime *)state;
 	printf("%s -> ", symbol);
-	rt_val_print(location, true);
+	rt_val_print(rt, location, true);
 	printf(" @ %ld\n", (long)location);
 }
 
-static void repl_cmd_print_sym_map(void)
+static void repl_cmd_print_sym_map(struct Runtime *rt)
 {
-	rt_for_each_sym(repl_cmd_print_sym_map_kvp);
+	rt_for_each_sym(rt, repl_cmd_print_sym_map_kvp);
 }
 
-enum ReplCmdResult repl_cmd_command(char *command_line)
+enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
 {
 	char *pieces[2];
 	int num_pieces = 0;
@@ -105,13 +110,13 @@ enum ReplCmdResult repl_cmd_command(char *command_line)
 		return REPL_CMD_QUIT;
 
 	} else if (strcmp(pieces[0], "ld") == 0) {
-		return repl_cmd_load(pieces + 1, num_pieces - 1);
+		return repl_cmd_load(rt, pieces + 1, num_pieces - 1);
 
 	} else if (strcmp(pieces[0], "pst") == 0) {
-		repl_cmd_print_stack();
+		repl_cmd_print_stack(rt);
 
 	} else if (strcmp(pieces[0], "psm") == 0) {
-		repl_cmd_print_sym_map();
+		repl_cmd_print_sym_map(rt);
 
 	} else {
         repl_cmd_error_bad();

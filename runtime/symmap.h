@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "stack.h"
+#include "runtime.h"
 #include "common.h"
 
 #ifndef SYMMAP_H
@@ -21,14 +21,9 @@ struct SymMapKvp {
     struct SymMapKvp *next;
 };
 
-void sym_map_init_global(
-		struct SymMap *sym_map,
-		struct Stack *stack);
-
-void sym_map_init_local(
-        struct SymMap *sym_map,
-        struct SymMap *global);
-
+/* TODO: RUNTIME SHOULD NOT BE NECESSARY HERE! */
+void sym_map_init_global(struct SymMap *sym_map, struct Runtime *rt);
+void sym_map_init_local(struct SymMap *sym_map, struct SymMap *global);
 void sym_map_deinit(struct SymMap *sym_map);
 
 void sym_map_insert(
@@ -40,6 +35,6 @@ void sym_map_insert(
 struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key);
-void sym_map_for_each(struct SymMap *sym_map, void(*f)(char*, VAL_LOC_T));
+void sym_map_for_each(struct SymMap *sym_map, void *state, void(*f)(void*, char*, VAL_LOC_T));
 
 #endif

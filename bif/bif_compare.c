@@ -26,20 +26,20 @@ static VAL_BOOL_T bif_leq_real(VAL_REAL_T x, VAL_REAL_T y) { return x <= y; }
 static VAL_BOOL_T bif_geq_real(VAL_REAL_T x, VAL_REAL_T y) { return x >= y; }
 
 static void common_impl(
-		struct Stack *stack,
+		struct Runtime *rt,
 		VAL_LOC_T x_loc, VAL_LOC_T y_loc,
 		VAL_BOOL_T(*impl_int)(VAL_INT_T, VAL_INT_T),
 		VAL_BOOL_T(*impl_real)(VAL_REAL_T, VAL_REAL_T))
 {
 	VAL_REAL_T rx, ry;
 	VAL_INT_T ix, iy;
-	switch (bif_match_bin(stack, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
+	switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
 	case BBM_BOTH_INT:
-		stack_push_bool(stack, impl_int(ix, iy));
+		stack_push_bool(rt->stack, impl_int(ix, iy));
 		break;
 
 	case BBM_BOTH_REAL:
-		stack_push_bool(stack, impl_real(rx, ry));
+		stack_push_bool(rt->stack, impl_real(rx, ry));
 		break;
 
 	case BBM_MISMATCH:
@@ -48,29 +48,29 @@ static void common_impl(
 	}
 }
 
-static void bif_eq_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_eq_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_impl(stack, x_loc, y_loc, bif_eq_int, bif_eq_real);
+	common_impl(rt, x_loc, y_loc, bif_eq_int, bif_eq_real);
 }
 
-static void bif_lt_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_lt_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_impl(stack, x_loc, y_loc, bif_lt_int, bif_lt_real);
+	common_impl(rt, x_loc, y_loc, bif_lt_int, bif_lt_real);
 }
 
-static void bif_gt_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_gt_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_impl(stack, x_loc, y_loc, bif_gt_int, bif_gt_real);
+	common_impl(rt, x_loc, y_loc, bif_gt_int, bif_gt_real);
 }
 
-static void bif_leq_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_leq_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_impl(stack, x_loc, y_loc, bif_leq_int, bif_leq_real);
+	common_impl(rt, x_loc, y_loc, bif_leq_int, bif_leq_real);
 }
 
-static void bif_geq_impl(struct Stack* stack, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+static void bif_geq_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	common_impl(stack, x_loc, y_loc, bif_geq_int, bif_geq_real);
+	common_impl(rt, x_loc, y_loc, bif_geq_int, bif_geq_real);
 }
 
 struct AstNode bif_eq;
