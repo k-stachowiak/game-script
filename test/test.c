@@ -196,20 +196,18 @@ int test(void)
 	success &= test_parser();
 
 	rt = rt_make(64 * 1024);
+
 	success &= test_runtime_sanity(rt);
-	rt_free(rt);
+	rt_reset(rt);
 
-	rt = rt_make(64 * 1024);
 	success &= test_local_scope(rt);
-	rt_free(rt);
+	rt_reset(rt);
 
-	rt = rt_make(64 * 1024);
 	success &= test_simple_algorithm(rt);
-	rt_free(rt);
+	rt_reset(rt);
 
-	rt = rt_make(64 * 1024);
 	success &= test_array_lookup(rt);
-	rt_free(rt);
+	rt_reset(rt);
 
 	if (success) {
 		printf("Tests ran successfully.\n");

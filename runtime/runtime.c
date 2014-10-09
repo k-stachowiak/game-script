@@ -60,23 +60,37 @@ static void rt_val_print_function(struct Runtime *rt, VAL_LOC_T loc)
     printf("function (ar=%d, cap=%d, appl=%d)", arity, captures, applied);
 }
 
-struct Runtime *rt_make(long stack)
+static void rt_init(struct Runtime *rt, long stack)
 {
-    struct Runtime *result = malloc_or_die(sizeof(*result));
-
-	result->stack = stack_make(stack);
-	sym_map_init_global(&result->global_sym_map, result); /* TODO: This is evil! result is incomplete! */
-	result->node_store = NULL;
-
-    return result;
+	rt->stack = stack_make(stack);
+	sym_map_init_global(&rt->global_sym_map, rt); /* TODO: This is evil! result is incomplete! */
+	rt->node_store = NULL;
 }
 
-void rt_free(struct Runtime *rt)
+static void rt_deinit(struct Runtime *rt)
 {
 	rt_free_stored(rt);
 	sym_map_deinit(&rt->global_sym_map);
 	stack_free(rt->stack);
+}
 
+struct Runtime *rt_make(long stack)
+{
+    struct Runtime *result = malloc_or_die(sizeof(*result));
+    rt_init(result, stack);
+    return result;
+}
+
+void rt_reset(struct Runtime *rt)
+{
+	long stack = rt->stack->size;
+	rt_deinit(rt);
+	rt_init(rt, stack);
+}
+
+void rt_free(struct Runtime *rt)
+{
+	rt_deinit(rt);
     free_or_die(rt);
 }
 
