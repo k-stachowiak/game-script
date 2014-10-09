@@ -244,6 +244,8 @@ int test(void)
 	success &= test_function_object(rt);
 	rt_reset(rt);
 
+    rt_free(rt);
+
 	if (success) {
 		printf("Tests ran successfully.\n");
 	}

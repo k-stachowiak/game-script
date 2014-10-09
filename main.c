@@ -9,9 +9,8 @@
 #include "test.h"
 
 /* TODO:
- * - Define runtime struct and remove global runtime state.
- * - Initialize bif values in a non-pathological way - no EVAL.
  * - Have an elegant runtime push/peek API over the basic stack API.
+ * - Initialize bif values in a non-pathological way - no EVAL.
  * - Test runtime.
  * - Algorithms:
  *   - merge sort:
