@@ -302,14 +302,14 @@ void rt_peek_val_fun_locs(
     loc += VAL_HEAD_BYTES;
 
     *impl_loc = loc;
-    loc = rt_next_loc(rt, loc);
+    loc += VAL_PTR_BYTES;
 
     *cap_start = loc;
     cap_count = rt_val_size(rt, loc);
     loc += VAL_SIZE_BYTES;
 
     for (i = 0; i < cap_count; ++i) {
-        loc = rt_next_loc(rt, loc);
+        loc = rt_fun_next_cap_loc(rt, loc);
     }
 
     *appl_start = loc;
@@ -317,7 +317,7 @@ void rt_peek_val_fun_locs(
 
 char *rt_fun_cap_symbol(struct Runtime *rt, VAL_LOC_T cap_loc)
 {
-    return rt->stack->buffer + cap_loc; 
+    return rt->stack->buffer + cap_loc;
 }
 
 VAL_LOC_T rt_fun_cap_val_loc(struct Runtime *rt, VAL_LOC_T cap_loc)
