@@ -139,7 +139,7 @@ void stack_push_func_cap(struct Stack *stack, char *symbol, VAL_LOC_T loc)
 {
 	VAL_SIZE_T len = strlen(symbol) + 1;
 	stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
-	stack_push(stack, len + 1, symbol);
+	stack_push(stack, len, symbol);
 	stack_push_copy(stack, loc);
 }
 
