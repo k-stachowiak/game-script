@@ -65,6 +65,7 @@ static bool test_lexer()
 		dom_free(dom_node);
 	}
 
+	printf("Lexer ran successfully.\n");
 	return true;
 }
 
@@ -128,6 +129,7 @@ static bool test_local_scope(struct Runtime *rt)
 		return false;
 	}
 
+	printf("Simple scope management test ran successfully.\n");
 	return true;
 }
 
@@ -154,6 +156,7 @@ static bool test_simple_algorithm(struct Runtime *rt)
         return false;
 	}
 
+	printf("GCD, LCM tests ran successfully.\n");
 	return true;
 }
 
@@ -184,6 +187,40 @@ static bool test_array_lookup(struct Runtime *rt)
         return false;
 	}
 
+	printf("Min element test ran successfully.\n");
+	return true;
+}
+
+static bool test_function_object(struct Runtime *rt)
+{
+	VAL_LOC_T results[4];
+
+	char *source =
+		"(bind lhs 1)\n"
+		"\n"
+		"(bind make_doubler (func () (do\n"
+		"		(bind lhs 2)\n"
+		"		(func (rhs) (* lhs rhs) )\n"
+		")))\n"
+		"\n"
+		"(bind test (func (rhs) (do\n"
+		"	(bind doubler (make_doubler))\n"
+		"	(doubler rhs)\n"
+		")))\n"
+		"\n"
+		"(bind result (test 4))";
+
+	if (!test_source_eval(rt, source, results)) {
+		return false;
+	}
+
+	if (!rt_peek_val_int(rt, results[3]) == 8) {
+		printf("Tricky double = %" PRId64 ", instead of 8.\n",
+				rt_peek_val_int(rt, results[0]));
+		return false;
+	}
+
+	printf("Closure/function value test ran successfully.\n");
 	return true;
 }
 
@@ -192,21 +229,24 @@ int test(void)
 	struct Runtime *rt;
 	bool success = true;
 
-	success &= test_lexer();
-	success &= test_parser();
+	//success &= test_lexer();
+	//success &= test_parser();
 
 	rt = rt_make(64 * 1024);
 
-	success &= test_runtime_sanity(rt);
+	//success &= test_runtime_sanity(rt);
 	rt_reset(rt);
 
-	success &= test_local_scope(rt);
+	//success &= test_local_scope(rt);
 	rt_reset(rt);
 
-	success &= test_simple_algorithm(rt);
+	//success &= test_simple_algorithm(rt);
 	rt_reset(rt);
 
-	success &= test_array_lookup(rt);
+	//success &= test_array_lookup(rt);
+	rt_reset(rt);
+
+	success &= test_function_object(rt);
 	rt_reset(rt);
 
 	if (success) {
