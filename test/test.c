@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include "error.h"
 #include "test.h"
@@ -110,8 +111,8 @@ static bool test_local_scope(struct Runtime *rt)
 	char *source =
 		"(bind sqr (func (x) (* x x)))\n"
 		"(bind select (func (cond x y) (if cond (sqr x) (sqr y))))\n"
-		"(select true 2 3)\n"
-		"(select false 2 3)\n";
+		"(bind a (select true 2 3))\n"
+		"(bind b (select false 2 3))\n";
 
 	if (!test_source_eval(rt, source, results)) {
 		return false;
@@ -144,12 +145,12 @@ static bool test_simple_algorithm(struct Runtime *rt)
 	}
 
 	if (rt_peek_val_int(rt, results[2]) != 6) {
-		printf("gcd returned %ld, instead of 6.\n", rt_peek_val_int(rt, results[0]));
+		printf("gcd returned %" PRId64 ", instead of 6.\n", rt_peek_val_int(rt, results[0]));
         return false;
 	}
 
 	if (rt_peek_val_int(rt, results[3]) != 42) {
-		printf("lcm returned %ld, instead of 42.\n", rt_peek_val_int(rt, results[1]));
+		printf("lcm returned %" PRId64 ", instead of 42.\n", rt_peek_val_int(rt, results[1]));
         return false;
 	}
 
@@ -178,7 +179,7 @@ static bool test_array_lookup(struct Runtime *rt)
 	}
 
 	if (!rt_peek_val_int(rt, results[2]) == 1) {
-		printf("min-element found %ld, instead of 1.\n",
+		printf("min-element found %" PRId64 ", instead of 1.\n",
                 rt_peek_val_int(rt, results[0]));
         return false;
 	}
@@ -188,17 +189,27 @@ static bool test_array_lookup(struct Runtime *rt)
 
 int test(void)
 {
+	struct Runtime *rt;
 	bool success = true;
 
-	// success &= test_lexer();
-	// success &= test_parser();
+	success &= test_lexer();
+	success &= test_parser();
 
-    struct Runtime *rt = rt_make(64 * 1024);
-	// success &= test_runtime_sanity(rt);
+	rt = rt_make(64 * 1024);
+	success &= test_runtime_sanity(rt);
+	rt_free(rt);
+
+	rt = rt_make(64 * 1024);
 	success &= test_local_scope(rt);
-	// success &= test_simple_algorithm(rt);
-	// success &= test_array_lookup(rt);
-    rt_free(rt);
+	rt_free(rt);
+
+	rt = rt_make(64 * 1024);
+	success &= test_simple_algorithm(rt);
+	rt_free(rt);
+
+	rt = rt_make(64 * 1024);
+	success &= test_array_lookup(rt);
+	rt_free(rt);
 
 	if (success) {
 		printf("Tests ran successfully.\n");

@@ -18,6 +18,7 @@ struct Runtime {
 };
 
 struct Runtime *rt_make(long stack);
+void rt_reset(struct Runtime *rt);
 void rt_free(struct Runtime *rt);
 
 void rt_save(struct Runtime *rt);

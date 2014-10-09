@@ -120,12 +120,13 @@ static void efc_curry_on(
 /** Evaluates an expression and inserts into a provided symbol map. */
 static bool efc_insert_expression(
         struct Runtime *rt,
+        struct SymMap *caller_sym_map,
 		struct SymMap *new_sym_map,
 		struct AstNode *arg_node,
         struct SourceLocation *arg_loc,
 		char *symbol)
 {
-	VAL_LOC_T location = eval_impl(arg_node, rt, new_sym_map);
+	VAL_LOC_T location = eval_impl(arg_node, rt, caller_sym_map);
 	if (err_state()) {
 		return false;
 	}
@@ -184,7 +185,7 @@ static void efc_evaluate_general(
 	/* Evaluate and insert new arguments. */
 	temp_begin = rt->stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
-		if (!efc_insert_expression(rt, &local_sym_map,
+		if (!efc_insert_expression(rt, sym_map, &local_sym_map,
                 actual_args, arg_locs++, *(formal_args++))) {
 			goto cleanup;
 		}
