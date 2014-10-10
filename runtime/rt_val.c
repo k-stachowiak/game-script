@@ -4,32 +4,24 @@
 
 #include "rt_val.h"
 
-/**
- * Advance location by:
- * - value header = VAL_HEAD_BYTES
- * - value size   = value.header.size
- */
 VAL_LOC_T rt_val_next_loc(struct Runtime *rt, VAL_LOC_T loc)
 {
     struct ValueHeader header = stack_peek_header(rt->stack, loc);
     return loc + VAL_HEAD_BYTES + header.size;
 }
 
-/** Peek the type of the value at the given location. */
 enum ValueType rt_val_peek_type(struct Runtime *rt, VAL_LOC_T loc)
 {
     struct ValueHeader header = stack_peek_header(rt->stack, loc);
     return (enum ValueType)header.type;
 }
 
-/** Peek the size of the value at the given location. */
 VAL_SIZE_T rt_val_peek_size(struct Runtime *rt, VAL_LOC_T loc)
 {
     struct ValueHeader header = stack_peek_header(rt->stack, loc);
     return header.size;
 }
 
-/** Peek a boolean value at the given location. */
 VAL_BOOL_T rt_val_peek_bool(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_BOOL_T result;
@@ -37,7 +29,6 @@ VAL_BOOL_T rt_val_peek_bool(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
-/** Peek a character value at the given location. */
 VAL_CHAR_T rt_val_peek_char(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_CHAR_T result;
@@ -45,7 +36,6 @@ VAL_CHAR_T rt_val_peek_char(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
-/** Peek a integer value at the given location. */
 VAL_INT_T rt_val_peek_int(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_INT_T result;
@@ -53,7 +43,6 @@ VAL_INT_T rt_val_peek_int(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
-/** Peek a real value at the given location. */
 VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_REAL_T result;
@@ -61,19 +50,16 @@ VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
-/** Peek a string value at the given location. */
 char* rt_val_peek_string(struct Runtime *rt, VAL_LOC_T loc)
 {
     return rt->stack->buffer + loc + VAL_HEAD_BYTES;
 }
 
-/** Returns the location of the first element of the compound value. */
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc)
 {
     return loc + VAL_HEAD_BYTES;
 }
 
-/** Computes the relevant locations of a function value. */
 void rt_val_function_locs(
         struct Runtime *rt, 
         VAL_LOC_T loc,
