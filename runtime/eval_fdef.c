@@ -7,6 +7,7 @@
 #include "eval_detail.h"
 #include "common.h"
 #include "error.h"
+#include "rt_val.h"
 
 /**
  * Analyzes an AST node to find if it contains children that can potentially
@@ -119,7 +120,7 @@ static void efd_push_captures(
 	VAL_LOC_T cap_count_loc;
 	VAL_SIZE_T cap_count = 0;
 
-	stack_push_func_cap_init_deferred(stack, &cap_count_loc);
+	rt_val_push_func_cap_init_deferred(stack, &cap_count_loc);
 
 	struct { struct AstNode **data; int size, cap; } to_visit = { 0 };
 	ARRAY_APPEND(to_visit, func_def->expr);
@@ -143,14 +144,14 @@ static void efd_push_captures(
 					eval_error_not_found(symbol);
 					return;
 				}
-				stack_push_func_cap(stack, symbol, cap_location);
+				rt_val_push_func_cap(stack, symbol, cap_location);
 				++cap_count;
 		}
 
 		ARRAY_REMOVE(to_visit, 0);
 	}
 
-	stack_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
+	rt_val_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
 	ARRAY_FREE(to_visit);
 }
 
@@ -160,12 +161,12 @@ void eval_func_def(
         struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
-	stack_push_func_init(stack, &size_loc, &data_begin, (void*)node);
+	rt_val_push_func_init(stack, &size_loc, &data_begin, (void*)node);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
 	if (err_state()) {
 		return;
 	}
-	stack_push_func_appl_empty(stack);
-	stack_push_func_final(stack, size_loc, data_begin);
+	rt_val_push_func_appl_empty(stack);
+	rt_val_push_func_final(stack, size_loc, data_begin);
 }
 

@@ -63,11 +63,11 @@ static void eval_compound(
 	/* Header. */
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-			stack_push_array_init(rt->stack, &size_loc);
+			rt_val_push_array_init(rt->stack, &size_loc);
             break;
 
         case AST_CPD_TUPLE:
-			stack_push_tuple_init(rt->stack, &size_loc);
+			rt_val_push_tuple_init(rt->stack, &size_loc);
             break;
     }
 
@@ -83,30 +83,30 @@ static void eval_compound(
 
     /* Hack value size to correct value. */
     data_size = rt->stack->top - data_begin;
-	stack_push_cpd_final(rt->stack, size_loc, data_size);
+	rt_val_push_cpd_final(rt->stack, size_loc, data_size);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
-		stack_push_bool(stack, node->data.literal.data.boolean);
+		rt_val_push_bool(stack, node->data.literal.data.boolean);
         break;
 
     case AST_LIT_CHAR:
-		stack_push_char(stack, node->data.literal.data.character);
+		rt_val_push_char(stack, node->data.literal.data.character);
         break;
 
     case AST_LIT_INT:
-		stack_push_int(stack, node->data.literal.data.integer);
+		rt_val_push_int(stack, node->data.literal.data.integer);
         break;
 
 	case AST_LIT_REAL:
-		stack_push_real(stack, node->data.literal.data.real);
+		rt_val_push_real(stack, node->data.literal.data.real);
         break;
 
 	case AST_LIT_STRING:
-		stack_push_string(stack, node->data.literal.data.string);
+		rt_val_push_string(stack, node->data.literal.data.string);
         break;
     }
 }

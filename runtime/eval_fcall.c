@@ -85,13 +85,13 @@ static void efc_curry_on(
 	VAL_LOC_T current_loc, size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
-	stack_push_func_init(rt->stack, &size_loc, &data_begin, impl);
+	rt_val_push_func_init(rt->stack, &size_loc, &data_begin, impl);
 
 	/* Captures. */
-	stack_push_func_cap_init(rt->stack, cap_count);
+	rt_val_push_func_cap_init(rt->stack, cap_count);
     current_loc = cap_loc;
 	for (i = 0; i < cap_count; ++i) {
-        stack_push_func_cap_copy(rt->stack, current_loc);
+		rt_val_push_func_cap_copy(rt->stack, current_loc);
         current_loc += rt_val_fun_next_cap_loc(rt, current_loc);
 	}
 
@@ -99,7 +99,7 @@ static void efc_curry_on(
 	arg_count = appl_count + ast_list_len(actual_args);
 
     /* ...already applied, */
-	stack_push_func_appl_init(rt->stack, arg_count);
+	rt_val_push_func_appl_init(rt->stack, arg_count);
     current_loc = appl_loc;
 	for (i = 0; i < appl_count; ++i) {
 		stack_push_copy(rt->stack, current_loc);
@@ -115,7 +115,7 @@ static void efc_curry_on(
 	}
 
 	/* Finalize. */
-	stack_push_func_final(rt->stack, size_loc, data_begin);
+	rt_val_push_func_final(rt->stack, size_loc, data_begin);
 }
 
 /** Evaluates an expression and inserts into a provided symbol map. */
@@ -303,10 +303,10 @@ void eval_func_call(
     }
 
     rt_val_function_locs(rt, val_loc, &impl_loc, &cap_start, &appl_start);
-    impl = (struct AstNode*)rt_peek_ptr(rt, impl_loc);
-    cap_count = rt_peek_size(rt, cap_start);
+    impl = (struct AstNode*)stack_peek_ptr(rt->stack, impl_loc);
+    cap_count = stack_peek_size(rt->stack, cap_start);
     cap_start += VAL_SIZE_BYTES;
-    appl_count = rt_peek_size(rt, appl_start);
+    appl_count = stack_peek_size(rt->stack, appl_start);
     appl_start += VAL_SIZE_BYTES;
 
 	arity = efc_compute_arity(impl);

@@ -42,7 +42,7 @@ static void bif_length_impl(struct Runtime* rt, VAL_LOC_T location)
         ++size;
     }
 
-	stack_push_int(rt->stack, size);
+	rt_val_push_int(rt->stack, size);
 }
 
 static void bif_empty_impl(struct Runtime* rt, VAL_LOC_T location)
@@ -50,7 +50,7 @@ static void bif_empty_impl(struct Runtime* rt, VAL_LOC_T location)
     if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "empty", "must be an array");
 	} else {
-        stack_push_bool(rt->stack, rt_val_peek_size(rt, location) == 0);
+		rt_val_push_bool(rt->stack, rt_val_peek_size(rt, location) == 0);
     }
 }
 
@@ -94,12 +94,12 @@ static void bif_cdr_impl(struct Runtime* rt, VAL_LOC_T location)
     current_loc = rt_val_next_loc(rt, head_loc);
     end_loc = head_loc + full_size;
 
-    stack_push_array_init(rt->stack, &size_loc);
+	rt_val_push_array_init(rt->stack, &size_loc);
     while (current_loc != end_loc) {
         stack_push_copy(rt->stack, current_loc);
         current_loc = rt_val_next_loc(rt, current_loc);
     }
-    stack_push_cpd_final(rt->stack, size_loc, tail_size);
+	rt_val_push_cpd_final(rt->stack, size_loc, tail_size);
 }
 
 static void bif_reverse_impl(struct Runtime* rt, VAL_LOC_T location)
@@ -123,11 +123,11 @@ static void bif_reverse_impl(struct Runtime* rt, VAL_LOC_T location)
         current_loc = rt_val_next_loc(rt, current_loc);
     }
 
-    stack_push_array_init(rt->stack, &size_loc);
+	rt_val_push_array_init(rt->stack, &size_loc);
     for (i = 0; i < locs.size; ++i) {
         stack_push_copy(rt->stack, locs.data[locs.size - i - 1]);
     }
-    stack_push_cpd_final(rt->stack, size_loc, size);
+	rt_val_push_cpd_final(rt->stack, size_loc, size);
 
 	ARRAY_FREE(locs);
 }
@@ -152,7 +152,7 @@ static void bif_cons_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     y_size = rt_val_peek_size(rt, y_loc);
 
 	/* Build new header. */
-	stack_push_array_init(rt->stack, &size_loc);
+	rt_val_push_array_init(rt->stack, &size_loc);
 
 	/* Append x. */
 	stack_push_copy(rt->stack, x_loc);
@@ -166,7 +166,7 @@ static void bif_cons_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	}
 
 	/* Finalize. */
-	stack_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
+	rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
 }
 
 static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
@@ -189,7 +189,7 @@ static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     y_size = rt_val_peek_size(rt, y_loc);
 
 	/* Build new header. */
-	stack_push_array_init(rt->stack, &size_loc);
+	rt_val_push_array_init(rt->stack, &size_loc);
 
 	/* Append X. */
 	loc = rt_val_cpd_first_loc(x_loc);
@@ -208,7 +208,7 @@ static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	}
 
 	/* Finalize. */
-	stack_push_cpd_final(rt->stack, size_loc, x_size + y_size);
+	rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size);
 }
 
 static void bif_slice_impl(
@@ -246,7 +246,7 @@ static void bif_slice_impl(
 	}
 
 	/* Build new header. */
-	stack_push_array_init(rt->stack, &size_loc);
+	rt_val_push_array_init(rt->stack, &size_loc);
 
 	/* Iterate over array */
 	loc = rt_val_cpd_first_loc(x_loc);
@@ -272,7 +272,7 @@ static void bif_slice_impl(
 	}
 
 	/* Finalize. */
-	stack_push_cpd_final(rt->stack, size_loc, size);
+	rt_val_push_cpd_final(rt->stack, size_loc, size);
 }
 
 struct AstNode bif_length;

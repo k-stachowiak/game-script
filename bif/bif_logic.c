@@ -33,7 +33,7 @@ static void common_bin_impl(
 		return;
 	}
 
-	stack_push_bool(rt->stack, impl(
+	rt_val_push_bool(rt->stack, impl(
             rt_val_peek_bool(rt, x_loc),
             rt_val_peek_bool(rt, y_loc)));
 }
@@ -50,7 +50,7 @@ static void common_un_impl(
 		return;
 	}
 
-	stack_push_bool(rt->stack, impl(rt_val_peek_bool(rt, x_loc)));
+	rt_val_push_bool(rt->stack, impl(rt_val_peek_bool(rt, x_loc)));
 }
 
 static void bif_and_impl(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)

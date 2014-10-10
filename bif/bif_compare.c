@@ -5,6 +5,7 @@
 #include "bif_detail.h"
 #include "stack.h"
 #include "error.h"
+#include "rt_val.h"
 
 static void bif_compare_error_arg_mismatch(void)
 {
@@ -35,11 +36,11 @@ static void common_impl(
 	VAL_INT_T ix, iy;
 	switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
 	case BBM_BOTH_INT:
-		stack_push_bool(rt->stack, impl_int(ix, iy));
+		rt_val_push_bool(rt->stack, impl_int(ix, iy));
 		break;
 
 	case BBM_BOTH_REAL:
-		stack_push_bool(rt->stack, impl_real(rx, ry));
+		rt_val_push_bool(rt->stack, impl_real(rx, ry));
 		break;
 
 	case BBM_MISMATCH:

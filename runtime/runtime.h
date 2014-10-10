@@ -35,9 +35,5 @@ bool rt_consume_list(struct Runtime *rt, struct AstNode *ast);
 void rt_for_each_stack_val(struct Runtime *rt, void(*f)(void*, VAL_LOC_T));
 void rt_for_each_sym(struct Runtime *rt, void(*f)(void*, char*, VAL_LOC_T));
 
-void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate);
-VAL_SIZE_T rt_peek_size(struct Runtime *rt, VAL_LOC_T loc);
-void *rt_peek_ptr(struct Runtime *rt, VAL_LOC_T loc);
-
 
 #endif

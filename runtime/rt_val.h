@@ -5,6 +5,26 @@
 
 #include "runtime.h"
 
+/* Data structores.
+ * ================
+ */
+
+enum ValueType {
+	VAL_BOOL,
+	VAL_CHAR,
+	VAL_INT,
+	VAL_REAL,
+	VAL_STRING,
+	VAL_ARRAY,
+	VAL_TUPLE,
+	VAL_FUNCTION
+};
+
+struct ValueHeader {
+	VAL_HEAD_TYPE_T type;
+	VAL_HEAD_SIZE_T size;
+};
+
 /* Writing (pushing) API.
  * ======================
  */
@@ -54,7 +74,7 @@ void rt_val_push_func_cap_final_deferred(
         VAL_SIZE_T cap_count);
 
 void rt_val_push_func_appl_init(struct Stack *stack, VAL_SIZE_T appl_count);
-void rt_val_push_func_appl_empty(struct Stack *rt);
+void rt_val_push_func_appl_empty(struct Stack *stack);
 
 void rt_val_push_func_final(
         struct Stack *stack,
@@ -64,6 +84,12 @@ void rt_val_push_func_final(
 /* Reading (peeking) API.
  * ======================
  */
+
+/** Peeks the header of a value at the given location. */
+struct ValueHeader rt_val_peek_header(struct Stack *stack, VAL_LOC_T location);
+
+/** Prints a value at a given location. */
+void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate);
 
 /* Value iteration.
  * ----------------

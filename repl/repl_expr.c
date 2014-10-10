@@ -11,6 +11,7 @@
 
 #include "repl_expr.h"
 #include "runtime.h"
+#include "rt_val.h"
 
 static void repl_expr_error_ast_len(int actual)
 {

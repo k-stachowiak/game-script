@@ -10,6 +10,7 @@
 #include "repl_cmd.h"
 #include "runtime.h"
 #include "ast_parse.h"
+#include "rt_val.h"
 
 static void repl_cmd_error_bad(void)
 {

@@ -8,6 +8,7 @@
 #include "bif_detail.h"
 #include "stack.h"
 #include "error.h"
+#include "rt_val.h"
 
 static void bif_arythm_error_arg_mismatch(void)
 {
@@ -42,11 +43,11 @@ static void common_bin_impl(
 
 	switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
 	case BBM_BOTH_INT:
-		stack_push_int(rt->stack, impl_int(ix, iy));
+		rt_val_push_int(rt->stack, impl_int(ix, iy));
 		break;
 
 	case BBM_BOTH_REAL:
-		stack_push_real(rt->stack, impl_real(rx, ry));
+		rt_val_push_real(rt->stack, impl_real(rx, ry));
 		break;
 
 	case BBM_MISMATCH:
@@ -66,11 +67,11 @@ static void common_un_impl(
 
 	switch (bif_match_un(rt, x_loc, &i, &r)) {
 	case VAL_INT:
-		stack_push_int(rt->stack, impl_int(i));
+		rt_val_push_int(rt->stack, impl_int(i));
 		break;
 
 	case VAL_REAL:
-		stack_push_real(rt->stack, impl_real(r));
+		rt_val_push_real(rt->stack, impl_real(r));
 		break;
 
 	default:
