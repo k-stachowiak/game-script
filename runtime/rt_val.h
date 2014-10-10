@@ -5,6 +5,62 @@
 
 #include "runtime.h"
 
+/* Writing (pushing) API.
+ * ======================
+ */
+
+/* Simple values.
+ * --------------
+ */
+
+void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value);
+void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
+void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
+void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
+void rt_val_push_string(struct Stack *stack, char *value);
+
+/* Compound values.
+ * ----------------
+ */
+
+void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc);
+void rt_val_push_tuple_init(struct Stack *stack, VAL_LOC_T *size_loc);
+void rt_val_push_cpd_final(
+        struct Stack *stack,
+        VAL_LOC_T size_loc,
+        VAL_SIZE_T size);
+
+/* Function values.
+ * ----------------
+ */
+
+void rt_val_push_func_init(
+        struct Stack *stack,
+        VAL_LOC_T *size_loc,
+        VAL_LOC_T *data_begin,
+        void *func_def);
+
+void rt_val_push_func_cap_init_deferred(
+        struct Stack *stack,
+        VAL_LOC_T *cap_count_loc);
+
+void rt_val_push_func_cap_init(struct Stack *stack, VAL_SIZE_T cap_count);
+void rt_val_push_func_cap(struct Stack *stack, char *symbol, VAL_LOC_T loc);
+void rt_val_push_func_cap_copy(struct Stack *stack, VAL_LOC_T loc);
+
+void rt_val_push_func_cap_final_deferred(
+        struct Stack *stack,
+        VAL_LOC_T cap_count_loc,
+        VAL_SIZE_T cap_count);
+
+void rt_val_push_func_appl_init(struct Stack *stack, VAL_SIZE_T appl_count);
+void rt_val_push_func_appl_empty(struct Stack *rt);
+
+void rt_val_push_func_final(
+        struct Stack *stack,
+        VAL_LOC_T size_loc,
+        VAL_SIZE_T data_begin);
+
 /* Reading (peeking) API.
  * ======================
  */
