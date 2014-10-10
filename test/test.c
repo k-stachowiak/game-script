@@ -11,6 +11,7 @@
 #include "parse.h"
 #include "ast_parse.h"
 #include "runtime.h"
+#include "rt_val.h"
 
 static bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
 {
@@ -119,12 +120,12 @@ static bool test_local_scope(struct Runtime *rt)
 		return false;
 	}
 
-	if (rt_peek_val_int(rt, results[2]) != 4) {
+	if (rt_val_peek_int(rt, results[2]) != 4) {
 		printf("Incorrect test result.\n");
 		return false;
 	}
 
-	if (rt_peek_val_int(rt, results[3]) != 9) {
+	if (rt_val_peek_int(rt, results[3]) != 9) {
 		printf("Incorrect test result.\n");
 		return false;
 	}
@@ -146,13 +147,13 @@ static bool test_simple_algorithm(struct Runtime *rt)
         return false;
 	}
 
-	if (rt_peek_val_int(rt, results[2]) != 6) {
-		printf("gcd returned %" PRId64 ", instead of 6.\n", rt_peek_val_int(rt, results[0]));
+	if (rt_val_peek_int(rt, results[2]) != 6) {
+		printf("gcd returned %" PRId64 ", instead of 6.\n", rt_val_peek_int(rt, results[0]));
         return false;
 	}
 
-	if (rt_peek_val_int(rt, results[3]) != 42) {
-		printf("lcm returned %" PRId64 ", instead of 42.\n", rt_peek_val_int(rt, results[1]));
+	if (rt_val_peek_int(rt, results[3]) != 42) {
+		printf("lcm returned %" PRId64 ", instead of 42.\n", rt_val_peek_int(rt, results[1]));
         return false;
 	}
 
@@ -181,9 +182,9 @@ static bool test_array_lookup(struct Runtime *rt)
         return false;
 	}
 
-	if (!rt_peek_val_int(rt, results[2]) == 1) {
+	if (!rt_val_peek_int(rt, results[2]) == 1) {
 		printf("min-element found %" PRId64 ", instead of 1.\n",
-                rt_peek_val_int(rt, results[0]));
+                rt_val_peek_int(rt, results[0]));
         return false;
 	}
 
@@ -209,9 +210,9 @@ static bool test_function_object(struct Runtime *rt)
 		return false;
 	}
 
-	if (!rt_peek_val_int(rt, results[2]) == 8) {
+	if (!rt_val_peek_int(rt, results[2]) == 8) {
 		printf("Tricky double = %" PRId64 ", instead of 8.\n",
-				rt_peek_val_int(rt, results[0]));
+				rt_val_peek_int(rt, results[0]));
 		return false;
 	}
 

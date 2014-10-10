@@ -8,6 +8,7 @@
 #include "error.h"
 #include "bif.h"
 #include "runtime.h"
+#include "rt_val.h"
 
 static void fcall_error_too_many_args(char *symbol)
 {
@@ -91,7 +92,7 @@ static void efc_curry_on(
     current_loc = cap_loc;
 	for (i = 0; i < cap_count; ++i) {
         stack_push_func_cap_copy(rt->stack, current_loc);
-        current_loc += rt_fun_next_cap_loc(rt, current_loc);
+        current_loc += rt_val_fun_next_cap_loc(rt, current_loc);
 	}
 
 	/* Applied arguments. */
@@ -102,7 +103,7 @@ static void efc_curry_on(
     current_loc = appl_loc;
 	for (i = 0; i < appl_count; ++i) {
 		stack_push_copy(rt->stack, current_loc);
-        current_loc += rt_fun_next_appl_loc(rt, current_loc);
+        current_loc += rt_val_fun_next_appl_loc(rt, current_loc);
 	}
 
     /* ...currently applied. */
@@ -164,10 +165,10 @@ static void efc_evaluate_general(
 
 	/* Insert captures into the scope. */
 	for (i = 0; i < cap_count; ++i) {
-        char *cap_symbol = rt_fun_cap_symbol(rt, cap_loc);
-        VAL_LOC_T cap_val_loc = rt_fun_cap_val_loc(rt, cap_loc);
+        char *cap_symbol = rt_val_peek_fun_cap_symbol(rt, cap_loc);
+        VAL_LOC_T cap_val_loc = rt_val_fun_cap_loc(rt, cap_loc);
 		sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, &cont_loc);
-        cap_loc = rt_fun_next_cap_loc(rt, cap_loc);
+        cap_loc = rt_val_fun_next_cap_loc(rt, cap_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
@@ -176,7 +177,7 @@ static void efc_evaluate_general(
 	/* Insert already applied arguments. */
 	for (i = 0; i < appl_count; ++i) {
 		sym_map_insert(&local_sym_map, *(formal_args++), appl_loc, &cont_loc);
-        appl_loc = rt_fun_next_appl_loc(rt, appl_loc);
+        appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
 		if (err_state()) {
 			goto cleanup;
 		}
@@ -237,7 +238,7 @@ static void efc_evaluate_bif(
 	/* Peal out already applied args. */
 	for (i = 0; i < appl_count; ++i) {
 		arg_locs[arg_count] = appl_loc;
-        appl_loc = rt_next_loc(rt, appl_loc);
+        appl_loc = rt_val_next_loc(rt, appl_loc);
 		++arg_count;
 	}
 
@@ -301,7 +302,7 @@ void eval_func_call(
         return;
     }
 
-    rt_peek_val_fun_locs(rt, val_loc, &impl_loc, &cap_start, &appl_start);
+    rt_val_function_locs(rt, val_loc, &impl_loc, &cap_start, &appl_start);
     impl = (struct AstNode*)rt_peek_ptr(rt, impl_loc);
     cap_count = rt_peek_size(rt, cap_start);
     cap_start += VAL_SIZE_BYTES;

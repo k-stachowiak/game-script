@@ -8,6 +8,7 @@
 #include "bif.h"
 #include "error.h"
 #include "runtime.h"
+#include "rt_val.h"
 
 struct {
 	struct SourceLocation *data;
@@ -151,13 +152,13 @@ static void eval_iff(
 	test_loc = eval_impl(node->data.iff.test, rt, sym_map);
 	temp_end = rt->stack->top;
 
-    if (rt_val_type(rt, test_loc) != VAL_BOOL) {
+    if (rt_val_peek_type(rt, test_loc) != VAL_BOOL) {
 		eval_common_error("Test expression isn't a boolean value.");
         stack_collapse(rt->stack, temp_begin, temp_end);
 		return;
     }
 
-	test_val = rt_peek_val_bool(rt, test_loc);
+	test_val = rt_val_peek_bool(rt, test_loc);
     stack_collapse(rt->stack, temp_begin, temp_end);
 
 	if (test_val) {

@@ -7,6 +7,7 @@
 #include "eval.h"
 #include "error.h"
 #include "runtime.h"
+#include "rt_val.h"
 
 static void rt_free_stored(struct Runtime *rt)
 {
@@ -23,12 +24,12 @@ static void rt_val_print_compound(
 
     printf("%c ", open);
 
-    cpd_loc = rt_peek_val_cpd_first(rt, loc);
-    end = cpd_loc + rt_val_size(rt, loc);
+    cpd_loc = rt_val_cpd_first_loc(loc);
+    end = cpd_loc + rt_val_peek_size(rt, loc);
     while (cpd_loc != end) {
         rt_val_print(rt, cpd_loc, false);
         printf(" ");
-        cpd_loc = rt_next_loc(rt, cpd_loc);
+        cpd_loc = rt_val_next_loc(rt, cpd_loc);
     }
 
     printf("%c", close);
@@ -40,7 +41,7 @@ static void rt_val_print_function(struct Runtime *rt, VAL_LOC_T loc)
     VAL_SIZE_T captures, applied, arity;
     struct AstNode *def;
 
-    rt_peek_val_fun_locs(rt, loc, &impl_loc, &cap_start, &appl_start);
+    rt_val_function_locs(rt, loc, &impl_loc, &cap_start, &appl_start);
 
     def = (struct AstNode*)rt_peek_ptr(rt, impl_loc);
 
@@ -54,8 +55,8 @@ static void rt_val_print_function(struct Runtime *rt, VAL_LOC_T loc)
         exit(1);
     }
 
-    captures = rt_val_size(rt, cap_start);
-    applied = rt_val_size(rt, appl_start);
+    captures = rt_val_peek_size(rt, cap_start);
+    applied = rt_val_peek_size(rt, appl_start);
     arity = def->data.func_def.func.arg_count - applied;
     printf("function (ar=%d, cap=%d, appl=%d)", arity, captures, applied);
 }
@@ -109,11 +110,6 @@ void rt_restore(struct Runtime *rt)
 	}
 
 	stack_collapse(rt->stack, rt->saved_loc, rt->stack->top);
-}
-
-VAL_LOC_T rt_current_top(struct Runtime *rt)
-{
-	return rt->stack->top;
 }
 
 void rt_consume_one(
@@ -177,40 +173,40 @@ void rt_for_each_sym(struct Runtime *rt, void(*f)(void*, char*, VAL_LOC_T))
 
 void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 {
-    switch (rt_val_type(rt, loc)) {
+    switch (rt_val_peek_type(rt, loc)) {
     case VAL_BOOL:
         if (annotate) {
             printf("bool :: ");
         }
-        printf("%s", rt_peek_val_bool(rt, loc) ? "true" : "false");
+        printf("%s", rt_val_peek_bool(rt, loc) ? "true" : "false");
         break;
 
     case VAL_CHAR:
         if (annotate) {
             printf("char :: ");
         }
-        printf("'%c'", rt_peek_val_char(rt, loc));
+        printf("'%c'", rt_val_peek_char(rt, loc));
         break;
 
     case VAL_INT:
         if (annotate) {
             printf("integer :: ");
         }
-        printf("%" PRId64 , rt_peek_val_int(rt, loc));
+        printf("%" PRId64 , rt_val_peek_int(rt, loc));
         break;
 
     case VAL_REAL:
         if (annotate) {
             printf("real :: ");
         }
-        printf("%f", rt_peek_val_real(rt, loc));
+        printf("%f", rt_val_peek_real(rt, loc));
         break;
 
     case VAL_STRING:
         if (annotate) {
             printf("string :: ");
         }
-        printf("%s", rt_peek_val_string(rt, loc));
+        printf("%s", rt_val_peek_string(rt, loc));
         break;
 
     case VAL_ARRAY:
@@ -233,25 +229,7 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
     }
 }
 
-VAL_LOC_T rt_next_loc(struct Runtime *rt, VAL_LOC_T loc)
-{
-    struct ValueHeader header = stack_peek_header(rt->stack, loc);
-    return loc + VAL_HEAD_BYTES + header.size;
-}
-
-enum ValueType rt_val_type(struct Runtime *rt, VAL_LOC_T loc)
-{
-    struct ValueHeader header = stack_peek_header(rt->stack, loc);
-    return (enum ValueType)header.type;
-}
-
-VAL_SIZE_T rt_val_size(struct Runtime *rt, VAL_LOC_T loc)
-{
-    VAL_SIZE_T result;
-    memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_TYPE_BYTES, VAL_SIZE_BYTES);
-    return result;
-}
-
+/** Peek a size_t at a given location */
 VAL_SIZE_T rt_peek_size(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_SIZE_T result;
@@ -259,97 +237,11 @@ VAL_SIZE_T rt_peek_size(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
+/** Peek a ptr_t at a given location */
 void *rt_peek_ptr(struct Runtime *rt, VAL_LOC_T loc)
 {
     void *result;
     memcpy((char*)&result, rt->stack->buffer + loc, VAL_PTR_BYTES);
     return result;
-}
-
-VAL_BOOL_T rt_peek_val_bool(struct Runtime *rt, VAL_LOC_T loc)
-{
-    VAL_BOOL_T result;
-    memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_BOOL_BYTES);
-    return result;
-}
-
-VAL_CHAR_T rt_peek_val_char(struct Runtime *rt, VAL_LOC_T loc)
-{
-    VAL_CHAR_T result;
-    memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_CHAR_BYTES);
-    return result;
-}
-
-VAL_INT_T rt_peek_val_int(struct Runtime *rt, VAL_LOC_T loc)
-{
-    VAL_INT_T result;
-    memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_INT_BYTES);
-    return result;
-}
-
-VAL_REAL_T rt_peek_val_real(struct Runtime *rt, VAL_LOC_T loc)
-{
-    VAL_REAL_T result;
-    memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
-    return result;
-}
-
-char* rt_peek_val_string(struct Runtime *rt, VAL_LOC_T loc)
-{
-    return rt->stack->buffer + loc + VAL_HEAD_BYTES;
-}
-
-VAL_LOC_T rt_peek_val_cpd_first(struct Runtime *rt, VAL_LOC_T loc)
-{
-    (void)rt;
-    return loc + VAL_HEAD_BYTES;
-}
-
-void rt_peek_val_fun_locs(
-        struct Runtime *rt,
-        VAL_LOC_T loc,
-        VAL_LOC_T *impl_loc,
-        VAL_LOC_T *cap_start,
-        VAL_LOC_T *appl_start)
-{
-    int cap_count, i;
-
-	loc += VAL_HEAD_BYTES;
-
-    *impl_loc = loc;
-    loc += VAL_PTR_BYTES;
-
-    *cap_start = loc;
-    cap_count = rt_peek_size(rt, loc);
-
-    loc += VAL_SIZE_BYTES;
-
-    for (i = 0; i < cap_count; ++i) {
-        loc = rt_fun_next_cap_loc(rt, loc);
-    }
-
-    *appl_start = loc;
-}
-
-char *rt_fun_cap_symbol(struct Runtime *rt, VAL_LOC_T cap_loc)
-{
-    return rt->stack->buffer + VAL_SIZE_BYTES + cap_loc;
-}
-
-VAL_LOC_T rt_fun_cap_val_loc(struct Runtime *rt, VAL_LOC_T cap_loc)
-{
-	VAL_SIZE_T len;
-	memcpy(&len, rt->stack->buffer + cap_loc, VAL_SIZE_BYTES);
-    return cap_loc + VAL_SIZE_BYTES + len;
-}
-
-VAL_LOC_T rt_fun_next_cap_loc(struct Runtime *rt, VAL_LOC_T loc)
-{
-    return rt_next_loc(rt, rt_fun_cap_val_loc(rt, loc));
-}
-
-VAL_LOC_T rt_fun_next_appl_loc(struct Runtime *rt, VAL_LOC_T loc)
-{
-    return rt_next_loc(rt, loc);
 }
 

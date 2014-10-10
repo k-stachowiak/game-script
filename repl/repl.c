@@ -65,7 +65,7 @@ int repl(void)
 
 		err_reset();
 
-        printf("moon [st:%ld]> ", (long)rt_current_top(rt));
+        printf("moon [st:%ld]> ", (long)rt->stack->top);
 
         line = my_getline(&eof_flag);
 
