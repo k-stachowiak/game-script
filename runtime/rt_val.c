@@ -365,3 +365,4 @@ VAL_LOC_T rt_val_fun_next_appl_loc(struct Runtime *rt, VAL_LOC_T loc)
 {
     return rt_val_next_loc(rt, loc);
 }
+

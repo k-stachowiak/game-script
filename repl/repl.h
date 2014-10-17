@@ -3,6 +3,6 @@
 #ifndef REPL_H
 #define REPL_H
 
-int repl(void);
+int repl(int argc, char *argv[]);
 
 #endif

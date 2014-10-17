@@ -220,13 +220,25 @@ static bool test_function_object(struct Runtime *rt)
 	return true;
 }
 
-int test(void)
+int test(int argc, char *argv[])
 {
 	struct Runtime *rt;
 	bool success = true;
 
+	if (argc != 1) {
+        printf("TEST: ignored additional command line arguments.\n");
+    }
+
+    /* Parser/lexer tests.
+     * -------------------
+     */
+
 	success &= test_lexer();
 	success &= test_parser();
+
+    /* Runtime tests.
+     * --------------
+     */
 
 	rt = rt_make(64 * 1024);
 

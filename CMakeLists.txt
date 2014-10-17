@@ -9,6 +9,7 @@ include_directories(
     ./repl
     ./test
     ./itpr
+    ./run
     ./runtime
     .
     )
@@ -31,6 +32,7 @@ add_executable(moon-lang
     ./repl/repl_cmd.c
     ./repl/repl.c
     ./test/test.c
+    ./run/run.c
     ./runtime/eval_fdef.c
     ./runtime/stack.c
     ./runtime/eval_fcall.c

@@ -3,6 +3,6 @@
 #ifndef TEST_H
 #define TEST_H
 
-int test(void);
+int test(int argc, char *argv[]);
 
 #endif
