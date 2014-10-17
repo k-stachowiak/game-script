@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -105,6 +105,18 @@ static bool test_runtime_sanity(struct Runtime *rt)
     VAL_LOC_T results[1];
 	char *source = "(bind x \"x\")";
     return test_source_eval(rt, source, results);
+}
+
+static bool test_runtime_free_on_fail(struct Runtime *rt)
+{
+    /* TODO:
+     * 0. Implement MEM_DEBUG mode to trace all the allocations and deallocations.
+     * 1. Implement a call rt_consume_one, that is supposed to fail.
+     * 2. Assert error state.
+     * 3. Run with memory monitor to verify absence of the memory leak.
+     * 4? monitor the memory internally? Compare mallocs vs. frees througout the test?
+     */
+    exit(1);
 }
 
 static bool test_local_scope(struct Runtime *rt)
@@ -220,18 +232,33 @@ static bool test_function_object(struct Runtime *rt)
 	return true;
 }
 
-int test(void)
+int test(int argc, char *argv[])
 {
 	struct Runtime *rt;
 	bool success = true;
 
+	if (argc != 1) {
+        printf("TEST: ignored additional command line arguments.\n");
+    }
+
+    /* Parser/lexer tests.
+     * -------------------
+     */
+
 	success &= test_lexer();
 	success &= test_parser();
+
+    /* Runtime tests.
+     * --------------
+     */
 
 	rt = rt_make(64 * 1024);
 
 	success &= test_runtime_sanity(rt);
 	rt_reset(rt);
+
+    success &= test_runtime_free_on_fail(rt);
+    rt_reset(rt);
 
 	success &= test_local_scope(rt);
 	rt_reset(rt);

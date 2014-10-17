@@ -1,16 +1,17 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "stack.h"
+#include "memory.h"
 #include "rt_val.h"
 
 struct Stack *stack_make(VAL_LOC_T size)
 {
-	struct Stack *result = malloc_or_die(sizeof(*result));
-	result->buffer = malloc_or_die(size);
+	struct Stack *result = mem_malloc(sizeof(*result));
+	result->buffer = mem_malloc(size);
     result->size = size;
     result->top = 0;
     return result;
@@ -18,8 +19,8 @@ struct Stack *stack_make(VAL_LOC_T size)
 
 void stack_free(struct Stack *stack)
 {
-    free_or_die(stack->buffer);
-    free_or_die(stack);
+    mem_free(stack->buffer);
+    mem_free(stack);
 }
 
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)

@@ -1,5 +1,6 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
+#include "memory.h"
 #include "ast_parse.h"
 #include "lex.h"
 #include "parse.h"

@@ -1,9 +1,10 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <string.h>
 
 #include "error.h"
+#include "memory.h"
 #include "symmap.h"
 #include "eval.h"
 #include "bif.h"
@@ -65,10 +66,10 @@ void sym_map_deinit(struct SymMap *sym_map)
 	struct SymMapKvp *temp, *kvp;
 	kvp = sym_map->map;
     while (kvp) {
-        free_or_die(kvp->key);
+        mem_free(kvp->key);
         temp = kvp;
         kvp = kvp->next;
-        free_or_die(temp);
+        mem_free(temp);
     }
     sym_map->map = NULL;
     sym_map->end = NULL;
@@ -82,7 +83,7 @@ void sym_map_insert(
 {
     struct SymMapKvp *kvp;
     int len = strlen(key);
-	char *key_copy = malloc_or_die(len + 1);
+	char *key_copy = mem_malloc(len + 1);
     memcpy(key_copy, key, len + 1);
 
     kvp = sym_map_find_shallow(sym_map, key);
@@ -91,7 +92,7 @@ void sym_map_insert(
 		return;
     }
 
-	kvp = malloc_or_die(sizeof(*kvp));
+	kvp = mem_malloc(sizeof(*kvp));
     kvp->key = key_copy;
     kvp->stack_loc = stack_loc;
     kvp->source_loc = *source_loc;

@@ -1,7 +1,8 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 
+#include "memory.h"
 #include "stack.h"
 #include "eval.h"
 #include "error.h"
@@ -32,7 +33,7 @@ static void rt_deinit(struct Runtime *rt)
 
 struct Runtime *rt_make(long stack)
 {
-    struct Runtime *result = malloc_or_die(sizeof(*result));
+    struct Runtime *result = mem_malloc(sizeof(*result));
     rt_init(result, stack);
     return result;
 }
@@ -47,7 +48,7 @@ void rt_reset(struct Runtime *rt)
 void rt_free(struct Runtime *rt)
 {
 	rt_deinit(rt);
-    free_or_die(rt);
+    mem_free(rt);
 }
 
 void rt_save(struct Runtime *rt)

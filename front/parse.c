@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +7,7 @@
 
 #include "error.h"
 #include "parse.h"
+#include "memory.h"
 #include "tok.h"
 #include "dom.h"
 
@@ -116,7 +117,7 @@ static struct AstNode *parse_bind(struct DomNode *dom)
 
     /* 3.3 3rd child is any expression. */
     if (!(expr = parse_one(child))) {
-        free_or_die(symbol);
+        mem_free(symbol);
         return NULL;
     }
 
@@ -313,7 +314,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
                 goto fail;
             } else {
                 int len = strlen(arg_child->atom);
-                char *formal_arg = malloc_or_die(len + 1);
+                char *formal_arg = mem_malloc(len + 1);
                 memcpy(formal_arg, arg_child->atom, len + 1);
                 ARRAY_APPEND(formal_args, formal_arg);
                 ARRAY_APPEND(arg_locs, arg_child->loc);
@@ -334,10 +335,10 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     return ast_make_func_def(
         &dom->loc,
-        realloc_or_die(
+        mem_realloc(
             formal_args.data,
             formal_args.size * sizeof(*formal_args.data)),
-        realloc_or_die(
+        mem_realloc(
             arg_locs.data,
             arg_locs.size * sizeof(*arg_locs.data)),
         arg_count,
@@ -384,7 +385,7 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
     len = strlen(atom);
 
     if (atom[0] == delim && atom[len - 1] == delim && len >= 2) {
-		atom_cpy = malloc_or_die(len + 1);
+		atom_cpy = mem_malloc(len + 1);
         memcpy(atom_cpy, atom, len + 1);
         atom_cpy[len] = '\0';
         return ast_make_literal_string(&dom->loc, atom_cpy);

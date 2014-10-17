@@ -1,9 +1,10 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <assert.h>
 
 #include "common.h"
+#include "memory.h"
 #include "error.h"
 #include "ast.h"
 
@@ -11,7 +12,7 @@ struct AstNode *ast_make_do_block(
 		struct SourceLocation *loc,
 		struct AstNode* exprs)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
 	result->next = NULL;
 	result->type = AST_DO_BLOCK;
 	result->loc = *loc;
@@ -23,7 +24,7 @@ struct AstNode *ast_make_bind(
 		struct SourceLocation *loc,
 		char *symbol, struct AstNode *expr)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_BIND;
     result->loc = *loc;
@@ -38,7 +39,7 @@ struct AstNode *ast_make_iff(
 		struct AstNode *true_expr,
 		struct AstNode *false_expr)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
 	result->next = NULL;
 	result->type = AST_IFF;
 	result->loc = *loc;
@@ -53,7 +54,7 @@ struct AstNode *ast_make_compound(
     enum AstCompoundType type,
     struct AstNode *exprs)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_COMPOUND;
     result->loc = *loc;
@@ -66,7 +67,7 @@ struct AstNode *ast_make_func_call(
     struct SourceLocation *loc,
     char *symbol, struct AstNode *args)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_CALL;
     result->loc = *loc;
@@ -82,7 +83,7 @@ struct AstNode *ast_make_func_def(
         int arg_count,
         struct AstNode *expr)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_DEF;
     result->loc = *loc;
@@ -95,7 +96,7 @@ struct AstNode *ast_make_func_def(
 
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -106,7 +107,7 @@ struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 
 struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -117,7 +118,7 @@ struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
 
 struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char value)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -128,7 +129,7 @@ struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char valu
 
 struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -139,7 +140,7 @@ struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value)
 
 struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -150,7 +151,7 @@ struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
 
 struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
 {
-	struct AstNode *result = malloc_or_die(sizeof(*result));
+	struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_REFERENCE;
     result->loc = *loc;
@@ -162,10 +163,10 @@ static void ast_common_func_free(struct AstCommonFunc *acf)
 {
     int i;
     for (i = 0; i < acf->arg_count; ++i) {
-        free_or_die(acf->formal_args[i]);
+        mem_free(acf->formal_args[i]);
     }
-    free_or_die(acf->formal_args);
-	free_or_die(acf->arg_locs);
+    mem_free(acf->formal_args);
+	mem_free(acf->arg_locs);
 }
 
 static void ast_bif_free(struct AstBif *abif)
@@ -180,7 +181,7 @@ static void ast_do_block_free(struct AstDoBlock *adb)
 
 static void ast_bind_free(struct AstBind *abind)
 {
-    free_or_die(abind->symbol);
+    mem_free(abind->symbol);
     ast_node_free_one(abind->expr);
 }
 
@@ -196,7 +197,7 @@ static void ast_compound_free(struct AstCompound *acpd)
 
 static void ast_func_call_free(struct AstFuncCall *afcall)
 {
-    free_or_die(afcall->symbol);
+    mem_free(afcall->symbol);
     ast_node_free(afcall->actual_args);
 }
 
@@ -209,13 +210,13 @@ static void ast_func_def_free(struct AstFuncDef *afdef)
 static void ast_literal_free(struct AstLiteral *alit)
 {
     if (alit->type == AST_LIT_STRING) {
-        free_or_die(alit->data.string);
+        mem_free(alit->data.string);
     }
 }
 
 static void ast_reference_free(struct AstReference *aref)
 {
-    free_or_die(aref->symbol);
+    mem_free(aref->symbol);
 }
 
 void ast_node_free_one(struct AstNode *node)
@@ -258,7 +259,7 @@ void ast_node_free_one(struct AstNode *node)
 		break;
 	}
 
-	free_or_die(node);
+	mem_free(node);
 }
 
 void ast_node_free(struct AstNode *current)

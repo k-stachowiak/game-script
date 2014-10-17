@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +9,7 @@
 #include "repl_expr.h"
 #include "runtime.h"
 #include "error.h"
+#include "memory.h"
 
 static bool request_quit = false;
 
@@ -53,11 +54,15 @@ static void repl_handle_line(struct Runtime *rt, char *line)
 	}
 }
 
-int repl(void)
+int repl(int argc, char *argv[])
 {
 	int result;
     bool eof_flag = false;
     struct Runtime *rt = rt_make(64 * 1024);
+
+    if (argc != 1) {
+        printf("REPL: ignored additional command line arguments.\n");
+    }
 
     for (;;) {
 
@@ -72,17 +77,17 @@ int repl(void)
         if (err_state()) {
             printf("IO error in line \"%s\" : \"%s\".\n", line, err_msg());
             result = 1;
-			free_or_die(line);
+			mem_free(line);
 			break;
 
         } else if (eof_flag) {
 			result = 0;
-			free_or_die(line);
+			mem_free(line);
 			break;
         }
 
         repl_handle_line(rt, line);
-		free_or_die(line);
+		mem_free(line);
 
         if (request_quit) {
 			result = 0;

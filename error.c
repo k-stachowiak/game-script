@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "memory.h"
 #include "error.h"
 
 static char *err_message = NULL;
@@ -23,7 +24,7 @@ void err_msg_init(struct ErrMessage *msg, char *module)
 		LOG_ERROR("Memory corruption while building error string.");
 		exit(2);
 	}
-	msg->text = malloc_or_die(len + 1);
+	msg->text = mem_malloc(len + 1);
 	memcpy(msg->text, buffer, len + 1);
 }
 
@@ -46,7 +47,7 @@ void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocatio
 		LOG_ERROR("Memory corruption while building error string.");
 		exit(2);
 	}
-	msg->text = malloc_or_die(len + 1);
+	msg->text = mem_malloc(len + 1);
 	memcpy(msg->text, buffer, len + 1);
 }
 
@@ -61,7 +62,7 @@ void err_msg_set(struct ErrMessage *msg)
 void err_reset(void)
 {
     if (err_message) {
-        free_or_die(err_message);
+        mem_free(err_message);
         err_message = NULL;
     }
 }

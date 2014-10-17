@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdbool.h>
 #include <math.h>
@@ -8,6 +8,7 @@
 #include "bif_detail.h"
 #include "stack.h"
 #include "error.h"
+#include "memory.h"
 #include "rt_val.h"
 
 static void bif_arythm_error_arg_mismatch(void)

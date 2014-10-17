@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stddef.h>
 #include <string.h>
@@ -6,11 +6,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#include "memory.h"
 #include "tok.h"
 
 struct Token *tok_make_token(struct SourceIter *begin, struct SourceIter *end)
 {
-	struct Token *result = malloc_or_die(sizeof(*result));
+	struct Token *result = mem_malloc(sizeof(*result));
     result->loc = begin->loc;
     result->begin = begin->current;
     result->end = end->current;
@@ -26,7 +27,7 @@ void tok_free(struct Token *current)
 
     while (current) {
         next = current->next;
-        free_or_die(current);
+        mem_free(current);
         current = next;
     }
 }

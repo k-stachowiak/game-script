@@ -1,0 +1,5 @@
+(bind sqr (func (x) (* x x)))
+
+(bind main (func ()
+    (sqr 4)
+))

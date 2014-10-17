@@ -1,5 +1,6 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
+#include "memory.h"
 #include "common.h"
 
 void si_init(struct SourceIter *si, char *first, char *last)
@@ -56,7 +57,7 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs)
  */
 char *my_getline(bool *eof)
 {
-	char *line = malloc_or_die(100);
+	char *line = mem_malloc(100);
 	char *linep = line;
 	size_t lenmax = 100;
 	size_t len = lenmax;
@@ -72,7 +73,7 @@ char *my_getline(bool *eof)
 		if (--len == 0) {
 			char *linen;
 			len = lenmax;
-			linen = realloc_or_die(linep, lenmax *= 2);
+			linen = mem_realloc(linep, lenmax *= 2);
 			line = linen + (line - linep);
 			linep = linen;
 		}
@@ -101,7 +102,7 @@ char *my_getfile(char *filename)
 		fseek(file, 0, SEEK_END);
 		length = ftell(file);
 		fseek(file, 0, SEEK_SET);
-		buffer = calloc_or_die(length + 1, 1);
+		buffer = mem_calloc(length + 1, 1);
 		fread(buffer, 1, length, file);
 		fclose(file);
 	} else {
@@ -111,41 +112,3 @@ char *my_getfile(char *filename)
 	return buffer;
 }
 
-void *malloc_or_die(size_t size)
-{
-	void *result = malloc(size);
-	if (!result) {
-		LOG_ERROR("Allocation failure.");
-		exit(1);
-	}
-	LOG_TRACE("*malloc* (%p)", result);
-	return result;
-}
-
-void *calloc_or_die(size_t count, size_t size)
-{
-	void *result = calloc(count, size);
-	if (!result) {
-		LOG_ERROR("Callocation failure.");
-		exit(1);
-	}
-	LOG_TRACE("*calloc* (%p)", result);
-	return result;
-}
-
-void *realloc_or_die(void *old, size_t size)
-{
-	void *result = realloc(old, size);
-	if (!result) {
-		LOG_ERROR("Reallocation failure.");
-		exit(1);
-	}
-	LOG_TRACE("*realloc* (%p)", result);
-	return result;
-}
-
-void free_or_die(void *ptr)
-{
-	LOG_TRACE("*free* (%p)", ptr);
-	free(ptr);
-}

@@ -1,8 +1,9 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <string.h>
 
+#include "memory.h"
 #include "dom.h"
 
 static char *reserved[] = {
@@ -28,11 +29,11 @@ static int dom_list_length(struct DomNode* current)
 
 struct DomNode *dom_make_atom(struct SourceLocation *loc, char *begin, char *end)
 {
-	struct DomNode *result = malloc_or_die(sizeof(*result));
+	struct DomNode *result = mem_malloc(sizeof(*result));
     int length = end - begin;
     result->loc = *loc;
     result->type = DOM_ATOM;
-	result->atom = malloc_or_die(length + 1);
+	result->atom = mem_malloc(length + 1);
     memcpy(result->atom, begin, length);
     result->atom[length] = '\0';
     result->next = NULL;
@@ -44,7 +45,7 @@ struct DomNode *dom_make_compound(
         enum DomCpdType compound_type,
         struct DomNode *children)
 {
-	struct DomNode *result = malloc_or_die(sizeof(*result));
+	struct DomNode *result = mem_malloc(sizeof(*result));
     result->loc = *loc;
     result->type = DOM_COMPOUND;
     result->cpd_type = compound_type;
@@ -58,11 +59,11 @@ void dom_free(struct DomNode *current)
     while (current) {
         struct DomNode *next = current->next;
         if (current->type == DOM_ATOM) {
-            free_or_die(current->atom);
+            mem_free(current->atom);
         } else {
             dom_free(current->cpd_children);
         }
-        free_or_die(current);
+        mem_free(current);
         current = next;
     }
 }
@@ -119,7 +120,7 @@ char *dom_node_parse_symbol(struct DomNode *node)
 	}
 
     len = strlen(node->atom);
-	result = malloc_or_die(len + 1);
+	result = mem_malloc(len + 1);
 	memcpy(result, node->atom, len + 1);
     result[len] = '\0';
 

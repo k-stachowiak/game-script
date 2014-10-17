@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "memory.h"
+
 struct SourceLocation;
 
 #define ERR_TEM_BUFFER_SIZE 4096
@@ -33,10 +35,10 @@ void err_msg_set(struct ErrMessage *msg);
 			exit(2); \
 		} \
 		old_len = strlen((MSG)->text); \
-		new_text = malloc_or_die(old_len + new_len + 1); \
+		new_text = mem_malloc(old_len + new_len + 1); \
 		memcpy(new_text, (MSG)->text, old_len); \
 		memcpy(new_text + old_len, buffer, new_len + 1); \
-		free((MSG)->text); \
+		mem_free((MSG)->text); \
 		(MSG)->text = new_text; \
 	} while(0)
 

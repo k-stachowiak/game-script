@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -36,15 +36,6 @@
 
 #define VAL_PTR_BYTES sizeof(void*)
 
-/* Memory management.
- * ==================
- */
-
-void *malloc_or_die(size_t size);
-void *calloc_or_die(size_t count, size_t size);
-void *realloc_or_die(void *old, size_t size);
-void free_or_die(void *ptr);
-
 /* Algorighms.
  * ===========
  */
@@ -61,7 +52,7 @@ void free_or_die(void *ptr);
 
 #define ARRAY_FREE(MACRO_ARRAY) \
     do { \
-        free_or_die((MACRO_ARRAY).data); \
+        mem_free((MACRO_ARRAY).data); \
         (MACRO_ARRAY).data = NULL; \
         (MACRO_ARRAY).size = 0; \
         (MACRO_ARRAY).cap = 0; \
@@ -70,7 +61,7 @@ void free_or_die(void *ptr);
 #define ARRAY_COPY(dst, src) \
     do { \
         int size = src.cap * sizeof(*dst.data); \
-		dst.data = malloc_or_die(size); \
+		dst.data = mem_malloc(size); \
         memcpy(dst.data, src.data, size); \
         dst.size = src.size; \
         dst.cap = src.cap; \
@@ -90,11 +81,11 @@ void free_or_die(void *ptr);
 #define ARRAY_APPEND(MACRO_ARRAY, MACRO_ELEMENT) \
     do { \
         if ((MACRO_ARRAY).cap == 0) { \
-			(MACRO_ARRAY).data = malloc_or_die(sizeof(*((MACRO_ARRAY).data))); \
+			(MACRO_ARRAY).data = mem_malloc(sizeof(*((MACRO_ARRAY).data))); \
             (MACRO_ARRAY).cap = 1; \
         } else if ((MACRO_ARRAY).cap == (MACRO_ARRAY).size) { \
             (MACRO_ARRAY).cap *= 2; \
-			(MACRO_ARRAY).data = realloc_or_die(\
+			(MACRO_ARRAY).data = mem_realloc(\
                     (MACRO_ARRAY).data,\
                     (MACRO_ARRAY).cap * sizeof(*((MACRO_ARRAY).data))); \
         } \
