@@ -1,7 +1,8 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 
+#include "log.h"
 #include "ast.h"
 #include "ast_parse.h"
 #include "error.h"

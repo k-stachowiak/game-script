@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
+#include "log.h"
 #include "memory.h"
 #include "tok.h"
 

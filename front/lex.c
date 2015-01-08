@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "log.h"
 #include "collection.h"
 #include "error.h"
 #include "lex.h"

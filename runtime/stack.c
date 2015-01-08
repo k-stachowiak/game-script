@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "log.h"
 #include "stack.h"
 #include "memory.h"
 #include "rt_val.h"

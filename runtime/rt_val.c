@@ -1,8 +1,9 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <string.h>
 #include <inttypes.h>
 
+#include "log.h"
 #include "runtime.h"
 #include "rt_val.h"
 

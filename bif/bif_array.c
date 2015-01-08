@@ -1,5 +1,6 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
+#include "log.h"
 #include "eval.h"
 #include "collection.h"
 #include "bif.h"

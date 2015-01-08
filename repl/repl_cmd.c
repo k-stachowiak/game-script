@@ -1,10 +1,11 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "log.h"
 #include "error.h"
 #include "common.h"
 #include "repl_cmd.h"

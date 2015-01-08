@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "log.h"
 #include "src_iter.h"
 #include "common.h"
 #include "memory.h"

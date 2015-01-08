@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "log.h"
 #include "eval.h"
 #include "bif.h"
 #include "bif_detail.h"

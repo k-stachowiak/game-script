@@ -1,5 +1,6 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
+#include "log.h"
 #include "memory.h"
 #include "common.h"
 

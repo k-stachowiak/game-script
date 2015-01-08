@@ -1,10 +1,11 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <string.h>
 
 #include "eval.h"
 #include "eval_detail.h"
 
+#include "log.h"
 #include "error.h"
 #include "bif.h"
 #include "runtime.h"
