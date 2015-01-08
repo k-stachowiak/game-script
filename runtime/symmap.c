@@ -68,9 +68,9 @@ void sym_map_deinit(struct SymMap *sym_map)
 	struct SymMapKvp *temp, *kvp;
 	kvp = sym_map->map;
     while (kvp) {
-        mem_free(kvp->key);
         temp = kvp;
         kvp = kvp->next;
+        mem_free(temp->key);
         mem_free(temp);
     }
     sym_map->map = NULL;

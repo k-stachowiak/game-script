@@ -41,11 +41,6 @@ int main(int argc, char *argv[])
 
     atexit(err_reset);
 
-#if MEM_TRACE
-    mem_init();
-    atexit(mem_deinit);
-#endif
-
     if (argc == 1) {
         printf("Missing command line argument.\n");
         error = 1;
