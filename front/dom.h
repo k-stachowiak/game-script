@@ -1,10 +1,11 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #ifndef DOM_H
 #define DOM_H
 
 #include <stdbool.h>
 
+#include "src_iter.h"
 #include "common.h"
 
 enum DomNodeType { DOM_ATOM, DOM_COMPOUND };

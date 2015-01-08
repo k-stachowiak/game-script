@@ -43,6 +43,7 @@ add_executable(moon-lang
     ./runtime/symmap.c
     ./common/error.c
     ./common/memory.c
+    ./common/src_iter.c
     ./common.c
     ./main.c
     )

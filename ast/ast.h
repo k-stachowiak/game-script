@@ -1,9 +1,10 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #ifndef AST_H
 #define AST_H
 
 #include "common.h"
+#include "src_iter.h"
 
 /* Enumerations.
  * =============
