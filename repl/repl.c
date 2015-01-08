@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "term.h"
 #include "repl_cmd.h"
 #include "repl_expr.h"
 #include "runtime.h"

@@ -3,6 +3,8 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <stdio.h>
+
 #define LLVL_TRACE 0
 #define LLVL_DEBUG 1
 #define LLVL_ERROR 2

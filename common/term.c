@@ -1,7 +1,9 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2015 Krzysztof Stachowiak */
+
+#include <stdio.h>
 
 #include "memory.h"
-#include "common.h"
+#include "term.h"
 
 /*
  * Implementation copied from StackOverflow :

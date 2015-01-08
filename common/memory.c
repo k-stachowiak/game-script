@@ -1,8 +1,9 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
+#include <stdlib.h>
+
 #include "log.h"
 #include "memory.h"
-#include "common.h"
 
 #if MEM_TRACE
 

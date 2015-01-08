@@ -44,7 +44,7 @@ add_executable(moon-lang
     ./common/error.c
     ./common/memory.c
     ./common/src_iter.c
-    ./common.c
+    ./common/term.c
     ./main.c
     )
 

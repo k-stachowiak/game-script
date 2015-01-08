@@ -3,7 +3,7 @@
 #ifndef AST_H
 #define AST_H
 
-#include "common.h"
+#include "define.h"
 #include "src_iter.h"
 
 /* Enumerations.

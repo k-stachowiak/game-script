@@ -1,11 +1,8 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef DEFINE_H
+#define DEFINE_H
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -35,12 +32,5 @@
 #define VAL_REAL_BYTES sizeof(VAL_REAL_T)
 
 #define VAL_PTR_BYTES sizeof(void*)
-
-/* Portable terminal.
- * ==================
- */
-
-char *my_getline(bool *eof);
-char *my_getfile(char *filename);
 
 #endif

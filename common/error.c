@@ -1,12 +1,10 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "log.h"
 #include "src_iter.h"
-#include "common.h"
 #include "memory.h"
 #include "error.h"
 

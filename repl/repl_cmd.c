@@ -7,7 +7,6 @@
 
 #include "log.h"
 #include "error.h"
-#include "common.h"
 #include "repl_cmd.h"
 #include "runtime.h"
 #include "ast_parse.h"

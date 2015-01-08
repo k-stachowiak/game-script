@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #include "src_iter.h"
-#include "common.h"
 
 enum DomNodeType { DOM_ATOM, DOM_COMPOUND };
 enum DomCpdType { DOM_CPD_CORE, DOM_CPD_ARRAY, DOM_CPD_TUPLE };

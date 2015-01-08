@@ -8,7 +8,6 @@
 #include "error.h"
 #include "stack.h"
 #include "eval.h"
-#include "common.h"
 
 #include "repl_expr.h"
 #include "runtime.h"

@@ -1,7 +1,10 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
+#include <stdio.h>
+
 #include "log.h"
 #include "memory.h"
+#include "term.h"
 #include "ast_parse.h"
 #include "lex.h"
 #include "parse.h"

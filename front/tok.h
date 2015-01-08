@@ -6,7 +6,6 @@
 #include <stdbool.h>
 
 #include "src_iter.h"
-#include "common.h"
 
 struct Token {
     /* Data */

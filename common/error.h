@@ -1,10 +1,12 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #ifndef ERROR_H
 #define ERROR_H
 
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "memory.h"
 

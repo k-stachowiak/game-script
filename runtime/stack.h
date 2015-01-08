@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "common.h"
+#include "define.h"
 
 struct Stack {
     char *buffer;

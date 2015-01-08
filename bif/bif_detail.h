@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 #include "runtime.h"
-#include "common.h"
+#include "define.h"
 
 enum BifBinaryMatch {
 	BBM_BOTH_INT,

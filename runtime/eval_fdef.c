@@ -7,7 +7,6 @@
 #include "collection.h"
 #include "eval.h"
 #include "eval_detail.h"
-#include "common.h"
 #include "error.h"
 #include "rt_val.h"
 

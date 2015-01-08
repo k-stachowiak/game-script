@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "common.h"
 #include "memory.h"
 #include "error.h"
 #include "ast.h"
