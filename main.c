@@ -11,7 +11,9 @@
 #include "run.h"
 
 /* TODO:
+ * =====
  * - does rt_consume_one properly releases memory upon faulure?
+ * - refactor BIF implementation so that is elegant and painless.
  * - Initialize bif values in a non-pathological way - no EVAL.
  * - Test runtime.
  * - Algorithms:
