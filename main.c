@@ -39,11 +39,12 @@ int main(int argc, char *argv[])
 {
     int error;
 
-    /* There is an awkward memory management scheme in the error module
-     * due to the lacking string building facilities in C and the convenience
-     * of using them there.
-     */
     atexit(err_reset);
+
+#if MEM_TRACE
+    mem_init();
+    atexit(mem_deinit);
+#endif
 
     if (argc == 1) {
         printf("Missing command line argument.\n");
