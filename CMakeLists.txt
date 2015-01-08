@@ -11,6 +11,7 @@ include_directories(
     ./itpr
     ./run
     ./runtime
+    ./common
     .
     )
 
@@ -40,10 +41,10 @@ add_executable(moon-lang
     ./runtime/runtime.c
     ./runtime/rt_val.c
     ./runtime/symmap.c
+    ./common/error.c
+    ./common/memory.c
     ./common.c
-    ./error.c
     ./main.c
-    ./memory.c
     )
 
 target_link_libraries(moon-lang m)

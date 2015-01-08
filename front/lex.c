@@ -1,8 +1,9 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "collection.h"
 #include "error.h"
 #include "lex.h"
 

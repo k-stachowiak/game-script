@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "collection.h"
 #include "error.h"
 #include "parse.h"
 #include "memory.h"

@@ -1,8 +1,9 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <string.h>
 #include <stdlib.h>
 
+#include "collection.h"
 #include "eval.h"
 #include "eval_detail.h"
 #include "bif.h"
