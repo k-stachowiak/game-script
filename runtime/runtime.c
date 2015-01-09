@@ -84,11 +84,13 @@ void rt_consume_one(
 	eval(ast, rt, &rt->global_sym_map);
 
 	if (err_state()) {
+		ast_node_free_one(ast);
 		return;
 
 	} else if (ast->type == AST_BIND) {
 		ast->next = rt->node_store;
 		rt->node_store = ast;
+
 	} else {
 		rt->stack->top = *loc;
 		ast_node_free_one(ast);

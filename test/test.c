@@ -110,14 +110,17 @@ static bool test_runtime_sanity(struct Runtime *rt)
 
 static bool test_runtime_free_on_fail(struct Runtime *rt)
 {
-    /* TODO:
-     * 1. Implement a call rt_consume_one, that is supposed to fail.
-     * 2. Assert error state.
-     * 3. Run with memory monitor to verify absence of the memory leak.
-     * 4? monitor the memory internally? Compare mallocs vs. frees througout the test?
-     */
-    printf("DEFERRED TEST IMPLEMENTATION: returns true, but tests nothing now.\n");
-    return true;
+    struct AstNode *ast_list = ast_parse_source("(bind x (invalid-call))");
+
+    rt_consume_one(rt, ast_list, NULL, NULL);
+
+    if (err_state()) {
+        printf("OK: error on invalid ast consume.\n");
+        return true;
+    } else {
+        printf("FAIL: no error on invalid ast consume.\n");
+        return false;
+    }
 }
 
 static bool test_local_scope(struct Runtime *rt)
