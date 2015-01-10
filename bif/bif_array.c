@@ -28,23 +28,12 @@ static void bif_arr_error_range(char *condition)
 
 static void bif_length_impl(struct Runtime* rt, VAL_LOC_T location)
 {
-    VAL_LOC_T current, end;
-    VAL_INT_T size = 0;
-
     if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "length", "must be an array");
 		return;
 	}
 
-    current = location + VAL_HEAD_BYTES;
-    end = current + rt_val_peek_size(rt, location);
-
-    while (current != end) {
-        current = rt_val_next_loc(rt, current);
-        ++size;
-    }
-
-	rt_val_push_int(rt->stack, size);
+	rt_val_push_int(rt->stack, rt_val_cpd_len(rt, location));
 }
 
 static void bif_empty_impl(struct Runtime* rt, VAL_LOC_T location)

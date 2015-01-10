@@ -95,6 +95,9 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate);
  * ----------------
  */
 
+/** Counts the compount value elements and returns the value. */
+int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location);
+
 /**
  * Advance location by:
  * - value header = VAL_HEAD_BYTES

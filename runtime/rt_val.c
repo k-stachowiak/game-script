@@ -264,6 +264,22 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 	}
 }
 
+int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location)
+{
+    VAL_LOC_T current, end;
+    int len = 0;
+
+    current = location + VAL_HEAD_BYTES;
+    end = current + rt_val_peek_size(rt, location);
+
+    while (current != end) {
+        current = rt_val_next_loc(rt, current);
+        ++len;
+    }
+
+    return len;
+}
+
 VAL_LOC_T rt_val_next_loc(struct Runtime *rt, VAL_LOC_T loc)
 {
     struct ValueHeader header = rt_val_peek_header(rt->stack, loc);
