@@ -34,9 +34,10 @@ add_executable(moon-lang
     ./repl/repl.c
     ./test/test.c
     ./run/run.c
-    ./runtime/eval_fdef.c
     ./runtime/stack.c
+    ./runtime/eval_fdef.c
     ./runtime/eval_fcall.c
+    ./runtime/eval_cpd.c
     ./runtime/eval.c
     ./runtime/runtime.c
     ./runtime/rt_val.c
