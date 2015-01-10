@@ -12,7 +12,7 @@
 
 /* TODO:
  * =====
- * - refactor BIF implementation so that is elegant and painless.
+ * - check homogenity upon array construction and concatenation.
  * - Initialize bif values in a non-pathological way - no EVAL.
  * - Test runtime.
  * - Algorithms:

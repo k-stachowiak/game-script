@@ -66,7 +66,6 @@ static bool test_lexer()
 		dom_free(dom_node);
 	}
 
-	printf("Lexer ran successfully.\n");
 	return true;
 }
 
@@ -97,7 +96,6 @@ static bool test_parser()
 		ast_node_free(ast_node);
 	}
 
-	printf("Parsed %d simple expressions successfully.\n", i);
 	return true;
 }
 
@@ -110,17 +108,56 @@ static bool test_runtime_sanity(struct Runtime *rt)
 
 static bool test_runtime_free_on_fail(struct Runtime *rt)
 {
-    struct AstNode *ast_list = ast_parse_source("(bind x (invalid-call))");
+    char *source = "(bind x (invalid-call))";
+    struct AstNode *ast_list = ast_parse_source(source);
 
     rt_consume_one(rt, ast_list, NULL, NULL);
 
     if (err_state()) {
-        printf("OK: error on invalid ast consume.\n");
         return true;
     } else {
-        printf("FAIL: no error on invalid ast consume.\n");
+        printf("No error on invalid ast consume.\n");
         return false;
     }
+}
+
+static bool test_bif_cat_homo(struct Runtime *rt)
+{
+    /* Allow for construction from anything and empty array. */
+    char *source_good_1 = "(cons 'a' [])";
+
+    /* Allow construction from homogenous values. */
+    char *source_good_2 = "(cons 'a' [ 'b' ])";
+
+    /* Disallow heterogenous array literals. */
+    char *source_bad_1 = "[ 'a' 1 ]";
+
+    /* Disallow construction from heterogenous values. */
+    char *source_bad_2 = "(cons 'a' [ 1 ])";
+
+    VAL_LOC_T results[1];
+
+    if (!test_source_eval(rt, source_good_1, results)) {
+        printf("Failed evaluating construction from value and empty list.\n");
+        return false;
+    }
+
+    if (!test_source_eval(rt, source_good_2, results)) {
+        printf("Failed evaluating construction from homogenous values.\n");
+        return false;
+    }
+
+    if (test_source_eval(rt, source_bad_1, results)) {
+        printf("Failed rejecting evaluation of literal of heterogenous values.\n");
+        return false;
+    }
+
+    if (test_source_eval(rt, source_bad_2, results)) {
+        printf("Failed rejecting construction from heterogenous value and list.\n");
+        return false;
+    }
+
+    return true;
 }
 
 static bool test_local_scope(struct Runtime *rt)
@@ -146,7 +183,6 @@ static bool test_local_scope(struct Runtime *rt)
 		return false;
 	}
 
-	printf("Simple scope management test ran successfully.\n");
 	return true;
 }
 
@@ -173,7 +209,6 @@ static bool test_simple_algorithm(struct Runtime *rt)
         return false;
 	}
 
-	printf("GCD, LCM tests ran successfully.\n");
 	return true;
 }
 
@@ -204,7 +239,6 @@ static bool test_array_lookup(struct Runtime *rt)
         return false;
 	}
 
-	printf("Min element test ran successfully.\n");
 	return true;
 }
 
@@ -232,25 +266,60 @@ static bool test_function_object(struct Runtime *rt)
 		return false;
 	}
 
-	printf("Closure/function value test ran successfully.\n");
 	return true;
 }
+
+typedef bool (*TestFunction)(void);
+typedef bool (*RuntimeTestFunction)(struct Runtime *);
 
 int test(int argc, char *argv[])
 {
 	struct Runtime *rt;
-	bool success = true;
+
+    TestFunction simple_tests[] = {
+        test_lexer,
+        test_parser
+    };
+
+    RuntimeTestFunction runtime_tests[] = {
+        test_runtime_sanity,
+        test_runtime_free_on_fail,
+        test_bif_cat_homo,
+        test_local_scope,
+        test_simple_algorithm,
+        test_array_lookup,
+        test_function_object
+    };
+
+    int simple_tests_count = sizeof(simple_tests) / sizeof(*simple_tests);
+    int runtime_tests_count = sizeof(runtime_tests) / sizeof(*runtime_tests);
+
+    int i, success;
+
+    bool result = true;
 
 	if (argc != 1) {
         printf("TEST: ignored additional command line arguments.\n");
     }
 
-    /* Parser/lexer tests.
-     * -------------------
+    /* Simple tests.
+     * -------------
      */
 
-	success &= test_lexer();
-	success &= test_parser();
+    for (i = 0, success = 0; i < simple_tests_count; ++i) {
+        if (simple_tests[i]()) {
+            ++success;
+        }
+    }
+
+    printf("[%s] %d/%d simple tests succeeded.\n",
+        (success == simple_tests_count) ? "OK" : "FAIL",
+        success, simple_tests_count
+    );
+
+    if (success != simple_tests_count) {
+        result = false;
+    }
 
     /* Runtime tests.
      * --------------
@@ -258,29 +327,23 @@ int test(int argc, char *argv[])
 
 	rt = rt_make(64 * 1024);
 
-	success &= test_runtime_sanity(rt);
-	rt_reset(rt);
+    for (i = 0, success = 0; i < runtime_tests_count; ++i) {
+        if (runtime_tests[i](rt)) {
+            ++success;
+        }
+        rt_reset(rt);
+    }
 
-    success &= test_runtime_free_on_fail(rt);
-    rt_reset(rt);
+    printf("[%s] %d/%d runtime tests succeeded.\n",
+        (success == runtime_tests_count) ? "OK" : "FAIL",
+        success, runtime_tests_count
+    );
 
-	success &= test_local_scope(rt);
-	rt_reset(rt);
-
-	success &= test_simple_algorithm(rt);
-	rt_reset(rt);
-
-	success &= test_array_lookup(rt);
-	rt_reset(rt);
-
-	success &= test_function_object(rt);
-	rt_reset(rt);
+    if (success != runtime_tests_count) {
+        result = false;
+    }
 
     rt_free(rt);
 
-	if (success) {
-		printf("Tests ran successfully.\n");
-	}
-
-	return !success;
+	return !result;
 }
