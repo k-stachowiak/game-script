@@ -12,7 +12,7 @@
 
 /* TODO:
  * =====
- * - Initialize bif values in a non-pathological way - no EVAL.
+ * - Fix headers.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE

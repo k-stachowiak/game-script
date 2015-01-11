@@ -8,6 +8,7 @@
 #include "error.h"
 #include "runtime.h"
 #include "rt_val.h"
+#include "bif.h"
 
 static void rt_free_stored(struct Runtime *rt)
 {
@@ -19,9 +20,38 @@ static void rt_free_stored(struct Runtime *rt)
 
 static void rt_init(struct Runtime *rt, long stack)
 {
+    struct SymMap *gsm;
+
 	rt->stack = stack_make(stack);
-	sym_map_init_global(&rt->global_sym_map, rt); /* TODO: This is evil! result is incomplete! */
 	rt->node_store = NULL;
+
+    gsm = &rt->global_sym_map;
+
+	sym_map_init_global(gsm);
+
+    bif_assure_init();
+    sym_map_insert(gsm, "sqrt", eval(&bif_sqrt, rt, gsm), &bif_location);
+    sym_map_insert(gsm, "+", eval(&bif_add, rt, gsm), &bif_location);
+    sym_map_insert(gsm, "-", eval(&bif_sub, rt, gsm), &bif_location);
+    sym_map_insert(gsm, "*", eval(&bif_mul, rt, gsm), &bif_location);
+    sym_map_insert(gsm, "/", eval(&bif_div, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "%", eval(&bif_mod, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "=", eval(&bif_eq, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "<", eval(&bif_lt, rt, gsm), &bif_location);
+	sym_map_insert(gsm, ">", eval(&bif_gt, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "<=", eval(&bif_leq, rt, gsm), &bif_location);
+	sym_map_insert(gsm, ">=", eval(&bif_geq, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "&&", eval(&bif_and, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "||", eval(&bif_or, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "~~", eval(&bif_not, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "length", eval(&bif_length, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "empty", eval(&bif_empty, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "car", eval(&bif_car, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "cdr", eval(&bif_cdr, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "reverse", eval(&bif_reverse, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "cons", eval(&bif_cons, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "cat", eval(&bif_cat, rt, gsm), &bif_location);
+	sym_map_insert(gsm, "slice", eval(&bif_slice, rt, gsm), &bif_location);
 }
 
 static void rt_deinit(struct Runtime *rt)

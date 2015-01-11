@@ -21,8 +21,7 @@ struct SymMapKvp {
     struct SymMapKvp *next;
 };
 
-/* TODO: RUNTIME SHOULD NOT BE NECESSARY HERE! */
-void sym_map_init_global(struct SymMap *sym_map, struct Runtime *rt);
+void sym_map_init_global(struct SymMap *sym_map);
 void sym_map_init_local(struct SymMap *sym_map, struct SymMap *global);
 void sym_map_deinit(struct SymMap *sym_map);
 

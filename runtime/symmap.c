@@ -9,7 +9,6 @@
 #include "memory.h"
 #include "symmap.h"
 #include "eval.h"
-#include "bif.h"
 
 static void symmap_error_already_inserted(char *symbol)
 {
@@ -19,39 +18,11 @@ static void symmap_error_already_inserted(char *symbol)
 	err_msg_set(&msg);
 }
 
-static void sym_map_init_bifs(struct SymMap *sym_map, struct Runtime *rt)
-{
-    bif_assure_init();
-    sym_map_insert(sym_map, "sqrt", eval(&bif_sqrt, rt, sym_map), &bif_location);
-    sym_map_insert(sym_map, "+", eval(&bif_add, rt, sym_map), &bif_location);
-    sym_map_insert(sym_map, "-", eval(&bif_sub, rt, sym_map), &bif_location);
-    sym_map_insert(sym_map, "*", eval(&bif_mul, rt, sym_map), &bif_location);
-    sym_map_insert(sym_map, "/", eval(&bif_div, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "%", eval(&bif_mod, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "=", eval(&bif_eq, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "<", eval(&bif_lt, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, ">", eval(&bif_gt, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "<=", eval(&bif_leq, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, ">=", eval(&bif_geq, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "&&", eval(&bif_and, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "||", eval(&bif_or, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "~~", eval(&bif_not, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "length", eval(&bif_length, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "empty", eval(&bif_empty, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "car", eval(&bif_car, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "cdr", eval(&bif_cdr, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "reverse", eval(&bif_reverse, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "cons", eval(&bif_cons, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "cat", eval(&bif_cat, rt, sym_map), &bif_location);
-	sym_map_insert(sym_map, "slice", eval(&bif_slice, rt, sym_map), &bif_location);
-}
-
-void sym_map_init_global(struct SymMap *sym_map, struct Runtime *rt)
+void sym_map_init_global(struct SymMap *sym_map)
 {
 	sym_map->global = NULL;
 	sym_map->map = NULL;
 	sym_map->end = NULL;
-	sym_map_init_bifs(sym_map, rt);
 }
 
 void sym_map_init_local(
