@@ -10,10 +10,18 @@
 #include "rt_val.h"
 #include "error.h"
 
+static void bif_arr_error_homo(char *func)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL ARRAY", eval_location_top());
+    err_msg_append(&msg, "Function _%s_ must produce homogenous result.", func);
+    err_msg_set(&msg);
+}
+
 static void bif_arr_error_arg(int arg, char *func, char *condition)
 {
 	struct ErrMessage msg;
-	err_msg_init_src(&msg, "EVAL BIF ARRAY", eval_location_top());
+	err_msg_init_src(&msg, "BIF EVAL ARRAY", eval_location_top());
 	err_msg_append(&msg, "Argument %d of _%s_ %s", arg, func, condition);
 	err_msg_set(&msg);
 }
@@ -21,7 +29,7 @@ static void bif_arr_error_arg(int arg, char *func, char *condition)
 static void bif_arr_error_range(char *condition)
 {
 	struct ErrMessage msg;
-	err_msg_init_src(&msg, "BIF EVAL", eval_location_top());
+	err_msg_init_src(&msg, "BIF EVAL ARRAY", eval_location_top());
 	err_msg_append(&msg, "In _slice_ : %s", condition);
 	err_msg_set(&msg);
 }
@@ -125,16 +133,10 @@ static void bif_reverse_impl(struct Runtime* rt, VAL_LOC_T location)
 
 static void bif_cons_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	VAL_LOC_T size_loc, loc, end;
+	VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
     VAL_SIZE_T x_size, y_size;
 
 	if (rt_val_peek_type(rt, y_loc) != VAL_ARRAY) {
-		/* 
-		 * TODO: More refine check needed here:
-		 * assert T = U, where
-		 *    T  = (typeof x)
-		 *   [U] = (typeof y)
-		 */
 		bif_arr_error_arg(2, "cons", "must be an array");
 		return;
 	}
@@ -158,11 +160,16 @@ static void bif_cons_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
 	/* Finalize. */
 	rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
+
+    /* Validate homogenity. */
+    if (!rt_val_compound_homo(rt, result_loc)) {
+        bif_arr_error_homo("cons");
+    }
 }
 
 static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	VAL_LOC_T size_loc, loc, end;
+	VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
     VAL_SIZE_T x_size, y_size;
 
 	/* Assert input. */
@@ -200,6 +207,11 @@ static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
 	/* Finalize. */
 	rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size);
+
+    /* Validate homogenity. */
+    if (!rt_val_compound_homo(rt, result_loc)) {
+        bif_arr_error_homo("cat");
+    }
 }
 
 static void bif_slice_impl(

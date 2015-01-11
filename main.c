@@ -12,9 +12,7 @@
 
 /* TODO:
  * =====
- * - check homogenity upon array construction and concatenation.
  * - Initialize bif values in a non-pathological way - no EVAL.
- * - Test runtime.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
@@ -45,7 +43,6 @@ int main(int argc, char *argv[])
         error = 1;
 
     } else {
-
         int num_modules = sizeof(module_map)/sizeof(module_map[0]), i;
         bool found = false;
 

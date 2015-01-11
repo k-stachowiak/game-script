@@ -157,4 +157,10 @@ VAL_LOC_T rt_val_fun_next_cap_loc(struct Runtime *rt, VAL_LOC_T loc);
 /** Get the location of the next applied argument. */
 VAL_LOC_T rt_val_fun_next_appl_loc(struct Runtime *rt, VAL_LOC_T loc);
 
+/* Integrity assertion.
+ * ====================
+ */
+
+bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc);
+
 #endif

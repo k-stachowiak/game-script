@@ -33,6 +33,9 @@ add_executable(moon-lang
     ./repl/repl_cmd.c
     ./repl/repl.c
     ./test/test.c
+    ./test/test_parse.c
+    ./test/test_runtime.c
+    ./test/test_regr.c
     ./run/run.c
     ./runtime/stack.c
     ./runtime/eval_fdef.c

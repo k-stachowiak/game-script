@@ -384,3 +384,83 @@ VAL_LOC_T rt_val_fun_next_appl_loc(struct Runtime *rt, VAL_LOC_T loc)
     return rt_val_next_loc(rt, loc);
 }
 
+static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
+
+static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+{
+    struct ValueHeader
+        header_x = rt_val_peek_header(rt->stack, x),
+        header_y = rt_val_peek_header(rt->stack, y);
+
+    return (
+        (header_x.type == VAL_BOOL && header_y.type == VAL_BOOL) ||
+        (header_x.type == VAL_CHAR && header_y.type == VAL_CHAR) ||
+        (header_x.type == VAL_INT && header_y.type == VAL_INT) ||
+        (header_x.type == VAL_REAL && header_y.type == VAL_REAL) ||
+        (header_x.type == VAL_STRING && header_y.type == VAL_STRING) ||
+        (header_x.type == VAL_FUNCTION && header_y.type == VAL_FUNCTION)
+    );
+}
+
+static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+{
+    VAL_LOC_T current_x, current_y, last_x;
+
+    struct ValueHeader
+        header_x = rt_val_peek_header(rt->stack, x),
+        header_y = rt_val_peek_header(rt->stack, y);
+
+    if (!(header_x.type == VAL_ARRAY && header_y.type == VAL_ARRAY) &&
+        !(header_x.type == VAL_TUPLE && header_y.type == VAL_TUPLE)) {
+        return false;
+    }
+
+    if (rt_val_cpd_len(rt, x) != rt_val_cpd_len(rt, y)) {
+        return false;
+    }
+
+    current_x = rt_val_cpd_first_loc(x);
+    current_y = rt_val_cpd_first_loc(y);
+    last_x = current_x + rt_val_peek_size(rt, current_x);
+
+    while (current_x != last_x) {
+
+        if (!rt_val_pair_homo(rt, current_x, current_y)) {
+            return false;
+        }
+
+        current_x = rt_val_next_loc(rt, current_x);
+        current_y = rt_val_next_loc(rt, current_y);
+    }
+
+    return true;
+}
+
+static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+{
+    return rt_val_pair_homo_simple(rt, x, y) ||
+           rt_val_pair_homo_complex(rt, x, y);
+}
+
+bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc)
+{
+    int i, len = rt_val_cpd_len(rt, val_loc);
+    VAL_LOC_T first, current;
+
+    if (len < 2) {
+        return true;
+    }
+
+    first = rt_val_cpd_first_loc(val_loc);
+    current = rt_val_next_loc(rt, first);
+
+    for (i = 1; i < len; ++i) {
+        if (!rt_val_pair_homo(rt, first, current)) {
+            return false;
+        }
+        current = rt_val_next_loc(rt, current);
+    }
+    
+    return true;
+}
+
