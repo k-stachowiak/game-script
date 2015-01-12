@@ -71,9 +71,7 @@ void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
     VAL_LOC_T i;
 	VAL_LOC_T removed = end - begin;
     VAL_LOC_T remaining = stack->top - end;
-	for (i = 0; i < remaining; ++i) {
-        *(stack->buffer + begin + i) = *(stack->buffer + end + i);
-    }
+    memmove(stack->buffer + begin, stack->buffer + end, remaining);
 	stack->top -= removed;
 }
 
