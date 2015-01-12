@@ -68,7 +68,6 @@ void *stack_peek_ptr(struct Stack *stack, VAL_LOC_T loc)
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
 {
-    VAL_LOC_T i;
 	VAL_LOC_T removed = end - begin;
     VAL_LOC_T remaining = stack->top - end;
     memmove(stack->buffer + begin, stack->buffer + end, remaining);
