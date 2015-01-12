@@ -12,6 +12,7 @@
 
 /* TODO:
  * =====
+ * - Use memmove for the stack collapsing operation.
  * - Fix headers.
  * - Algorithms:
  *   - merge sort:
