@@ -13,6 +13,7 @@ bool test_lexer();
 bool test_parser();
 
 bool test_regression_real_in_array(struct Runtime *rt);
+bool test_regression_cyclic_calls(struct Runtime *rt);
 
 bool test_runtime_sanity(struct Runtime *rt);
 bool test_runtime_free_on_fail(struct Runtime *rt);

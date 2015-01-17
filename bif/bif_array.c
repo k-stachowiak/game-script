@@ -34,7 +34,7 @@ static void bif_arr_error_range(char *condition)
 	err_msg_set(&msg);
 }
 
-static void bif_length_impl(struct Runtime* rt, VAL_LOC_T location)
+void bif_length(struct Runtime* rt, VAL_LOC_T location)
 {
     if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "length", "must be an array");
@@ -44,7 +44,7 @@ static void bif_length_impl(struct Runtime* rt, VAL_LOC_T location)
 	rt_val_push_int(rt->stack, rt_val_cpd_len(rt, location));
 }
 
-static void bif_empty_impl(struct Runtime* rt, VAL_LOC_T location)
+void bif_empty(struct Runtime* rt, VAL_LOC_T location)
 {
     if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "empty", "must be an array");
@@ -53,7 +53,7 @@ static void bif_empty_impl(struct Runtime* rt, VAL_LOC_T location)
     }
 }
 
-static void bif_car_impl(struct Runtime* rt, VAL_LOC_T location)
+void bif_car(struct Runtime* rt, VAL_LOC_T location)
 {
     if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
 		bif_arr_error_arg(1, "car", "must be an array");
@@ -68,7 +68,7 @@ static void bif_car_impl(struct Runtime* rt, VAL_LOC_T location)
 	stack_push_copy(rt->stack, location + VAL_HEAD_BYTES);
 }
 
-static void bif_cdr_impl(struct Runtime* rt, VAL_LOC_T location)
+void bif_cdr(struct Runtime* rt, VAL_LOC_T location)
 {
     VAL_LOC_T head_loc, size_loc;
     VAL_LOC_T current_loc, end_loc;
@@ -101,7 +101,7 @@ static void bif_cdr_impl(struct Runtime* rt, VAL_LOC_T location)
 	rt_val_push_cpd_final(rt->stack, size_loc, tail_size);
 }
 
-static void bif_reverse_impl(struct Runtime* rt, VAL_LOC_T location)
+void bif_reverse(struct Runtime* rt, VAL_LOC_T location)
 {
 	int i;
     VAL_SIZE_T size;
@@ -131,7 +131,7 @@ static void bif_reverse_impl(struct Runtime* rt, VAL_LOC_T location)
 	ARRAY_FREE(locs);
 }
 
-static void bif_cons_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+void bif_cons(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
 	VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
     VAL_SIZE_T x_size, y_size;
@@ -167,7 +167,7 @@ static void bif_cons_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     }
 }
 
-static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
 	VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
     VAL_SIZE_T x_size, y_size;
@@ -214,7 +214,7 @@ static void bif_cat_impl(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     }
 }
 
-static void bif_slice_impl(
+void bif_slice(
 		struct Runtime *rt,
 		VAL_LOC_T x_loc,
 		VAL_LOC_T y_loc,
@@ -276,41 +276,5 @@ static void bif_slice_impl(
 
 	/* Finalize. */
 	rt_val_push_cpd_final(rt->stack, size_loc, size);
-}
-
-struct AstNode bif_length;
-struct AstNode bif_empty;
-struct AstNode bif_car;
-struct AstNode bif_cdr;
-struct AstNode bif_reverse;
-struct AstNode bif_cons;
-struct AstNode bif_cat;
-struct AstNode bif_slice;
-
-void bif_init_array(void)
-{
-	bif_init_unary_ast(&bif_length);
-	bif_length.data.bif.u_impl = bif_length_impl;
-
-	bif_init_unary_ast(&bif_empty);
-	bif_empty.data.bif.u_impl = bif_empty_impl;
-
-	bif_init_unary_ast(&bif_car);
-	bif_car.data.bif.u_impl = bif_car_impl;
-
-	bif_init_unary_ast(&bif_cdr);
-	bif_cdr.data.bif.u_impl = bif_cdr_impl;
-
-	bif_init_unary_ast(&bif_reverse);
-	bif_reverse.data.bif.u_impl = bif_reverse_impl;
-
-	bif_init_binary_ast(&bif_cons);
-	bif_cons.data.bif.bi_impl = bif_cons_impl;
-
-	bif_init_binary_ast(&bif_cat);
-	bif_cat.data.bif.bi_impl = bif_cat_impl;
-
-	bif_init_ternary_ast(&bif_slice);
-	bif_slice.data.bif.ter_impl = bif_slice_impl;
 }
 

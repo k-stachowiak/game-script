@@ -58,6 +58,7 @@ int test(int argc, char *argv[])
 
     RuntimeTestFunction runtime_tests[] = {
 
+        test_regression_cyclic_calls,
         test_regression_real_in_array,
 
         test_runtime_sanity,

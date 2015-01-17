@@ -162,12 +162,13 @@ void eval_func_def(
         struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
-	rt_val_push_func_init(stack, &size_loc, &data_begin, (void*)node);
+    VAL_INT_T arity = node->data.func_def.func.arg_count;
+	rt_val_push_func_init(stack, &size_loc, &data_begin, arity, (void*)node, NULL);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
 	if (err_state()) {
 		return;
 	}
-	rt_val_push_func_appl_empty(stack);
+	rt_val_push_func_appl_init(stack, 0);
 	rt_val_push_func_final(stack, size_loc, data_begin);
 }
 

@@ -11,11 +11,12 @@
 #include "runtime.h"
 #include "rt_val.h"
 
-static void fcall_error_too_many_args(char *symbol)
+static void fcall_error_too_many_args(char *symbol, int arity, int applied)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "EVAL FUNC CALL", eval_location_top());
-	err_msg_append(&msg, "Passed too many arguments to \"%s\"", symbol);
+	err_msg_append(&msg, "Passed too many arguments to \"%s\".", symbol);
+	err_msg_append(&msg, "Expected %d, applied %d", arity, applied);
 	err_msg_set(&msg);
 }
 
@@ -41,36 +42,6 @@ static bool efc_lookup_value(
 	return true;
 }
 
-/** Determines the arity of the given function definition. */
-static int efc_compute_arity(struct AstNode *def_node)
-{
-	switch (def_node->type) {
-	case AST_BIF:
-		switch (def_node->data.bif.type) {
-		case AST_BIF_UNARY:
-			return 1;
-
-		case AST_BIF_BINARY:
-			return 2;
-
-		case AST_BIF_TERNARY:
-			return 3;
-
-		default:
-			LOG_ERROR("Unhandled bif type.\n");
-			exit(1);
-		}
-		break;
-
-	case AST_FUNC_DEF:
-		return def_node->data.func_def.func.arg_count;
-
-	default:
-		LOG_ERROR("Non-function AST node pointed by function value.\n");
-		exit(1);
-	}
-}
-
 /**
  * Creates a new function value based on and existing function value,
  * Its captures, already evaluated arguments and the newly applied ones.
@@ -79,14 +50,16 @@ static void efc_curry_on(
         struct Runtime *rt,
         struct SymMap *sym_map,
 		struct AstNode *actual_args,
-        struct AstNode *impl,
+        VAL_INT_T arity,
+        struct AstNode *ast_def,
+        void *bif_impl,
         VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
         VAL_SIZE_T appl_count, VAL_LOC_T appl_loc)
 {
 	VAL_LOC_T current_loc, size_loc, data_begin;
 	VAL_SIZE_T i, arg_count;
 
-	rt_val_push_func_init(rt->stack, &size_loc, &data_begin, impl);
+	rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, ast_def, bif_impl);
 
 	/* Captures. */
 	rt_val_push_func_cap_init(rt->stack, cap_count);
@@ -207,22 +180,6 @@ cleanup:
 }
 
 /** Tests the argument count against a BIF type. */
-static bool efc_assert_bif_arg_count(enum AstBifType type, int arg_count)
-{
-	switch (type) {
-	case AST_BIF_UNARY:
-		return arg_count == 1;
-
-	case AST_BIF_BINARY:
-		return arg_count == 2;
-
-	case AST_BIF_TERNARY:
-		return arg_count == 3;
-	}
-
-	LOG_ERROR("Unhandled BIF type.\n");
-	exit(1);
-}
 
 /** Evaluates a BIF. */
 static void efc_evaluate_bif(
@@ -230,7 +187,8 @@ static void efc_evaluate_bif(
 		struct SymMap *sym_map,
 		struct AstNode *actual_args,
         VAL_SIZE_T appl_count, VAL_LOC_T appl_loc,
-		struct AstBif *impl)
+        VAL_SIZE_T arity,
+		void *impl)
 {
 	VAL_LOC_T arg_locs[BIF_MAX_ARITY];
 	VAL_SIZE_T arg_count = 0, i;
@@ -263,23 +221,23 @@ static void efc_evaluate_bif(
 	temp_end = rt->stack->top;
 
 	/* Assert arguments count. */
-	if (!efc_assert_bif_arg_count(impl->type, arg_count)) {
+	if (arity != arg_count) {
 		LOG_ERROR("Invalid argument count passed to BIF.");
 		exit(1);
 	}
 
 	/* Evaluate the function implementation. */
-	switch (impl->type) {
-	case AST_BIF_UNARY:
-		impl->u_impl(rt, arg_locs[0]);
+	switch (arity) {
+	case 1:
+        ((bif_unary_func)impl)(rt, arg_locs[0]);
 		break;
 
-	case AST_BIF_BINARY:
-		impl->bi_impl(rt, arg_locs[0], arg_locs[1]);
+	case 2:
+		((bif_binary_func)impl)(rt, arg_locs[0], arg_locs[1]);
 		break;
 
-	case AST_BIF_TERNARY:
-		impl->ter_impl(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
+	case 3:
+		((bif_ternary_func)impl)(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
 		break;
 	}
 
@@ -292,10 +250,15 @@ void eval_func_call(
 		struct Runtime *rt,
 		struct SymMap *sym_map)
 {
-    VAL_LOC_T val_loc, impl_loc, cap_start, appl_start;
-    struct AstNode *impl;
+    VAL_LOC_T
+        val_loc, arity_loc,
+        ast_def_loc, bif_impl_loc,
+        cap_start, appl_start;
+
+    struct AstNode *ast_def;
+    void *bif_impl;
     VAL_SIZE_T appl_count, cap_count;
-	int arity, applied;
+	VAL_SIZE_T arity, applied;
 	struct AstNode *actual_args = node->data.func_call.actual_args;
 	char *symbol = node->data.func_call.symbol;
 
@@ -303,39 +266,45 @@ void eval_func_call(
         return;
     }
 
-    rt_val_function_locs(rt, val_loc, &impl_loc, &cap_start, &appl_start);
-    impl = (struct AstNode*)stack_peek_ptr(rt->stack, impl_loc);
+    rt_val_function_locs(rt, val_loc,
+            &arity_loc,
+            &ast_def_loc, &bif_impl_loc,
+            &cap_start, &appl_start);
+
+    arity = stack_peek_size(rt->stack, arity_loc);
+    ast_def = (struct AstNode*)stack_peek_ptr(rt->stack, ast_def_loc);
+    bif_impl = (void*)stack_peek_ptr(rt->stack, bif_impl_loc);
     cap_count = stack_peek_size(rt->stack, cap_start);
     cap_start += VAL_SIZE_BYTES;
     appl_count = stack_peek_size(rt->stack, appl_start);
     appl_start += VAL_SIZE_BYTES;
 
-	arity = efc_compute_arity(impl);
 	applied = appl_count + ast_list_len(actual_args);
 
 	if (arity > applied) {
-		efc_curry_on(rt, sym_map, actual_args, impl,
-                cap_count, cap_start, appl_count, appl_start);
+		efc_curry_on(rt, sym_map,
+                actual_args,
+                arity,
+                ast_def, bif_impl,
+                cap_count, cap_start,
+                appl_count, appl_start);
 
 	} else if (arity == applied) {
-		switch (impl->type) {
-		case AST_FUNC_DEF:
-			efc_evaluate_general(rt, sym_map, actual_args, impl,
+        if (ast_def && !bif_impl) {
+			efc_evaluate_general(rt, sym_map, actual_args, ast_def,
                     cap_count, cap_start, appl_count, appl_start);
-			break;
 
-		case AST_BIF:
+        } else if (!ast_def && bif_impl) {
 			efc_evaluate_bif(rt, sym_map, actual_args,
-                    appl_count, appl_start, &impl->data.bif);
-			break;
+                    appl_count, appl_start, arity, &bif_impl);
 
-		default:
-			LOG_ERROR("Non-function AST node pointed by function value.\n");
+        } else {
+			LOG_ERROR("Malformed function value evaluated.\n");
 			exit(1);
 		}
 
 	} else {
-		fcall_error_too_many_args(symbol);
+		fcall_error_too_many_args(symbol, arity, applied);
 
 	}
 }
