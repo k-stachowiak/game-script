@@ -296,7 +296,7 @@ void eval_func_call(
 
         } else if (!ast_def && bif_impl) {
 			efc_evaluate_bif(rt, sym_map, actual_args,
-                    appl_count, appl_start, arity, &bif_impl);
+                    appl_count, appl_start, arity, bif_impl);
 
         } else {
 			LOG_ERROR("Malformed function value evaluated.\n");
