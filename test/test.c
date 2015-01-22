@@ -37,7 +37,7 @@ bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
             /*
 			printf("Failed consuming an AST node into runtime.\n");
 			printf("Error : %s.\n", err_msg());
-            */
+            //*/
 			ast_node_free(next);
 			return false;
 		}

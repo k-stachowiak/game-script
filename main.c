@@ -12,6 +12,7 @@
 
 /* TODO:
  * =====
+ * - Always perform preloading global symbols.
  * - Fix headers.
  * - Algorithms:
  *   - merge sort:

@@ -142,7 +142,14 @@ static void efd_push_captures(
 			!efd_is_global(symbol, sym_map, &cap_location) &&
 			!efd_is_argument(symbol, &func_def->func)) {
 				if (!efd_is_defined(symbol, sym_map)) {
-					eval_error_not_found(symbol);
+					if (node->type != AST_FUNC_CALL) {
+						/* Note: it is allowed for the func call symbol not to be defined.
+						 * in such case it shall not be captured in the closure and
+						 * will result in runtime error if called before the definition
+						 * is made.
+						 */
+						eval_error_not_found(symbol);
+					}
 					return;
 				}
 				rt_val_push_func_cap(stack, symbol, cap_location);
