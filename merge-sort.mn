@@ -45,8 +45,8 @@
 		(if (<= len 1)
 			x
 			(do
-				(bind lt (slice x 0 (+ h 1)))
-				(bind rt (slice x (+ h 2) len))
+				(bind lt (slice x 0 h))
+				(bind rt (slice x h len))
 				(merge-sort`` lt rt)
 			)
 		)

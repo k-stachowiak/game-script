@@ -11,6 +11,42 @@
 #include "runtime.h"
 #include "rt_val.h"
 
+#if RT_DEBUG
+static void efc_log_gen_call_sym(char *symbol)
+{
+	printf("\tcall %s\n", symbol);
+}
+
+static void efc_log_gen_call_arg(struct Runtime *rt, VAL_LOC_T loc)
+{
+	printf("\t\t");
+	rt_val_print(rt, loc, false);
+	printf("\n");
+}
+
+static void efc_log_result(struct Runtime *rt, VAL_LOC_T loc)
+{
+	printf("\t>>");
+	rt_val_print(rt, loc, false);
+	printf("\n");
+}
+
+static void efc_log_bif_call(
+		struct Runtime *rt,
+		char *symbol,
+		VAL_LOC_T arg_locs[],
+		int arg_count,
+		VAL_LOC_T result_loc)
+{
+	int i;
+	efc_log_gen_call_sym(symbol);
+	for (i = 0; i < arg_count; ++i) {
+		efc_log_gen_call_arg(rt, arg_locs[i]);
+	}
+	efc_log_result(rt, result_loc);
+}
+#endif
+
 static void fcall_error_too_many_args(char *symbol, int arity, int applied)
 {
 	struct ErrMessage msg;
@@ -99,14 +135,15 @@ static bool efc_insert_expression(
 		struct SymMap *new_sym_map,
 		struct AstNode *arg_node,
         struct SourceLocation *arg_loc,
-		char *symbol)
+		char *symbol,
+		VAL_LOC_T *location)
 {
-	VAL_LOC_T location = eval_impl(arg_node, rt, caller_sym_map);
+	*location = eval_impl(arg_node, rt, caller_sym_map);
 	if (err_state()) {
 		return false;
 	}
 
-	sym_map_insert(new_sym_map, symbol, location, arg_loc);
+	sym_map_insert(new_sym_map, symbol, *location, arg_loc);
 	if (err_state()) {
 		return false;
 	}
@@ -118,6 +155,7 @@ static bool efc_insert_expression(
 static void efc_evaluate_general(
         struct Runtime *rt,
         struct SymMap *sym_map,
+		char *symbol,
 		struct AstNode *actual_args,
         struct AstNode *impl,
         VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
@@ -148,8 +186,11 @@ static void efc_evaluate_general(
 		}
 	}
 
+	efc_log_gen_call_sym(symbol);
+
 	/* Insert already applied arguments. */
 	for (i = 0; i < appl_count; ++i) {
+		efc_log_gen_call_arg(rt, appl_loc);
 		sym_map_insert(&local_sym_map, *(formal_args++), appl_loc, &cont_loc);
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
 		if (err_state()) {
@@ -160,8 +201,11 @@ static void efc_evaluate_general(
 	/* Evaluate and insert new arguments. */
 	temp_begin = rt->stack->top;
 	for (; actual_args; actual_args = actual_args->next) {
-		if (!efc_insert_expression(rt, sym_map, &local_sym_map,
-                actual_args, arg_locs++, *(formal_args++))) {
+		VAL_LOC_T actual_loc;
+		if (efc_insert_expression(rt, sym_map, &local_sym_map,
+			actual_args, arg_locs++, *(formal_args++), &actual_loc)) {
+			efc_log_gen_call_arg(rt, actual_loc);
+		} else {
 			goto cleanup;
 		}
 	}
@@ -169,6 +213,8 @@ static void efc_evaluate_general(
 
 	/* Evaluate the function expression. */
 	eval_impl(impl->data.func_def.expr, rt, &local_sym_map);
+
+	efc_log_result(rt, temp_end);
 
 	/* Collapse the temporaries. */
 	stack_collapse(rt->stack, temp_begin, temp_end);
@@ -185,6 +231,7 @@ cleanup:
 static void efc_evaluate_bif(
 		struct Runtime *rt,
 		struct SymMap *sym_map,
+		char *symbol,
 		struct AstNode *actual_args,
         VAL_SIZE_T appl_count, VAL_LOC_T appl_loc,
         VAL_SIZE_T arity,
@@ -241,6 +288,8 @@ static void efc_evaluate_bif(
 		break;
 	}
 
+	efc_log_bif_call(rt, symbol, arg_locs, arg_count, temp_end);
+
 	/* Collapse the temporaries. */
 	stack_collapse(rt->stack, temp_begin, temp_end);
 }
@@ -291,11 +340,11 @@ void eval_func_call(
 
 	} else if (arity == applied) {
         if (ast_def && !bif_impl) {
-			efc_evaluate_general(rt, sym_map, actual_args, ast_def,
+			efc_evaluate_general(rt, sym_map, symbol, actual_args, ast_def,
                     cap_count, cap_start, appl_count, appl_start);
 
         } else if (!ast_def && bif_impl) {
-			efc_evaluate_bif(rt, sym_map, actual_args,
+			efc_evaluate_bif(rt, sym_map, symbol, actual_args,
                     appl_count, appl_start, arity, bif_impl);
 
         } else {

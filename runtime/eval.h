@@ -9,6 +9,25 @@
 
 #include <stddef.h>
 
+#define RT_DEBUG 0
+
+#if RT_DEBUG
+void efc_log_gen_call_sym(char *symbol);
+void efc_log_gen_call_arg(struct Runtime *rt, VAL_LOC_T loc);
+void efc_log_result(struct Runtime *rt, VAL_LOC_T loc);
+void efc_log_bif_call(
+		struct Runtime *rt,
+		char *symbol,
+		VAL_LOC_T arg_locs[],
+		int arg_count,
+		VAL_LOC_T result_loc);
+#else
+#	define efc_log_gen_call_sym
+#	define efc_log_gen_call_arg
+#	define efc_log_result
+#	define efc_log_bif_call
+#endif
+
 void eval_location_reset(void);
 void eval_location_push(struct SourceLocation *loc);
 void eval_location_swap(struct SourceLocation *loc);
