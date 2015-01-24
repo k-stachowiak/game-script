@@ -9,7 +9,7 @@
 
 #include <stddef.h>
 
-#define RT_DEBUG 0
+#define RT_DEBUG false
 
 #if RT_DEBUG
 void efc_log_gen_call_sym(char *symbol);

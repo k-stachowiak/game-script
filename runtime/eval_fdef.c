@@ -169,7 +169,7 @@ void eval_func_def(
         struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
-    VAL_INT_T arity = node->data.func_def.func.arg_count;
+	VAL_SIZE_T arity = node->data.func_def.func.arg_count;
 	rt_val_push_func_init(stack, &size_loc, &data_begin, arity, (void*)node, NULL);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
 	if (err_state()) {
