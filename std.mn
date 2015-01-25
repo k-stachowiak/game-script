@@ -1,0 +1,83 @@
+# Greatest Common Divisor.
+(bind gcd (func (x y)
+	(if (= y 0)
+		x
+		(gcd y (% x y))
+	)
+))
+
+# Least Common Multiple.
+(bind lcm (func (x y)
+	(* (/ x (gcd x y)) y)
+))
+
+# Finds the minimum element in an array.
+(bind min-element (func (x)
+	(do
+		# Recursive implementation of the algorithm.
+		(bind min-element-impl (func (element x)
+			(if (empty x)
+				element
+				(if (< element (car x))
+					(min-element-impl element (cdr x))
+					(min-element-impl (car x) (cdr x))
+				)
+			)
+		))
+		
+		# Algorithm execution.
+		(if (= (length x) 1)
+			(car x)
+			(min-element-impl (car x) (cdr x))
+		)
+	)
+))
+
+# Merges two sorted arrays into a sorted array.
+(bind merge (func (x y)
+	(do
+		# Accumulator argument based merge algorithm implementation.
+		(bind merge-impl (func (x y result)
+			(do				
+				(bind left-empty (empty x))	
+				(bind right-empty (empty y))
+				(if (&& left-empty right-empty)
+					result
+					(if left-empty
+						(cat result y)
+						(if right-empty
+							(cat result x)
+							(do
+								# Merge step for non-empty arrays.
+								(bind l (car x))
+								(bind r (car y))
+								(if (< l r)
+									(merge-impl (cdr x) y (cat result [l]))
+									(merge-impl x (cdr y) (cat result [r]))
+								)
+							)
+						)
+					)
+				)
+			)
+		))
+		
+		# Algorithm execution.
+		(merge-impl x y [])
+	)
+))
+
+# Sorts an array
+(bind sort (func (x)
+	(do
+		(bind len (length x))
+        (bind half-len (/ len 2))
+        (if (<= len 1)
+            x
+            (merge
+                (sort (slice x 0 half-len))
+                (sort (slice x half-len len))
+            )
+        )
+	)
+))

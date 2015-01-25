@@ -1,62 +1,13 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include "bif.h"
 #include "bif_detail.h"
 #include "stack.h"
 #include "runtime.h"
 #include "rt_val.h"
-
-bool initialized = false;
+#include "src_iter.h"
 
 struct SourceLocation bif_location = { SRC_LOC_BIF, -1, -1 };
-
-struct SourceLocation bif_arg_locations[] = {
-	{ SRC_LOC_BIF, -1, -1 },
-	{ SRC_LOC_BIF, -1, -1 },
-	{ SRC_LOC_BIF, -1, -1 }
-};
-
-char *bif_arg_names[] = { "x", "y", "z" };
-
-static void bif_init_impl_ptrs(struct AstNode *node)
-{
-	node->data.bif.u_impl = NULL;
-	node->data.bif.bi_impl = NULL;
-	node->data.bif.ter_impl = NULL;
-}
-
-void bif_init_unary_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 1;
-	node->data.bif.type = AST_BIF_UNARY;
-	bif_init_impl_ptrs(node);
-}
-
-void bif_init_binary_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 2;
-	node->data.bif.type = AST_BIF_BINARY;
-	bif_init_impl_ptrs(node);
-}
-
-void bif_init_ternary_ast(struct AstNode *node)
-{
-	node->type = AST_BIF;
-	node->loc = bif_location;
-	node->data.bif.func.formal_args = bif_arg_names;
-	node->data.bif.func.arg_locs = bif_arg_locations;
-	node->data.bif.func.arg_count = 3;
-	node->data.bif.type = AST_BIF_TERNARY;
-	bif_init_impl_ptrs(node);
-}
 
 enum ValueType bif_match_un(
 		struct Runtime *rt,
@@ -101,18 +52,5 @@ enum BifBinaryMatch bif_match_bin(
 	} else {
 		return BBM_MISMATCH;
 	}
-}
-
-void bif_assure_init(void)
-{
-	if (initialized) {
-		return;
-	}
-
-	initialized = true;
-	bif_init_arythmetic();
-	bif_init_compare();
-	bif_init_logic();
-	bif_init_array();
 }
 

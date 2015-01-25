@@ -26,7 +26,7 @@ bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
         /*
 		printf("Error parsing source: %s.\n", source);
 		printf("Error : %s.\n", err_msg());
-        */
+        //*/
 		return false;
 	}
 
@@ -37,7 +37,7 @@ bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
             /*
 			printf("Failed consuming an AST node into runtime.\n");
 			printf("Error : %s.\n", err_msg());
-            */
+            //*/
 			ast_node_free(next);
 			return false;
 		}
@@ -58,6 +58,8 @@ int test(int argc, char *argv[])
 
     RuntimeTestFunction runtime_tests[] = {
 
+		test_regression_comment,
+        test_regression_cyclic_calls,
         test_regression_real_in_array,
 
         test_runtime_sanity,

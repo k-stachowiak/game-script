@@ -12,12 +12,11 @@
 
 /* TODO:
  * =====
- * - Fix headers.
  * - Algorithms:
- *   - merge sort:
- *      - PREDICATE
- *      - implement the splitting phase
+ *	- Enable predicates in the algorithms
+ * - Improve capturing algorithm so that captured functions are bound to the local symmap.
  * - Side effects: print
+ * - File type
  *
  * Questions:
  * - should source locations be pushed to the stack? In debug mode?

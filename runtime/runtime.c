@@ -29,29 +29,28 @@ static void rt_init(struct Runtime *rt, long stack)
 
 	sym_map_init_global(gsm);
 
-    bif_assure_init();
-    sym_map_insert(gsm, "sqrt", eval(&bif_sqrt, rt, gsm), &bif_location);
-    sym_map_insert(gsm, "+", eval(&bif_add, rt, gsm), &bif_location);
-    sym_map_insert(gsm, "-", eval(&bif_sub, rt, gsm), &bif_location);
-    sym_map_insert(gsm, "*", eval(&bif_mul, rt, gsm), &bif_location);
-    sym_map_insert(gsm, "/", eval(&bif_div, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "%", eval(&bif_mod, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "=", eval(&bif_eq, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "<", eval(&bif_lt, rt, gsm), &bif_location);
-	sym_map_insert(gsm, ">", eval(&bif_gt, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "<=", eval(&bif_leq, rt, gsm), &bif_location);
-	sym_map_insert(gsm, ">=", eval(&bif_geq, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "&&", eval(&bif_and, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "||", eval(&bif_or, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "~~", eval(&bif_not, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "length", eval(&bif_length, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "empty", eval(&bif_empty, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "car", eval(&bif_car, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "cdr", eval(&bif_cdr, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "reverse", eval(&bif_reverse, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "cons", eval(&bif_cons, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "cat", eval(&bif_cat, rt, gsm), &bif_location);
-	sym_map_insert(gsm, "slice", eval(&bif_slice, rt, gsm), &bif_location);
+    sym_map_insert(gsm, "sqrt", eval_bif(rt, bif_sqrt, 1), &bif_location);
+    sym_map_insert(gsm, "+", eval_bif(rt, bif_add, 2), &bif_location);
+    sym_map_insert(gsm, "-", eval_bif(rt, bif_sub, 2), &bif_location);
+    sym_map_insert(gsm, "*", eval_bif(rt, bif_mul, 2), &bif_location);
+    sym_map_insert(gsm, "/", eval_bif(rt, bif_div, 2), &bif_location);
+	sym_map_insert(gsm, "%", eval_bif(rt, bif_mod, 2), &bif_location);
+	sym_map_insert(gsm, "=", eval_bif(rt, bif_eq, 2), &bif_location);
+	sym_map_insert(gsm, "<", eval_bif(rt, bif_lt, 2), &bif_location);
+	sym_map_insert(gsm, ">", eval_bif(rt, bif_gt, 2), &bif_location);
+	sym_map_insert(gsm, "<=", eval_bif(rt, bif_leq, 2), &bif_location);
+	sym_map_insert(gsm, ">=", eval_bif(rt, bif_geq, 2), &bif_location);
+	sym_map_insert(gsm, "&&", eval_bif(rt, bif_and, 2), &bif_location);
+	sym_map_insert(gsm, "||", eval_bif(rt, bif_or, 2), &bif_location);
+	sym_map_insert(gsm, "~~", eval_bif(rt, bif_not, 1), &bif_location);
+	sym_map_insert(gsm, "length", eval_bif(rt, bif_length, 1), &bif_location);
+	sym_map_insert(gsm, "empty", eval_bif(rt, bif_empty, 1), &bif_location);
+	sym_map_insert(gsm, "car", eval_bif(rt, bif_car, 1), &bif_location);
+	sym_map_insert(gsm, "cdr", eval_bif(rt, bif_cdr, 1), &bif_location);
+	sym_map_insert(gsm, "reverse", eval_bif(rt, bif_reverse, 1), &bif_location);
+	sym_map_insert(gsm, "cons", eval_bif(rt, bif_cons, 2), &bif_location);
+	sym_map_insert(gsm, "cat", eval_bif(rt, bif_cat, 2), &bif_location);
+	sym_map_insert(gsm, "slice", eval_bif(rt, bif_slice, 3), &bif_location);
 }
 
 static void rt_deinit(struct Runtime *rt)

@@ -152,24 +152,6 @@ static void eval_reference(
 	stack_push_copy(stack, kvp->stack_loc);
 }
 
-/**
- * Note: This is not called during regular evaluation, but when 
- *       BIFs are added to the global scope.
- */
-static void eval_bif(struct AstNode *node, struct Stack *stack)
-{
-    static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
-    static VAL_HEAD_SIZE_T size = VAL_PTR_BYTES + 2 * VAL_SIZE_BYTES;
-    static VAL_HEAD_SIZE_T zero = 0;
-    void* impl = (void*)node;
-
-	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
-	stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);    
-}
-
 /* Main evaluation dispatch.
  * =========================
  */
@@ -212,8 +194,8 @@ VAL_LOC_T eval_impl(
         break;
 
     case AST_BIF:
-        eval_bif(node, rt->stack);
-        break;
+		LOG_ERROR("Deprecated evaluation of AST_BIF node.\n");
+        exit(1);
 
     case AST_FUNC_CALL:
         eval_func_call(node, rt, sym_map);
@@ -250,5 +232,15 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
         stack_collapse(rt->stack, begin, end);
         return -1;
     }
+}
+
+VAL_LOC_T eval_bif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
+{
+    VAL_LOC_T size_loc, data_begin, result_loc = rt->stack->top;
+    rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, NULL, impl);
+    rt_val_push_func_cap_init(rt->stack, 0);
+    rt_val_push_func_appl_init(rt->stack, 0);
+    rt_val_push_func_final(rt->stack, size_loc, data_begin);
+    return result_loc;
 }
 

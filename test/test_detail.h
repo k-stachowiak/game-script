@@ -9,10 +9,12 @@ typedef bool (*RuntimeTestFunction)(struct Runtime *);
 
 bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs);
 
-bool test_lexer();
-bool test_parser();
+bool test_lexer(void);
+bool test_parser(void);
 
+bool test_regression_comment(struct Runtime *rt);
 bool test_regression_real_in_array(struct Runtime *rt);
+bool test_regression_cyclic_calls(struct Runtime *rt);
 
 bool test_runtime_sanity(struct Runtime *rt);
 bool test_runtime_free_on_fail(struct Runtime *rt);

@@ -58,7 +58,9 @@ void rt_val_push_func_init(
         struct Stack *stack,
         VAL_LOC_T *size_loc,
         VAL_LOC_T *data_begin,
-        void *func_def);
+        VAL_SIZE_T arity,
+        void *ast_def,
+        void *bif_impl);
 
 void rt_val_push_func_cap_init_deferred(
         struct Stack *stack,
@@ -74,7 +76,6 @@ void rt_val_push_func_cap_final_deferred(
         VAL_SIZE_T cap_count);
 
 void rt_val_push_func_appl_init(struct Stack *stack, VAL_SIZE_T appl_count);
-void rt_val_push_func_appl_empty(struct Stack *stack);
 
 void rt_val_push_func_final(
         struct Stack *stack,
@@ -138,10 +139,10 @@ char* rt_val_peek_string(struct Runtime *rt, VAL_LOC_T loc);
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc);
 
 /** Computes the relevant locations of a function value. */
-void rt_val_function_locs(
-        struct Runtime *rt, 
-        VAL_LOC_T loc,
-        VAL_LOC_T *impl_loc,
+void rt_val_function_locs(struct Runtime *rt, VAL_LOC_T loc,
+        VAL_LOC_T *arity_loc,
+        VAL_LOC_T *ast_def_loc,
+        VAL_LOC_T *bif_impl_loc,
         VAL_LOC_T *cap_start,
         VAL_LOC_T *appl_start);
 

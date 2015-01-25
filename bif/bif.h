@@ -1,41 +1,48 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #ifndef BIF_H
 #define BIF_H
 
-#include "ast.h"
+#include "define.h"
 
 #define BIF_MAX_ARITY 3
 
-extern struct AstNode bif_sqrt;
+struct Runtime;
+
+typedef void (*bif_unary_func)(struct Runtime *rt, VAL_LOC_T x_loc);
+typedef void (*bif_binary_func)(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+typedef void (*bif_ternary_func)(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc, VAL_LOC_T z_loc);
 
 extern struct SourceLocation bif_location;
 
-extern struct AstNode bif_add;
-extern struct AstNode bif_sub;
-extern struct AstNode bif_mul;
-extern struct AstNode bif_div;
-extern struct AstNode bif_mod;
+/* Array */
+void bif_length(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_empty(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_car(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_cdr(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_reverse(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_cons(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_slice(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc, VAL_LOC_T z_loc);
 
-extern struct AstNode bif_eq;
-extern struct AstNode bif_lt;
-extern struct AstNode bif_gt;
-extern struct AstNode bif_leq;
-extern struct AstNode bif_geq;
+/* Arythmetic */
+void bif_sqrt(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_add(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_sub(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_mul(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_div(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_mod(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 
-extern struct AstNode bif_and;
-extern struct AstNode bif_or;
-extern struct AstNode bif_not;
+/* Comparison */
+void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_gt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_leq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_geq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 
-extern struct AstNode bif_length;
-extern struct AstNode bif_empty;
-extern struct AstNode bif_car;
-extern struct AstNode bif_cdr;
-extern struct AstNode bif_reverse;
-extern struct AstNode bif_cons;
-extern struct AstNode bif_cat;
-extern struct AstNode bif_slice;
-
-void bif_assure_init(void);
+/* Logic */
+void bif_and(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_or(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_not(struct Runtime *rt, VAL_LOC_T x_loc);
 
 #endif

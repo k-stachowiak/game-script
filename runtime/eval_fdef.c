@@ -142,7 +142,14 @@ static void efd_push_captures(
 			!efd_is_global(symbol, sym_map, &cap_location) &&
 			!efd_is_argument(symbol, &func_def->func)) {
 				if (!efd_is_defined(symbol, sym_map)) {
-					eval_error_not_found(symbol);
+					if (node->type != AST_FUNC_CALL) {
+						/* Note: it is allowed for the func call symbol not to be defined.
+						 * in such case it shall not be captured in the closure and
+						 * will result in runtime error if called before the definition
+						 * is made.
+						 */
+						eval_error_not_found(symbol);
+					}
 					return;
 				}
 				rt_val_push_func_cap(stack, symbol, cap_location);
@@ -162,12 +169,13 @@ void eval_func_def(
         struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
-	rt_val_push_func_init(stack, &size_loc, &data_begin, (void*)node);
+	VAL_SIZE_T arity = node->data.func_def.func.arg_count;
+	rt_val_push_func_init(stack, &size_loc, &data_begin, arity, (void*)node, NULL);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
 	if (err_state()) {
 		return;
 	}
-	rt_val_push_func_appl_empty(stack);
+	rt_val_push_func_appl_init(stack, 0);
 	rt_val_push_func_final(stack, size_loc, data_begin);
 }
 
