@@ -12,10 +12,8 @@
 
 /* TODO:
  * =====
- * - Add "self" to local symbol map, which will enable recursion.
  * - Algorithms:
- *   - merge sort:
- *      - PREDICATE
+ *	- Enable predicates in the algorithms
  * - Side effects: print
  * - File type
  *
