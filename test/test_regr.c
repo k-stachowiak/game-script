@@ -4,6 +4,24 @@
 
 #include "test_detail.h"
 
+bool test_regression_comment(struct Runtime *rt)
+{
+	VAL_LOC_T results[2];
+	char *source =
+		"#start with a comment\n"
+		"(bind # end line with a comment\n"
+		"    #interleave with a comment   \n"
+		"x 0)\n"
+		"(bind y 42) # comment at the end of the source\n";
+	
+	if (!test_source_eval(rt, source, results)) {
+		printf("Failed parsing source code with comments.\n");
+		return false;
+	}
+
+	return true;
+}
+
 bool test_regression_cyclic_calls(struct Runtime *rt)
 {
     VAL_LOC_T results[2];

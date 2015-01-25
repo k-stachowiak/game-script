@@ -26,7 +26,7 @@ bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
         /*
 		printf("Error parsing source: %s.\n", source);
 		printf("Error : %s.\n", err_msg());
-        */
+        //*/
 		return false;
 	}
 
@@ -58,6 +58,7 @@ int test(int argc, char *argv[])
 
     RuntimeTestFunction runtime_tests[] = {
 
+		test_regression_comment,
         test_regression_cyclic_calls,
         test_regression_real_in_array,
 

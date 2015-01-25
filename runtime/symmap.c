@@ -26,7 +26,7 @@ void sym_map_init_global(struct SymMap *sym_map)
 }
 
 void sym_map_init_local(
-        struct SymMap *sym_map,
+		struct SymMap *sym_map,
         struct SymMap *global)
 {
     sym_map->global = global;

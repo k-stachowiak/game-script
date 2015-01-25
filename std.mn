@@ -1,0 +1,21 @@
+# Finds the minimum element in an array.
+(bind min-element (func (x)
+	(do
+		# Recursive implementation of the algorithm.
+		(bind impl (func (element x)
+			(if (empty x)
+				element
+				(if (< element (car x))
+					(impl element (cdr x))
+					(impl (car x) (cdr x))
+				)
+			)
+		))
+		
+		# Algorithm execution.
+		(if (= (length x) 1)
+			(car x)
+			(impl (car x) (cdr x))
+		)
+	)
+))

@@ -8,7 +8,7 @@
 
 #include "test_detail.h"
 
-bool test_lexer()
+bool test_lexer(void)
 {
 	struct DomNode *dom_node;
 
@@ -34,7 +34,7 @@ bool test_lexer()
 	return true;
 }
 
-bool test_parser()
+bool test_parser(void)
 {
 	int i;
 

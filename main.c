@@ -12,13 +12,12 @@
 
 /* TODO:
  * =====
- * - Always perform preloading global symbols.
- * - Fix headers.
+ * - Add "self" to local symbol map, which will enable recursion.
  * - Algorithms:
  *   - merge sort:
  *      - PREDICATE
- *      - implement the splitting phase
  * - Side effects: print
+ * - File type
  *
  * Questions:
  * - should source locations be pushed to the stack? In debug mode?

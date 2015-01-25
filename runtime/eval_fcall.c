@@ -152,10 +152,10 @@ static bool efc_insert_expression(
 }
 
 /** Evaluates a general function implementation i.e. not BIF. */
-static void efc_evaluate_general(
+static void efc_evaluate_ast(
         struct Runtime *rt,
         struct SymMap *sym_map,
-		char *symbol,
+		char *symbol, VAL_LOC_T func_loc, struct SourceLocation *func_src_loc,
 		struct AstNode *actual_args,
         struct AstNode *impl,
         VAL_SIZE_T cap_count, VAL_LOC_T cap_loc,
@@ -174,6 +174,7 @@ static void efc_evaluate_general(
 	} else {
 		sym_map_init_local(&local_sym_map, sym_map);
 	}
+	sym_map_insert(&local_sym_map, symbol, func_loc, func_src_loc);
 
 	/* Insert captures into the scope. */
 	for (i = 0; i < cap_count; ++i) {
@@ -340,8 +341,13 @@ void eval_func_call(
 
 	} else if (arity == applied) {
         if (ast_def && !bif_impl) {
-			efc_evaluate_general(rt, sym_map, symbol, actual_args, ast_def,
-                    cap_count, cap_start, appl_count, appl_start);
+			efc_evaluate_ast(
+				rt, sym_map,
+				symbol, val_loc, &ast_def->loc,
+				actual_args,
+				ast_def,
+                cap_count, cap_start,
+				appl_count, appl_start);
 
         } else if (!ast_def && bif_impl) {
 			efc_evaluate_bif(rt, sym_map, symbol, actual_args,
