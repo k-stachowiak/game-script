@@ -418,7 +418,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
     if (len == 3) {
         return ast_make_literal_character(&dom->loc, atom[1]);
 
-    } else if (len == 4 && atom[1] == '\\') {
+	} else if (len == 4 && atom[1] == TOK_DELIM_ESCAPE) {
         switch(atom[2]) {
          case 'b':
             return ast_make_literal_character(&dom->loc, '\b');

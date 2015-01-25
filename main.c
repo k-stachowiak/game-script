@@ -14,6 +14,7 @@
  * =====
  * - Algorithms:
  *	- Enable predicates in the algorithms
+ * - Improve capturing algorithm so that captured functions are bound to the local symmap.
  * - Side effects: print
  * - File type
  *
