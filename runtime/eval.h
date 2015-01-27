@@ -22,10 +22,10 @@ void efc_log_bif_call(
 		int arg_count,
 		VAL_LOC_T result_loc);
 #else
-#	define efc_log_gen_call_sym
-#	define efc_log_gen_call_arg
-#	define efc_log_result
-#	define efc_log_bif_call
+#	define efc_log_gen_call_sym(X)
+#	define efc_log_gen_call_arg(X, Y)
+#	define efc_log_result(X, Y)
+#	define efc_log_bif_call(A, B, C, D, E)
 #endif
 
 void eval_location_reset(void);

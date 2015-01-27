@@ -4,7 +4,7 @@
 
 #include "lex.h"
 #include "parse.h"
-#include "ast_parse.h"
+#include "parse.h"
 
 #include "test_detail.h"
 
@@ -52,7 +52,7 @@ bool test_parser(void)
 	int good_sources_count = sizeof(good_sources) / sizeof(good_sources[0]);
 
 	for (i = 0; i < good_sources_count; ++i) {
-		struct AstNode *ast_node = ast_parse_source(good_sources[i]);
+		struct AstNode *ast_node = parse_source(good_sources[i]);
 		if (!ast_node) {
             printf("Failed parsing source: \"%s\".\n", good_sources[i]);
 			return false;

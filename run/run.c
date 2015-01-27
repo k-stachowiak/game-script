@@ -5,7 +5,7 @@
 #include "error.h"
 #include "runtime.h"
 #include "rt_val.h"
-#include "ast_parse.h"
+#include "parse.h"
 
 int run(int argc, char *argv[])
 {
@@ -24,7 +24,7 @@ int run(int argc, char *argv[])
     }
 
     filename = argv[1];
-    if (!(ast_list = ast_parse_file(filename))) {
+    if (!(ast_list = parse_file(filename))) {
         return 1;
     }
 
@@ -35,7 +35,7 @@ int run(int argc, char *argv[])
         return 1;
     }
 
-    call_expr = ast_parse_source("(main)");
+    call_expr = parse_source("(main)");
     rt_consume_one(rt, call_expr, &result_loc, NULL);
     if (err_state()) {
         rt_free(rt);

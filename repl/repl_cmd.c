@@ -9,7 +9,7 @@
 #include "error.h"
 #include "repl_cmd.h"
 #include "runtime.h"
-#include "ast_parse.h"
+#include "parse.h"
 #include "rt_val.h"
 
 static void repl_cmd_error_bad(void)
@@ -53,7 +53,7 @@ static enum ReplCmdResult repl_cmd_load(
 
 	filename = pieces[0];
 
-	if (!(ast_list = ast_parse_file(filename))) {
+	if (!(ast_list = parse_file(filename))) {
 		return REPL_CMD_INTERNAL_ERROR;
 	}
 

@@ -5,7 +5,7 @@
 
 #include "error.h"
 
-#include "ast_parse.h"
+#include "parse.h"
 
 #include "test.h"
 #include "dom.h"
@@ -21,12 +21,12 @@ bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
 	err_reset();
 
 	/* 1. Parse the input source. */
-	ast_list = ast_parse_source(source);
+	ast_list = parse_source(source);
 	if (!ast_list) {
-        /*
+#if TEST_DEBUG
 		printf("Error parsing source: %s.\n", source);
 		printf("Error : %s.\n", err_msg());
-        //*/
+#endif
 		return false;
 	}
 
@@ -34,10 +34,10 @@ bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
 	while (ast_list) {
 		rt_consume_one(rt, ast_list, locs + (i++), &next);
 		if (err_state()) {
-            /*
+#if TEST_DEBUG
 			printf("Failed consuming an AST node into runtime.\n");
 			printf("Error : %s.\n", err_msg());
-            //*/
+#endif
 			ast_node_free(next);
 			return false;
 		}

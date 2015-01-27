@@ -5,12 +5,14 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "term.h"
 #include "log.h"
 #include "collection.h"
 #include "error.h"
 #include "parse.h"
 #include "memory.h"
 #include "tok.h"
+#include "lex.h"
 #include "dom.h"
 
 static void parse_error_char_length(int len, struct SourceLocation *where)
@@ -51,6 +53,9 @@ static bool all_of(char *current, char *last, int (*f)(int))
     }
     return true;
 }
+
+static struct AstNode *parse_one(struct DomNode *dom);
+static struct AstNode *parse_list(struct DomNode *dom);
 
 static struct AstNode *parse_do_block(struct DomNode *dom)
 {
@@ -530,7 +535,7 @@ static struct AstNode *parse_reference(struct DomNode *dom)
     return ast_make_reference(&dom->loc, symbol);
 }
 
-struct AstNode *parse_one(struct DomNode *dom)
+static struct AstNode *parse_one(struct DomNode *dom)
 {
 	err_reset();
 	struct AstNode *node;
@@ -552,7 +557,7 @@ struct AstNode *parse_one(struct DomNode *dom)
 	}
 }
 
-struct AstNode *parse_list(struct DomNode *dom)
+static struct AstNode *parse_list(struct DomNode *dom)
 {
 	struct AstNode *node;
     struct AstNode *result = NULL;
@@ -571,3 +576,37 @@ struct AstNode *parse_list(struct DomNode *dom)
 
     return result;
 }
+
+struct AstNode *parse_source(char *source)
+{
+	struct DomNode *dom;
+	struct AstNode *ast;
+
+	dom = lex(source);
+    if (err_state()) {
+		return NULL;
+	}
+
+	ast = parse_list(dom);
+    if (err_state()) {
+		return NULL;
+	}
+
+	dom_free(dom);
+	return ast;
+}
+
+struct AstNode *parse_file(char *filename)
+{
+	char *source = my_getfile(filename);
+	if (!source) {
+        struct ErrMessage msg;
+        err_msg_init(&msg, "PARSE");
+        err_msg_append(&msg, "Failed loading file \"%s\"", filename);
+        err_msg_set(&msg);
+		return NULL;
+	}
+
+	return parse_source(source);
+}
+

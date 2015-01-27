@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-#include "ast_parse.h"
+#include "parse.h"
 #include "rt_val.h"
 
 #include "test_detail.h"
@@ -19,7 +19,7 @@ bool test_runtime_sanity(struct Runtime *rt)
 bool test_runtime_free_on_fail(struct Runtime *rt)
 {
     char *source = "(bind x (invalid-call))";
-    struct AstNode *ast_list = ast_parse_source(source);
+    struct AstNode *ast_list = parse_source(source);
 
     rt_consume_one(rt, ast_list, NULL, NULL);
 

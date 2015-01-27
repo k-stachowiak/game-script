@@ -4,7 +4,7 @@
 
 #include "log.h"
 #include "ast.h"
-#include "ast_parse.h"
+#include "parse.h"
 #include "error.h"
 #include "stack.h"
 #include "eval.h"
@@ -36,7 +36,7 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
     int ast_len;
 	VAL_LOC_T location;
 
-	ast = ast_parse_source(expression_line);
+	ast = parse_source(expression_line);
 	if (!ast) {
 		return REPL_EXPR_INTERNAL_ERROR;
 	} 

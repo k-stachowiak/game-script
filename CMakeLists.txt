@@ -18,38 +18,37 @@ include_directories(
 set(CMAKE_C_FLAGS "-Wall -g -O0")
 
 add_executable(moon-lang
-    ./ast/ast_parse.c
-    ./ast/ast.c
+    ./run/run.c
+    ./main.c
+    ./front/dom.c
+    ./front/lex.c
+    ./front/parse.c
+    ./front/tok.c
+    ./bif/bif_logic.c
     ./bif/bif_arythm.c
     ./bif/bif_array.c
-    ./bif/bif_common.c
     ./bif/bif_compare.c
-    ./bif/bif_logic.c
-    ./front/parse.c
-    ./front/lex.c
-    ./front/dom.c
-    ./front/tok.c
-    ./repl/repl_expr.c
-    ./repl/repl_cmd.c
-    ./repl/repl.c
-    ./test/test.c
-    ./test/test_parse.c
-    ./test/test_runtime.c
-    ./test/test_regr.c
-    ./run/run.c
-    ./runtime/stack.c
-    ./runtime/eval_fdef.c
-    ./runtime/eval_fcall.c
+    ./bif/bif_common.c
     ./runtime/eval_cpd.c
+    ./runtime/eval_fcall.c
+    ./runtime/symmap.c
+    ./runtime/stack.c
     ./runtime/eval.c
     ./runtime/runtime.c
+    ./runtime/eval_fdef.c
     ./runtime/rt_val.c
-    ./runtime/symmap.c
+    ./ast/ast.c
+    ./repl/repl_cmd.c
+    ./repl/repl.c
+    ./repl/repl_expr.c
     ./common/error.c
+    ./common/term.c
     ./common/memory.c
     ./common/src_iter.c
-    ./common/term.c
-    ./main.c
+    ./test/test_regr.c
+    ./test/test_runtime.c
+    ./test/test_parse.c
+    ./test/test.c
     )
 
 target_link_libraries(moon-lang m)
