@@ -3,6 +3,8 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
+#include "memory.h"
+
 #define LIST_APPEND(MLA_ELEMENT, MLA_LIST, MLA_END) \
     do { \
         if (!(*(MLA_END))) { \

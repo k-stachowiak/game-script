@@ -7,6 +7,7 @@ include_directories(
     ./client/repl
     ./client/run
     ./client/test
+    ./client/test2
     ./common
     ./front
     ./runtime
@@ -29,6 +30,8 @@ add_executable(moon-lang
     ./client/test/test_runtime.c
     ./client/test/test_parse.c
     ./client/test/test.c
+    ./client/test2/test2.c
+    ./client/test2/test2_front.c
     ./runtime/bif_logic.c
     ./runtime/bif_arythm.c
     ./runtime/bif_array.c

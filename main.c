@@ -8,26 +8,35 @@
 #include "error.h"
 #include "repl.h"
 #include "test.h"
+#include "test2.h"
 #include "run.h"
 
-/* TODO:
+/*
+ * TODO:
  * =====
+ * - Thorough tesets:
+ *  - Front-end
+ *  - Runtime:
+ *      - Operation of all AST elements
+ *      - BIF correctness
  * - Algorithms:
- *	- Enable predicates in the algorithms
+ *  - Enable predicates in the algorithms
  * - Improve capturing algorithm so that captured functions are bound to the local symmap.
- * - Side effects: print
+ * - print BIF
  * - File type
  *
  * Questions:
+ * ==========
  * - should source locations be pushed to the stack? In debug mode?
  */
 
 struct {
-    char *module_name;
+    char *client_name;
     int (*impl)(int, char*[]);
-} module_map[] = {
+} client_map[] = {
     { "repl", repl },
     { "test", test },
+    { "test2", test2 },
     { "run", run }
 };
 
@@ -42,19 +51,19 @@ int main(int argc, char *argv[])
         error = 1;
 
     } else {
-        int num_modules = sizeof(module_map)/sizeof(module_map[0]), i;
+        int num_clients = sizeof(client_map)/sizeof(client_map[0]), i;
         bool found = false;
 
-        for (i = 0; i < num_modules; ++i) {
-            if (strcmp(argv[1], module_map[i].module_name) == 0) {
+        for (i = 0; i < num_clients; ++i) {
+            if (strcmp(argv[1], client_map[i].client_name) == 0) {
                 found = true;
-                error = module_map[i].impl(argc - 1, argv + 1);
+                error = client_map[i].impl(argc - 1, argv + 1);
                 break;
             }
         }
 
         if (!found) {
-            printf("Module \"%s\" not implemented.\n", argv[1]);
+            printf("Client \"%s\" not implemented.\n", argv[1]);
             error = 1;
         }
     }

@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "memory.h"
 #include "dom.h"
@@ -110,6 +111,10 @@ char *dom_node_parse_symbol(struct DomNode *node)
     int len, i;
 
     if (node->type != DOM_ATOM) {
+        return NULL;
+    }
+
+    if (isdigit(node->atom[0])) {
         return NULL;
     }
 
