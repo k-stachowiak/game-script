@@ -102,10 +102,46 @@ static void test_runtime_eval_literals(
     test_runtime_eval_literal_string(tc, rt, "\"x\\\"y\"", "Evaluate string literal with escapes", "x\\\"y");
 }
 
+static void test_runtime_eval_do_fail(struct TestContext *tc, struct Runtime *rt)
+{
+    char *test_name = "Fail on evaluating empty do block";
+    VAL_LOC_T result[1];
+    if (test_runtime_source_eval(rt, "(do)", result)) {
+        tc_record(tc, test_name, false);
+    } else {
+        tc_record(tc, test_name, true);
+    }
+    rt_reset(rt);
+}
+
+static void test_runtime_eval_do_succeed(struct TestContext *tc, struct Runtime *rt)
+{
+    char *test_name = "Succeed on evaluating correct do block";
+
+    VAL_LOC_T result[1];
+
+    if (!test_runtime_source_eval(rt, "(do 1 2 3)", result)) {
+        tc_record(tc, test_name, false);
+        rt_reset(rt);
+        return;
+    }
+
+    if (rt_val_peek_type(rt, *result) != VAL_INT || rt_val_peek_int(rt, *result) != 3) {
+        tc_record(tc, test_name, false);
+        rt_reset(rt);
+        return;
+    }
+
+    tc_record(tc, test_name, true);
+    rt_reset(rt);
+}
+
 void test2_runtime(struct TestContext *tc)
 {
 	struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_eval_literals(tc, rt);
+    test_runtime_eval_do_fail(tc, rt);
+    test_runtime_eval_do_succeed(tc, rt);
     rt_free(rt);
 }
 
