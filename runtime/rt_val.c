@@ -4,6 +4,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "memory.h"
 #include "log.h"
 #include "runtime.h"
 #include "rt_val.h"
@@ -100,11 +101,20 @@ void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
 
 void rt_val_push_string(struct Stack *stack, char *value)
 {
+    int len = strlen(value);
+    char *value_copy = mem_malloc(len + 1);
+
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_STRING;
-	VAL_HEAD_SIZE_T size = strlen(value) + 1;
+	VAL_HEAD_SIZE_T size = len - 2;
+
+    memcpy(value_copy, value, len + 1);
+    value[len - 2] = '\0';
+
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-	stack_push(stack, size, value);
+	stack_push(stack, size, value_copy + 1);
+
+    mem_free(value_copy);
 }
 
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)

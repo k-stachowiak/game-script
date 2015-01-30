@@ -51,14 +51,8 @@ int test(int argc, char *argv[])
 {
 	struct Runtime *rt;
 
-    TestFunction simple_tests[] = {
-        test_lexer,
-        test_parser
-    };
-
     RuntimeTestFunction runtime_tests[] = {
 
-		test_regression_comment,
         test_regression_cyclic_calls,
         test_regression_real_in_array,
 
@@ -73,7 +67,6 @@ int test(int argc, char *argv[])
         test_function_object
     };
 
-    int simple_tests_count = sizeof(simple_tests) / sizeof(*simple_tests);
     int runtime_tests_count = sizeof(runtime_tests) / sizeof(*runtime_tests);
 
     int i, success;
@@ -82,26 +75,6 @@ int test(int argc, char *argv[])
 
 	if (argc != 1) {
         printf("TEST: ignored additional command line arguments.\n");
-    }
-
-    /* Simple tests.
-     * -------------
-     */
-
-    for (i = 0, success = 0; i < simple_tests_count; ++i) {
-        printf("test %d...\n", i);
-        if (simple_tests[i]()) {
-            ++success;
-        }
-    }
-
-    printf("[%s] %d/%d simple tests succeeded.\n",
-        (success == simple_tests_count) ? "OK" : "FAIL",
-        success, simple_tests_count
-    );
-
-    if (success != simple_tests_count) {
-        result = false;
     }
 
     /* Runtime tests.

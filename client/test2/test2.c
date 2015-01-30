@@ -21,7 +21,7 @@ void tc_deinit(struct TestContext *tc)
 
 void tc_report(struct TestContext *tc)
 {
-    int i, successes;
+    int i, successes = 0;
     char *success_string;
     for (i = 0; i < tc->entries.size; ++i) {
 
@@ -52,6 +52,7 @@ int test2(int argc, char *argv[])
 
     tc_init(&tc);
     test2_front(&tc);
+    test2_runtime(&tc);
     tc_report(&tc);
     tc_deinit(&tc);
 

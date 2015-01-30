@@ -67,7 +67,6 @@ static void test_parse_literal_string(
     ast_node_free(node);
 }
 
-
 #define test_parse_literal(TC, SRC, NAME, EX_ASTTYPE, EX_CTYPE, EX_VALUE) \
     do { \
         struct AstNode *node = parse_source(SRC); \
@@ -114,6 +113,18 @@ static void test_lex_mixed(struct TestContext *tc)
 {
     test_lex(tc, "( atom ( )", "Fail on undelimited complex expression", false);
     test_lex(tc, "this (should () be (lexed) nicely)", "Succeed on well formed complex expression", true);
+}
+
+static void test_lex_comments(struct TestContext *tc)
+{
+	char *source =
+		"#start with a comment\n"
+		"(bind # end line with a comment\n"
+		"    #interleave with a comment   \n"
+		"x 0)\n"
+		"(bind y 42) # comment at the end of the source\n";
+
+    test_lex(tc, source, "Succeed on a code interleaved with comments.", true);
 }
 
 static void test_parse_do(struct TestContext *tc)
@@ -211,6 +222,7 @@ void test2_front(struct TestContext *tc)
     test_lex_atom(tc);
     test_lex_compound(tc);
     test_lex_mixed(tc);
+    test_lex_comments(tc);
     test_parse_do(tc);
     test_parse_bind(tc);
     test_parse_iff(tc);

@@ -441,6 +441,8 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
             return ast_make_literal_character(&dom->loc, '\"');
          case '\'':
             return ast_make_literal_character(&dom->loc, '\'');
+         case '0':
+            return ast_make_literal_character(&dom->loc, '\0');
          default:
             return NULL;
         }

@@ -23,6 +23,7 @@ void tc_report(struct TestContext *tc);
 void tc_record(struct TestContext *tc, char *name, bool result);
 
 void test2_front(struct TestContext *tc);
+void test2_runtime(struct TestContext *tc);
 
 #endif
 
