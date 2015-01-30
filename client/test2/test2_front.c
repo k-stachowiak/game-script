@@ -36,7 +36,6 @@ static void test_parse(
 static void test_parse_literal_string(
         struct TestContext *tc,
         char *source,
-        char *expected_value,
         char *test_name)
 {
     struct AstNode *node = parse_source(source);
@@ -58,7 +57,7 @@ static void test_parse_literal_string(
         return;
     }
     
-    if (strcmp(node->data.literal.data.string, expected_value) != 0) {
+    if (strcmp(node->data.literal.data.string, source) != 0) {
         tc_record(tc, test_name, false);
         ast_node_free(node);
         return;
@@ -184,10 +183,9 @@ static void test_parse_literals(struct TestContext *tc)
     test_parse_literal(tc, "true", "Boolean true", AST_LIT_BOOL, int, true);
     test_parse_literal(tc, "false", "Boolean false", AST_LIT_BOOL, int, false);
 
-    test_parse_literal_string(tc, "\"simple string\"", "simple string", "Simple string");
+    test_parse_literal_string(tc, "\"simple string\"", "Simple string");
     test_parse_literal_string(tc,
             "\"string \\\"with\\\" escaped 'quotes'\"",
-            "string \"with\" escaped 'quotes'",
             "Quoted string");
 
     test_parse_literal(tc, "\'a\'", "Character \'a\'", AST_LIT_CHAR, char, 'a');

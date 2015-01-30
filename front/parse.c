@@ -465,13 +465,18 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
     atom = dom->atom;
     len = strlen(atom);
 
-    if (len > 0 && (isdigit(atom[0]) || atom[0] == '-' || atom[0] == '+') &&
-        all_of(atom, atom + len, isdigit)) {
-        long value = atol(atom);
-        return ast_make_literal_int(&dom->loc, value);
-    } else {
-        return NULL;
+    if (len > 0) {
+        char *first = atom, *last = atom + len;
+        if (atom[0] == '-' || atom[0] == '+') {
+            ++first;
+        }
+        if (all_of(first, last, isdigit)) {
+            long value = atol(atom);
+            return ast_make_literal_int(&dom->loc, value);
+        }
     }
+
+    return NULL;
 }
 
 static struct AstNode *parse_literal_real(struct DomNode *dom)
@@ -492,6 +497,10 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
     first = atom;
     last = first + len;
     period = find(first, last, '.');
+
+    if (atom[0] == '-' || atom[0] == '+') {
+        ++first;
+    }
 
     if (period == last ||
         !all_of(first, period, isdigit) ||
