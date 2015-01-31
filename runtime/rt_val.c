@@ -423,36 +423,67 @@ static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y
 
 static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
+    /* Note, for every compound type, empty compound type-matches any other. */
+
     VAL_LOC_T current_x, current_y, last_x;
+    int len_x, len_y;
 
     struct ValueHeader
         header_x = rt_val_peek_header(rt->stack, x),
         header_y = rt_val_peek_header(rt->stack, y);
 
-    if (!(header_x.type == VAL_ARRAY && header_y.type == VAL_ARRAY) &&
-        !(header_x.type == VAL_TUPLE && header_y.type == VAL_TUPLE)) {
-        return false;
-    }
+    if (header_x.type == VAL_ARRAY && header_y.type == VAL_ARRAY) {
 
-    if (rt_val_cpd_len(rt, x) != rt_val_cpd_len(rt, y)) {
-        return false;
-    }
+        /* In case of arrays we only compare the first elements as the homogenity
+         * is assured by the language rules in static and dynamic checks.
+         */
 
-    current_x = rt_val_cpd_first_loc(x);
-    current_y = rt_val_cpd_first_loc(y);
-    last_x = current_x + rt_val_peek_size(rt, current_x);
+        len_x = rt_val_cpd_len(rt, x);
+        len_y = rt_val_cpd_len(rt, y);
 
-    while (current_x != last_x) {
+        if (len_x == 0 || len_y == 0) {
+            return true;
 
-        if (!rt_val_pair_homo(rt, current_x, current_y)) {
-            return false;
+        } else {
+            current_x = rt_val_cpd_first_loc(x);
+            current_y = rt_val_cpd_first_loc(y);
+            return rt_val_pair_homo(rt, current_x, current_y);
+
         }
 
-        current_x = rt_val_next_loc(rt, current_x);
-        current_y = rt_val_next_loc(rt, current_y);
-    }
+    } else if (header_x.type == VAL_TUPLE && header_y.type == VAL_TUPLE) {
 
-    return true;
+        /* In case of tuples, we must compare the element counts as well as
+         * all the contents element-wise.
+         */
+
+        len_x = rt_val_cpd_len(rt, x);
+        len_y = rt_val_cpd_len(rt, y);
+
+        if (len_x != len_y) {
+            return false;
+
+        } else {
+            current_x = rt_val_cpd_first_loc(x);
+            current_y = rt_val_cpd_first_loc(y);
+            last_x = current_x + rt_val_peek_size(rt, current_x);
+
+            while (current_x != last_x) {
+                if (!rt_val_pair_homo(rt, current_x, current_y)) {
+                    return false;
+                }
+
+                current_x = rt_val_next_loc(rt, current_x);
+                current_y = rt_val_next_loc(rt, current_y);
+            }
+
+            return true;
+        }
+        
+    } else {
+        return false;
+
+    }
 }
 
 static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
