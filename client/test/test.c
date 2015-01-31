@@ -55,13 +55,8 @@ int test(int argc, char *argv[])
 
         test_regression_cyclic_calls,
         test_regression_real_in_array,
-
         test_bif_cons_homo,
         test_bif_cat_homo,
-        test_local_scope,
-        test_simple_algorithm,
-        test_array_lookup,
-        test_function_object
     };
 
     int runtime_tests_count = sizeof(runtime_tests) / sizeof(*runtime_tests);
