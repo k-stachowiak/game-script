@@ -1,97 +1,9 @@
+/* Copyright (C) 2015 Krzysztof Stachowiak */
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "lex.h"
-#include "dom.h"
-#include "parse.h"
-
 #include "test2_detail.h"
-
-static void test_lex(
-        struct TestContext *tc,
-        char *source,
-        char *test_name,
-        bool expect_success)
-{
-    struct DomNode *node = lex(source);
-    tc_record(tc, test_name, !(expect_success ^ (!!node)));
-    if (node) {
-        dom_free(node);
-    }
-}
-
-static void test_parse(
-        struct TestContext *tc,
-        char *source,
-        char *test_name,
-        bool expect_success)
-{
-    struct AstNode *node = parse_source(source);
-    tc_record(tc, test_name, !(expect_success ^ (!!node)));
-    if (node) {
-        ast_node_free(node);
-    }
-}
-
-static void test_parse_literal_string(
-        struct TestContext *tc,
-        char *source,
-        char *test_name)
-{
-    struct AstNode *node = parse_source(source);
-    
-    if (!node) {
-        tc_record(tc, test_name, false);
-        return;
-    }
-
-    if (node->type != AST_LITERAL) {
-        tc_record(tc, test_name, false);
-        ast_node_free(node);
-        return;
-    }
-
-    if (node->data.literal.type != AST_LIT_STRING) {
-        tc_record(tc, test_name, false);
-        ast_node_free(node);
-        return;
-    }
-    
-    if (strcmp(node->data.literal.data.string, source) != 0) {
-        tc_record(tc, test_name, false);
-        ast_node_free(node);
-        return;
-    }
-
-    tc_record(tc, test_name, true);
-    ast_node_free(node);
-}
-
-#define test_parse_literal(TC, SRC, NAME, EX_ASTTYPE, EX_CTYPE, EX_VALUE) \
-    do { \
-        struct AstNode *node = parse_source(SRC); \
-        if (!node) { \
-            tc_record(TC, NAME, false); \
-            break; \
-        } \
-        if (node->type != AST_LITERAL) { \
-            tc_record(TC, NAME, false); \
-            ast_node_free(node); \
-            break; \
-        } \
-        if (node->data.literal.type != EX_ASTTYPE) { \
-            tc_record(TC, NAME, false); \
-            ast_node_free(node); \
-            break; \
-        } \
-        if (*((EX_CTYPE*)(&(node->data.literal.data))) != EX_VALUE) { \
-            tc_record(TC, NAME, false); \
-            ast_node_free(node); \
-            break; \
-        } \
-        tc_record(TC, NAME, true); \
-        ast_node_free(node); \
-    } while (0)
 
 static void test_lex_atom(struct TestContext *tc)
 {

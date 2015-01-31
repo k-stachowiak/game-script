@@ -14,7 +14,7 @@ include_directories(
     .
     )
 
-set(CMAKE_C_FLAGS "-Wall -g -O0")
+set(CMAKE_C_FLAGS "-Wall -g -O0 -flto")
 
 add_executable(moon-lang
     ./main.c
@@ -31,7 +31,8 @@ add_executable(moon-lang
     ./client/test/test.c
     ./client/test2/test2.c
     ./client/test2/test2_front.c
-    ./client/test2/test2_runtime.c
+    ./client/test2/test2_runtime_basic.c
+    ./client/test2/test2_runtime_func.c
     ./runtime/bif_logic.c
     ./runtime/bif_arythm.c
     ./runtime/bif_array.c
