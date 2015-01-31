@@ -102,7 +102,7 @@ static void test_runtime_eval_source_expect_string(
         rt_reset(rt);
         return;
     }
-    if (strcmp(rt->stack->buffer + *result + VAL_HEAD_BYTES, expected_value) != 0) {
+    if (!rt_val_string_eq(rt, *result, expected_value) != 0) {
         tc_record(tc, test_name, false);
         rt_reset(rt);
         return;

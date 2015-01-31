@@ -164,4 +164,10 @@ VAL_LOC_T rt_val_fun_next_appl_loc(struct Runtime *rt, VAL_LOC_T loc);
 
 bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc);
 
+/* Utility functions.
+ * ==================
+ */
+
+bool rt_val_string_eq(struct Runtime *rt, VAL_LOC_T loc, char *str);
+
 #endif

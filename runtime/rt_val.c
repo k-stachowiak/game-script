@@ -423,8 +423,6 @@ static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y
 
 static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
-    /* Note, for every compound type, empty compound type-matches any other. */
-
     VAL_LOC_T current_x, current_y, last_x;
     int len_x, len_y;
 
@@ -436,6 +434,7 @@ static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T 
 
         /* In case of arrays we only compare the first elements as the homogenity
          * is assured by the language rules in static and dynamic checks.
+         * Note that empty array will type-match any other array.
          */
 
         len_x = rt_val_cpd_len(rt, x);
@@ -514,3 +513,15 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc)
     return true;
 }
 
+bool rt_val_string_eq(struct Runtime *rt, VAL_LOC_T loc, char *str)
+{
+    char *stack_str = rt_val_peek_string(rt, loc);
+    while (*str) {
+        if (*stack_str != *str) {
+            return false;
+        }
+        ++str;
+        ++stack_str;
+    }
+    return true;
+}
