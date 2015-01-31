@@ -6,6 +6,7 @@
 
 #include "memory.h"
 #include "dom.h"
+#include "tok.h"
 
 static char *reserved[] = {
 	"do",
@@ -110,14 +111,22 @@ char *dom_node_parse_symbol(struct DomNode *node)
     char* result;
     int len, i;
 
+    /* Is an atom. */
     if (node->type != DOM_ATOM) {
         return NULL;
     }
 
+    /* Isn't delimited. */
+    if (node->atom[0] == TOK_DELIM_STR || node->atom[0] == TOK_DELIM_CHAR) {
+        return NULL;
+    }
+
+    /* Doesn't start with a digit. */
     if (isdigit(node->atom[0])) {
         return NULL;
     }
 
+    /* Isn't a reserved word. */
 	for (i = 0; i < reserved_count; ++i) {
 		if (strcmp(node->atom, reserved[i]) == 0) {
 			return NULL;
