@@ -9,48 +9,6 @@
 
 #include "test_detail.h"
 
-bool test_runtime_sanity(struct Runtime *rt)
-{
-    VAL_LOC_T results[1];
-	char *source = "(bind x \"x\")";
-    return test_source_eval(rt, source, results);
-}
-
-bool test_runtime_free_on_fail(struct Runtime *rt)
-{
-    char *source = "(bind x (invalid-call))";
-    struct AstNode *ast_list = parse_source(source);
-
-    rt_consume_one(rt, ast_list, NULL, NULL);
-
-    if (err_state()) {
-        return true;
-    } else {
-        printf("No error on invalid ast consume.\n");
-        return false;
-    }
-}
-
-bool test_array_homo(struct Runtime *rt)
-{
-    VAL_LOC_T results[1];
-
-    char *source_homo = "[ 1 2 3 ]";
-    char *source_hetero = "[1 2.0 \"three\"]";
-
-    if (!test_source_eval(rt, source_homo, results)) {
-        printf("Failed evaluatig homogenous array.\n");
-        return false;
-    }
-
-    if (test_source_eval(rt, source_hetero, results)) {
-        printf("Error: Succeeded evaluating heterogenous array.\n");
-        return false;
-    }
-
-    return true;
-}
-
 bool test_bif_cons_homo(struct Runtime *rt)
 {
     char *source_good_1 = "(cons 'a' [])";

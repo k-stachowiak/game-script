@@ -56,9 +56,6 @@ int test(int argc, char *argv[])
         test_regression_cyclic_calls,
         test_regression_real_in_array,
 
-        test_runtime_sanity,
-        test_runtime_free_on_fail,
-        test_array_homo,
         test_bif_cons_homo,
         test_bif_cat_homo,
         test_local_scope,

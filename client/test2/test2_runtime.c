@@ -48,6 +48,20 @@ static void test_runtime_eval_source_fail(
     }
 }
 
+static void test_runtime_eval_source_succeed(
+        struct TestContext *tc,
+        struct Runtime *rt,
+        char *source,
+        char *test_name)
+{
+    VAL_LOC_T result[10];
+    if (test_runtime_eval_source(rt, source, result)) {
+        tc_record(tc, test_name, true);
+    } else {
+        tc_record(tc, test_name, false);
+    }
+}
+
 #define test_runtime_eval_source_expect(TC, RT, SRC, NAME, EX_TYPE, EX_VALUE) \
     do { \
         VAL_LOC_T result[1]; \
@@ -131,12 +145,45 @@ static void test_runtime_eval_bind(struct TestContext *tc, struct Runtime *rt)
     test_runtime_eval_source_expect(tc, rt, "(bind y (+ 2 3))", "Succeed on non-trivial bind", INT, 5);
 }
 
+static void test_runtime_eval_iff(struct TestContext *tc, struct Runtime *rt)
+{
+    test_runtime_eval_source_fail(tc, rt, "(if)", "Fail on evaluating empty if block");
+    test_runtime_eval_source_fail(tc, rt, "(if a)", "Fail on evaluating incomplete if block 1");
+    test_runtime_eval_source_fail(tc, rt, "(if a b)", "Fail on evaluating incomplete if block 2");
+    test_runtime_eval_source_expect(tc, rt, "(if true 1.0 2.0)", "Succeed on iff - true branch", REAL, 1.0);
+    test_runtime_eval_source_expect_string(tc, rt, "(if false \"a\" \"b\")", "Succeed on iff - false branch", "b");
+}
+
+static void test_runtime_eval_reference(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_runtime_eval_source_fail(tc, rt, "x", "Fail on evaluating undefined reference");
+    test_runtime_eval_source_expect(tc, rt, "(do (bind y 3) y)", "Succeed on evaluating defined reference", INT, 3);
+}
+
+static void test_runtime_eval_cpd(struct TestContext *tc, struct Runtime *rt)
+{
+    test_runtime_eval_source_fail(tc, rt, "[ 1.0 \"two\"]", "Fail on evaluating heterogenous array");
+    test_runtime_eval_source_fail(tc, rt, "[ [ 1.0 ]  [ \"two\" ] ]", "Fail on evaluating heterogenous nested array");
+    test_runtime_eval_source_succeed(tc, rt, "[]", "Succeed on evaluating empty array");
+    test_runtime_eval_source_succeed(tc, rt, "[ 1 2 ]", "Succeed on evaluating homogenous array");
+    test_runtime_eval_source_succeed(tc, rt, "[ [ 1 ] [ 2 3 ] ]", "Succeed on evaluating homogenous nested array");
+    test_runtime_eval_source_succeed(tc, rt, "{}", "Succeed on evaluating empty tuple");
+    test_runtime_eval_source_succeed(tc, rt, "{ 1 2 }", "Succeed on evaluating homogenous tuple");
+    test_runtime_eval_source_succeed(tc, rt, "{ 1 [] }", "Succeed on evaluating heterogenous tuple");
+}
+
 void test2_runtime(struct TestContext *tc)
 {
 	struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_eval_literals(tc, rt);
     test_runtime_eval_do(tc, rt);
     test_runtime_eval_bind(tc, rt);
+    test_runtime_eval_iff(tc, rt);
+    test_runtime_eval_reference(tc, rt);
+    test_runtime_eval_iff(tc, rt);
+    test_runtime_eval_cpd(tc, rt);
     rt_free(rt);
 }
 
