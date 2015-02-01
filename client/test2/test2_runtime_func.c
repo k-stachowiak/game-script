@@ -113,12 +113,60 @@ static void test_runtime_func_simple_capture(
     rt_reset(rt);
 }
 
+static void test_runtime_func_cyclic_capture(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+	VAL_LOC_T results[3];
+
+    char *test_name = "Convoluted capture / function call";
+	char *source =
+		"(bind cross-call (func (x) (do\n"
+		"	(bind call-ping (func (x)\n"
+		"		(if (> x 0)\n"
+		"			(call-pong (- x 1))\n"
+		"			\"success ping\"\n"
+		"		)\n"
+		"	))\n"
+		"	(bind call-pong (func (x)\n"
+		"		(if (> x 0)\n"
+		"			(call-ping (- x 1))\n"
+		"			\"success pong\"\n"
+		"		)\n"
+		"	))\n"
+		"	(call-ping x)\n"
+		")))\n"
+		"(cross-call 2)\n"
+		"(cross-call 3)";
+
+    if (!test_eval_source(rt, source, results)) {
+        tc_record(tc, test_name, false);
+        rt_reset(rt);
+        return;
+    }
+
+	if (!rt_val_string_eq(rt, results[1], "success ping")) {
+        tc_record(tc, test_name, false);
+        rt_reset(rt);
+        return;
+    }
+
+	if (!rt_val_string_eq(rt, results[2], "success pong")) {
+        tc_record(tc, test_name, false);
+        rt_reset(rt);
+        return;
+    }
+
+    tc_record(tc, test_name, true);
+    rt_reset(rt);
+}
+
 void test2_runtime_func(struct TestContext *tc)
 {
 	struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_func_simple(tc, rt);
     test_runtime_func_recursive(tc, rt);
     test_runtime_func_simple_capture(tc, rt);
+    test_runtime_func_cyclic_capture(tc, rt);
     rt_free(rt);
 }
-
