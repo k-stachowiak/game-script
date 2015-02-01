@@ -153,6 +153,21 @@ static bool efc_insert_expression(
 	return true;
 }
 
+static void efc_evaluate_ast_init_local_sym_map(
+		struct SymMap *current_sym_map,
+		char *current_symbol,
+		struct SymMap *local_sym_map)
+{
+	struct SymMapKvp *found = sym_map_find_not_global(
+			current_sym_map, current_symbol);
+
+	if (found || !current_sym_map->global) {
+		sym_map_init_local(local_sym_map, current_sym_map);
+	} else {
+		sym_map_init_local(local_sym_map, current_sym_map->global);
+	}
+}
+
 /** Evaluates a general function implementation i.e. not BIF. */
 static void efc_evaluate_ast(
         struct Runtime *rt,
@@ -174,12 +189,8 @@ static void efc_evaluate_ast(
     struct SourceLocation *arg_locs = func_data->ast_def->data.func_def.func.arg_locs;
     struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
 
-	/* Create the local scope. */
-	if (sym_map->global) {
-		sym_map_init_local(&local_sym_map, sym_map->global);
-	} else {
-		sym_map_init_local(&local_sym_map, sym_map);
-	}
+    /* Initialize local scope. */
+    efc_evaluate_ast_init_local_sym_map(sym_map, symbol, &local_sym_map);
 	sym_map_insert(&local_sym_map, symbol, func_loc, &func_data->ast_def->loc);
 
 	/* Insert captures into the scope. */
@@ -231,8 +242,6 @@ cleanup:
 	/* Free the local scope. */
 	sym_map_deinit(&local_sym_map);
 }
-
-/** Tests the argument count against a BIF type. */
 
 /** Evaluates a BIF. */
 static void efc_evaluate_bif(

@@ -136,8 +136,8 @@ static void test_runtime_func_cyclic_capture(
 		"	))\n"
 		"	(call-ping x)\n"
 		")))\n"
-		"(cross-call 2)\n"
-		"(cross-call 3)";
+		"(bind x (cross-call 2))\n"
+		"(bind y (cross-call 3))";
 
     if (!test_eval_source(rt, source, results)) {
         tc_record(tc, test_name, false);
