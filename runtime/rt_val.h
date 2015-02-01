@@ -25,6 +25,21 @@ struct ValueHeader {
 	VAL_HEAD_SIZE_T size;
 };
 
+struct ValueFuncData {
+
+	VAL_LOC_T arity_loc;
+	VAL_LOC_T ast_def_loc;
+	VAL_LOC_T bif_impl_loc;
+	VAL_LOC_T cap_start;
+	VAL_LOC_T appl_start;
+
+	VAL_SIZE_T arity;
+	struct AstNode *ast_def;
+	void *bif_impl;
+	VAL_SIZE_T appl_count;
+	VAL_SIZE_T cap_count;
+};
+
 /* Writing (pushing) API.
  * ======================
  */
@@ -139,12 +154,7 @@ char* rt_val_peek_string(struct Runtime *rt, VAL_LOC_T loc);
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc);
 
 /** Computes the relevant locations of a function value. */
-void rt_val_function_locs(struct Runtime *rt, VAL_LOC_T loc,
-        VAL_LOC_T *arity_loc,
-        VAL_LOC_T *ast_def_loc,
-        VAL_LOC_T *bif_impl_loc,
-        VAL_LOC_T *cap_start,
-        VAL_LOC_T *appl_start);
+struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc);
 
 /** Peek a function capture symbol. */
 char *rt_val_peek_fun_cap_symbol(struct Runtime *rt, VAL_LOC_T cap_loc);

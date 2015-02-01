@@ -31,27 +31,16 @@ static void rt_val_print_compound(
 
 static void rt_val_print_function(struct Runtime *rt, VAL_LOC_T loc)
 {
-	VAL_LOC_T arity_loc, ast_def_loc, bif_impl_loc, cap_start, appl_start;
-	VAL_SIZE_T captures, applied, arity;
-	struct AstNode *ast_def;
-    void *bif_impl;
+	struct ValueFuncData func_data = rt_val_function_data(rt, loc);
 
-	rt_val_function_locs(rt, loc,
-            &arity_loc,
-            &ast_def_loc, &bif_impl_loc,
-            &cap_start, &appl_start);
+	if (func_data.bif_impl && !func_data.ast_def) {
+		printf("built-in function (arity %d)", func_data.arity);
 
-    arity = rt_val_peek_size(rt, arity_loc);
-	ast_def = (struct AstNode*)stack_peek_ptr(rt->stack, ast_def_loc);
-    bif_impl = (void*)stack_peek_ptr(rt->stack, bif_impl_loc);
-
-	if (bif_impl && !ast_def) {
-		printf("built-in function (arity %d)", arity);
-
-	} else if (!bif_impl && ast_def) {
-        captures = rt_val_peek_size(rt, cap_start);
-        applied = rt_val_peek_size(rt, appl_start);
-        printf("function (ar=%d, cap=%d, appl=%d)", arity, captures, applied);
+	} else if (!func_data.bif_impl && func_data.ast_def) {
+        printf("function (ar=%d, cap=%d, appl=%d)",
+			func_data.arity,
+			func_data.cap_count,
+			func_data.appl_count);
 
 	} else {
 		LOG_ERROR("Attempting to print malformed function value.\n");
@@ -349,27 +338,30 @@ VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc)
     return loc + VAL_HEAD_BYTES;
 }
 
-void rt_val_function_locs(struct Runtime *rt, VAL_LOC_T loc,
-        VAL_LOC_T *arity_loc,
-        VAL_LOC_T *ast_def_loc,
-        VAL_LOC_T *bif_impl_loc,
-        VAL_LOC_T *cap_start,
-        VAL_LOC_T *appl_start)
+struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
 {
     int cap_count, i;
+    struct ValueFuncData result;
+    VAL_LOC_T cap_count_loc, appl_count_loc;
+
+    /* Read locations.
+     * ===============
+     */
 
 	loc += VAL_HEAD_BYTES;
 
-    *arity_loc = loc;
+	result.arity_loc = loc;
     loc += VAL_SIZE_BYTES;
 
-    *ast_def_loc = loc;
+    result.ast_def_loc = loc;
     loc += VAL_PTR_BYTES;
 
-    *bif_impl_loc = loc;
+    result.bif_impl_loc = loc;
     loc += VAL_PTR_BYTES;
 
-    *cap_start = loc;
+    cap_count_loc = loc;
+    result.cap_start = cap_count_loc + VAL_SIZE_BYTES;
+
     cap_count = stack_peek_size(rt->stack, loc);
 
     loc += VAL_SIZE_BYTES;
@@ -378,7 +370,20 @@ void rt_val_function_locs(struct Runtime *rt, VAL_LOC_T loc,
         loc = rt_val_fun_next_cap_loc(rt, loc);
     }
 
-    *appl_start = loc;
+    appl_count_loc = loc;
+    result.appl_start = appl_count_loc + VAL_SIZE_BYTES;
+
+    /* Lookup values.
+     * ==============
+     */
+
+    result.arity = stack_peek_size(rt->stack, result.arity_loc);
+    result.ast_def = (struct AstNode*)stack_peek_ptr(rt->stack, result.ast_def_loc);
+    result.bif_impl = (void*)stack_peek_ptr(rt->stack, result.bif_impl_loc);
+    result.cap_count = stack_peek_size(rt->stack, cap_count_loc);
+    result.appl_count = stack_peek_size(rt->stack, appl_count_loc);
+
+    return result;
 }
 
 char *rt_val_peek_fun_cap_symbol(struct Runtime *rt, VAL_LOC_T cap_loc)
