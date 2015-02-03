@@ -1,98 +1,62 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2015 Krzysztof Stachowiak */
 
+#include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
-
-#include "error.h"
-
-#include "parse.h"
-
-#include "test.h"
-#include "dom.h"
-#include "runtime.h"
+#include <string.h>
 
 #include "test_detail.h"
 
-bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs)
+void tc_init(struct TestContext *tc)
 {
-	int i = 0;
-	struct AstNode *ast_list = NULL, *next;
+    tc->entries.data = NULL;
+    tc->entries.cap = 0;
+    tc->entries.size = 0;
+}
 
-	err_reset();
+void tc_deinit(struct TestContext *tc)
+{
+    ARRAY_FREE(tc->entries);
+}
 
-	/* 1. Parse the input source. */
-	ast_list = parse_source(source);
-	if (!ast_list) {
-#if TEST_DEBUG
-		printf("Error parsing source: %s.\n", source);
-		printf("Error : %s.\n", err_msg());
-#endif
-		return false;
-	}
+void tc_report(struct TestContext *tc)
+{
+    int i, successes = 0;
+    char *success_string;
+    for (i = 0; i < tc->entries.size; ++i) {
 
-	/* 2. Evaluate the source nodes. */
-	while (ast_list) {
-		rt_consume_one(rt, ast_list, locs + (i++), &next);
-		if (err_state()) {
-#if TEST_DEBUG
-			printf("Failed consuming an AST node into runtime.\n");
-			printf("Error : %s.\n", err_msg());
-#endif
-			ast_node_free(next);
-			return false;
-		}
-		ast_list = next;
-	}
+        struct TestEntry *te = tc->entries.data + i;
 
-	return true;
+        if (te->result) {
+            ++successes;
+            success_string = "OK";
+        } else {
+            success_string = "FAIL";
+        }
+
+        printf("[%s] %s\n", success_string, te->name);
+    }
+
+    printf("\n%d/%d tests passed.\n", successes, i);
+}
+
+void tc_record(struct TestContext *tc, char *name, bool result)
+{
+    struct TestEntry te = { name, result };
+    ARRAY_APPEND(tc->entries, te);
 }
 
 int test(int argc, char *argv[])
 {
-	struct Runtime *rt;
+    struct TestContext tc;
 
-    RuntimeTestFunction runtime_tests[] = {
+    tc_init(&tc);
+    test_front(&tc);
+    test_runtime_basic(&tc);
+    test_runtime_func(&tc);
+    test_runtime_bif(&tc);
+    tc_report(&tc);
+    tc_deinit(&tc);
 
-        test_regression_cyclic_calls,
-        test_regression_real_in_array,
-        test_bif_cons_homo,
-        test_bif_cat_homo,
-    };
-
-    int runtime_tests_count = sizeof(runtime_tests) / sizeof(*runtime_tests);
-
-    int i, success;
-
-    bool result = true;
-
-	if (argc != 1) {
-        printf("TEST: ignored additional command line arguments.\n");
-    }
-
-    /* Runtime tests.
-     * --------------
-     */
-
-	rt = rt_make(64 * 1024);
-
-    for (i = 0, success = 0; i < runtime_tests_count; ++i) {
-        printf("test %d...\n", i);
-        if (runtime_tests[i](rt)) {
-            ++success;
-        }
-        rt_reset(rt);
-    }
-
-    printf("[%s] %d/%d runtime tests succeeded.\n",
-        (success == runtime_tests_count) ? "OK" : "FAIL",
-        success, runtime_tests_count
-    );
-
-    if (success != runtime_tests_count) {
-        result = false;
-    }
-
-    rt_free(rt);
-
-	return !result;
+    return 0;
 }
+

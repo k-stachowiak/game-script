@@ -1,6 +1,6 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
-#include "test2_detail.h"
+#include "test_helpers.h"
 
 static void test_runtime_func_simple(
         struct TestContext *tc,
@@ -161,7 +161,7 @@ static void test_runtime_func_cyclic_capture(
     rt_reset(rt);
 }
 
-void test2_runtime_func(struct TestContext *tc)
+void test_runtime_func(struct TestContext *tc)
 {
 	struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_func_simple(tc, rt);

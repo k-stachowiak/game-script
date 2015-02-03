@@ -1,10 +1,9 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #ifndef TEST_H
 #define TEST_H
 
-#define TEST_DEBUG false
-
 int test(int argc, char *argv[]);
 
 #endif
+

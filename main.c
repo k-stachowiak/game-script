@@ -8,16 +8,13 @@
 #include "error.h"
 #include "repl.h"
 #include "test.h"
-#include "test2.h"
 #include "run.h"
 
 /*
  * TODO:
  * =====
  * - Thorough tesets:
- *  - Front-end
  *  - Runtime:
- *      - Operation of all AST elements
  *      - BIF correctness
  * - Algorithms:
  *  - Enable predicates in the algorithms
@@ -36,7 +33,6 @@ struct {
 } client_map[] = {
     { "repl", repl },
     { "test", test },
-    { "test2", test2 },
     { "run", run }
 };
 

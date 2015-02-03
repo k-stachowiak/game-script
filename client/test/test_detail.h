@@ -1,22 +1,49 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
+#ifndef TEST_DETAIL_H
+#define TEST_DETAIL_H
+
 #include <stdbool.h>
 
+#include "define.h"
+#include "error.h"
+#include "collection.h"
+
+#include "lex.h"
+#include "dom.h"
+#include "parse.h"
 #include "runtime.h"
+#include "rt_val.h"
 
-typedef bool (*RuntimeTestFunction)(struct Runtime *);
+/* Test context API.
+ * =================
+ */
 
-bool test_source_eval(struct Runtime *rt, char *source, VAL_LOC_T *locs);
+struct TestEntry {
+    char *name;
+    bool result;
+};
 
-bool test_regression_real_in_array(struct Runtime *rt);
-bool test_regression_cyclic_calls(struct Runtime *rt);
+struct TestContext {
+    struct {
+        struct TestEntry *data;
+        int cap, size;
+    } entries;
+};
 
-bool test_runtime_sanity(struct Runtime *rt);
-bool test_runtime_free_on_fail(struct Runtime *rt);
-bool test_array_homo(struct Runtime *rt);
-bool test_bif_cons_homo(struct Runtime *rt);
-bool test_bif_cat_homo(struct Runtime *rt);
-bool test_local_scope(struct Runtime *rt);
-bool test_simple_algorithm(struct Runtime *rt);
-bool test_array_lookup(struct Runtime *rt);
-bool test_function_object(struct Runtime *rt);
+void tc_init(struct TestContext *tc);
+void tc_deinit(struct TestContext *tc);
+void tc_report(struct TestContext *tc);
+void tc_record(struct TestContext *tc, char *name, bool result);
+
+/* Main test procedures.
+ * =====================
+ */
+
+void test_front(struct TestContext *tc);
+void test_runtime_basic(struct TestContext *tc);
+void test_runtime_func(struct TestContext *tc);
+void test_runtime_bif(struct TestContext *tc);
+
+#endif
+

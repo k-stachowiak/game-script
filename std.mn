@@ -1,4 +1,4 @@
-# Greatest Common Divisor.
+### Greatest Common Divisor.
 (bind gcd (func (x y)
 	(if (= y 0)
 		x
@@ -6,78 +6,99 @@
 	)
 ))
 
-# Least Common Multiple.
+### Least Common Multiple.
 (bind lcm (func (x y)
 	(* (/ x (gcd x y)) y)
 ))
 
-# Finds the minimum element in an array.
-(bind min-element (func (x)
-	(do
-		# Recursive implementation of the algorithm.
-		(bind min-element-impl (func (element x)
-			(if (empty x)
-				element
-				(if (< element (car x))
-					(min-element-impl element (cdr x))
-					(min-element-impl (car x) (cdr x))
-				)
-			)
-		))
-		
-		# Algorithm execution.
-		(if (= (length x) 1)
-			(car x)
-			(min-element-impl (car x) (cdr x))
-		)
-	)
-))
+### Finds the minimum element in an array with a custom comparator.
+(bind min-element-cmp (func (x cmp) (do
 
-# Merges two sorted arrays into a sorted array.
-(bind merge (func (x y)
-	(do
-		# Accumulator argument based merge algorithm implementation.
-		(bind merge-impl (func (x y result)
-			(do				
-				(bind left-empty (empty x))	
-				(bind right-empty (empty y))
-				(if (&& left-empty right-empty)
-					result
-					(if left-empty
-						(cat result y)
-						(if right-empty
-							(cat result x)
-							(do
-								# Merge step for non-empty arrays.
-								(bind l (car x))
-								(bind r (car y))
-								(if (< l r)
-									(merge-impl (cdr x) y (cat result [l]))
-									(merge-impl x (cdr y) (cat result [r]))
-								)
-							)
-						)
-					)
-				)
-			)
-		))
-		
-		# Algorithm execution.
-		(merge-impl x y [])
-	)
-))
-
-# Sorts an array
-(bind sort (func (x)
-	(do
-		(bind len (length x))
-        (bind half-len (/ len 2))
-        (if (<= len 1)
-            x
-            (merge
-                (sort (slice x 0 half-len))
-                (sort (slice x half-len len))
+    (bind min-element-impl (func (element x)
+        (if (empty x)
+            element
+            (if (cmp element (car x))
+                (min-element-impl element (cdr x))
+                (min-element-impl (car x) (cdr x))
             )
         )
-	)
-))
+    ))
+    
+    (if (= (length x) 1)
+        (car x)
+        (min-element-impl (car x) (cdr x))
+    )
+
+)))
+
+### Finds the minimum element in an array with a default comparator: less than.
+(bind min-element (func (x) (min-element-cmp x <)))
+
+### Merges two sorted arrays into a sorted array with a custom comparator.
+(bind merge2-cmp (func (x y cmp) (do
+    (bind merge2-impl (func (x y result) (do
+        (bind x-empty (empty x))	
+        (bind y-empty (empty y))
+        (if (&& x-empty y-empty)
+            result
+            (do
+                (if (|| y-empty (cmp (car x) (car y)))
+                    (merge2-impl (cdr x) y (cat result [(car x)]))
+                    (merge2-impl x (cdr y) (cat result [(car y)]))
+                )
+            )
+        )
+    )))
+    (merge2-impl x y [])
+)))
+
+### Merges two sorted arrays into a sorted array with a custom comparator.
+(bind merge-cmp (func (x y cmp) (do
+
+    (bind merge-non-empty (func (x y) (do
+        (bind l (car x))
+        (bind r (car y))
+        (if (cmp l r)
+            (merge-impl (cdr x) y (cat result [l]))
+            (merge-impl x (cdr y) (cat result [r]))
+        )
+    )))
+
+    (bind merge-impl (func (x y result) (do				
+        (bind x-empty (empty x))	
+        (bind y-empty (empty y))
+        (if (&& x-empty y-empty)
+            result
+            (if x-empty
+                (cat result y)
+                (if y-empty
+                    (cat result x)
+                    (merge-non-empty x y)
+                )
+            )
+        )
+    )))
+    
+    (merge-impl x y [])
+)))
+
+### Merges two sorted arrays into a sorted array.
+### A default comparator less than assumed.
+(bind merge (func (x y) (merge2-cmp x y <)))
+
+### Sorts an array with a custom comparator.
+(bind sort-cmp (func (x cmp) (do
+    (bind len (length x))
+    (bind half-len (/ len 2))
+    (if (<= len 1)
+        x
+        (merge2-cmp
+            (sort (slice x 0 half-len))
+            (sort (slice x half-len len))
+            cmp
+        )
+    )
+)))
+
+### Sorts an array with a default comparator: less than.
+(bind sort (func (x) (sort-cmp x <)))

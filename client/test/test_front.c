@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "test2_detail.h"
+#include "test_helpers.h"
 
 static void test_lex_atom(struct TestContext *tc)
 {
@@ -129,7 +129,7 @@ static void test_parse_literals(struct TestContext *tc)
     test_parse(tc, "8e9", "Fail on real scientific notation", false);
 }
 
-void test2_front(struct TestContext *tc)
+void test_front(struct TestContext *tc)
 {
     test_lex_atom(tc);
     test_lex_compound(tc);

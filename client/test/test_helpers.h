@@ -1,51 +1,12 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
-#ifndef TEST2_DETAIL_H
-#define TEST2_DETAIL_H
+#ifndef TEST_HELPERS_H
+#define TEST_HELPERS_H
 
-#include <stdbool.h>
+#include "test_detail.h"
 
-#include "define.h"
-#include "error.h"
-#include "collection.h"
-
-#include "lex.h"
-#include "dom.h"
-#include "parse.h"
-#include "runtime.h"
-#include "rt_val.h"
-
-/* Test context API.
- * =================
- */
-
-struct TestEntry {
-    char *name;
-    bool result;
-};
-
-struct TestContext {
-    struct {
-        struct TestEntry *data;
-        int cap, size;
-    } entries;
-};
-
-void tc_init(struct TestContext *tc);
-void tc_deinit(struct TestContext *tc);
-void tc_report(struct TestContext *tc);
-void tc_record(struct TestContext *tc, char *name, bool result);
-
-/* Main test procedures.
- * =====================
- */
-
-void test2_front(struct TestContext *tc);
-void test2_runtime_basic(struct TestContext *tc);
-void test2_runtime_func(struct TestContext *tc);
-
-/* Common lexer/parser test API.
- * =============================
+/* Lex/parse time testing API.
+ * ===========================
  */
 
 void test_lex(
@@ -53,11 +14,13 @@ void test_lex(
         char *source,
         char *test_name,
         bool expect_success);
+
 void test_parse(
         struct TestContext *tc,
         char *source,
         char *test_name,
         bool expect_success);
+
 void test_parse_literal_string(
         struct TestContext *tc,
         char *source,
@@ -89,21 +52,24 @@ void test_parse_literal_string(
         ast_node_free(node); \
     } while (0)
 
-/* Common runtime test api.
- * ========================
+/* Runtime testing API.
+ * ====================
  */
 
 bool test_eval_source(struct Runtime *rt, char *source, VAL_LOC_T *locs);
+
 void test_eval_source_fail(
         struct TestContext *tc,
         struct Runtime *rt,
         char *source,
         char *test_name);
+
 void test_eval_source_succeed(
         struct TestContext *tc,
         struct Runtime *rt,
         char *source,
         char *test_name);
+
 void test_eval_source_expect_string(
         struct TestContext *tc,
         struct Runtime *rt,
@@ -133,5 +99,5 @@ void test_eval_source_expect_string(
         rt_reset(RT); \
     } while(0)
 
-#endif
 
+#endif

@@ -1,6 +1,6 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
-#include "test2_detail.h"
+#include "test_helpers.h"
 
 static void test_runtime_literals(
         struct TestContext *tc,
@@ -65,7 +65,7 @@ static void test_runtime_cpd(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_succeed(tc, rt, "{ 1 [] }", "Succeed on evaluating heterogenous tuple");
 }
 
-void test2_runtime_basic(struct TestContext *tc)
+void test_runtime_basic(struct TestContext *tc)
 {
 	struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_literals(tc, rt);
