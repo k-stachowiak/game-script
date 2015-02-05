@@ -42,6 +42,7 @@ static void rt_init(struct Runtime *rt, long stack)
 	sym_map_insert(gsm, ">=", eval_bif(rt, bif_geq, 2), &bif_location);
 	sym_map_insert(gsm, "&&", eval_bif(rt, bif_and, 2), &bif_location);
 	sym_map_insert(gsm, "||", eval_bif(rt, bif_or, 2), &bif_location);
+	sym_map_insert(gsm, "^^", eval_bif(rt, bif_xor, 2), &bif_location);
 	sym_map_insert(gsm, "~~", eval_bif(rt, bif_not, 1), &bif_location);
 	sym_map_insert(gsm, "length", eval_bif(rt, bif_length, 1), &bif_location);
 	sym_map_insert(gsm, "empty", eval_bif(rt, bif_empty, 1), &bif_location);
