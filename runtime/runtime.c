@@ -24,6 +24,9 @@ static void rt_init(struct Runtime *rt, long stack)
 
 	rt->stack = stack_make(stack);
 	rt->node_store = NULL;
+	rt->eval_callback_data = NULL;
+	rt->eval_callback_begin = NULL;
+	rt->eval_callback_end = NULL;
 
     gsm = &rt->global_sym_map;
 
@@ -96,6 +99,17 @@ void rt_restore(struct Runtime *rt)
 	}
 
 	stack_collapse(rt->stack, rt->saved_loc, rt->stack->top);
+}
+
+void rt_set_eval_callback(
+		struct Runtime *rt,
+		void *data,
+		EvalCallback begin,
+		EvalCallback end)
+{
+	rt->eval_callback_data = data;
+	rt->eval_callback_begin = begin;
+	rt->eval_callback_end = end;
 }
 
 void rt_consume_one(

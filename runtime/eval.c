@@ -206,7 +206,17 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 	eval_location_reset();
 
     begin = rt->stack->top;
+
+	if (rt->eval_callback_begin) {
+		rt->eval_callback_begin(rt->eval_callback_data, node);
+	}
+
     result = eval_impl(node, rt, sym_map);
+
+	if (rt->eval_callback_end) {
+		rt->eval_callback_end(rt->eval_callback_data, node);
+	}
+
     end = rt->stack->top;
 
     if (!err_state()) {

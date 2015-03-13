@@ -36,6 +36,7 @@ add_executable(moon-lang
     ./runtime/bif_array.c
     ./runtime/bif_compare.c
     ./runtime/bif_common.c
+	./runtime/dbg.c
     ./runtime/eval_cpd.c
     ./runtime/eval_fcall.c
     ./runtime/symmap.c
