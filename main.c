@@ -12,19 +12,8 @@
 
 /*
  * TODO:
- * =====
- * - Thorough tesets:
- *  - Runtime:
- *      - BIF correctness
- * - Algorithms:
- *  - Enable predicates in the algorithms
- * - Improve capturing algorithm so that captured functions are bound to the local symmap.
- * - print BIF
- * - File type
- *
- * Questions:
- * ==========
- * - should source locations be pushed to the stack? In debug mode?
+ * - finish debugger module
+ * - debug sorting algorithm with comparison passed as an argument
  */
 
 struct {
