@@ -12,6 +12,9 @@ enum ReplCmdResult {
 	REPL_CMD_QUIT
 };
 
+void repl_cmd_init(struct Runtime* rt);
+void repl_cmd_deinit(void);
+
 enum ReplCmdResult repl_cmd_command(struct Runtime *rt, char *command_line);
 
 #endif

@@ -11,6 +11,10 @@
 #include "runtime.h"
 #include "parse.h"
 #include "rt_val.h"
+#include "dbg.h"
+
+struct Debugger dbg;
+bool dbg_enabled;
 
 static void repl_cmd_error_bad(void)
 {
@@ -89,6 +93,29 @@ static void repl_cmd_print_sym_map(struct Runtime *rt)
 	rt_for_each_sym(rt, repl_cmd_print_sym_map_kvp);
 }
 
+static void repl_cmd_dbg_toggle(struct Runtime *rt)
+{
+    if (dbg_enabled) {
+        rt_reset_eval_callback(rt);
+        dbg_enabled = false;
+    } else {
+        rt_set_eval_callback(rt, &dbg, dbg_callback_begin, dbg_callback_end);
+        dbg_enabled = true;
+    }
+}
+
+void repl_cmd_init(struct Runtime *rt)
+{
+    dbg_init(&dbg);
+    dbg_enabled = false;
+    repl_cmd_dbg_toggle(rt); /* HACK to enable debugger by default. */
+}
+
+void repl_cmd_deinit(void)
+{
+    dbg_deinit(&dbg);
+}
+
 enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
 {
 	char *pieces[2];
@@ -118,6 +145,9 @@ enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
 
 	} else if (strcmp(pieces[0], "psm") == 0) {
 		repl_cmd_print_sym_map(rt);
+
+    } else if (strcmp(pieces[0], "d") == 0) {
+        repl_cmd_dbg_toggle(rt);
 
 	} else {
         repl_cmd_error_bad();

@@ -101,6 +101,13 @@ void rt_restore(struct Runtime *rt)
 	stack_collapse(rt->stack, rt->saved_loc, rt->stack->top);
 }
 
+void rt_reset_eval_callback(struct Runtime *rt)
+{
+	rt->eval_callback_data = NULL;
+	rt->eval_callback_begin = NULL;
+	rt->eval_callback_end = NULL;
+}
+
 void rt_set_eval_callback(
 		struct Runtime *rt,
 		void *data,

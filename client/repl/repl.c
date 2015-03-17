@@ -11,7 +11,6 @@
 #include "runtime.h"
 #include "error.h"
 #include "memory.h"
-#include "dbg.h"
 
 static bool request_quit = false;
 
@@ -60,15 +59,13 @@ int repl(int argc, char *argv[])
 {
 	int result;
     bool eof_flag = false;
-    struct Debugger dbg;
     struct Runtime *rt = rt_make(64 * 1024);
-
-    dbg_init(&dbg);
-    rt_set_eval_callback(rt, &dbg, dbg_callback_begin, dbg_callback_end);
 
     if (argc != 1) {
         printf("REPL: ignored additional command line arguments.\n");
     }
+
+    repl_cmd_init(rt);
 
     for (;;) {
 
@@ -76,7 +73,7 @@ int repl(int argc, char *argv[])
 
 		err_reset();
 
-        printf("moon [st:%ld]> ", (long)rt->stack->top);
+        printf("moon > ");
 
         line = my_getline(&eof_flag);
 
@@ -100,6 +97,8 @@ int repl(int argc, char *argv[])
 			break;
 		}
     }
+
+    repl_cmd_deinit();
 
 	rt_free(rt);
 

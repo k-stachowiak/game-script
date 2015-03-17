@@ -32,6 +32,7 @@ void rt_free(struct Runtime *rt);
 void rt_save(struct Runtime *rt);
 void rt_restore(struct Runtime *rt);
 
+void rt_reset_eval_callback(struct Runtime *rt);
 void rt_set_eval_callback(
 		struct Runtime *rt,
 		void *data,
