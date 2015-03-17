@@ -104,8 +104,8 @@ void rt_restore(struct Runtime *rt)
 void rt_set_eval_callback(
 		struct Runtime *rt,
 		void *data,
-		EvalCallback begin,
-		EvalCallback end)
+		EvalCallbackBegin begin,
+		EvalCallbackEnd end)
 {
 	rt->eval_callback_data = data;
 	rt->eval_callback_begin = begin;

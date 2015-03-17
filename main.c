@@ -14,6 +14,7 @@
  * TODO:
  * - finish debugger module
  * - debug sorting algorithm with comparison passed as an argument
+ * - gather the string -> ast node / ast node -> string code together.
  */
 
 struct {

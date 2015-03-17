@@ -116,7 +116,7 @@ void bif_reverse(struct Runtime* rt, VAL_LOC_T location)
     size = rt_val_peek_size(rt, location);
     current_loc = rt_val_cpd_first_loc(location);
     end_loc = current_loc + size;
-    
+
     while (current_loc != end_loc) {
         ARRAY_APPEND(locs, current_loc);
         current_loc = rt_val_next_loc(rt, current_loc);

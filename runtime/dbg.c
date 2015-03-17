@@ -2,53 +2,59 @@
 
 #include <stdio.h>
 
+#include "rt_val.h"
 #include "dbg.h"
-
-static void dbg_print_node_bif(struct AstBif *bif)
-{
-}
-
-static void dbg_print_node_do_block(struct AstDoBlock *do_block)
-{
-}
 
 static void dbg_print_node_bind(struct AstBind *bind)
 {
-}
-
-static void dbg_print_node_iff(struct AstIff *iff)
-{
+    printf("bind \"%s\"\n", bind->symbol);
 }
 
 static void dbg_print_node_compound(struct AstCompound *compound)
 {
+    printf("%s\n", (compound->type == AST_CPD_ARRAY) ? "array" : "tuple");
 }
 
 static void dbg_print_node_func_call(struct AstFuncCall *func_call)
 {
-}
-
-static void dbg_print_node_func_def(struct AstFuncDef *func_def)
-{
+    printf("%s()\n", func_call->symbol);
 }
 
 static void dbg_print_node_literal(struct AstLiteral *literal)
 {
+    switch (literal->type) {
+    case AST_LIT_BOOL:
+        printf("%s\n", literal->data.boolean ? "true" : "false");
+        break;
+    case AST_LIT_STRING:
+        printf("\"%s\"\n", literal->data.string);
+        break;
+    case AST_LIT_CHAR:
+        printf("'%c'\n", literal->data.character);
+        break;
+    case AST_LIT_INT:
+        printf("%ld\n", literal->data.integer);
+        break;
+    case AST_LIT_REAL:
+        printf("%f\n", literal->data.real);
+        break;
+    }
 }
 
 static void dbg_print_node_reference(struct AstReference *reference)
 {
+    printf("ref %s\n", reference->symbol);
 }
 
 static void dbg_print_node(struct AstNode *node)
 {
 	switch (node->type) {
     case AST_BIF:
-		dbg_print_node_bif(&node->data.bif);
+        printf("bif\n");
 		break;
 
 	case AST_DO_BLOCK:
-		dbg_print_node_do_block(&node->data.do_block);
+        printf("do\n");
 		break;
 
     case AST_BIND:
@@ -56,7 +62,7 @@ static void dbg_print_node(struct AstNode *node)
 		break;
 
 	case AST_IFF:
-		dbg_print_node_iff(&node->data.iff);
+        printf("if\n");
 		break;
 
     case AST_COMPOUND:
@@ -68,16 +74,30 @@ static void dbg_print_node(struct AstNode *node)
 		break;
 
     case AST_FUNC_DEF:
-		dbg_print_node_func_def(&node->data.func_def);
+        printf("function definition\n");
 		break;
 
     case AST_LITERAL:
+        printf("literal ");
 		dbg_print_node_literal(&node->data.literal);
 		break;
 
 	case AST_REFERENCE:
 		dbg_print_node_reference(&node->data.reference);
 		break;
+	}
+}
+
+static void dbg_print_indent(struct Debugger *dbg)
+{
+    static const int indent = 4;
+	int i;
+	for (i = 0; i < dbg->lvl * indent; ++i) {
+        if (!(i % indent)) {
+            putc('.', stdout);
+        } else {
+            putc(' ', stdout);
+        }
 	}
 }
 
@@ -92,18 +112,19 @@ void dbg_deinit(struct Debugger *dbg)
 
 void dbg_callback_begin(void *dbg_void, struct AstNode* node)
 {
-	int i;
 	struct Debugger *dbg = (struct Debugger*)dbg_void;
-	for (i = 0; i < dbg->lvl * 2; ++i) {
-		putc(' ', stdout);
-	}
+    dbg_print_indent(dbg);
 	dbg_print_node(node);
 	++dbg->lvl;
 }
 
-void dbg_callback_end(void *dbg_void, struct AstNode* node)
+void dbg_callback_end(void *dbg_void, struct Runtime* rt, VAL_LOC_T val_loc)
 {
 	struct Debugger *dbg = (struct Debugger*)dbg_void;
 	--dbg->lvl;
+    dbg_print_indent(dbg);
+    printf("`~~~~~> ");
+    rt_val_print(rt, val_loc, false);
+    printf("\n");
 }
 

@@ -39,7 +39,7 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
 	ast = parse_source(expression_line);
 	if (!ast) {
 		return REPL_EXPR_INTERNAL_ERROR;
-	} 
+	}
 
     ast_len = ast_list_len(ast);
     if (ast_len != 1) {
@@ -51,14 +51,14 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
             "Function definition cannot prsist without being bound");
         return REPL_EXPR_ERROR;
     }
-		
+
 	rt_consume_one(rt, ast, &location, NULL);
 	if (err_state()) {
 		return REPL_EXPR_INTERNAL_ERROR;
 	}
 
 	rt_val_print(rt, location, true);
-	printf("\n");		
+	printf("\n");
 	return REPL_EXPR_OK;
 }
 

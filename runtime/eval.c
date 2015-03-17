@@ -103,6 +103,10 @@ static void eval_iff(
 	test_loc = eval_impl(node->data.iff.test, rt, sym_map);
 	temp_end = rt->stack->top;
 
+    if (err_state()) {
+        return;
+    }
+
     if (rt_val_peek_type(rt, test_loc) != VAL_BOOL) {
 		eval_common_error("Test expression isn't a boolean value.");
         stack_collapse(rt->stack, temp_begin, temp_end);
@@ -146,6 +150,9 @@ VAL_LOC_T eval_impl(
 {
     VAL_LOC_T begin = rt->stack->top;
 	eval_location_push(&node->loc);
+	if (rt->eval_callback_begin) {
+		rt->eval_callback_begin(rt->eval_callback_data, node);
+	}
 
     switch (node->type) {
     case AST_COMPOUND:
@@ -161,16 +168,16 @@ VAL_LOC_T eval_impl(
 		break;
 
     case AST_BIND:
-    	eval_bind(node, rt, sym_map);
-    	break;
+        eval_bind(node, rt, sym_map);
+        break;
 
 	case AST_IFF:
 		eval_iff(node, rt, sym_map);
 		break;
 
     case AST_REFERENCE:
-    	eval_reference(node, rt->stack, sym_map);
-    	break;
+        eval_reference(node, rt->stack, sym_map);
+        break;
 
     case AST_FUNC_DEF:
         eval_func_def(node, rt->stack, sym_map);
@@ -189,12 +196,16 @@ VAL_LOC_T eval_impl(
 		exit(1);
     }
 
-	eval_location_pop();
-
     if (err_state()) {
         return -1;
+
     } else {
+        if (rt->eval_callback_end) {
+            rt->eval_callback_end(rt->eval_callback_data, rt, begin);
+        }
+        eval_location_pop();
         return begin;
+
     }
 }
 
@@ -206,17 +217,7 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 	eval_location_reset();
 
     begin = rt->stack->top;
-
-	if (rt->eval_callback_begin) {
-		rt->eval_callback_begin(rt->eval_callback_data, node);
-	}
-
     result = eval_impl(node, rt, sym_map);
-
-	if (rt->eval_callback_end) {
-		rt->eval_callback_end(rt->eval_callback_data, node);
-	}
-
     end = rt->stack->top;
 
     if (!err_state()) {
