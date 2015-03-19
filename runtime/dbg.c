@@ -15,6 +15,18 @@ static void dbg_print_node_compound(struct AstCompound *compound)
     printf("%s\n", (compound->type == AST_CPD_ARRAY) ? "array" : "tuple");
 }
 
+static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
+{
+    switch (parafunc->type) {
+    case AST_PARAFUNC_AND:
+        printf("&&()\n");
+        break;
+    case AST_PARAFUNC_OR:
+        printf("||()\n");
+        break;
+    }
+}
+
 static void dbg_print_node_func_call(struct AstFuncCall *func_call)
 {
     printf("%s()\n", func_call->symbol);
@@ -68,6 +80,10 @@ static void dbg_print_node(struct AstNode *node)
     case AST_COMPOUND:
 		dbg_print_node_compound(&node->data.compound);
 		break;
+
+    case AST_PARAFUNC:
+        dbg_print_node_parafunc(&node->data.parafunc);
+        break;
 
     case AST_FUNC_CALL:
 		dbg_print_node_func_call(&node->data.func_call);

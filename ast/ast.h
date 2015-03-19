@@ -19,6 +19,7 @@ enum AstNodeType {
     AST_FUNC_CALL,
     AST_FUNC_DEF,
     AST_LITERAL,
+    AST_PARAFUNC,
     AST_REFERENCE
 };
 
@@ -39,6 +40,11 @@ enum AstLiteralType {
     AST_LIT_CHAR,
     AST_LIT_INT,
     AST_LIT_REAL
+};
+
+enum AstParafuncType {
+    AST_PARAFUNC_AND,
+    AST_PARAFUNC_OR,
 };
 
 /* Partial types.
@@ -104,6 +110,11 @@ struct AstLiteral {
     } data;
 };
 
+struct AstParafunc {
+    enum AstParafuncType type;
+    struct AstNode *args;
+};
+
 struct AstReference {
     char *symbol;
 };
@@ -127,6 +138,7 @@ struct AstNode {
         struct AstFuncCall func_call;
         struct AstFuncDef func_def;
         struct AstLiteral literal;
+        struct AstParafunc parafunc;
         struct AstReference reference;
     } data;
 
@@ -167,6 +179,11 @@ struct AstNode *ast_make_func_def(
     struct SourceLocation *arg_locs,
     int arg_count,
     struct AstNode *expr);
+
+struct AstNode *ast_make_parafunc(
+    struct SourceLocation *loc,
+    enum AstParafuncType type,
+    struct AstNode *args);
 
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value);
 struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value);

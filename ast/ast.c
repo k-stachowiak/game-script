@@ -93,6 +93,20 @@ struct AstNode *ast_make_func_def(
     return result;
 }
 
+struct AstNode *ast_make_parafunc(
+    struct SourceLocation *loc,
+    enum AstParafuncType type,
+    struct AstNode *args)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+    result->next = NULL;
+    result->type = AST_PARAFUNC;
+    result->loc = *loc;
+    result->data.parafunc.type = type;
+    result->data.parafunc.args = args;
+    return result;
+}
+
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 {
 	struct AstNode *result = mem_malloc(sizeof(*result));
@@ -213,6 +227,11 @@ static void ast_literal_free(struct AstLiteral *alit)
     }
 }
 
+static void ast_parafunc_free(struct AstParafunc *parafunc)
+{
+    ast_node_free(parafunc->args);
+}
+
 static void ast_reference_free(struct AstReference *aref)
 {
     mem_free(aref->symbol);
@@ -252,6 +271,10 @@ void ast_node_free_one(struct AstNode *node)
 	case AST_LITERAL:
 		ast_literal_free(&(node->data.literal));
 		break;
+
+    case AST_PARAFUNC:
+        ast_parafunc_free(&(node->data.parafunc));
+        break;
 
 	case AST_REFERENCE:
 		ast_reference_free(&(node->data.reference));

@@ -39,6 +39,9 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 
 	case AST_FUNC_CALL:
 		return node->data.func_call.actual_args;
+
+    case AST_PARAFUNC:
+        return node->data.parafunc.args;
 	}
 
 	LOG_ERROR("Unhandled AST node type.\n");
@@ -60,6 +63,7 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 	case AST_BIND:
 	case AST_IFF:
 	case AST_FUNC_DEF:
+    case AST_PARAFUNC: /* don't capture parafunc symbol */
 		return false;
 
 	case AST_REFERENCE:
@@ -110,14 +114,14 @@ static bool efd_is_argument(char *symbol, struct AstCommonFunc *func)
 
 /**
  * Searches recursively for all symbols in the given function definitions.
- * Pushes on the stack all the values refered to that are not global and 
+ * Pushes on the stack all the values refered to that are not global and
  * not passed in as an argument.
  */
 static void efd_push_captures(
         struct Stack *stack,
         struct SymMap *sym_map,
 		struct AstFuncDef *func_def)
-{	
+{
 	VAL_LOC_T cap_count_loc;
 	VAL_SIZE_T cap_count = 0;
 
@@ -137,17 +141,17 @@ static void efd_push_captures(
 		if ((to_append = efd_get_children(node))) {
 			ARRAY_APPEND(to_visit, to_append);
 		}
-		
+
 		if (efd_has_symbol(node, &symbol) &&
 			!efd_is_global(symbol, sym_map, &cap_location) &&
 			!efd_is_argument(symbol, &func_def->func)) {
 				if (!efd_is_defined(symbol, sym_map)) {
 					if (node->type != AST_FUNC_CALL) {
 						/* Note: it is allowed for the func call symbol not to be defined.
-						 * in such case it shall not be captured in the closure and
-						 * will result in runtime error if called before the definition
-						 * is made.
-						 */
+                         * in such case it shall not be captured in the closure and
+                         * will result in runtime error if called before the definition
+                         * is made.
+                         */
 						eval_error_not_found(symbol);
 					}
 					return;

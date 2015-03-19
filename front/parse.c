@@ -174,8 +174,8 @@ static struct AstNode *parse_iff(struct DomNode *dom)
 	}
 
 	/* NOTE: The expressions are linked here which is useful in a remote place
-	 * in the system. Sorry.
-	 */
+     * in the system. Sorry.
+     */
 	test->next = true_expr;
 	true_expr->next = false_expr;
 	false_expr->next = NULL;
@@ -196,6 +196,43 @@ fail:
 	}
 
 	return NULL;
+}
+
+static struct AstNode *parse_parafunc(struct DomNode *dom)
+{
+	struct DomNode *child = NULL;
+
+	/* 1. Is compound CORE */
+	if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+		return NULL;
+	}
+
+    /* 2. Has 1 or more children. */
+    if (!dom_node_is_cpd_min_size(dom, 1)) {
+        return NULL;
+    }
+
+	child = dom->cpd_children;
+
+    /* 3. Switch the first child. */
+    if (!dom_node_is_atom(child)) {
+        return NULL;
+    }
+
+    /* 3.1. Case &&: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_AND)) {
+        struct AstNode *args = parse_list(child->next);
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_AND, args);
+    }
+
+    /* 3.2. Case ||: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_OR)) {
+        struct AstNode *args = parse_list(child->next);
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_OR, args);
+    }
+
+    /* None of the reserved words were matched. */
+    return NULL;
 }
 
 static struct AstNode *parse_compound(struct DomNode *dom)
@@ -556,10 +593,11 @@ static struct AstNode *parse_one(struct DomNode *dom)
 		(!err_state() && (node = parse_bind(dom))) ||
 		(!err_state() && (node = parse_iff(dom))) ||
 		(!err_state() && (node = parse_func_def(dom))) ||
+        (!err_state() && (node = parse_parafunc(dom))) ||
 		(!err_state() && (node = parse_func_call(dom))) ||
 		(!err_state() && (node = parse_compound(dom)))) {
 		return node;
-		
+
 	} else {
 		if (!err_state()) {
 			parse_error_read("AST node", &dom->loc);

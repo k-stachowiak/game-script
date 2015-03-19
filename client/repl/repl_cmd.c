@@ -13,8 +13,8 @@
 #include "rt_val.h"
 #include "dbg.h"
 
-struct Debugger dbg;
-bool dbg_enabled;
+static struct Debugger dbg;
+static bool dbg_enabled;
 
 static void repl_cmd_error_bad(void)
 {
@@ -98,9 +98,11 @@ static void repl_cmd_dbg_toggle(struct Runtime *rt)
     if (dbg_enabled) {
         rt_reset_eval_callback(rt);
         dbg_enabled = false;
+        printf("debugger disabled\n");
     } else {
         rt_set_eval_callback(rt, &dbg, dbg_callback_begin, dbg_callback_end);
         dbg_enabled = true;
+        printf("debugger enabled\n");
     }
 }
 

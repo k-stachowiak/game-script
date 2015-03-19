@@ -45,6 +45,7 @@ add_executable(moon-lang
     ./runtime/runtime.c
     ./runtime/eval_fdef.c
     ./runtime/eval_do.c
+    ./runtime/eval_parafunc.c
     ./runtime/rt_val.c
     ./ast/ast.c
     ./common/error.c

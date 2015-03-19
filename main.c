@@ -12,7 +12,7 @@
 
 /*
  * TODO:
- * - finish debugger module
+ * - make iff into a parafunc
  * - debug sorting algorithm with comparison passed as an argument
  * - gather the string -> ast node / ast node -> string code together.
  */

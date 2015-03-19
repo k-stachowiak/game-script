@@ -43,13 +43,12 @@ static void bif_logic_error_arg_mismatch(void)
 	err_msg_set(&msg);
 }
 
-static VAL_BOOL_T bif_and_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x && (bool)y; }
-static VAL_BOOL_T bif_or_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x || (bool)y; }
+// static VAL_BOOL_T bif_and_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x && (bool)y; }
+// static VAL_BOOL_T bif_or_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x || (bool)y; }
 static VAL_BOOL_T bif_xor_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x ^ (bool)y; }
 static VAL_BOOL_T bif_not_impl(VAL_BOOL_T x) { return !!x; }
 
-BIF_LOGIC_BINARY_DEF(bif_and)
-BIF_LOGIC_BINARY_DEF(bif_or)
+// BIF_LOGIC_BINARY_DEF(bif_and)
+// BIF_LOGIC_BINARY_DEF(bif_or)
 BIF_LOGIC_BINARY_DEF(bif_xor)
 BIF_LOGIC_UNARY_DEF(bif_not)
-

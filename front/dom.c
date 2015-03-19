@@ -12,6 +12,8 @@ static char *reserved[] = {
 	"do",
 	"bind",
 	"if",
+    "&&",
+    "||",
 	"func",
 	"true",
 	"false"
