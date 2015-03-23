@@ -1,7 +1,26 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include "error.h"
+#include "runtime.h"
+#include "rt_val.h"
+#include "eval.h"
 #include "eval_detail.h"
+
+static void bind_error_incorrrect_type(void)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
+    err_msg_append(&msg, "Compound type mismatched");
+    err_msg_set(&msg);
+}
+
+static void bind_error_pattern_length_mismatch(void)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
+    err_msg_append(&msg, "Compound bind length mismatched");
+    err_msg_set(&msg);
+}
 
 static void eval_bind_recursively(
 		struct Runtime *rt,
@@ -12,8 +31,9 @@ static void eval_bind_recursively(
 {
 	enum ValueType type = rt_val_peek_type(rt, location);
 
-	struct Pattern *child_pat;
 	VAL_LOC_T child_loc;
+	struct Pattern *child_pat;
+    int i, cpd_len, pattern_len, len;
 
 	if (pattern->type == PATTERN_SYMBOL) {
 		sym_map_insert(sym_map, pattern->symbol, location, source_loc);
@@ -21,19 +41,34 @@ static void eval_bind_recursively(
 	}
 
 	if (pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) {
-		err_incorrect_type();
+		bind_error_incorrrect_type();
 		return;
 	}
 
 	if (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE) {
-		err_incorrect_type();
+		bind_error_incorrrect_type();
 		return;
 	}
 
+    cpd_len = rt_val_cpd_len(rt, location);
+    pattern_len = pattern_list_len(pattern);
+    if (cpd_len != pattern_len) {
+        bind_error_pattern_length_mismatch();
+    } else {
+        len = pattern_len;
+    }
+
 	child_loc = rt_val_cpd_first_loc(location);
 	child_pat = pattern->children;
-	for (;;) {
-	}
+
+    for (i = 0; i < len; ++i) {
+        eval_bind_recursively(rt, sym_map, child_pat, child_loc, source_loc);
+        if (err_state()) {
+            return;
+        }
+        child_loc = rt_val_next_loc(rt, child_loc);
+        child_pat = child_pat->next;
+    }
 }
 
 void eval_bind(

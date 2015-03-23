@@ -5,7 +5,7 @@
 
 struct Pattern *pattern_make_symbol(char *symbol)
 {
-	struct Pattern *result = mem_malloc(sizeof(*symbol));
+	struct Pattern *result = mem_malloc(sizeof(*result));
 	result->type = PATTERN_SYMBOL;
 	result->symbol = symbol;
 	result->children = NULL;
@@ -33,3 +33,12 @@ void pattern_free(struct Pattern *pattern)
 	}
 }
 
+int pattern_list_len(struct Pattern *pattern)
+{
+    int result = 0;
+    while (pattern) {
+        ++result;
+        pattern = pattern->next;
+    }
+    return result;
+}

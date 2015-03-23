@@ -51,7 +51,7 @@ static void fcall_error_too_many_args(char *symbol, int arity, int applied)
 {
 	struct ErrMessage msg;
 	err_msg_init_src(&msg, "EVAL FUNC CALL", eval_location_top());
-	err_msg_append(&msg, "Passed too many arguments to \"%s\".", symbol);
+	err_msg_append(&msg, "Passed too many arguments to \"%s\"", symbol);
 	err_msg_append(&msg, "Expected %d, applied %d", arity, applied);
 	err_msg_set(&msg);
 }

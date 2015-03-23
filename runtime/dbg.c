@@ -7,10 +7,8 @@
 
 static void dbg_print_node_bind(struct AstBind *bind)
 {
-	switch (bind->pattern->type) {
-	case PATTERN_SYMBOL:
+    if (bind->pattern->type == PATTERN_SYMBOL) {
 		printf("bind \"%s\"\n", bind->pattern->symbol);
-		break;
 	}
 }
 

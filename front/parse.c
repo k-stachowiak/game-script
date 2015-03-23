@@ -63,7 +63,6 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
 		return pattern_make_symbol(symbol);
 
 	} else {
-		LOG_DEBUG("compound patterns not implemented yet.");
 		parse_error_read("Compound pattern", &dom->loc);
 		return NULL;
 	}

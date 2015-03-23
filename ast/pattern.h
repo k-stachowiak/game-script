@@ -18,5 +18,6 @@ struct Pattern {
 
 struct Pattern *pattern_make_symbol(char *symbol);
 void pattern_free(struct Pattern *pattern);
+int pattern_list_len(struct Pattern *pattern);
 
 #endif
