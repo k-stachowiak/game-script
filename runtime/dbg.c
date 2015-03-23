@@ -101,6 +101,10 @@ static void dbg_print_node(struct AstNode *node)
 	case AST_REFERENCE:
 		dbg_print_node_reference(&node->data.reference);
 		break;
+
+	case AST_PATTERN:
+		printf("pattern\n");
+		break;
 	}
 }
 

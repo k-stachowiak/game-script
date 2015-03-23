@@ -107,6 +107,57 @@ struct AstNode *ast_make_parafunc(
     return result;
 }
 
+struct AstNode *ast_make_pattern_symbol(
+		struct SourceLocation *loc,
+		char *symbol,
+		struct AstPattern *next)
+{
+	struct AstNode *result = mem_malloc(sizeof(*result));
+	result->next = NULL;
+	result->type = AST_PATTERN;
+	result->loc = *loc;
+	result->data.pattern = mem_malloc(sizeof(*result->data.pattern));
+	result->data.pattern->type = AST_PATTERN_SYMBOL;
+	result->data.pattern->symbol = symbol;
+	result->data.pattern->children = NULL;
+	result->data.pattern->next = NULL;
+	return result;
+}
+
+struct AstNode *ast_make_pattern_array(
+		struct SourceLocation *loc,
+		struct AstPattern *children,
+		struct AstPattern *next)
+{
+	struct AstNode *result = mem_malloc(sizeof(*result));
+	result->next = NULL;
+	result->type = AST_PATTERN;
+	result->loc = *loc;
+	result->data.pattern = mem_malloc(sizeof(*result->data.pattern));
+	result->data.pattern->type = AST_PATTERN_ARRAY;
+	result->data.pattern->symbol = NULL;
+	result->data.pattern->children = children;
+	result->data.pattern->next = NULL;
+	return result;
+}
+
+struct AstNode *ast_make_pattern_tuple(
+		struct SourceLocation *loc,
+		struct AstPattern *children,
+		struct AstPattern *next)
+{
+	struct AstNode *result = mem_malloc(sizeof(*result));
+	result->next = NULL;
+	result->type = AST_PATTERN;
+	result->loc = *loc;
+	result->data.pattern = mem_malloc(sizeof(*result->data.pattern));
+	result->data.pattern->type = AST_PATTERN_TUPLE;
+	result->data.pattern->symbol = NULL;
+	result->data.pattern->children = children;
+	result->data.pattern->next = NULL;
+	return result;
+}
+
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 {
 	struct AstNode *result = mem_malloc(sizeof(*result));
@@ -237,6 +288,26 @@ static void ast_reference_free(struct AstReference *aref)
     mem_free(aref->symbol);
 }
 
+static void ast_pattern_free(struct AstPattern *pattern)
+{
+	while (pattern) {
+		struct AstPattern *next_pattern = pattern->next;
+		switch (pattern->type) {
+		case AST_PATTERN_SYMBOL:
+			mem_free(pattern->symbol);
+			break;
+
+		case AST_PATTERN_ARRAY:
+		case AST_PATTERN_TUPLE:
+			ast_pattern_free(pattern->children);
+			break;
+		}
+
+		mem_free(pattern);
+		pattern = next_pattern;
+	}
+}
+
 void ast_node_free_one(struct AstNode *node)
 {
 	switch (node->type) {
@@ -278,6 +349,10 @@ void ast_node_free_one(struct AstNode *node)
 
 	case AST_REFERENCE:
 		ast_reference_free(&(node->data.reference));
+		break;
+
+	case AST_PATTERN:
+		ast_pattern_free(node->data.pattern);
 		break;
 	}
 

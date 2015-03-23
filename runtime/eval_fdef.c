@@ -20,6 +20,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 	case AST_BIF:
 	case AST_LITERAL:
 	case AST_REFERENCE:
+	case AST_PATTERN:
 		return NULL;
 
 	case AST_DO_BLOCK:
@@ -63,6 +64,7 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 	case AST_BIND:
 	case AST_IFF:
 	case AST_FUNC_DEF:
+	case AST_PATTERN:
     case AST_PARAFUNC: /* don't capture parafunc symbol */
 		return false;
 

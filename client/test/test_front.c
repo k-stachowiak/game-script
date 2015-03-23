@@ -18,6 +18,7 @@ static void test_lex_compound(struct TestContext *tc)
 {
     test_lex(tc, "( ()", "Fail on undelimited homogenous tokens", false);
     test_lex(tc, "( { ( }", "Fail on undelimited heterogenous tokens", false);
+    test_lex(tc, "(])", "Fail on unopened compound", false);
     test_lex(tc, "( [] { () } )", "Succeed on properly delimited heterogenous tokens", true);
 }
 
@@ -50,6 +51,7 @@ static void test_parse_do(struct TestContext *tc)
 
 static void test_parse_bind(struct TestContext *tc)
 {
+	/* Alias binds */
     test_parse(tc, "(bind)", "Fail on empty bind block", false);
     test_parse(tc, "(bind x)", "Fail on bind without bound value", false);
     test_parse(tc, "(bind x 1 2)", "Fail on bind with extra element", false);
@@ -57,6 +59,14 @@ static void test_parse_bind(struct TestContext *tc)
     test_parse(tc, "{bind x 1}", "Fail on bind in tuple compound", false);
     test_parse(tc, "(bind x 1)", "Succeed on simplistic bind", true);
     test_parse(tc, "(bind x (+ 2 2))", "Succeed on non-trivial bind", true);
+
+	/* Matching binds */
+	test_parse(tc, "(bind {} 1.0)", "Fail on binding to empty tuple", false);
+	test_parse(tc, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array", false);
+	test_parse(tc, "(bind { a } [ 2 ])", "Fail on binding to mismatched object", false);
+	test_parse(tc, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal", false);
+	test_parse(tc, "(bind { x y } { 2 3 })", "Succeed on compound bind", true);
+	test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
 }
 
 static void test_parse_iff(struct TestContext *tc)
