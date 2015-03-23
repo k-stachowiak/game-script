@@ -5,6 +5,7 @@
 
 #include "define.h"
 #include "src_iter.h"
+#include "pattern.h"
 
 /* Enumerations.
  * =============
@@ -21,7 +22,6 @@ enum AstNodeType {
     AST_LITERAL,
     AST_PARAFUNC,
     AST_REFERENCE,
-	AST_PATTERN
 };
 
 enum AstBifType {
@@ -46,12 +46,6 @@ enum AstLiteralType {
 enum AstParafuncType {
     AST_PARAFUNC_AND,
     AST_PARAFUNC_OR,
-};
-
-enum AstPatternType {
-	AST_PATTERN_SYMBOL,
-	AST_PATTERN_ARRAY,
-	AST_PATTERN_TUPLE
 };
 
 /* Partial types.
@@ -81,7 +75,7 @@ struct AstDoBlock {
 };
 
 struct AstBind {
-    char *symbol;
+	struct Pattern *pattern;
     struct AstNode *expr;
 };
 
@@ -126,13 +120,6 @@ struct AstReference {
     char *symbol;
 };
 
-struct AstPattern {
-	enum AstPatternType type;
-	char *symbol;
-	struct AstPattern *children;
-	struct AstPattern *next;
-};
-
 /* Main AST node definition.
  * =========================
  */
@@ -154,7 +141,6 @@ struct AstNode {
         struct AstLiteral literal;
         struct AstParafunc parafunc;
         struct AstReference reference;
-		struct AstPattern *pattern;
     } data;
 
     /* Intrusive list. */
@@ -171,7 +157,8 @@ struct AstNode *ast_make_do_block(
 
 struct AstNode *ast_make_bind(
     struct SourceLocation *loc,
-    char *symbol, struct AstNode *expr);
+    struct Pattern *pattern,
+	struct AstNode *expr);
 
 struct AstNode *ast_make_iff(
 	struct SourceLocation *loc,
@@ -199,21 +186,6 @@ struct AstNode *ast_make_parafunc(
     struct SourceLocation *loc,
     enum AstParafuncType type,
     struct AstNode *args);
-
-struct AstNode *ast_make_pattern_symbol(
-		struct SourceLocation *loc,
-		char *symbol,
-		struct AstPattern *next);
-
-struct AstNode *ast_make_pattern_array(
-		struct SourceLocation *loc,
-		struct AstPattern *children,
-		struct AstPattern *next);
-
-struct AstNode *ast_make_pattern_tuple(
-		struct SourceLocation *loc,
-		struct AstPattern *children,
-		struct AstPattern *next);
 
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value);
 struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value);

@@ -79,18 +79,6 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
     }
 }
 
-static void eval_bind(
-		struct AstNode *node,
-		struct Runtime *rt,
-		struct SymMap *sym_map)
-{
-	struct AstNode *expr = node->data.bind.expr;
-    VAL_LOC_T location = eval_impl(expr, rt, sym_map);
-    if (!err_state()) {
-        sym_map_insert(sym_map, node->data.bind.symbol, location, &expr->loc);
-    }
-}
-
 static void eval_iff(
 		struct AstNode *node,
 		struct Runtime *rt,

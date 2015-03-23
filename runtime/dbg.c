@@ -7,7 +7,11 @@
 
 static void dbg_print_node_bind(struct AstBind *bind)
 {
-    printf("bind \"%s\"\n", bind->symbol);
+	switch (bind->pattern->type) {
+	case PATTERN_SYMBOL:
+		printf("bind \"%s\"\n", bind->pattern->symbol);
+		break;
+	}
 }
 
 static void dbg_print_node_compound(struct AstCompound *compound)
@@ -100,10 +104,6 @@ static void dbg_print_node(struct AstNode *node)
 
 	case AST_REFERENCE:
 		dbg_print_node_reference(&node->data.reference);
-		break;
-
-	case AST_PATTERN:
-		printf("pattern\n");
 		break;
 	}
 }

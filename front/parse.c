@@ -14,6 +14,7 @@
 #include "tok.h"
 #include "lex.h"
 #include "dom.h"
+#include "pattern.h"
 
 static void parse_error_char_length(int len, struct SourceLocation *where)
 {
@@ -52,6 +53,20 @@ static bool all_of(char *current, char *last, int (*f)(int))
         ++current;
     }
     return true;
+}
+
+static struct Pattern *parse_pattern(struct DomNode *dom)
+{
+    char *symbol = dom_node_parse_symbol(dom);
+
+	if (symbol) {
+		return pattern_make_symbol(symbol);
+
+	} else {
+		LOG_DEBUG("compound patterns not implemented yet.");
+		parse_error_read("Compound pattern", &dom->loc);
+		return NULL;
+	}
 }
 
 static struct AstNode *parse_one(struct DomNode *dom);
@@ -93,7 +108,7 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
 static struct AstNode *parse_bind(struct DomNode *dom)
 {
     struct DomNode *child = NULL;
-    char *symbol = NULL;
+    struct Pattern *pattern = NULL;
     struct AstNode *expr = NULL;
 
     LOG_TRACE_FUNC
@@ -116,19 +131,19 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     }
     child = child->next;
 
-    /* 3.2. 2nd child is symbol. */
-	if (!(symbol = dom_node_parse_symbol(child))) {
+    /* 3.2. 2nd child is pattern. */
+	if (!(pattern = parse_pattern(child))) {
         return NULL;
     }
     child = child->next;
 
     /* 3.3 3rd child is any expression. */
     if (!(expr = parse_one(child))) {
-        mem_free(symbol);
+        pattern_free(pattern);
         return NULL;
     }
 
-    return ast_make_bind(&dom->loc, symbol, expr);
+    return ast_make_bind(&dom->loc, pattern, expr);
 }
 
 static struct AstNode *parse_iff(struct DomNode *dom)

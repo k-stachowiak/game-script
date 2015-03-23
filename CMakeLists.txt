@@ -37,8 +37,6 @@ add_executable(moon-lang
     ./runtime/bif_compare.c
     ./runtime/bif_common.c
 	./runtime/dbg.c
-    ./runtime/eval_cpd.c
-    ./runtime/eval_fcall.c
     ./runtime/symmap.c
     ./runtime/stack.c
     ./runtime/eval.c
@@ -46,8 +44,12 @@ add_executable(moon-lang
     ./runtime/eval_fdef.c
     ./runtime/eval_do.c
     ./runtime/eval_parafunc.c
+    ./runtime/eval_cpd.c
+    ./runtime/eval_fcall.c
+	./runtime/eval_bind.c
     ./runtime/rt_val.c
     ./ast/ast.c
+    ./ast/pattern.c
     ./common/error.c
     ./common/term.c
     ./common/memory.c
