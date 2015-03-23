@@ -14,6 +14,7 @@
  * TODO:
  * - gather the string -> ast node / ast node -> string code together.
  * - add print para-func
+ * - implement pattern matching
  */
 
 struct {
