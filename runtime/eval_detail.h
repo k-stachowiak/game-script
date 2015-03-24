@@ -11,4 +11,12 @@ void eval_compound(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_
 void eval_do_block(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 void eval_parafunc(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 void eval_bind(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
+
+void eval_bind_pattern(
+	struct Runtime *rt,
+	struct SymMap *sym_map,
+	struct Pattern *pattern,
+	VAL_LOC_T location,
+	struct SourceLocation *source_loc);
+
 VAL_LOC_T eval_impl(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);

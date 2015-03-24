@@ -22,7 +22,7 @@ static void bind_error_pattern_length_mismatch(void)
     err_msg_set(&msg);
 }
 
-static void eval_bind_recursively(
+void eval_bind_pattern(
 		struct Runtime *rt,
 		struct SymMap *sym_map,
 		struct Pattern *pattern,
@@ -63,7 +63,7 @@ static void eval_bind_recursively(
 	child_pat = pattern->children;
 
     for (i = 0; i < len; ++i) {
-        eval_bind_recursively(rt, sym_map, child_pat, child_loc, source_loc);
+        eval_bind_pattern(rt, sym_map, child_pat, child_loc, source_loc);
         if (err_state()) {
             return;
         }
@@ -82,7 +82,7 @@ void eval_bind(
     VAL_LOC_T location = eval_impl(expr, rt, sym_map);
 
     if (!err_state()) {
-		eval_bind_recursively(rt, sym_map, pattern, location, &expr->loc);
+		eval_bind_pattern(rt, sym_map, pattern, location, &expr->loc);
     }
 }
 
