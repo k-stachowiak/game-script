@@ -1,6 +1,7 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "log.h"
 #include "memory.h"
@@ -64,3 +65,26 @@ int pattern_list_len(struct Pattern *pattern)
     }
     return result;
 }
+
+bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
+{
+	while (pattern) {
+		switch (pattern->type) {
+		case PATTERN_SYMBOL:
+			if (strcmp(pattern->symbol, symbol) == 0) {
+				return true;
+			}
+			break;
+
+		case PATTERN_ARRAY:
+		case PATTERN_TUPLE:
+			if (pattern_list_contains_symbol(pattern->children, symbol)) {
+				return true;
+			}
+			break;
+		}
+		pattern = pattern->next;
+	}
+	return false;
+}
+

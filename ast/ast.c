@@ -78,7 +78,7 @@ struct AstNode *ast_make_func_call(
 
 struct AstNode *ast_make_func_def(
         struct SourceLocation *loc,
-        char **formal_args,
+        struct Pattern *formal_args,
         struct SourceLocation *arg_locs,
         int arg_count,
         struct AstNode *expr)
@@ -175,6 +175,7 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
 
 static void ast_bif_free(struct AstBif *abif)
 {
+	/* nop */
 }
 
 static void ast_do_block_free(struct AstDoBlock *adb)
@@ -206,10 +207,7 @@ static void ast_func_call_free(struct AstFuncCall *afcall)
 
 static void ast_func_def_free(struct AstFuncDef *afdef)
 {
-    int i;
-    for (i = 0; i < afdef->arg_count; ++i) {
-        mem_free(afdef->formal_args[i]);
-    }
+	pattern_free(afdef->formal_args);
     mem_free(afdef->formal_args);
 	mem_free(afdef->arg_locs);
     ast_node_free(afdef->expr);

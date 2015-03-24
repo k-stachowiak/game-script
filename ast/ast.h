@@ -89,7 +89,7 @@ struct AstFuncCall {
 };
 
 struct AstFuncDef {
-    char **formal_args;
+    struct Pattern *formal_args;
     struct SourceLocation *arg_locs;
     int arg_count;
     struct AstNode *expr;
@@ -171,11 +171,11 @@ struct AstNode *ast_make_func_call(
     char *symbol, struct AstNode *args);
 
 struct AstNode *ast_make_func_def(
-    struct SourceLocation *loc,
-    char **formal_args,
-    struct SourceLocation *arg_locs,
-    int arg_count,
-    struct AstNode *expr);
+        struct SourceLocation *loc,
+        struct Pattern *formal_args,
+        struct SourceLocation *arg_locs,
+        int arg_count,
+        struct AstNode *expr);
 
 struct AstNode *ast_make_parafunc(
     struct SourceLocation *loc,

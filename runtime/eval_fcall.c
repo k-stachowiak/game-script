@@ -137,7 +137,7 @@ static bool efc_insert_expression(
 		struct SymMap *new_sym_map,
 		struct AstNode *arg_node,
         struct SourceLocation *arg_loc,
-		char *symbol,
+		struct Pattern *pattern,
 		VAL_LOC_T *location)
 {
 	*location = eval_impl(arg_node, rt, caller_sym_map);
@@ -145,7 +145,7 @@ static bool efc_insert_expression(
 		return false;
 	}
 
-	sym_map_insert(new_sym_map, symbol, *location, arg_loc);
+	eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
 	if (err_state()) {
 		return false;
 	}
@@ -184,7 +184,7 @@ static void efc_evaluate_ast(
 
 	struct SymMap local_sym_map;
 
-	char **formal_args = func_data->ast_def->data.func_def.formal_args;
+	struct Pattern *formal_args = func_data->ast_def->data.func_def.formal_args;
 
     struct SourceLocation *arg_locs = func_data->ast_def->data.func_def.arg_locs;
     struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
@@ -209,7 +209,8 @@ static void efc_evaluate_ast(
 	/* Insert already applied arguments. */
 	for (i = 0; i < func_data->appl_count; ++i) {
 		efc_log_gen_call_arg(rt, appl_loc);
-		sym_map_insert(&local_sym_map, *(formal_args++), appl_loc, &cont_loc);
+		eval_bind_pattern(rt, &local_sym_map, formal_args, appl_loc, &cont_loc);
+		formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
 		if (err_state()) {
 			goto cleanup;
@@ -221,7 +222,8 @@ static void efc_evaluate_ast(
 	for (; actual_args; actual_args = actual_args->next) {
 		VAL_LOC_T actual_loc;
 		if (efc_insert_expression(rt, sym_map, &local_sym_map,
-			actual_args, arg_locs++, *(formal_args++), &actual_loc)) {
+			actual_args, arg_locs++, formal_args, &actual_loc)) {
+			formal_args = formal_args->next;
 			efc_log_gen_call_arg(rt, actual_loc);
 		} else {
 			goto cleanup;

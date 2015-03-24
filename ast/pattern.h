@@ -3,6 +3,8 @@
 #ifndef PATTERN_H
 #define PATTERN_H
 
+#include <stdbool.h>
+
 enum PatternType {
 	PATTERN_SYMBOL,
 	PATTERN_ARRAY,
@@ -23,5 +25,6 @@ struct Pattern *pattern_make_compound(
 
 void pattern_free(struct Pattern *pattern);
 int pattern_list_len(struct Pattern *pattern);
+bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol);
 
 #endif

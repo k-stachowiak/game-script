@@ -100,18 +100,6 @@ static bool efd_is_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *loc)
 	return kvp != sym_map_find_not_global(sym_map, symbol);
 }
 
-/** Simple wrapper around an argument list lookup. */
-static bool efd_is_argument(char *symbol, struct AstFuncDef *func_def)
-{
-	int i;
-	for (i = 0; i < func_def->arg_count; ++i) {
-		if (strcmp(symbol, func_def->formal_args[i]) == 0) {
-			return true;
-		}
-	}
-	return false;
-}
-
 /**
  * Searches recursively for all symbols in the given function definitions.
  * Pushes on the stack all the values refered to that are not global and
@@ -144,7 +132,7 @@ static void efd_push_captures(
 
 		if (efd_has_symbol(node, &symbol) &&
 			!efd_is_global(symbol, sym_map, &cap_location) &&
-			!efd_is_argument(symbol, func_def)) {
+			!pattern_list_contains_symbol(func_def->formal_args, symbol)) {
 				if (!efd_is_defined(symbol, sym_map)) {
 					if (node->type != AST_FUNC_CALL) {
 						/* Note: it is allowed for the func call symbol not to be defined.
