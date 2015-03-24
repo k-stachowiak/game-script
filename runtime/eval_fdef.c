@@ -101,11 +101,11 @@ static bool efd_is_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *loc)
 }
 
 /** Simple wrapper around an argument list lookup. */
-static bool efd_is_argument(char *symbol, struct AstCommonFunc *func)
+static bool efd_is_argument(char *symbol, struct AstFuncDef *func_def)
 {
 	int i;
-	for (i = 0; i < func->arg_count; ++i) {
-		if (strcmp(symbol, func->formal_args[i]) == 0) {
+	for (i = 0; i < func_def->arg_count; ++i) {
+		if (strcmp(symbol, func_def->formal_args[i]) == 0) {
 			return true;
 		}
 	}
@@ -144,7 +144,7 @@ static void efd_push_captures(
 
 		if (efd_has_symbol(node, &symbol) &&
 			!efd_is_global(symbol, sym_map, &cap_location) &&
-			!efd_is_argument(symbol, &func_def->func)) {
+			!efd_is_argument(symbol, func_def)) {
 				if (!efd_is_defined(symbol, sym_map)) {
 					if (node->type != AST_FUNC_CALL) {
 						/* Note: it is allowed for the func call symbol not to be defined.
@@ -173,7 +173,7 @@ void eval_func_def(
         struct SymMap *sym_map)
 {
 	VAL_LOC_T size_loc, data_begin;
-	VAL_SIZE_T arity = node->data.func_def.func.arg_count;
+	VAL_SIZE_T arity = node->data.func_def.arg_count;
 	rt_val_push_func_init(stack, &size_loc, &data_begin, arity, (void*)node, NULL);
 	efd_push_captures(stack, sym_map, &node->data.func_def);
 	if (err_state()) {

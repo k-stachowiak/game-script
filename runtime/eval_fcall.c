@@ -184,9 +184,9 @@ static void efc_evaluate_ast(
 
 	struct SymMap local_sym_map;
 
-	char **formal_args = func_data->ast_def->data.func_def.func.formal_args;
+	char **formal_args = func_data->ast_def->data.func_def.formal_args;
 
-    struct SourceLocation *arg_locs = func_data->ast_def->data.func_def.func.arg_locs;
+    struct SourceLocation *arg_locs = func_data->ast_def->data.func_def.arg_locs;
     struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
 
     /* Initialize local scope. */

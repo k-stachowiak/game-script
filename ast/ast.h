@@ -52,18 +52,11 @@ enum AstParafuncType {
  * ==============
  */
 
-struct AstCommonFunc {
-    char **formal_args;
-    struct SourceLocation *arg_locs;
-    int arg_count;
-};
-
 struct AstNode;
 struct Value;
 struct Runtime;
 
 struct AstBif {
-    struct AstCommonFunc func;
     enum AstBifType type;
 	void(*u_impl)(struct Runtime*, VAL_LOC_T);
 	void(*bi_impl)(struct Runtime*, VAL_LOC_T, VAL_LOC_T);
@@ -96,7 +89,9 @@ struct AstFuncCall {
 };
 
 struct AstFuncDef {
-    struct AstCommonFunc func;
+    char **formal_args;
+    struct SourceLocation *arg_locs;
+    int arg_count;
     struct AstNode *expr;
 };
 
