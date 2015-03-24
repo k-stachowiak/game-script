@@ -413,11 +413,6 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
 static struct AstNode *parse_func_def(struct DomNode *dom)
 {
     struct {
-        char **data;
-        int cap, size;
-    } formal_args = { NULL, 0, 0 };
-
-    struct {
         struct SourceLocation *data;
         int cap, size;
     } arg_locs = { NULL, 0, 0 };
@@ -427,6 +422,8 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 
     struct DomNode *child = NULL;
     struct DomNode *arg_child = NULL;
+
+	struct Pattern *formal_args = NULL, *formal_args_end = NULL;
 
     LOG_TRACE_FUNC
 
@@ -448,7 +445,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
     }
     child = child->next;
 
-    /* 3.2. 2nd keyword is a core compound of symbols. */
+    /* 3.2. 2nd keyword is a core compound of patterns. */
     if (!dom_node_is_spec_compound(child, DOM_CPD_CORE)) {
         return NULL;
     }
@@ -458,13 +455,12 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
     /* Argument list may be empty. */
     if (arg_child) {
         while (arg_child) {
-            if (!dom_node_is_atom(arg_child)) {
-                goto fail;
+			struct Pattern *pattern;
+			if (!(pattern = parse_pattern(arg_child))) {
+				goto fail;
+
             } else {
-                int len = strlen(arg_child->atom);
-                char *formal_arg = mem_malloc(len + 1);
-                memcpy(formal_arg, arg_child->atom, len + 1);
-                ARRAY_APPEND(formal_args, formal_arg);
+				LIST_APPEND(pattern, &formal_args, &formal_args_end);
                 ARRAY_APPEND(arg_locs, arg_child->loc);
             }
             arg_child = arg_child->next;
@@ -478,14 +474,10 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
 		goto fail;
 	}
 
-	assert(arg_locs.size == formal_args.size);
 	arg_count = arg_locs.size;
-
     return ast_make_func_def(
         &dom->loc,
-        mem_realloc(
-            formal_args.data,
-            formal_args.size * sizeof(*formal_args.data)),
+		formal_args,
         mem_realloc(
             arg_locs.data,
             arg_locs.size * sizeof(*arg_locs.data)),
@@ -493,8 +485,8 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
         expr);
 
 fail:
-    if (formal_args.size) {
-        ARRAY_FREE(formal_args);
+    if (formal_args) {
+		pattern_free(formal_args);
     }
 
     if (arg_locs.size) {
