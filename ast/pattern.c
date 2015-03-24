@@ -1,5 +1,8 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
+#include <stdlib.h>
+
+#include "log.h"
 #include "memory.h"
 #include "pattern.h"
 
@@ -10,6 +13,25 @@ struct Pattern *pattern_make_symbol(char *symbol)
 	result->symbol = symbol;
 	result->children = NULL;
 	result->next = NULL;
+	return result;
+}
+
+struct Pattern *pattern_make_compound(
+		struct Pattern *children,
+		enum PatternType type)
+{
+	struct Pattern *result = mem_malloc(sizeof(*result));
+
+	if (type != PATTERN_ARRAY && type != PATTERN_TUPLE) {
+		LOG_ERROR("Compound pattern created with an incorrect type.");
+		exit(1);
+	}
+
+	result->type = type;
+	result->symbol = NULL;
+	result->children = children;
+	result->next = NULL;
+
 	return result;
 }
 

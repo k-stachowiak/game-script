@@ -15,8 +15,16 @@
 static void lex_error_undelimited(char *what, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
-	err_msg_init_src(&msg, "LEX", where);
-	err_msg_append(&msg, "Undelimited %s", what);
+	err_msg_init_src(&msg, "lex", where);
+	err_msg_append(&msg, "undelimited %s", what);
+	err_msg_set(&msg);
+}
+
+static void lex_error_close_unopen(struct SourceLocation *where)
+{
+	struct ErrMessage msg;
+	err_msg_init_src(&msg, "lex", where);
+	err_msg_append(&msg, "closing unopened compound node");
 	err_msg_set(&msg);
 }
 
@@ -356,6 +364,10 @@ static struct DomNode *dom_parse_node(struct Token **current)
 	if (!(*current)) {
 		return NULL;
 
+	} else if (tok_is_close_paren(*current)) {
+		lex_error_close_unopen(&(*current)->loc);
+		return NULL;
+
 	} else if (tok_is_open_paren(*current)) {
 		return dom_parse_compound_node(current);
 
@@ -380,7 +392,7 @@ static struct DomNode *dom_build(struct Token *tokens)
 		}
 		if (node) {
 			LIST_APPEND(node, &result, &result_end);
-		}        
+		}
     }
 
     return result;

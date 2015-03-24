@@ -16,6 +16,34 @@
 #include "dom.h"
 #include "pattern.h"
 
+/* Error handling.
+ * ===============
+ */
+
+static void parse_error_pattern_core(struct SourceLocation *where)
+{
+	struct ErrMessage msg;
+	err_msg_init_src(&msg, "PARSE", where);
+	err_msg_append(&msg, "Core compound encountered where a pattern was expected");
+	err_msg_set(&msg);
+}
+
+static void parse_error_empty_pattern(struct SourceLocation *where)
+{
+	struct ErrMessage msg;
+	err_msg_init_src(&msg, "PARSE", where);
+	err_msg_append(&msg, "Empty compound pattern encountered");
+	err_msg_set(&msg);
+}
+
+static void parse_error_bind_to_literal(struct SourceLocation *where)
+{
+	struct ErrMessage msg;
+	err_msg_init_src(&msg, "PARSE", where);
+	err_msg_append(&msg, "Attempt at binding to a literal");
+	err_msg_set(&msg);
+}
+
 static void parse_error_char_length(int len, struct SourceLocation *where)
 {
 	struct ErrMessage msg;
@@ -31,6 +59,10 @@ static void parse_error_read(char *what, struct SourceLocation *where)
 	err_msg_append(&msg, "Failed reading %s", what);
 	err_msg_set(&msg);
 }
+
+/* Algorithms.
+ * ===========
+ */
 
 static char *find(char * current, char *last, char value)
 {
@@ -55,18 +87,76 @@ static bool all_of(char *current, char *last, int (*f)(int))
     return true;
 }
 
+/* Pattern parsing.
+ * ================
+ */
+
+static struct Pattern *parse_pattern(struct DomNode *dom);
+
+static struct Pattern *parse_pattern_list(struct DomNode *dom)
+{
+	struct Pattern *result = NULL, *result_end = NULL;
+	while (dom) {
+		struct Pattern *item = parse_pattern(dom);
+		if (!item) {
+			pattern_free(result);
+			return NULL;
+		}
+		LIST_APPEND(item, &result, &result_end);
+		dom = dom->next;
+	}
+	return result;
+}
+
 static struct Pattern *parse_pattern(struct DomNode *dom)
 {
     char *symbol = dom_node_parse_symbol(dom);
+	struct Pattern *children;
 
 	if (symbol) {
 		return pattern_make_symbol(symbol);
 
-	} else {
-		parse_error_read("Compound pattern", &dom->loc);
+	} else if (dom->type == DOM_ATOM) {
+		parse_error_bind_to_literal(&dom->loc);
 		return NULL;
+
+	} else {
+		switch (dom->cpd_type) {
+		case DOM_CPD_CORE:
+			parse_error_pattern_core(&dom->loc);
+			return NULL;
+
+		case DOM_CPD_ARRAY:
+			if (!(children = parse_pattern_list(dom->cpd_children))) {
+				if (!err_state()) {
+					parse_error_empty_pattern(&dom->loc);
+				}
+				return NULL;
+
+			} else {
+				return pattern_make_compound(children, PATTERN_ARRAY);
+			}
+
+		case DOM_CPD_TUPLE:
+			if (!(children = parse_pattern_list(dom->cpd_children))) {
+				if (!err_state()) {
+					parse_error_empty_pattern(&dom->loc);
+				}
+				return NULL;
+
+			} else {
+				return pattern_make_compound(children, PATTERN_TUPLE);
+			}
+		}
 	}
+
+	LOG_ERROR("Impossible to get here.");
+	exit(1);
 }
+
+/* Regular AST parsing.
+ * ====================
+ */
 
 static struct AstNode *parse_one(struct DomNode *dom);
 static struct AstNode *parse_list(struct DomNode *dom);

@@ -10,7 +10,7 @@
 #   ...
 # )
 #(bind length (func (a { bx by }) (do
-(bind length (func (a b) (do
+(bind dist(func (a b) (do
 	(bind { ax ay } a)
 	(bind { bx by } b)
 	(bind dx (- bx ax))
@@ -18,18 +18,18 @@
 	(sqrt (+ (* dx dx) (* dy dy)))
 )))
 
-(bind cross-call (func (x) (do
-    (bind call-ping (func (x)
-        (if (> x 0)
-            (call-pong (- x 1))
-            "success ping"
-        )
-    ))
-    (bind call-pong (func (x)
-        (if (> x 0)
-            (call-ping (- x 1))
-            "success pong"
-        )
-    ))
-    (call-ping x)
-)))
+#(bind cross-call (func (x) (do
+#    (bind call-ping (func (x)
+#        (if (> x 0)
+#            (call-pong (- x 1))
+#            "success ping"
+#        )
+#    ))
+#    (bind call-pong (func (x)
+#        (if (> x 0)
+#            (call-ping (- x 1))
+#            "success pong"
+#        )
+#    ))
+#    (call-ping x)
+#)))

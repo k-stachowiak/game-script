@@ -51,9 +51,10 @@ static void eval_bind_recursively(
 	}
 
     cpd_len = rt_val_cpd_len(rt, location);
-    pattern_len = pattern_list_len(pattern);
+    pattern_len = pattern_list_len(pattern->children);
     if (cpd_len != pattern_len) {
         bind_error_pattern_length_mismatch();
+		return;
     } else {
         len = pattern_len;
     }

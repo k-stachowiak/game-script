@@ -17,6 +17,10 @@ struct Pattern {
 };
 
 struct Pattern *pattern_make_symbol(char *symbol);
+struct Pattern *pattern_make_compound(
+		struct Pattern *children,
+		enum PatternType type);
+
 void pattern_free(struct Pattern *pattern);
 int pattern_list_len(struct Pattern *pattern);
 

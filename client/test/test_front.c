@@ -63,7 +63,6 @@ static void test_parse_bind(struct TestContext *tc)
 	/* Matching binds */
 	test_parse(tc, "(bind {} 1.0)", "Fail on binding to empty tuple", false);
 	test_parse(tc, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array", false);
-	test_parse(tc, "(bind { a } [ 2 ])", "Fail on binding to mismatched object", false);
 	test_parse(tc, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal", false);
 	test_parse(tc, "(bind { x y } { 2 3 })", "Succeed on compound bind", true);
 	test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);

@@ -34,6 +34,11 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_fail(tc, rt, "(bind \"x\" 1)", "Fail on binding to literal");
     test_eval_source_expect(tc, rt, "(bind x 1.0)", "Succeed on simple bind", REAL, 1.0);
     test_eval_source_expect(tc, rt, "(bind y (+ 2 3))", "Succeed on non-trivial bind", INT, 5);
+    test_eval_source_fail(tc, rt, "(bind { a } [ 1.0 ])", "Fail on mismatched types of compound bind");
+    test_eval_source_fail(tc, rt, "(bind { b } { 1 2 })", "Fail on too many values in compound bind");
+    test_eval_source_fail(tc, rt, "(bind [ c d ] [ 1 ])", "Fail on too many keys in compound bind");
+    test_eval_source_succeed(tc, rt, "(bind { e f } { 1 2 })", "Succeed on tuple bind");
+    test_eval_source_succeed(tc, rt, "(bind [ g ] [ 1.0 ])", "Succeed on array bind");
 }
 
 static void test_runtime_iff(struct TestContext *tc, struct Runtime *rt)

@@ -162,7 +162,9 @@ bool rt_consume_list(struct Runtime *rt, struct AstNode *ast_list)
 			* no nodes that have already been consumed will be freed.
 			* They have actually been freed upon success of the consume function.
 			*/
-			ast_node_free(ast_list);
+			if (ast_list->next) {
+				ast_node_free(ast_list->next);
+			}
 			return false;
 		}
 		ast_list = next;
