@@ -67,8 +67,8 @@
     (if (<= len 1)
         x
         (merge-cmp
-            (sort (slice x 0 half-len))
-            (sort (slice x half-len len))
+            (sort-cmp (slice x 0 half-len) cmp)
+            (sort-cmp (slice x half-len len) cmp)
             cmp
         )
     )

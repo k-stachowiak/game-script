@@ -1,33 +1,12 @@
-# Note: the pattern may be put in the:
-# - arguments list
-# - bind left hand side
-# this means that the argunent list is processed like this:
-# (func (arg1-symbol arg2-symbol ...) ... )
-# means
-# (func () (do
-#	(bind arg1-symbol arg1-value)
-#	(bind arg2-symbol arg2-value)
-#   ...
-# )
-(bind dist (func (a { bx by }) (do
-	(bind { ax ay } a)
-	(bind dx (- bx ax))
-	(bind dy (- by ay))
+(bind dist (func ({ ax ay } { bx by }) (do
+    (bind { dx dy } { (- bx ax) (- by ay) })
 	(sqrt (+ (* dx dx) (* dy dy)))
 )))
 
-#(bind cross-call (func (x) (do
-#    (bind call-ping (func (x)
-#        (if (> x 0)
-#            (call-pong (- x 1))
-#            "success ping"
-#        )
-#    ))
-#    (bind call-pong (func (x)
-#        (if (> x 0)
-#            (call-ping (- x 1))
-#            "success pong"
-#        )
-#    ))
-#    (call-ping x)
-#)))
+(bind cmp-pts (func (px py) (do
+    (bind dx (dist { 0 0 } px))
+    (bind dy (dist { 0 0 } py))
+    (< dx dy)
+)))
+
+(bind pts [ { 3 3 } { 1 1 } { 2 2 } ])

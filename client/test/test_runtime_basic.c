@@ -62,9 +62,11 @@ static void test_runtime_cpd(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_fail(tc, rt, "[ 1.0 \"two\"]", "Fail on evaluating heterogenous array");
     test_eval_source_fail(tc, rt, "[ [ 1.0 ]  [ \"two\" ] ]", "Fail on evaluating heterogenous nested array");
+    test_eval_source_fail(tc, rt, "[ { 1 } { 2 3 } ]", "Fail on evaluating heterogenous array of tuples");
     test_eval_source_succeed(tc, rt, "[]", "Succeed on evaluating empty array");
     test_eval_source_succeed(tc, rt, "[ 1 2 ]", "Succeed on evaluating homogenous array");
     test_eval_source_succeed(tc, rt, "[ [ 1 ] [ 2 3 ] ]", "Succeed on evaluating homogenous nested array");
+    test_eval_source_succeed(tc, rt, "[ { 1 2 } { 3 4 } ]", "Succeed on evaluating homogenous array of tuples");
     test_eval_source_succeed(tc, rt, "{}", "Succeed on evaluating empty tuple");
     test_eval_source_succeed(tc, rt, "{ 1 2 }", "Succeed on evaluating homogenous tuple");
     test_eval_source_succeed(tc, rt, "{ 1 [] }", "Succeed on evaluating heterogenous tuple");
