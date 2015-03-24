@@ -208,7 +208,6 @@ static void ast_func_call_free(struct AstFuncCall *afcall)
 static void ast_func_def_free(struct AstFuncDef *afdef)
 {
 	pattern_free(afdef->formal_args);
-    mem_free(afdef->formal_args);
 	mem_free(afdef->arg_locs);
     ast_node_free(afdef->expr);
 }

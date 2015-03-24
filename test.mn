@@ -9,10 +9,8 @@
 #	(bind arg2-symbol arg2-value)
 #   ...
 # )
-#(bind length (func (a { bx by }) (do
-(bind dist(func (a b) (do
+(bind dist (func (a { bx by }) (do
 	(bind { ax ay } a)
-	(bind { bx by } b)
 	(bind dx (- bx ax))
 	(bind dy (- by ay))
 	(sqrt (+ (* dx dx) (* dy dy)))
