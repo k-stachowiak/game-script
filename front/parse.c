@@ -744,7 +744,9 @@ struct AstNode *parse_source(char *source)
 
 struct AstNode *parse_file(char *filename)
 {
+	struct AstNode *result;
 	char *source = my_getfile(filename);
+
 	if (!source) {
         struct ErrMessage msg;
         err_msg_init(&msg, "PARSE");
@@ -753,6 +755,9 @@ struct AstNode *parse_file(char *filename)
 		return NULL;
 	}
 
-	return parse_source(source);
+	result = parse_source(source);
+	mem_free(source);
+
+	return result;
 }
 
