@@ -13,23 +13,14 @@ include_directories(
     .
     )
 
-set(CMAKE_C_FLAGS "-Wall -g -O0 -flto")
+set(CMAKE_C_FLAGS "-Wall -O3")
+set(CMAKE_C_COMPILER "gcc")
 
 add_library(lang
     ./front/dom.c
     ./front/lex.c
     ./front/parse.c
     ./front/tok.c
-    ./client/run/run.c
-    ./client/repl/repl_cmd.c
-    ./client/repl/repl.c
-    ./client/repl/repl_expr.c
-    ./client/test/test.c
-    ./client/test/test_helpers.c
-    ./client/test/test_front.c
-    ./client/test/test_runtime_basic.c
-    ./client/test/test_runtime_func.c
-    ./client/test/test_runtime_bif.c
     ./runtime/bif_logic.c
     ./runtime/bif_arythm.c
     ./runtime/bif_array.c
@@ -55,8 +46,21 @@ add_library(lang
     ./common/src_iter.c
 	)
 
-add_executable(moon-lang ./cli.c)
+add_executable(moon-lang
+    ./cli.c
+    ./client/run/run.c
+    ./client/repl/repl_cmd.c
+    ./client/repl/repl.c
+    ./client/repl/repl_expr.c
+    ./client/test/test.c
+    ./client/test/test_helpers.c
+    ./client/test/test_front.c
+    ./client/test/test_runtime_basic.c
+    ./client/test/test_runtime_func.c
+    ./client/test/test_runtime_bif.c
+    )
 target_link_libraries(moon-lang m lang)
 
 add_library(moon ./moon.c)
 target_link_libraries(moon m lang)
+

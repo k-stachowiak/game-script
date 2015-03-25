@@ -122,7 +122,7 @@ static void efd_push_captures(
 
 		struct AstNode *node = to_visit.data[0];
 		struct AstNode *to_append;
-		VAL_LOC_T cap_location;
+		VAL_LOC_T cap_location = -1;
 
 		char *symbol;
 

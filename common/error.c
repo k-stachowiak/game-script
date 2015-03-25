@@ -31,7 +31,7 @@ void err_msg_init(struct ErrMessage *msg, char *module)
 void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocation *loc)
 {
 	char buffer[ERR_TEM_BUFFER_SIZE];
-	int len;
+	int len = -1;
 	switch (loc->type) {
 	case SRC_LOC_REGULAR:
 		len = sprintf(buffer, "[%s] (%d:%d) :", module, loc->line, loc->column);
