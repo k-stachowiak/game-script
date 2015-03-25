@@ -15,8 +15,7 @@ include_directories(
 
 set(CMAKE_C_FLAGS "-Wall -g -O0 -flto")
 
-add_executable(moon-lang
-    ./cli.c
+add_library(lang
     ./front/dom.c
     ./front/lex.c
     ./front/parse.c
@@ -54,7 +53,10 @@ add_executable(moon-lang
     ./common/term.c
     ./common/memory.c
     ./common/src_iter.c
-    )
+	)
 
-target_link_libraries(moon-lang m)
+add_executable(moon-lang ./cli.c)
+target_link_libraries(moon-lang m lang)
 
+add_library(moon ./moon.c)
+target_link_libraries(moon m lang)

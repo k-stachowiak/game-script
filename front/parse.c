@@ -734,6 +734,7 @@ struct AstNode *parse_source(char *source)
 
 	ast = parse_list(dom);
     if (err_state()) {
+		dom_free(dom);
 		return NULL;
 	}
 
