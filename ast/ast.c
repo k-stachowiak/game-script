@@ -173,11 +173,6 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
     return result;
 }
 
-static void ast_bif_free(struct AstBif *abif)
-{
-	/* nop */
-}
-
 static void ast_do_block_free(struct AstDoBlock *adb)
 {
 	ast_node_free(adb->exprs);
@@ -232,10 +227,6 @@ static void ast_reference_free(struct AstReference *aref)
 void ast_node_free_one(struct AstNode *node)
 {
 	switch (node->type) {
-	case AST_BIF:
-		ast_bif_free(&(node->data.bif));
-		break;
-
 	case AST_DO_BLOCK:
 		ast_do_block_free(&(node->data.do_block));
 		break;

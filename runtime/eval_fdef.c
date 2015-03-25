@@ -17,7 +17,6 @@
 static struct AstNode *efd_get_children(struct AstNode* node)
 {
 	switch (node->type) {
-	case AST_BIF:
 	case AST_LITERAL:
 	case AST_REFERENCE:
 		return NULL;
@@ -57,7 +56,6 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 {
 	switch (node->type) {
 	case AST_DO_BLOCK:
-	case AST_BIF:
 	case AST_LITERAL:
 	case AST_COMPOUND:
 	case AST_BIND:

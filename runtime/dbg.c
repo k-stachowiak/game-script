@@ -63,10 +63,6 @@ static void dbg_print_node_reference(struct AstReference *reference)
 static void dbg_print_node(struct AstNode *node)
 {
 	switch (node->type) {
-    case AST_BIF:
-        printf("bif\n");
-		break;
-
 	case AST_DO_BLOCK:
         printf("do\n");
 		break;

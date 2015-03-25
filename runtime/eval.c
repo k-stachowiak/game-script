@@ -171,10 +171,6 @@ VAL_LOC_T eval_impl(
         eval_func_def(node, rt->stack, sym_map);
         break;
 
-    case AST_BIF:
-		LOG_ERROR("Deprecated evaluation of AST_BIF node.\n");
-        exit(1);
-
     case AST_PARAFUNC:
         eval_parafunc(node, rt, sym_map);
         break;

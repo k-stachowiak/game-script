@@ -12,7 +12,6 @@
  */
 
 enum AstNodeType {
-    AST_BIF,
 	AST_DO_BLOCK,
     AST_BIND,
 	AST_IFF,
@@ -22,12 +21,6 @@ enum AstNodeType {
     AST_LITERAL,
     AST_PARAFUNC,
     AST_REFERENCE,
-};
-
-enum AstBifType {
-    AST_BIF_UNARY,
-    AST_BIF_BINARY,
-	AST_BIF_TERNARY
 };
 
 enum AstCompoundType {
@@ -55,13 +48,6 @@ enum AstParafuncType {
 struct AstNode;
 struct Value;
 struct Runtime;
-
-struct AstBif {
-    enum AstBifType type;
-	void(*u_impl)(struct Runtime*, VAL_LOC_T);
-	void(*bi_impl)(struct Runtime*, VAL_LOC_T, VAL_LOC_T);
-	void(*ter_impl)(struct Runtime*, VAL_LOC_T, VAL_LOC_T, VAL_LOC_T);
-};
 
 struct AstDoBlock {
 	struct AstNode *exprs;
@@ -126,7 +112,6 @@ struct AstNode {
 
     /* Specific data. */
     union {
-        struct AstBif bif;
 		struct AstDoBlock do_block;
         struct AstBind bind;
 		struct AstIff iff;
