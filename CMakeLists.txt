@@ -16,7 +16,7 @@ include_directories(
 set(CMAKE_C_FLAGS "-Wall -g -O0 -flto")
 
 add_executable(moon-lang
-    ./main.c
+    ./cli.c
     ./front/dom.c
     ./front/lex.c
     ./front/parse.c
