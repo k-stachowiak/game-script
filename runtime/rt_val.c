@@ -428,8 +428,8 @@ static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y
 
 static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
-    VAL_LOC_T current_x, current_y, last_x;
-    int len_x, len_y;
+    VAL_LOC_T current_x, current_y;
+    int i, len_x, len_y;
 
     struct ValueHeader
         header_x = rt_val_peek_header(rt->stack, x),
@@ -470,20 +470,18 @@ static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T 
         } else {
             current_x = rt_val_cpd_first_loc(x);
             current_y = rt_val_cpd_first_loc(y);
-            last_x = current_x + rt_val_peek_size(rt, current_x);
 
-            while (current_x != last_x) {
+			for (i = 0; i < len_x; ++i) {
                 if (!rt_val_pair_homo(rt, current_x, current_y)) {
                     return false;
                 }
-
                 current_x = rt_val_next_loc(rt, current_x);
                 current_y = rt_val_next_loc(rt, current_y);
             }
 
             return true;
         }
-        
+
     } else {
         return false;
 
@@ -514,7 +512,7 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc)
         }
         current = rt_val_next_loc(rt, current);
     }
-    
+
     return true;
 }
 
