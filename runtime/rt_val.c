@@ -243,7 +243,7 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 		if (annotate) {
 			printf("string :: ");
 		}
-		printf("%s", rt_val_peek_string(rt, loc));
+		printf("\"%s\"", rt_val_peek_string(rt, loc));
 		break;
 
 	case VAL_ARRAY:

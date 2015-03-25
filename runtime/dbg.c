@@ -41,7 +41,7 @@ static void dbg_print_node_literal(struct AstLiteral *literal)
         printf("%s\n", literal->data.boolean ? "true" : "false");
         break;
     case AST_LIT_STRING:
-        printf("\"%s\"\n", literal->data.string);
+        printf("%s\n", literal->data.string);
         break;
     case AST_LIT_CHAR:
         printf("'%c'\n", literal->data.character);

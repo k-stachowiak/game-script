@@ -26,6 +26,7 @@ add_library(lang
     ./runtime/bif_array.c
     ./runtime/bif_compare.c
     ./runtime/bif_common.c
+    ./runtime/bif_text.c
 	./runtime/dbg.c
     ./runtime/symmap.c
     ./runtime/stack.c

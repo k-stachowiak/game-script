@@ -12,8 +12,7 @@
 
 /*
  * TODO:
- * - remove BIF from AST; hide this behind the function-call mechanism,
- * - add print para-func,
+ * - add print bif,
  * - implement sorting as bif,
  * - prepare library API.
  */
