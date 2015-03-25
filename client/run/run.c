@@ -25,12 +25,13 @@ int run(int argc, char *argv[])
 
     filename = argv[1];
     if (!(ast_list = parse_file(filename))) {
+        printf("Parser error: %s\n", err_msg());
         return 1;
     }
 
     rt = rt_make(64 * 1024);
     if (!rt_consume_list(rt, ast_list)) {
-        printf("Interpreter error: %s\n", err_msg());
+        printf("Interpreter load error: %s\n", err_msg());
         rt_free(rt);
         return 1;
     }
@@ -38,6 +39,7 @@ int run(int argc, char *argv[])
     call_expr = parse_source("(main)");
     rt_consume_one(rt, call_expr, &result_loc, NULL);
     if (err_state()) {
+        printf("Interpreter execution error: %s\n", err_msg());
         rt_free(rt);
         return 1;
     }
