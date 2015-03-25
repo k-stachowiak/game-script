@@ -12,9 +12,10 @@
 
 /*
  * TODO:
- * - add print para-func
- * - implement sorting as bif
- * - prepare library API
+ * - remove BIF from AST; hide this behind the function-call mechanism,
+ * - add print para-func,
+ * - implement sorting as bif,
+ * - prepare library API.
  */
 
 struct {
