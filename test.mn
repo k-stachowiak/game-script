@@ -3,10 +3,13 @@
 	(sqrt (+ (* dx dx) (* dy dy)))
 )))
 
-(bind cmp-pts (func (px py) (do
-    (bind dx (dist { 0 0 } px))
-    (bind dy (dist { 0 0 } py))
+(bind point-cmp-orig (func (origin px py) (do
+    (bind dx (dist origin px))
+    (bind dy (dist origin py))
     (< dx dy)
 )))
+
+(bind point-cmp-int (point-cmp-orig { 0 0 }))
+(bind point-cmp-real (point-cmp-orig { 0.0 0.0 }))
 
 (bind pts [ { 3 3 } { 1 1 } { 2 2 } ])
