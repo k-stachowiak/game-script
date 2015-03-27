@@ -43,13 +43,13 @@ static void bif_text_error_args_left(int count)
 
 static char *bif_text_find(char *str, char value)
 {
-    while (*str != '0' && *str != value) {
+    while (*str != '\0' && *str != value) {
         ++str;
     }
     return str;
 }
 
-static void bif_printf_try_print_arg(struct Runtime *rt, char wc, VAL_LOC_T loc)
+static int bif_printf_try_print_arg(struct Runtime *rt, char wc, VAL_LOC_T loc)
 {
     enum ValueType type = rt_val_peek_type(rt, loc);
 
@@ -57,46 +57,41 @@ static void bif_printf_try_print_arg(struct Runtime *rt, char wc, VAL_LOC_T loc)
     case 'b':
         if (type != VAL_BOOL) {
             bif_text_error_wc_mismatch();
-            return;
+            return -1;
         }
-        printf("%s", rt_val_peek_bool(rt, loc) ? "true" : "false");
-        break;
+        return printf("%s", rt_val_peek_bool(rt, loc) ? "true" : "false");
 
     case 'c':
         if (type != VAL_CHAR) {
             bif_text_error_wc_mismatch();
-            return;
+            return -1;
         }
-        printf("%c", rt_val_peek_char(rt, loc));
-        break;
+        return printf("%c", rt_val_peek_char(rt, loc));
 
     case 'd':
         if (type != VAL_INT) {
             bif_text_error_wc_mismatch();
-            return;
+            return -1;
         }
-        printf("%ld", rt_val_peek_int(rt, loc));
-        break;
+        return printf("%ld", rt_val_peek_int(rt, loc));
 
     case 'f':
         if (type != VAL_REAL) {
             bif_text_error_wc_mismatch();
-            return;
+            return -1;
         }
-        printf("%f", rt_val_peek_real(rt, loc));
-        break;
+        return printf("%f", rt_val_peek_real(rt, loc));
 
     case 's':
         if (type != VAL_STRING) {
             bif_text_error_wc_mismatch();
-            return;
+            return -1;
         }
-        printf("%s", rt_val_peek_string(rt, loc));
-        break;
+        return printf("%s", rt_val_peek_string(rt, loc));
 
     default:
         bif_text_error_ws_unknown(wc);
-        break;
+        return -1;
     }
 }
 
@@ -108,24 +103,28 @@ static void bif_printf_impl(
 {
     char *end = str;
     int args_left = argc;
+    int result = 0;
 
     while (true) {
         end = bif_text_find(str, '%');
         while (str != end) {
             putc(*str, stdout);
+            printf("printing char %d\n", (int)(*str));
             ++str;
+            ++result;
         }
         
         if (*end == '\0') {
             break;
         }
 
-        ++end; /* skip '%' */
-        bif_printf_try_print_arg(rt, *end, arg_loc);
+        ++str; /* skip '%' */
+        result += bif_printf_try_print_arg(rt, *str, arg_loc);
         if (err_state()) {
             return;
         }
-        ++end; /* skip wildcard */
+        arg_loc = rt_val_next_loc(rt, arg_loc);
+        ++str; /* skip wildcard */
 
         --args_left;
     }
@@ -134,6 +133,8 @@ static void bif_printf_impl(
         bif_text_error_args_left(args_left);
         return;
     }
+
+    rt_val_push_int(rt->stack, result);
 }
 
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
