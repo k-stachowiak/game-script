@@ -109,7 +109,6 @@ static void bif_printf_impl(
         end = bif_text_find(str, '%');
         while (str != end) {
             putc(*str, stdout);
-            printf("printing char %d\n", (int)(*str));
             ++str;
             ++result;
         }
