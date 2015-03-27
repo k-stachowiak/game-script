@@ -56,6 +56,10 @@ void eval_error_not_found(char *symbol)
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
 {
+    char *string;
+    int string_len;
+    char *string_copy;
+
     switch (node->data.literal.type) {
     case AST_LIT_BOOL:
 		rt_val_push_bool(stack, node->data.literal.data.boolean);
@@ -74,7 +78,13 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
         break;
 
 	case AST_LIT_STRING:
-		rt_val_push_string(stack, node->data.literal.data.string);
+        string = node->data.literal.data.string;
+        string_len = strlen(string);
+        string_copy = mem_malloc(string_len + 1);
+        memcpy(string_copy, string, string_len + 1);
+        string_copy[string_len - 1] = '\0';
+		rt_val_push_string(stack, string_copy + 1);
+        mem_free(string_copy);
         break;
     }
 }

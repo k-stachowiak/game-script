@@ -101,7 +101,7 @@ static void bif_printf_impl(
         int argc,
         VAL_LOC_T arg_loc)
 {
-    char *end = str;
+    char *end;
     int args_left = argc;
     int result = 0;
 
