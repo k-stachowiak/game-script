@@ -17,6 +17,12 @@ struct {
 	int size, cap;
 } location_stack = { NULL, 0, 0 };
 
+void eval_init(void)
+{
+    eval_location_reset();
+    atexit(eval_location_reset);
+}
+
 void eval_location_reset(void)
 {
 	ARRAY_FREE(location_stack);

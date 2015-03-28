@@ -32,6 +32,8 @@ static void rt_init(struct Runtime *rt, long stack)
 
 	sym_map_init_global(gsm);
 
+    eval_init();
+
     sym_map_insert(gsm, "sqrt", eval_bif(rt, bif_sqrt, 1), &bif_location);
     sym_map_insert(gsm, "+", eval_bif(rt, bif_add, 2), &bif_location);
     sym_map_insert(gsm, "-", eval_bif(rt, bif_sub, 2), &bif_location);
