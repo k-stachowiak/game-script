@@ -18,7 +18,8 @@ static void test_runtime_literals(
     test_eval_source_expect(tc, rt, "-3.0", "Evaluate -3.0 literal", REAL, -3.0);
     test_eval_source_expect_string(tc, rt, "\"\"", "Evaluate empty string literal", "");
     test_eval_source_expect_string(tc, rt, "\"str\"", "Evaluate simple string literal", "str");
-    test_eval_source_expect_string(tc, rt, "\"x\\\"y\"", "Evaluate string literal with escapes", "x\\\"y");
+    test_eval_source_expect_string(tc, rt, "\"x\\\"y\"", "Evaluate string literal with escapes", "x\"y");
+    test_eval_source_expect_string(tc, rt, "\"\\n\"", "Evaluate string literal with escaped whitespace", "\n");
 }
 
 static void test_runtime_do(struct TestContext *tc, struct Runtime *rt)

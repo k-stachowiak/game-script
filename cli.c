@@ -12,8 +12,7 @@
 
 /*
  * TODO:
- * - add print bif,
- * - implement sorting as bif,
+ * - Enable parsing of the escape sequences.
  * - prepare library API.
  */
 

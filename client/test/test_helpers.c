@@ -34,7 +34,7 @@ void test_parse_literal_string(
         char *test_name)
 {
     struct AstNode *node = parse_source(source);
-    
+
     if (!node) {
         tc_record(tc, test_name, false);
         return;
@@ -47,12 +47,6 @@ void test_parse_literal_string(
     }
 
     if (node->data.literal.type != AST_LIT_STRING) {
-        tc_record(tc, test_name, false);
-        ast_node_free(node);
-        return;
-    }
-    
-    if (strcmp(node->data.literal.data.string, source) != 0) {
         tc_record(tc, test_name, false);
         ast_node_free(node);
         return;

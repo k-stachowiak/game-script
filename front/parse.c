@@ -509,9 +509,62 @@ static struct AstNode *parse_literal_bool(struct DomNode *dom)
     }
 }
 
+static char *unescape_string(char *in)
+{
+    int in_len = strlen(in);
+    char *out = mem_calloc(in_len + 1, 1);
+    char *write = out;
+    while (*in) {
+
+        if (*in != '\\') {
+            *write++ = *in++;
+            continue;
+        }
+
+        switch (*++in) {
+            case 'a':
+                *write++ = '\a';
+                break;
+            case 'b':
+                *write++ = '\b';
+                break;
+            case 't':
+                *write++ = '\t';
+                break;
+            case 'n':
+                *write++ = '\n';
+                break;
+            case 'f':
+                *write++ = '\f';
+                break;
+            case 'r':
+                *write++ = '\r';
+                break;
+            case 'v':
+                *write++ = '\v';
+                break;
+            case '\\':
+                *write++ = '\\';
+                break;
+            case '"':
+                *write++ = '"';
+                break;
+            case '\0':
+                *write++ = '\0';
+                break;
+            default:
+                mem_free(out);
+                return NULL;
+        }
+        ++in;
+    }
+
+    return mem_realloc(out, write - out + 1);
+}
+
 static struct AstNode *parse_literal_string(struct DomNode *dom)
 {
-    char *atom, *atom_cpy;
+    char *atom;
     int len;
     char delim = TOK_DELIM_STR;
 
@@ -525,10 +578,12 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
     len = strlen(atom);
 
     if (atom[0] == delim && atom[len - 1] == delim && len >= 2) {
-		atom_cpy = mem_malloc(len + 1);
-        memcpy(atom_cpy, atom, len + 1);
-        atom_cpy[len] = '\0';
-        return ast_make_literal_string(&dom->loc, atom_cpy);
+        char *unescaped = unescape_string(atom);
+        if (!unescaped) {
+            return NULL;
+        } else {
+            return ast_make_literal_string(&dom->loc, unescaped);
+        }
     } else {
         return NULL;
     }
@@ -558,6 +613,8 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
 
 	} else if (len == 4 && atom[1] == TOK_DELIM_ESCAPE) {
         switch(atom[2]) {
+         case 'a':
+            return ast_make_literal_character(&dom->loc, '\a');
          case 'b':
             return ast_make_literal_character(&dom->loc, '\b');
          case 't':
@@ -568,10 +625,10 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
             return ast_make_literal_character(&dom->loc, '\f');
          case 'r':
             return ast_make_literal_character(&dom->loc, '\r');
+         case 'v':
+            return ast_make_literal_character(&dom->loc, '\v');
          case '\\':
             return ast_make_literal_character(&dom->loc, '\\');
-         case '"':
-            return ast_make_literal_character(&dom->loc, '\"');
          case '\'':
             return ast_make_literal_character(&dom->loc, '\'');
          case '0':

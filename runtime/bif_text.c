@@ -101,39 +101,46 @@ static void bif_printf_impl(
         int argc,
         VAL_LOC_T arg_loc)
 {
-    char *end;
+    char *copy, *end;
     int args_left = argc;
-    int result = 0;
+    int len, result = 0;
+    bool done = false;
+
+    len = strlen(str);
+    copy = mem_malloc(len + 1);
+    memcpy(copy, str, len + 1);
 
     while (true) {
-        end = bif_text_find(str, '%');
-        while (str != end) {
-            putc(*str, stdout);
-            ++str;
-            ++result;
-        }
-        
+        end = bif_text_find(copy, '%');
         if (*end == '\0') {
+            done = true;
+        }
+        *end = '\0';
+        result += printf("%s", copy);
+        if (done) {
             break;
         }
 
-        ++str; /* skip '%' */
-        result += bif_printf_try_print_arg(rt, *str, arg_loc);
+        ++copy; /* skip '%' */
+        result += bif_printf_try_print_arg(rt, *copy, arg_loc);
         if (err_state()) {
-            return;
+            goto end;
         }
         arg_loc = rt_val_next_loc(rt, arg_loc);
-        ++str; /* skip wildcard */
+        ++copy; /* skip wildcard */
 
         --args_left;
     }
 
     if (args_left) {
         bif_text_error_args_left(args_left);
-        return;
+        goto end;
     }
 
     rt_val_push_int(rt->stack, result);
+
+end:
+    mem_free(copy);
 }
 
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
