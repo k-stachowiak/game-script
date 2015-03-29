@@ -12,7 +12,6 @@
 
 /*
  * TODO:
- * - Enable parsing of the escape sequences.
  * - prepare library API.
  */
 
