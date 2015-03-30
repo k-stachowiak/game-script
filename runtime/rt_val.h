@@ -178,6 +178,7 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc);
  * ==================
  */
 
+bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T Y);
 bool rt_val_string_eq(struct Runtime *rt, VAL_LOC_T loc, char *str);
 
 #endif

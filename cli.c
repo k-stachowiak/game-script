@@ -12,6 +12,7 @@
 
 /*
  * TODO:
+ * - analyze the capturing mechanism.
  * - prepare library API.
  */
 

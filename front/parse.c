@@ -235,73 +235,6 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     return ast_make_bind(&dom->loc, pattern, expr);
 }
 
-static struct AstNode *parse_iff(struct DomNode *dom)
-{
-	struct DomNode *child = NULL;
-	struct AstNode *test = NULL;
-	struct AstNode *true_expr = NULL;
-	struct AstNode *false_expr = NULL;
-
-	/* 1. Is compound CORE */
-	if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
-		return NULL;
-	}
-
-	/* 2. Has 4 children */
-	if (!dom_node_is_cpd_of_size(dom, 4)) {
-		return NULL;
-	}
-
-	child = dom->cpd_children;
-
-	/* 3.1. 1st child is if keyword. */
-	if (!dom_node_is_reserved_atom(child, DOM_RES_IF)) {
-		return NULL;
-	}
-	child = child->next;
-
-	/* 3.2. 2nd child is the test expression. */
-	if (!(test = parse_one(child))) {
-		goto fail;
-	}
-	child = child->next;
-
-	/* 3.3. 3rd child is the true expression. */
-	if (!(true_expr = parse_one(child))) {
-		goto fail;
-	}
-	child = child->next;
-
-	/* 3.4. 4th child is the false expression. */
-	if (!(false_expr = parse_one(child))) {
-		goto fail;
-	}
-
-	/* NOTE: The expressions are linked here which is useful in a remote place
-     * in the system. Sorry.
-     */
-	test->next = true_expr;
-	true_expr->next = false_expr;
-	false_expr->next = NULL;
-
-	return ast_make_iff(&dom->loc, test, true_expr, false_expr);
-
-fail:
-	if (test) {
-		ast_node_free(test);
-	}
-
-	if (true_expr) {
-		ast_node_free(true_expr);
-	}
-
-	if (false_expr) {
-		ast_node_free(false_expr);
-	}
-
-	return NULL;
-}
-
 static struct AstNode *parse_parafunc(struct DomNode *dom)
 {
 	struct DomNode *child = NULL;
@@ -333,6 +266,18 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
     if (dom_node_is_reserved_atom(child, DOM_RES_OR)) {
         struct AstNode *args = parse_list(child->next);
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_OR, args);
+    }
+
+	/* 3.3. Case if: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_IF)) {
+        struct AstNode *args = parse_list(child->next);
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_IF, args);
+    }
+
+	/* 3.4. Case switch: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_SWITCH)) {
+        struct AstNode *args = parse_list(child->next);
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SWITCH, args);
     }
 
     /* None of the reserved words were matched. */
@@ -744,7 +689,6 @@ static struct AstNode *parse_one(struct DomNode *dom)
 		(!err_state() && (node = parse_reference(dom))) ||
 		(!err_state() && (node = parse_do_block(dom))) ||
 		(!err_state() && (node = parse_bind(dom))) ||
-		(!err_state() && (node = parse_iff(dom))) ||
 		(!err_state() && (node = parse_func_def(dom))) ||
         (!err_state() && (node = parse_parafunc(dom))) ||
 		(!err_state() && (node = parse_func_call(dom))) ||

@@ -68,17 +68,6 @@ static void test_parse_bind(struct TestContext *tc)
 	test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
 }
 
-static void test_parse_iff(struct TestContext *tc)
-{
-    test_parse(tc, "(if)", "Fail on empty iff block", false);
-    test_parse(tc, "(if x)", "Fail on iff with only one argument", false);
-    test_parse(tc, "(if x y)", "Fail on iff with only two arguments", false);
-    test_parse(tc, "(if x y z s)", "Fail on iff with extra arguments", false);
-    test_parse(tc, "[if x y z]", "Fail on iff in array comopund", false);
-    test_parse(tc, "{if x y z}", "Fail on iff in tuple comopund", false);
-    test_parse(tc, "(if true 1 2)", "Succeed on simplistic iff expression", true);
-}
-
 static void test_parse_compound(struct TestContext *tc)
 {
     test_parse(tc, "()", "Fail on empty core compound", false);
@@ -146,7 +135,6 @@ void test_front(struct TestContext *tc)
     test_lex_comments(tc);
     test_parse_do(tc);
     test_parse_bind(tc);
-    test_parse_iff(tc);
     test_parse_compound(tc);
     test_parse_func_call(tc);
     test_parse_func_def(tc);

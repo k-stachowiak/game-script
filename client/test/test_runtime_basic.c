@@ -42,15 +42,6 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_succeed(tc, rt, "(bind [ g ] [ 1.0 ])", "Succeed on array bind");
 }
 
-static void test_runtime_iff(struct TestContext *tc, struct Runtime *rt)
-{
-    test_eval_source_fail(tc, rt, "(if)", "Fail on evaluating empty if block");
-    test_eval_source_fail(tc, rt, "(if a)", "Fail on evaluating incomplete if block 1");
-    test_eval_source_fail(tc, rt, "(if a b)", "Fail on evaluating incomplete if block 2");
-    test_eval_source_expect(tc, rt, "(if true 1.0 2.0)", "Succeed on iff - true branch", REAL, 1.0);
-    test_eval_source_expect_string(tc, rt, "(if false \"a\" \"b\")", "Succeed on iff - false branch", "b");
-}
-
 static void test_runtime_reference(
         struct TestContext *tc,
         struct Runtime *rt)
@@ -79,9 +70,7 @@ void test_runtime_basic(struct TestContext *tc)
     test_runtime_literals(tc, rt);
     test_runtime_do(tc, rt);
     test_runtime_bind(tc, rt);
-    test_runtime_iff(tc, rt);
     test_runtime_reference(tc, rt);
-    test_runtime_iff(tc, rt);
     test_runtime_cpd(tc, rt);
     rt_free(rt);
 }

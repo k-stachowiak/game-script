@@ -22,10 +22,6 @@ static void test_runtime_bif_logic(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(&& true true)", "Evaluate && true result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(&& false true)", "Evaluate && false result", BOOL, false);
-    test_eval_source_expect(tc, rt, "(|| false true)", "Evaluate || true result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(|| false false)", "Evaluate || false result", BOOL, false);
     test_eval_source_expect(tc, rt, "(^^ false true)", "Evaluate || true result", BOOL, true);
     test_eval_source_expect(tc, rt, "(^^ true true)", "Evaluate || false result", BOOL, false);
     test_eval_source_expect(tc, rt, "(~~ false)", "Evaluate ~~ false result", BOOL, false);

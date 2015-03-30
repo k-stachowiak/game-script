@@ -26,6 +26,12 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
     case AST_PARAFUNC_OR:
         printf("||()\n");
         break;
+    case AST_PARAFUNC_IF:
+        printf("if()\n");
+        break;
+    case AST_PARAFUNC_SWITCH:
+        printf("switch()\n");
+        break;
     }
 }
 
@@ -69,10 +75,6 @@ static void dbg_print_node(struct AstNode *node)
 
     case AST_BIND:
 		dbg_print_node_bind(&node->data.bind);
-		break;
-
-	case AST_IFF:
-        printf("if\n");
 		break;
 
     case AST_COMPOUND:

@@ -508,6 +508,65 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc)
     return true;
 }
 
+bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+{
+	enum ValueType xtype, ytype;
+	int xlen, ylen;
+
+	if (rt_val_peek_size(rt, x) != rt_val_peek_size(rt, y)) {
+		return false;
+	}
+
+	xtype = rt_val_peek_type(rt, x);
+	ytype = rt_val_peek_type(rt, y);
+
+	if (xtype != ytype) {
+		return false;
+	}
+
+	switch (xtype) {
+	case VAL_BOOL:
+		return rt_val_peek_bool(rt, x) == rt_val_peek_bool(rt, y);
+
+	case VAL_CHAR:
+		return rt_val_peek_char(rt, x) == rt_val_peek_char(rt, y);
+
+	case VAL_INT:
+		return rt_val_peek_int(rt, x) == rt_val_peek_int(rt, y);
+
+	case VAL_REAL:
+		return rt_val_peek_real(rt, x) == rt_val_peek_real(rt, y);
+
+	case VAL_STRING:
+		return strcmp(rt_val_peek_string(rt, x), rt_val_peek_string(rt, y)) == 0;
+
+	case VAL_ARRAY:
+	case VAL_TUPLE:
+		xlen = rt_val_cpd_len(rt, x);
+		ylen = rt_val_cpd_len(rt, y);
+		if (xlen != ylen) {
+			return false;
+		}
+		x = rt_val_cpd_first_loc(x);
+		y = rt_val_cpd_first_loc(y);
+		while (xlen) {
+			if (!rt_val_eq(rt, x, y)) {
+				return false;
+			}
+			x = rt_val_next_loc(rt, x);
+			y = rt_val_next_loc(rt, y);
+			--xlen;
+		}
+		return true;
+
+	case VAL_FUNCTION:
+		return false;
+	}
+
+	LOG_ERROR("Cannot get here");
+	exit(1);
+}
+
 bool rt_val_string_eq(struct Runtime *rt, VAL_LOC_T loc, char *str)
 {
     char *stack_str = rt_val_peek_string(rt, loc);

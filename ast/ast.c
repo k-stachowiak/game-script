@@ -33,22 +33,6 @@ struct AstNode *ast_make_bind(
     return result;
 }
 
-struct AstNode *ast_make_iff(
-		struct SourceLocation *loc,
-		struct AstNode *test,
-		struct AstNode *true_expr,
-		struct AstNode *false_expr)
-{
-	struct AstNode *result = mem_malloc(sizeof(*result));
-	result->next = NULL;
-	result->type = AST_IFF;
-	result->loc = *loc;
-	result->data.iff.test = test;
-	result->data.iff.true_expr = true_expr;
-	result->data.iff.false_expr = false_expr;
-	return result;
-}
-
 struct AstNode *ast_make_compound(
     struct SourceLocation *loc,
     enum AstCompoundType type,
@@ -184,11 +168,6 @@ static void ast_bind_free(struct AstBind *abind)
     ast_node_free_one(abind->expr);
 }
 
-static void ast_iff_free(struct AstIff *aiff)
-{
-    ast_node_free(aiff->test);
-}
-
 static void ast_compound_free(struct AstCompound *acpd)
 {
     ast_node_free(acpd->exprs);
@@ -233,10 +212,6 @@ void ast_node_free_one(struct AstNode *node)
 
 	case AST_BIND:
 		ast_bind_free(&(node->data.bind));
-		break;
-
-	case AST_IFF:
-		ast_iff_free(&(node->data.iff));
 		break;
 
 	case AST_COMPOUND:

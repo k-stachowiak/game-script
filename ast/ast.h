@@ -14,7 +14,6 @@
 enum AstNodeType {
 	AST_DO_BLOCK,
     AST_BIND,
-	AST_IFF,
     AST_COMPOUND,
     AST_FUNC_CALL,
     AST_FUNC_DEF,
@@ -39,6 +38,8 @@ enum AstLiteralType {
 enum AstParafuncType {
     AST_PARAFUNC_AND,
     AST_PARAFUNC_OR,
+	AST_PARAFUNC_IF,
+	AST_PARAFUNC_SWITCH
 };
 
 /* Partial types.
@@ -56,12 +57,6 @@ struct AstDoBlock {
 struct AstBind {
 	struct Pattern *pattern;
     struct AstNode *expr;
-};
-
-struct AstIff {
-	struct AstNode *test;
-	struct AstNode *true_expr;
-	struct AstNode *false_expr;
 };
 
 struct AstCompound {
@@ -114,7 +109,6 @@ struct AstNode {
     union {
 		struct AstDoBlock do_block;
         struct AstBind bind;
-		struct AstIff iff;
         struct AstCompound compound;
         struct AstFuncCall func_call;
         struct AstFuncDef func_def;
@@ -139,12 +133,6 @@ struct AstNode *ast_make_bind(
     struct SourceLocation *loc,
     struct Pattern *pattern,
 	struct AstNode *expr);
-
-struct AstNode *ast_make_iff(
-	struct SourceLocation *loc,
-	struct AstNode *test,
-	struct AstNode *true_expr,
-	struct AstNode *false_expr);
 
 struct AstNode *ast_make_compound(
     struct SourceLocation *loc,

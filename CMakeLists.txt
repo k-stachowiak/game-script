@@ -61,6 +61,7 @@ add_executable(moon-lang
     ./client/test/test_runtime_basic.c
     ./client/test/test_runtime_func.c
     ./client/test/test_runtime_bif.c
+    ./client/test/test_runtime_parafunc.c
     )
 target_link_libraries(moon-lang m lang)
 

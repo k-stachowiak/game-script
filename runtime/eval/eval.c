@@ -43,14 +43,6 @@ struct SourceLocation *eval_location_top(void)
 	return location_stack.data + location_stack.size - 1;
 }
 
-static void eval_common_error(char *issue)
-{
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "EVAL", eval_location_top());
-	err_msg_append(&msg, "%s", issue);
-	err_msg_set(&msg);
-}
-
 /* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
@@ -93,38 +85,6 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
         mem_free(string_copy);
         break;
     }
-}
-
-static void eval_iff(
-		struct AstNode *node,
-		struct Runtime *rt,
-		struct SymMap *sym_map)
-{
-	VAL_LOC_T test_loc, temp_begin, temp_end;
-	VAL_BOOL_T test_val;
-
-	temp_begin = rt->stack->top;
-	test_loc = eval_impl(node->data.iff.test, rt, sym_map);
-	temp_end = rt->stack->top;
-
-    if (err_state()) {
-        return;
-    }
-
-    if (rt_val_peek_type(rt, test_loc) != VAL_BOOL) {
-		eval_common_error("Test expression isn't a boolean value.");
-        stack_collapse(rt->stack, temp_begin, temp_end);
-		return;
-    }
-
-	test_val = rt_val_peek_bool(rt, test_loc);
-    stack_collapse(rt->stack, temp_begin, temp_end);
-
-	if (test_val) {
-		eval_impl(node->data.iff.true_expr, rt, sym_map);
-	} else {
-		eval_impl(node->data.iff.false_expr, rt, sym_map);
-	}
 }
 
 static void eval_reference(
@@ -174,10 +134,6 @@ VAL_LOC_T eval_impl(
     case AST_BIND:
         eval_bind(node, rt, sym_map);
         break;
-
-	case AST_IFF:
-		eval_iff(node, rt, sym_map);
-		break;
 
     case AST_REFERENCE:
         eval_reference(node, rt->stack, sym_map);
