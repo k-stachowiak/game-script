@@ -13,6 +13,8 @@
 /*
  * TODO:
  * - analyze the capturing mechanism.
+ * - implement AST rewriting (rewrite switch in terms of if)
+ * - implement BIF(?) or for value - string conversion
  * - prepare library API.
  */
 
