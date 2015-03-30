@@ -9,21 +9,21 @@
 #include "define.h"
 
 enum BifBinaryMatch {
-	BBM_BOTH_INT,
-	BBM_BOTH_REAL,
-	BBM_MISMATCH
+    BBM_BOTH_INT,
+    BBM_BOTH_REAL,
+    BBM_MISMATCH
 };
 
 enum ValueType bif_match_un(
-	struct Runtime *rt,
-	VAL_LOC_T x_loc,
-	VAL_INT_T *i,
-	VAL_REAL_T *r);
+    struct Runtime *rt,
+    VAL_LOC_T x_loc,
+    VAL_INT_T *i,
+    VAL_REAL_T *r);
 
 enum BifBinaryMatch bif_match_bin(
     struct Runtime *rt,
-	VAL_LOC_T x_loc, VAL_LOC_T y_loc,
-	VAL_INT_T *ix, VAL_INT_T *iy,
-	VAL_REAL_T *rx, VAL_REAL_T *ry);
+    VAL_LOC_T x_loc, VAL_LOC_T y_loc,
+    VAL_INT_T *ix, VAL_INT_T *iy,
+    VAL_REAL_T *rx, VAL_REAL_T *ry);
 
 #endif

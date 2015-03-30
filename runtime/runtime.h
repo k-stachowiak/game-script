@@ -20,9 +20,9 @@ struct Runtime {
     VAL_LOC_T saved_loc;
     struct AstNode *saved_store;
 
-	void *eval_callback_data;
-	EvalCallbackBegin eval_callback_begin;
-	EvalCallbackEnd eval_callback_end;
+    void *eval_callback_data;
+    EvalCallbackBegin eval_callback_begin;
+    EvalCallbackEnd eval_callback_end;
 };
 
 struct Runtime *rt_make(long stack);
@@ -34,10 +34,10 @@ void rt_restore(struct Runtime *rt);
 
 void rt_reset_eval_callback(struct Runtime *rt);
 void rt_set_eval_callback(
-		struct Runtime *rt,
-		void *data,
-		EvalCallbackBegin begin,
-		EvalCallbackEnd end);
+        struct Runtime *rt,
+        void *data,
+        EvalCallbackBegin begin,
+        EvalCallbackEnd end);
 
 void rt_consume_one(
         struct Runtime *rt,

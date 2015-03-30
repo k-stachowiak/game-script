@@ -23,44 +23,44 @@ static void bind_error_pattern_length_mismatch(void)
 }
 
 void eval_bind_pattern(
-		struct Runtime *rt,
-		struct SymMap *sym_map,
-		struct Pattern *pattern,
-		VAL_LOC_T location,
-		struct SourceLocation *source_loc)
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct Pattern *pattern,
+        VAL_LOC_T location,
+        struct SourceLocation *source_loc)
 {
-	enum ValueType type = rt_val_peek_type(rt, location);
+    enum ValueType type = rt_val_peek_type(rt, location);
 
-	VAL_LOC_T child_loc;
-	struct Pattern *child_pat;
+    VAL_LOC_T child_loc;
+    struct Pattern *child_pat;
     int i, cpd_len, pattern_len, len;
 
-	if (pattern->type == PATTERN_SYMBOL) {
-		sym_map_insert(sym_map, pattern->symbol, location, source_loc);
-		return;
-	}
+    if (pattern->type == PATTERN_SYMBOL) {
+        sym_map_insert(sym_map, pattern->symbol, location, source_loc);
+        return;
+    }
 
-	if (pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) {
-		bind_error_incorrrect_type();
-		return;
-	}
+    if (pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) {
+        bind_error_incorrrect_type();
+        return;
+    }
 
-	if (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE) {
-		bind_error_incorrrect_type();
-		return;
-	}
+    if (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE) {
+        bind_error_incorrrect_type();
+        return;
+    }
 
     cpd_len = rt_val_cpd_len(rt, location);
     pattern_len = pattern_list_len(pattern->children);
     if (cpd_len != pattern_len) {
         bind_error_pattern_length_mismatch();
-		return;
+        return;
     } else {
         len = pattern_len;
     }
 
-	child_loc = rt_val_cpd_first_loc(location);
-	child_pat = pattern->children;
+    child_loc = rt_val_cpd_first_loc(location);
+    child_pat = pattern->children;
 
     for (i = 0; i < len; ++i) {
         eval_bind_pattern(rt, sym_map, child_pat, child_loc, source_loc);
@@ -73,16 +73,16 @@ void eval_bind_pattern(
 }
 
 void eval_bind(
-		struct AstNode *node,
-		struct Runtime *rt,
-		struct SymMap *sym_map)
+        struct AstNode *node,
+        struct Runtime *rt,
+        struct SymMap *sym_map)
 {
-	struct Pattern *pattern = node->data.bind.pattern;
-	struct AstNode *expr = node->data.bind.expr;
+    struct Pattern *pattern = node->data.bind.pattern;
+    struct AstNode *expr = node->data.bind.expr;
     VAL_LOC_T location = eval_impl(expr, rt, sym_map);
 
     if (!err_state()) {
-		eval_bind_pattern(rt, sym_map, pattern, location, &expr->loc);
+        eval_bind_pattern(rt, sym_map, pattern, location, &expr->loc);
     }
 }
 

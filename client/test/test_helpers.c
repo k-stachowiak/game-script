@@ -61,26 +61,26 @@ bool test_eval_source(
         char *source,
         VAL_LOC_T *locs)
 {
-	int i = 0;
-	struct AstNode *ast_list = NULL, *next;
+    int i = 0;
+    struct AstNode *ast_list = NULL, *next;
 
-	err_reset();
+    err_reset();
 
-	ast_list = parse_source(source);
-	if (!ast_list) {
-		return false;
-	}
+    ast_list = parse_source(source);
+    if (!ast_list) {
+        return false;
+    }
 
-	while (ast_list) {
-		rt_consume_one(rt, ast_list, locs + (i++), &next);
-		if (err_state()) {
-			ast_node_free(next);
-			return false;
-		}
-		ast_list = next;
-	}
+    while (ast_list) {
+        rt_consume_one(rt, ast_list, locs + (i++), &next);
+        if (err_state()) {
+            ast_node_free(next);
+            return false;
+        }
+        ast_list = next;
+    }
 
-	return true;
+    return true;
 }
 
 void test_eval_source_fail(

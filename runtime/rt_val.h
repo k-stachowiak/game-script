@@ -10,34 +10,34 @@
  */
 
 enum ValueType {
-	VAL_BOOL,
-	VAL_CHAR,
-	VAL_INT,
-	VAL_REAL,
-	VAL_STRING,
-	VAL_ARRAY,
-	VAL_TUPLE,
-	VAL_FUNCTION
+    VAL_BOOL,
+    VAL_CHAR,
+    VAL_INT,
+    VAL_REAL,
+    VAL_STRING,
+    VAL_ARRAY,
+    VAL_TUPLE,
+    VAL_FUNCTION
 };
 
 struct ValueHeader {
-	VAL_HEAD_TYPE_T type;
-	VAL_HEAD_SIZE_T size;
+    VAL_HEAD_TYPE_T type;
+    VAL_HEAD_SIZE_T size;
 };
 
 struct ValueFuncData {
 
-	VAL_LOC_T arity_loc;
-	VAL_LOC_T ast_def_loc;
-	VAL_LOC_T bif_impl_loc;
-	VAL_LOC_T cap_start;
-	VAL_LOC_T appl_start;
+    VAL_LOC_T arity_loc;
+    VAL_LOC_T ast_def_loc;
+    VAL_LOC_T bif_impl_loc;
+    VAL_LOC_T cap_start;
+    VAL_LOC_T appl_start;
 
-	VAL_SIZE_T arity;
-	struct AstNode *ast_def;
-	void *bif_impl;
-	VAL_SIZE_T appl_count;
-	VAL_SIZE_T cap_count;
+    VAL_SIZE_T arity;
+    struct AstNode *ast_def;
+    void *bif_impl;
+    VAL_SIZE_T appl_count;
+    VAL_SIZE_T cap_count;
 };
 
 /* Writing (pushing) API.

@@ -64,13 +64,13 @@ static void test_runtime_bif_cons_valid(
         return;
     }
 
-	if (rt_val_peek_int(rt, results[2]) != 1) {
+    if (rt_val_peek_int(rt, results[2]) != 1) {
         tc_record(tc, test_name, false);
         rt_reset(rt);
         return;
     }
 
-	if (rt_val_peek_int(rt, results[3]) != 3) {
+    if (rt_val_peek_int(rt, results[3]) != 3) {
         tc_record(tc, test_name, false);
         rt_reset(rt);
         return;
@@ -110,19 +110,19 @@ static void test_runtime_bif_cat_valid(
         return;
     }
 
-	if (rt_val_peek_int(rt, results[3]) != 0) {
+    if (rt_val_peek_int(rt, results[3]) != 0) {
         tc_record(tc, test_name, false);
         rt_reset(rt);
         return;
     }
 
-	if (rt_val_peek_int(rt, results[4]) != 1) {
+    if (rt_val_peek_int(rt, results[4]) != 1) {
         tc_record(tc, test_name, false);
         rt_reset(rt);
         return;
     }
 
-	if (rt_val_peek_int(rt, results[5]) != 3) {
+    if (rt_val_peek_int(rt, results[5]) != 3) {
         tc_record(tc, test_name, false);
         rt_reset(rt);
         return;
@@ -144,7 +144,7 @@ static void test_runtime_bif_cat_invalid(
 
 void test_runtime_bif(struct TestContext *tc)
 {
-	struct Runtime *rt = rt_make(64 * 1024);
+    struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_bif_arythmetic(tc, rt);
     test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);

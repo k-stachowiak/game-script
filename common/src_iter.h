@@ -6,13 +6,13 @@
 #include <stdbool.h>
 
 enum SourceLocationType {
-	SRC_LOC_REGULAR,
-	SRC_LOC_BIF,
-	SRC_LOC_FUNC_CONTAINED
+    SRC_LOC_REGULAR,
+    SRC_LOC_BIF,
+    SRC_LOC_FUNC_CONTAINED
 };
 
 struct SourceLocation {
-	enum SourceLocationType type;
+    enum SourceLocationType type;
     int line;
     int column;
 };

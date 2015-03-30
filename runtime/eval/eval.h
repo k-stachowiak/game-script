@@ -16,16 +16,16 @@ void efc_log_gen_call_sym(char *symbol);
 void efc_log_gen_call_arg(struct Runtime *rt, VAL_LOC_T loc);
 void efc_log_result(struct Runtime *rt, VAL_LOC_T loc);
 void efc_log_bif_call(
-		struct Runtime *rt,
-		char *symbol,
-		VAL_LOC_T arg_locs[],
-		int arg_count,
-		VAL_LOC_T result_loc);
+        struct Runtime *rt,
+        char *symbol,
+        VAL_LOC_T arg_locs[],
+        int arg_count,
+        VAL_LOC_T result_loc);
 #else
-#	define efc_log_gen_call_sym(X)
-#	define efc_log_gen_call_arg(X, Y)
-#	define efc_log_result(X, Y)
-#	define efc_log_bif_call(A, B, C, D, E)
+#    define efc_log_gen_call_sym(X)
+#    define efc_log_gen_call_arg(X, Y)
+#    define efc_log_result(X, Y)
+#    define efc_log_bif_call(A, B, C, D, E)
 #endif
 
 void eval_init(void);

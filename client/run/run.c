@@ -44,10 +44,10 @@ int run(int argc, char *argv[])
         return 1;
     }
 
-	if (result_loc) {
-		rt_val_print(rt, result_loc, false);
-		printf("\n");
-	}
+    if (result_loc) {
+        rt_val_print(rt, result_loc, false);
+        printf("\n");
+    }
 
     rt_free(rt);
     return 0;

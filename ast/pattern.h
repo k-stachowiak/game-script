@@ -6,22 +6,22 @@
 #include <stdbool.h>
 
 enum PatternType {
-	PATTERN_SYMBOL,
-	PATTERN_ARRAY,
-	PATTERN_TUPLE
+    PATTERN_SYMBOL,
+    PATTERN_ARRAY,
+    PATTERN_TUPLE
 };
 
 struct Pattern {
-	enum PatternType type;
-	char *symbol;
-	struct Pattern *children;
-	struct Pattern *next;
+    enum PatternType type;
+    char *symbol;
+    struct Pattern *children;
+    struct Pattern *next;
 };
 
 struct Pattern *pattern_make_symbol(char *symbol);
 struct Pattern *pattern_make_compound(
-		struct Pattern *children,
-		enum PatternType type);
+        struct Pattern *children,
+        enum PatternType type);
 
 void pattern_free(struct Pattern *pattern);
 int pattern_list_len(struct Pattern *pattern);

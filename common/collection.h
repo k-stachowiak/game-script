@@ -26,7 +26,7 @@
 #define ARRAY_COPY(dst, src) \
     do { \
         int size = src.cap * sizeof(*dst.data); \
-		dst.data = mem_malloc(size); \
+        dst.data = mem_malloc(size); \
         memcpy(dst.data, src.data, size); \
         dst.size = src.size; \
         dst.cap = src.cap; \
@@ -46,11 +46,11 @@
 #define ARRAY_APPEND(MACRO_ARRAY, MACRO_ELEMENT) \
     do { \
         if ((MACRO_ARRAY).cap == 0) { \
-			(MACRO_ARRAY).data = mem_malloc(sizeof(*((MACRO_ARRAY).data))); \
+            (MACRO_ARRAY).data = mem_malloc(sizeof(*((MACRO_ARRAY).data))); \
             (MACRO_ARRAY).cap = 1; \
         } else if ((MACRO_ARRAY).cap == (MACRO_ARRAY).size) { \
             (MACRO_ARRAY).cap *= 2; \
-			(MACRO_ARRAY).data = mem_realloc(\
+            (MACRO_ARRAY).data = mem_realloc(\
                     (MACRO_ARRAY).data,\
                     (MACRO_ARRAY).cap * sizeof(*((MACRO_ARRAY).data))); \
         } \
@@ -65,8 +65,8 @@
 
 #define ARRAY_POP(MACRO_ARRAY) \
     do { \
-		ARRAY_REMOVE((MACRO_ARRAY), (MACRO_ARRAY).size - 1); \
-	} while(0)
+        ARRAY_REMOVE((MACRO_ARRAY), (MACRO_ARRAY).size - 1); \
+    } while(0)
 
 
 #endif

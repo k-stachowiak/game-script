@@ -6,27 +6,27 @@
 #include <stdbool.h>
 
 enum MoonValueType {
-	MN_BOOL,
-	MN_CHAR,
-	MN_INT,
-	MN_REAL,
-	MN_STRING,
-	MN_ARRAY,
-	MN_TUPLE,
-	MN_FUNCTION
+    MN_BOOL,
+    MN_CHAR,
+    MN_INT,
+    MN_REAL,
+    MN_STRING,
+    MN_ARRAY,
+    MN_TUPLE,
+    MN_FUNCTION
 };
 
 struct MoonValue {
-	enum MoonValueType type;
-	union {
-		bool boolean;
-		char character;
-		long integer;
-		double real;
-		char *string;
-		struct MoonValue *compound;
-	} data;
-	struct MoonValue *next;
+    enum MoonValueType type;
+    union {
+        bool boolean;
+        char character;
+        long integer;
+        double real;
+        char *string;
+        struct MoonValue *compound;
+    } data;
+    struct MoonValue *next;
 };
 
 void mn_init(void);

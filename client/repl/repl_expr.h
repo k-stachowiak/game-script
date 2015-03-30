@@ -6,9 +6,9 @@
 #include "runtime.h"
 
 enum ReplExprResult {
-	REPL_EXPR_OK,
-	REPL_EXPR_ERROR,
-	REPL_EXPR_INTERNAL_ERROR
+    REPL_EXPR_OK,
+    REPL_EXPR_ERROR,
+    REPL_EXPR_INTERNAL_ERROR
 };
 
 enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line);

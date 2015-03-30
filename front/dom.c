@@ -9,15 +9,15 @@
 #include "tok.h"
 
 static char *reserved[] = {
-	"do",
-	"bind",
-	"if",
-	"switch",
+    "do",
+    "bind",
+    "if",
+    "switch",
     "&&",
     "||",
-	"func",
-	"true",
-	"false"
+    "func",
+    "true",
+    "false"
 };
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
@@ -26,19 +26,19 @@ static int dom_list_length(struct DomNode* current)
 {
     int result = 0;
     while (current) {
-		current = current->next;
-		++result;
+        current = current->next;
+        ++result;
     }
     return result;
 }
 
 struct DomNode *dom_make_atom(struct SourceLocation *loc, char *begin, char *end)
 {
-	struct DomNode *result = mem_malloc(sizeof(*result));
+    struct DomNode *result = mem_malloc(sizeof(*result));
     int length = end - begin;
     result->loc = *loc;
     result->type = DOM_ATOM;
-	result->atom = mem_malloc(length + 1);
+    result->atom = mem_malloc(length + 1);
     memcpy(result->atom, begin, length);
     result->atom[length] = '\0';
     result->next = NULL;
@@ -50,7 +50,7 @@ struct DomNode *dom_make_compound(
         enum DomCpdType compound_type,
         struct DomNode *children)
 {
-	struct DomNode *result = mem_malloc(sizeof(*result));
+    struct DomNode *result = mem_malloc(sizeof(*result));
     result->loc = *loc;
     result->type = DOM_COMPOUND;
     result->cpd_type = compound_type;
@@ -130,15 +130,15 @@ char *dom_node_parse_symbol(struct DomNode *node)
     }
 
     /* Isn't a reserved word. */
-	for (i = 0; i < reserved_count; ++i) {
-		if (strcmp(node->atom, reserved[i]) == 0) {
-			return NULL;
-		}
-	}
+    for (i = 0; i < reserved_count; ++i) {
+        if (strcmp(node->atom, reserved[i]) == 0) {
+            return NULL;
+        }
+    }
 
     len = strlen(node->atom);
-	result = mem_malloc(len + 1);
-	memcpy(result, node->atom, len + 1);
+    result = mem_malloc(len + 1);
+    memcpy(result, node->atom, len + 1);
     result[len] = '\0';
 
     return result;

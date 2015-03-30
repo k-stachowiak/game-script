@@ -7,7 +7,7 @@
 #include "runtime.h"
 
 struct Debugger {
-	int lvl;
+    int lvl;
 };
 
 void dbg_init(struct Debugger *dbg);

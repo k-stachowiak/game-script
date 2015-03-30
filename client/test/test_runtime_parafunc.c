@@ -33,9 +33,9 @@ static void test_parafunc_switch(struct TestContext *tc, struct Runtime *rt)
 
 void test_runtime_parafunc(struct TestContext *tc)
 {
-	struct Runtime *rt = rt_make(64 * 1024);
-	test_runtime_parafunc_logic(tc, rt);
-	test_parafunc_if(tc, rt);
-	test_parafunc_switch(tc, rt);
-	rt_free(rt);
+    struct Runtime *rt = rt_make(64 * 1024);
+    test_runtime_parafunc_logic(tc, rt);
+    test_parafunc_if(tc, rt);
+    test_parafunc_switch(tc, rt);
+    rt_free(rt);
 }

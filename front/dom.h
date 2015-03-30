@@ -11,15 +11,15 @@ enum DomNodeType { DOM_ATOM, DOM_COMPOUND };
 enum DomCpdType { DOM_CPD_CORE, DOM_CPD_ARRAY, DOM_CPD_TUPLE };
 
 enum Reserved {
-	DOM_RES_DO,
-	DOM_RES_BIND,
-	DOM_RES_IF,
-	DOM_RES_SWITCH,
+    DOM_RES_DO,
+    DOM_RES_BIND,
+    DOM_RES_IF,
+    DOM_RES_SWITCH,
     DOM_RES_AND,
     DOM_RES_OR,
-	DOM_RES_FUNC,
-	DOM_RES_TRUE,
-	DOM_RES_FALSE
+    DOM_RES_FUNC,
+    DOM_RES_TRUE,
+    DOM_RES_FALSE
 };
 
 struct DomNode {

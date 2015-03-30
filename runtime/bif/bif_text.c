@@ -11,34 +11,34 @@
 
 static void bif_text_error_arg(int arg, char *func, char *condition)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
-	err_msg_append(&msg, "Argument %d of _%s_ %s", arg, func, condition);
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
+    err_msg_append(&msg, "Argument %d of _%s_ %s", arg, func, condition);
+    err_msg_set(&msg);
 }
 
 static void bif_text_error_wc_mismatch(void)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
-	err_msg_append(&msg, "Wildcard type mismatched argument");
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
+    err_msg_append(&msg, "Wildcard type mismatched argument");
+    err_msg_set(&msg);
 }
 
 static void bif_text_error_ws_unknown(char wildcard)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
-	err_msg_append(&msg, "Wildcard '%c' unknown", wildcard);
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
+    err_msg_append(&msg, "Wildcard '%c' unknown", wildcard);
+    err_msg_set(&msg);
 }
 
 static void bif_text_error_args_left(int count)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
-	err_msg_append(&msg, "%d arguments left after printf", count);
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
+    err_msg_append(&msg, "%d arguments left after printf", count);
+    err_msg_set(&msg);
 }
 
 static char *bif_text_find(char *str, char value)

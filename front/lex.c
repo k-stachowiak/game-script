@@ -14,26 +14,26 @@
 
 static void lex_error_undelimited(char *what, struct SourceLocation *where)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "lex", where);
-	err_msg_append(&msg, "undelimited %s", what);
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "lex", where);
+    err_msg_append(&msg, "undelimited %s", what);
+    err_msg_set(&msg);
 }
 
 static void lex_error_close_unopen(struct SourceLocation *where)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "lex", where);
-	err_msg_append(&msg, "closing unopened compound node");
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "lex", where);
+    err_msg_append(&msg, "closing unopened compound node");
+    err_msg_set(&msg);
 }
 
 static void lex_error_read(char *what, struct SourceLocation *where)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "LEX", where);
-	err_msg_append(&msg, "Failed reading %s", what);
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "LEX", where);
+    err_msg_append(&msg, "Failed reading %s", what);
+    err_msg_set(&msg);
 }
 
 /* Tokenization.
@@ -187,9 +187,9 @@ static struct Token *tok_read_delim_atom(
     atom_end = find_nonesc_delim(current, end, delimiter);
 
     if (si_eq(&atom_end, end) || (*(atom_end.current) != delimiter)) {
-		lex_error_undelimited(
-			delimiter == TOK_DELIM_STR ? "string" : "character",
-			&atom_begin.loc);
+        lex_error_undelimited(
+            delimiter == TOK_DELIM_STR ? "string" : "character",
+            &atom_begin.loc);
         return NULL;
     }
 
@@ -223,12 +223,12 @@ static struct Token *tok_read_comment(
     comment_end = find(current, end, '\n');
     result = tok_make_token(current, &comment_end);
 
-	if (!si_eq(&comment_end, end)) {
-		si_adv(&comment_end);
-		*current = find_if_not(&comment_end, end, isspace);
-	} else {
-		*current = *end;
-	}
+    if (!si_eq(&comment_end, end)) {
+        si_adv(&comment_end);
+        *current = find_if_not(&comment_end, end, isspace);
+    } else {
+        *current = *end;
+    }
 
     return result;
 }
@@ -269,7 +269,7 @@ static struct Token *tokenize(
 
         if (!tok) {
             if (!err_state()) {
-				lex_error_read("token", &begin.loc);
+                lex_error_read("token", &begin.loc);
             }
             tok_free(result);
             return NULL;
@@ -322,20 +322,20 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
 
         } else {
             struct DomNode *child = dom_parse_node(current);
-			if (err_state()) {
-				goto fail;
+            if (err_state()) {
+                goto fail;
 
-			} else if (!child) {
-				lex_error_read("compound DOM node", &(*current)->loc);
-				goto fail;
+            } else if (!child) {
+                lex_error_read("compound DOM node", &(*current)->loc);
+                goto fail;
 
-			} else {
-				LIST_APPEND(child, &children, &children_end);
-			}
+            } else {
+                LIST_APPEND(child, &children, &children_end);
+            }
         }
     }
 
-	lex_error_undelimited("compound DOM node", &first->loc);
+    lex_error_undelimited("compound DOM node", &first->loc);
 
 fail:
     dom_free(children);
@@ -357,19 +357,19 @@ static struct DomNode *dom_parse_atom_node(struct Token **current)
  */
 static struct DomNode *dom_parse_node(struct Token **current)
 {
-	while (*current && tok_is_comment(*current)) {
-		*current = (*current)->next;
-	}
+    while (*current && tok_is_comment(*current)) {
+        *current = (*current)->next;
+    }
 
-	if (!(*current)) {
-		return NULL;
+    if (!(*current)) {
+        return NULL;
 
-	} else if (tok_is_close_paren(*current)) {
-		lex_error_close_unopen(&(*current)->loc);
-		return NULL;
+    } else if (tok_is_close_paren(*current)) {
+        lex_error_close_unopen(&(*current)->loc);
+        return NULL;
 
-	} else if (tok_is_open_paren(*current)) {
-		return dom_parse_compound_node(current);
+    } else if (tok_is_open_paren(*current)) {
+        return dom_parse_compound_node(current);
 
     } else {
         return dom_parse_atom_node(current);
@@ -385,14 +385,14 @@ static struct DomNode *dom_build(struct Token *tokens)
 
     err_reset();
     while (current) {
-		struct DomNode *node = dom_parse_node(&current);
-		if (err_state()) {
-			dom_free(result);
-			return NULL;
-		}
-		if (node) {
-			LIST_APPEND(node, &result, &result_end);
-		}
+        struct DomNode *node = dom_parse_node(&current);
+        if (err_state()) {
+            dom_free(result);
+            return NULL;
+        }
+        if (node) {
+            LIST_APPEND(node, &result, &result_end);
+        }
     }
 
     return result;
@@ -421,7 +421,7 @@ struct DomNode *lex(char *source)
     }
 
     if (!(dom = dom_build(tokens))) {
-		tok_free(tokens);
+        tok_free(tokens);
         return NULL;
     }
 

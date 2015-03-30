@@ -30,12 +30,12 @@ static void test_lex_mixed(struct TestContext *tc)
 
 static void test_lex_comments(struct TestContext *tc)
 {
-	char *source =
-		"#start with a comment\n"
-		"(bind # end line with a comment\n"
-		"    #interleave with a comment   \n"
-		"x 0)\n"
-		"(bind y 42) # comment at the end of the source\n";
+    char *source =
+        "#start with a comment\n"
+        "(bind # end line with a comment\n"
+        "    #interleave with a comment   \n"
+        "x 0)\n"
+        "(bind y 42) # comment at the end of the source\n";
 
     test_lex(tc, source, "Succeed on a code interleaved with comments.", true);
 }
@@ -51,7 +51,7 @@ static void test_parse_do(struct TestContext *tc)
 
 static void test_parse_bind(struct TestContext *tc)
 {
-	/* Alias binds */
+    /* Alias binds */
     test_parse(tc, "(bind)", "Fail on empty bind block", false);
     test_parse(tc, "(bind x)", "Fail on bind without bound value", false);
     test_parse(tc, "(bind x 1 2)", "Fail on bind with extra element", false);
@@ -60,12 +60,12 @@ static void test_parse_bind(struct TestContext *tc)
     test_parse(tc, "(bind x 1)", "Succeed on simplistic bind", true);
     test_parse(tc, "(bind x (+ 2 2))", "Succeed on non-trivial bind", true);
 
-	/* Matching binds */
-	test_parse(tc, "(bind {} 1.0)", "Fail on binding to empty tuple", false);
-	test_parse(tc, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array", false);
-	test_parse(tc, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal", false);
-	test_parse(tc, "(bind { x y } { 2 3 })", "Succeed on compound bind", true);
-	test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
+    /* Matching binds */
+    test_parse(tc, "(bind {} 1.0)", "Fail on binding to empty tuple", false);
+    test_parse(tc, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array", false);
+    test_parse(tc, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal", false);
+    test_parse(tc, "(bind { x y } { 2 3 })", "Succeed on compound bind", true);
+    test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
 }
 
 static void test_parse_compound(struct TestContext *tc)

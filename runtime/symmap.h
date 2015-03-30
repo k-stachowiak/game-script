@@ -16,7 +16,7 @@ struct SymMap {
 
 struct SymMapKvp {
     char *key;
-	VAL_LOC_T stack_loc;
+    VAL_LOC_T stack_loc;
     struct SourceLocation source_loc;
     struct SymMapKvp *next;
 };

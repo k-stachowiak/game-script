@@ -12,7 +12,7 @@
 
 struct Token *tok_make_token(struct SourceIter *begin, struct SourceIter *end)
 {
-	struct Token *result = mem_malloc(sizeof(*result));
+    struct Token *result = mem_malloc(sizeof(*result));
     result->loc = begin->loc;
     result->begin = begin->current;
     result->end = end->current;
@@ -82,8 +82,8 @@ bool tok_is_close_paren(struct Token *tok)
 
 bool tok_is_comment(struct Token *tok)
 {
-	LOG_TRACE_FUNC
-	return *tok->begin == TOK_COMMENT;
+    LOG_TRACE_FUNC
+    return *tok->begin == TOK_COMMENT;
 }
 
 bool tok_paren_match(struct Token *lhs, struct Token *rhs)

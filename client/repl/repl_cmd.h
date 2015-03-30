@@ -6,10 +6,10 @@
 #include "runtime.h"
 
 enum ReplCmdResult {
-	REPL_CMD_OK,
-	REPL_CMD_ERROR,
-	REPL_CMD_INTERNAL_ERROR,
-	REPL_CMD_QUIT
+    REPL_CMD_OK,
+    REPL_CMD_ERROR,
+    REPL_CMD_INTERNAL_ERROR,
+    REPL_CMD_QUIT
 };
 
 void repl_cmd_init(struct Runtime* rt);

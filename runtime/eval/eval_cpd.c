@@ -8,10 +8,10 @@
 
 static void eval_error_array_hetero(void)
 {
-	struct ErrMessage msg;
-	err_msg_init_src(&msg, "EVAL", eval_location_top());
-	err_msg_append(&msg, "Heterogenous array literal evaluated");
-	err_msg_set(&msg);
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "EVAL", eval_location_top());
+    err_msg_append(&msg, "Heterogenous array literal evaluated");
+    err_msg_set(&msg);
 }
 
 void eval_compound(
@@ -23,14 +23,14 @@ void eval_compound(
     struct AstNode *current = node->data.compound.exprs;
     VAL_LOC_T result_loc = rt->stack->top;
 
-	/* Header. */
+    /* Header. */
     switch (node->data.compound.type) {
         case AST_CPD_ARRAY:
-			rt_val_push_array_init(rt->stack, &size_loc);
+            rt_val_push_array_init(rt->stack, &size_loc);
             break;
 
         case AST_CPD_TUPLE:
-			rt_val_push_tuple_init(rt->stack, &size_loc);
+            rt_val_push_tuple_init(rt->stack, &size_loc);
             break;
     }
 
@@ -46,7 +46,7 @@ void eval_compound(
 
     /* Hack value size to correct value. */
     data_size = rt->stack->top - data_begin;
-	rt_val_push_cpd_final(rt->stack, size_loc, data_size);
+    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
 
     /* Assert array homogenity. */
     if (node->data.compound.type == AST_CPD_ARRAY &&

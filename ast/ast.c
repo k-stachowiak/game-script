@@ -8,23 +8,23 @@
 #include "ast.h"
 
 struct AstNode *ast_make_do_block(
-		struct SourceLocation *loc,
-		struct AstNode* exprs)
+        struct SourceLocation *loc,
+        struct AstNode* exprs)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
-	result->next = NULL;
-	result->type = AST_DO_BLOCK;
-	result->loc = *loc;
-	result->data.do_block.exprs = exprs;
-	return result;
+    struct AstNode *result = mem_malloc(sizeof(*result));
+    result->next = NULL;
+    result->type = AST_DO_BLOCK;
+    result->loc = *loc;
+    result->data.do_block.exprs = exprs;
+    return result;
 }
 
 struct AstNode *ast_make_bind(
-		struct SourceLocation *loc,
-		struct Pattern *pattern,
-		struct AstNode *expr)
+        struct SourceLocation *loc,
+        struct Pattern *pattern,
+        struct AstNode *expr)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_BIND;
     result->loc = *loc;
@@ -38,7 +38,7 @@ struct AstNode *ast_make_compound(
     enum AstCompoundType type,
     struct AstNode *exprs)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_COMPOUND;
     result->loc = *loc;
@@ -51,7 +51,7 @@ struct AstNode *ast_make_func_call(
     struct SourceLocation *loc,
     char *symbol, struct AstNode *args)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_CALL;
     result->loc = *loc;
@@ -67,7 +67,7 @@ struct AstNode *ast_make_func_def(
         int arg_count,
         struct AstNode *expr)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_DEF;
     result->loc = *loc;
@@ -94,7 +94,7 @@ struct AstNode *ast_make_parafunc(
 
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -105,7 +105,7 @@ struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 
 struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -116,7 +116,7 @@ struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
 
 struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char value)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -127,7 +127,7 @@ struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char valu
 
 struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -138,7 +138,7 @@ struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value)
 
 struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
@@ -149,7 +149,7 @@ struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
 
 struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
 {
-	struct AstNode *result = mem_malloc(sizeof(*result));
+    struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_REFERENCE;
     result->loc = *loc;
@@ -159,7 +159,7 @@ struct AstNode *ast_make_reference(struct SourceLocation *loc, char *symbol)
 
 static void ast_do_block_free(struct AstDoBlock *adb)
 {
-	ast_node_free(adb->exprs);
+    ast_node_free(adb->exprs);
 }
 
 static void ast_bind_free(struct AstBind *abind)
@@ -181,8 +181,8 @@ static void ast_func_call_free(struct AstFuncCall *afcall)
 
 static void ast_func_def_free(struct AstFuncDef *afdef)
 {
-	pattern_free(afdef->formal_args);
-	mem_free(afdef->arg_locs);
+    pattern_free(afdef->formal_args);
+    mem_free(afdef->arg_locs);
     ast_node_free(afdef->expr);
 }
 
@@ -205,59 +205,59 @@ static void ast_reference_free(struct AstReference *aref)
 
 void ast_node_free_one(struct AstNode *node)
 {
-	switch (node->type) {
-	case AST_DO_BLOCK:
-		ast_do_block_free(&(node->data.do_block));
-		break;
+    switch (node->type) {
+    case AST_DO_BLOCK:
+        ast_do_block_free(&(node->data.do_block));
+        break;
 
-	case AST_BIND:
-		ast_bind_free(&(node->data.bind));
-		break;
+    case AST_BIND:
+        ast_bind_free(&(node->data.bind));
+        break;
 
-	case AST_COMPOUND:
-		ast_compound_free(&(node->data.compound));
-		break;
+    case AST_COMPOUND:
+        ast_compound_free(&(node->data.compound));
+        break;
 
-	case AST_FUNC_CALL:
-		ast_func_call_free(&(node->data.func_call));
-		break;
+    case AST_FUNC_CALL:
+        ast_func_call_free(&(node->data.func_call));
+        break;
 
-	case AST_FUNC_DEF:
-		ast_func_def_free(&(node->data.func_def));
-		break;
+    case AST_FUNC_DEF:
+        ast_func_def_free(&(node->data.func_def));
+        break;
 
-	case AST_LITERAL:
-		ast_literal_free(&(node->data.literal));
-		break;
+    case AST_LITERAL:
+        ast_literal_free(&(node->data.literal));
+        break;
 
     case AST_PARAFUNC:
         ast_parafunc_free(&(node->data.parafunc));
         break;
 
-	case AST_REFERENCE:
-		ast_reference_free(&(node->data.reference));
-		break;
-	}
+    case AST_REFERENCE:
+        ast_reference_free(&(node->data.reference));
+        break;
+    }
 
-	mem_free(node);
+    mem_free(node);
 }
 
 void ast_node_free(struct AstNode *current)
 {
     while (current) {
-		struct AstNode *next = current->next;
-		ast_node_free_one(current);
+        struct AstNode *next = current->next;
+        ast_node_free_one(current);
         current = next;
     }
 }
 
 int ast_list_len(struct AstNode *head)
 {
-	int result = 0;
-	while (head) {
-		head = head->next;
-		++result;
-	}
-	return result;
+    int result = 0;
+    while (head) {
+        head = head->next;
+        ++result;
+    }
+    return result;
 }
 

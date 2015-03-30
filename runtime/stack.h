@@ -10,8 +10,8 @@
 
 struct Stack {
     char *buffer;
-	VAL_LOC_T size;
-	VAL_LOC_T top;
+    VAL_LOC_T size;
+    VAL_LOC_T top;
 };
 
 struct Stack *stack_make(VAL_LOC_T size);
