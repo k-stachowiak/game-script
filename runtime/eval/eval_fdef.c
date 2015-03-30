@@ -51,26 +51,17 @@ static struct AstNode *efd_get_children(struct AstNode* node)
  */
 static bool efd_has_symbol(struct AstNode *node, char **symbol)
 {
-    switch (node->type) {
-    case AST_DO_BLOCK:
-    case AST_LITERAL:
-    case AST_COMPOUND:
-    case AST_BIND:
-    case AST_FUNC_DEF:
-    case AST_PARAFUNC: /* don't capture parafunc symbol */
-        return false;
-
-    case AST_REFERENCE:
+    if (node->type == AST_REFERENCE) {
         *symbol = node->data.reference.symbol;
         return true;
+    }
 
-    case AST_FUNC_CALL:
+    if (node->type == AST_FUNC_CALL) {
         *symbol = node->data.func_call.symbol;
         return true;
     }
 
-    LOG_ERROR("Unhandled AST node type.\n");
-    exit(1);
+    return false;
 }
 
 /** Checks whether symbol is defined in the symbol map. */
@@ -129,10 +120,15 @@ static void efd_push_captures(
             !pattern_list_contains_symbol(func_def->formal_args, symbol)) {
                 if (!efd_is_defined(symbol, sym_map)) {
                     if (node->type != AST_FUNC_CALL) {
-                        /* Note: it is allowed for the func call symbol not to be defined.
-                         * in such case it shall not be captured in the closure and
-                         * will result in runtime error if called before the definition
-                         * is made.
+                        /* Note: it is allowed for the func call symbol not to
+                         * be defined. In such case it shall not be captured in
+                         * the closure and will result in runtime error if
+                         * called before the definition is made.
+                         *
+                         * This _HACK_ enables an easy and greasy recursion in
+                         * the scripts and works around the necessity of
+                         * introducing of the forward declarations or performing
+                         * AST preprocessing during the closure evaluation.
                          */
                         eval_error_not_found(symbol);
                     }
