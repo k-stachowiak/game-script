@@ -143,6 +143,16 @@ end:
     mem_free(copy);
 }
 
+void bif_putc(struct Runtime *rt, VAL_LOC_T char_loc)
+{
+    if (rt_val_peek_type(rt, char_loc) != VAL_CHAR) {
+        bif_text_error_arg(1, "putc", "must be a character");
+    } else {
+        char character = rt_val_peek_char(rt, char_loc);
+        putc(character, stdout);
+    }
+}
+
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
 {
     char *string;
@@ -150,13 +160,11 @@ void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
 
     if (rt_val_peek_type(rt, str_loc) != VAL_STRING) {
         bif_text_error_arg(1, "print", "must be a string");
-        return;
+    } else {
+        string = rt_val_peek_string(rt, str_loc);
+        len = strlen(string);
+        printf("%s", string);
     }
-
-    string = rt_val_peek_string(rt, str_loc);
-    len = strlen(string);
-    printf("%s", string);
-    rt_val_push_int(rt->stack, len);
 }
 
 void bif_printf(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)

@@ -57,8 +57,11 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
 		return REPL_EXPR_INTERNAL_ERROR;
 	}
 
-	rt_val_print(rt, location, true);
-	printf("\n");
+	if (location) {
+		rt_val_print(rt, location, true);
+		printf("\n");
+	}
+
 	return REPL_EXPR_OK;
 }
 

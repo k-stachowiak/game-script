@@ -47,6 +47,7 @@ void bif_xor(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_not(struct Runtime *rt, VAL_LOC_T x_loc);
 
 /* Text */
+void bif_putc(struct Runtime *rt, VAL_LOC_T char_loc);
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc);
 void bif_printf(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc);
 

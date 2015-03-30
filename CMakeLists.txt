@@ -10,6 +10,8 @@ include_directories(
     ./common
     ./front
     ./runtime
+    ./runtime/bif
+    ./runtime/eval
     .
     )
 
@@ -21,23 +23,23 @@ add_library(lang
     ./front/lex.c
     ./front/parse.c
     ./front/tok.c
-    ./runtime/bif_logic.c
-    ./runtime/bif_arythm.c
-    ./runtime/bif_array.c
-    ./runtime/bif_compare.c
-    ./runtime/bif_common.c
-    ./runtime/bif_text.c
+    ./runtime/bif/bif_logic.c
+    ./runtime/bif/bif_arythm.c
+    ./runtime/bif/bif_array.c
+    ./runtime/bif/bif_compare.c
+    ./runtime/bif/bif_common.c
+    ./runtime/bif/bif_text.c
+    ./runtime/eval/eval.c
+    ./runtime/eval/eval_fdef.c
+    ./runtime/eval/eval_do.c
+    ./runtime/eval/eval_parafunc.c
+    ./runtime/eval/eval_cpd.c
+    ./runtime/eval/eval_fcall.c
+	./runtime/eval/eval_bind.c
 	./runtime/dbg.c
     ./runtime/symmap.c
     ./runtime/stack.c
-    ./runtime/eval.c
     ./runtime/runtime.c
-    ./runtime/eval_fdef.c
-    ./runtime/eval_do.c
-    ./runtime/eval_parafunc.c
-    ./runtime/eval_cpd.c
-    ./runtime/eval_fcall.c
-	./runtime/eval_bind.c
     ./runtime/rt_val.c
     ./ast/ast.c
     ./ast/pattern.c

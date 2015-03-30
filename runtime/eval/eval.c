@@ -208,8 +208,11 @@ VAL_LOC_T eval_impl(
             rt->eval_callback_end(rt->eval_callback_data, rt, begin);
         }
         eval_location_pop();
-        return begin;
-
+		if (begin == rt->stack->top) {
+			return 0;
+		} else {
+			return begin;
+		}
     }
 }
 
@@ -224,11 +227,11 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
     result = eval_impl(node, rt, sym_map);
     end = rt->stack->top;
 
-    if (!err_state()) {
-        return result;
-    } else {
+    if (err_state()) {
         stack_collapse(rt->stack, begin, end);
         return -1;
+	} else {
+        return result;
     }
 }
 

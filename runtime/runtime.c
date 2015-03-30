@@ -55,6 +55,7 @@ static void rt_init(struct Runtime *rt, long stack)
 	sym_map_insert(gsm, "cons", eval_bif(rt, bif_cons, 2), &bif_location);
 	sym_map_insert(gsm, "cat", eval_bif(rt, bif_cat, 2), &bif_location);
 	sym_map_insert(gsm, "slice", eval_bif(rt, bif_slice, 3), &bif_location);
+	sym_map_insert(gsm, "putc", eval_bif(rt, bif_putc, 1), &bif_location);
 	sym_map_insert(gsm, "print", eval_bif(rt, bif_print, 1), &bif_location);
 	sym_map_insert(gsm, "printf", eval_bif(rt, bif_printf, 2), &bif_location);
 }
@@ -127,14 +128,17 @@ void rt_consume_one(
         VAL_LOC_T *loc,
         struct AstNode **next)
 {
-	if (loc) {
-		*loc = rt->stack->top;
-	}
+	VAL_LOC_T result;
+
 	if (next) {
 		*next = ast->next;
 	}
 
-	eval(ast, rt, &rt->global_sym_map);
+	result = eval(ast, rt, &rt->global_sym_map);
+
+	if (loc) {
+		*loc = result;
+	}
 
 	if (err_state()) {
 		ast_node_free_one(ast);

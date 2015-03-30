@@ -14,7 +14,7 @@ struct Stack *stack_make(VAL_LOC_T size)
 	struct Stack *result = mem_malloc(sizeof(*result));
 	result->buffer = mem_malloc(size);
     result->size = size;
-    result->top = 0;
+    result->top = 1;
     return result;
 }
 
