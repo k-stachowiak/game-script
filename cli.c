@@ -12,9 +12,9 @@
 
 /*
  * TODO:
- * - implement AST rewriting (rewrite switch in terms of if)
  * - implement BIF(?) or for value - string conversion
- * - prepare library API.
+ * - implement key-value store
+ * - finish the library API
  */
 
 struct {

@@ -25,7 +25,7 @@ static void bif_text_error_wc_mismatch(void)
     err_msg_set(&msg);
 }
 
-static void bif_text_error_ws_unknown(char wildcard)
+static void bif_text_error_wc_unknown(char wildcard)
 {
     struct ErrMessage msg;
     err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
@@ -90,7 +90,7 @@ static int bif_printf_try_print_arg(struct Runtime *rt, char wc, VAL_LOC_T loc)
         return printf("%s", rt_val_peek_string(rt, loc));
 
     default:
-        bif_text_error_ws_unknown(wc);
+        bif_text_error_wc_unknown(wc);
         return -1;
     }
 }
