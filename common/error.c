@@ -18,37 +18,26 @@ static void err_internal_error(void)
 
 void err_msg_init(struct ErrMessage *msg, char *module)
 {
-    char buffer[ERR_TEM_BUFFER_SIZE];
-    int len = sprintf(buffer, "[%s] :", module);
-    if (len >= (ERR_TEM_BUFFER_SIZE) - 1) {
-        LOG_ERROR("Memory corruption while building error string.");
-        exit(2);
-    }
-    msg->text = mem_malloc(len + 1);
-    memcpy(msg->text, buffer, len + 1);
+    char *buffer = NULL;
+    str_append(buffer, "[%s] :", module);
+    msg->text = buffer;
 }
 
 void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocation *loc)
 {
-    char buffer[ERR_TEM_BUFFER_SIZE];
-    int len = -1;
+    char *buffer = NULL;
     switch (loc->type) {
     case SRC_LOC_REGULAR:
-        len = sprintf(buffer, "[%s] (%d:%d) :", module, loc->line, loc->column);
+        str_append(buffer, "[%s] (%d:%d) :", module, loc->line, loc->column);
         break;
     case SRC_LOC_BIF:
-        len = sprintf(buffer, "[%s] (BIF) :", module);
+        str_append(buffer, "[%s] (BIF) :", module);
         break;
     case SRC_LOC_FUNC_CONTAINED:
-        len = sprintf(buffer, "[%s] (FUNC) :", module);
+        str_append(buffer, "[%s] (FUNC) :", module);
         break;
     }
-    if (len >= (ERR_TEM_BUFFER_SIZE) - 1) {
-        LOG_ERROR("Memory corruption while building error string.");
-        exit(2);
-    }
-    msg->text = mem_malloc(len + 1);
-    memcpy(msg->text, buffer, len + 1);
+    msg->text = buffer;
 }
 
 void err_msg_set(struct ErrMessage *msg)

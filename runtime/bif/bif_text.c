@@ -154,65 +154,6 @@ end:
     mem_free(copy);
 }
 
-static void bif_to_string_impl(struct Runtime *rt, VAL_LOC_T x, char **str);
-
-static void bif_to_string_compound(struct Runtime *rt, VAL_LOC_T x, char **str)
-{
-    int i, len = rt_val_cpd_len(rt, x);
-    VAL_LOC_T item = rt_val_cpd_first_loc(x);
-    for (i = 0; i < len; ++i) {
-        bif_to_string_impl(rt, item, str);
-        str_append(*str, " ");
-        item = rt_val_next_loc(rt, item);
-    }
-}
-
-static void bif_to_string_impl(struct Runtime *rt, VAL_LOC_T x, char **str)
-{
-    enum ValueType type = rt_val_peek_type(rt, x);
-    switch (type) {
-    case VAL_STRING:
-        str_append(*str, "%s", rt_val_peek_string(rt, x));
-        break;
-
-    case VAL_BOOL:
-        if (rt_val_peek_bool(rt, x)) {
-            str_append(*str, "true");
-        } else {
-            str_append(*str, "false");
-        }
-        break;
-
-    case VAL_CHAR:
-        str_append(*str, "%c", rt_val_peek_char(rt, x));
-        break;
-
-    case VAL_INT:
-        str_append(*str, "%ld", rt_val_peek_int(rt, x));
-        break;
-
-    case VAL_REAL:
-        str_append(*str, "%f", rt_val_peek_real(rt, x));
-        break;
-
-    case VAL_ARRAY:
-        str_append(*str, "[ ");
-        bif_to_string_compound(rt, x, str);
-        str_append(*str, "]");
-        break;
-
-    case VAL_TUPLE:
-        str_append(*str, "{ ");
-        bif_to_string_compound(rt, x, str);
-        str_append(*str, "}");
-        break;
-
-    case VAL_FUNCTION:
-        str_append(*str, "function");
-        break;
-    }
-}
-
 void bif_putc(struct Runtime *rt, VAL_LOC_T char_loc)
 {
     if (rt_val_peek_type(rt, char_loc) != VAL_CHAR) {
@@ -261,11 +202,12 @@ void bif_printf(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)
 void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
     char *buffer = NULL;
+    rt_val_to_string(rt, arg_loc, &buffer);
 
-    bif_to_string_impl(rt, arg_loc, &buffer);
-    rt_val_push_string(rt->stack, buffer);
-
-    if (buffer) {
+    if (!buffer) {
+        LOG_ERROR("Stringifying failed.");
+    } else {
+        rt_val_push_string(rt->stack, buffer);
         mem_free(buffer);
     }
 }

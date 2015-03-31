@@ -14,8 +14,6 @@
 
 struct SourceLocation;
 
-#define ERR_TEM_BUFFER_SIZE 4096
-
 struct ErrMessage {
     char *text;
 };

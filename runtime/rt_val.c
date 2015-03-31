@@ -5,48 +5,12 @@
 #include <inttypes.h>
 
 #include "memory.h"
+#include "strbuild.h"
 #include "log.h"
 #include "runtime.h"
 #include "rt_val.h"
 
 static VAL_HEAD_SIZE_T zero = 0;
-
-static void rt_val_print_compound(
-        struct Runtime *rt, VAL_LOC_T loc, char open, char close)
-{
-    VAL_LOC_T cpd_loc, end;
-
-    printf("%c ", open);
-
-    cpd_loc = rt_val_cpd_first_loc(loc);
-    end = cpd_loc + rt_val_peek_size(rt, loc);
-    while (cpd_loc != end) {
-        rt_val_print(rt, cpd_loc, false);
-        printf(" ");
-        cpd_loc = rt_val_next_loc(rt, cpd_loc);
-    }
-
-    printf("%c", close);
-}
-
-static void rt_val_print_function(struct Runtime *rt, VAL_LOC_T loc)
-{
-    struct ValueFuncData func_data = rt_val_function_data(rt, loc);
-
-    if (func_data.bif_impl && !func_data.ast_def) {
-        printf("built-in function (arity %d)", func_data.arity);
-
-    } else if (!func_data.bif_impl && func_data.ast_def) {
-        printf("function (ar=%d, cap=%d, appl=%d)",
-            func_data.arity,
-            func_data.cap_count,
-            func_data.appl_count);
-
-    } else {
-        LOG_ERROR("Attempting to print malformed function value.\n");
-        exit(1);
-    }
-}
 
 /* Writing / pushing.
  * ==================
@@ -200,62 +164,106 @@ struct ValueHeader rt_val_peek_header(struct Stack *stack, VAL_LOC_T location)
     return result;
 }
 
-void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
+static void rt_val_to_string_compound(struct Runtime *rt, VAL_LOC_T x, char **str)
 {
-    switch (rt_val_peek_type(rt, loc)) {
+    int i, len = rt_val_cpd_len(rt, x);
+    VAL_LOC_T item = rt_val_cpd_first_loc(x);
+    for (i = 0; i < len; ++i) {
+        rt_val_to_string(rt, item, str);
+        str_append(*str, " ");
+        item = rt_val_next_loc(rt, item);
+    }
+}
+
+void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
+{
+    enum ValueType type = rt_val_peek_type(rt, x);
+    switch (type) {
+    case VAL_STRING:
+        str_append(*str, "%s", rt_val_peek_string(rt, x));
+        break;
+
     case VAL_BOOL:
-        if (annotate) {
-            printf("bool :: ");
+        if (rt_val_peek_bool(rt, x)) {
+            str_append(*str, "true");
+        } else {
+            str_append(*str, "false");
         }
-        printf("%s", rt_val_peek_bool(rt, loc) ? "true" : "false");
         break;
 
     case VAL_CHAR:
-        if (annotate) {
-            printf("char :: ");
-        }
-        printf("'%c'", rt_val_peek_char(rt, loc));
+        str_append(*str, "%c", rt_val_peek_char(rt, x));
         break;
 
     case VAL_INT:
-        if (annotate) {
-            printf("integer :: ");
-        }
-        printf("%" PRId64, rt_val_peek_int(rt, loc));
+        str_append(*str, "%ld", rt_val_peek_int(rt, x));
         break;
 
     case VAL_REAL:
-        if (annotate) {
-            printf("real :: ");
-        }
-        printf("%f", rt_val_peek_real(rt, loc));
-        break;
-
-    case VAL_STRING:
-        if (annotate) {
-            printf("string :: ");
-        }
-        printf("\"%s\"", rt_val_peek_string(rt, loc));
+        str_append(*str, "%f", rt_val_peek_real(rt, x));
         break;
 
     case VAL_ARRAY:
-        if (annotate) {
-            printf("array :: ");
-        }
-        rt_val_print_compound(rt, loc, '[', ']');
+        str_append(*str, "[ ");
+        rt_val_to_string_compound(rt, x, str);
+        str_append(*str, "]");
         break;
 
     case VAL_TUPLE:
-        if (annotate) {
-            printf("tuple :: ");
-        }
-        rt_val_print_compound(rt, loc, '{', '}');
+        str_append(*str, "{ ");
+        rt_val_to_string_compound(rt, x, str);
+        str_append(*str, "}");
         break;
 
     case VAL_FUNCTION:
-        rt_val_print_function(rt, loc);
+        str_append(*str, "function");
         break;
     }
+}
+
+void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
+{
+    char *buffer = NULL;
+
+    if (annotate) {
+        switch (rt_val_peek_type(rt, loc)) {
+        case VAL_BOOL:
+            str_append(buffer, "bool :: ");
+            break;
+
+        case VAL_CHAR:
+            str_append(buffer, "char :: ");
+            break;
+
+        case VAL_INT:
+            str_append(buffer, "integer :: ");
+            break;
+
+        case VAL_REAL:
+            str_append(buffer, "real :: ");
+            break;
+
+        case VAL_STRING:
+            str_append(buffer, "string :: ");
+            break;
+
+        case VAL_ARRAY:
+            str_append(buffer, "array :: ");
+            break;
+
+        case VAL_TUPLE:
+            str_append(buffer, "tuple :: ");
+            break;
+
+        case VAL_FUNCTION:
+            str_append(buffer, "function :: ");
+            break;
+        }
+    }
+
+    rt_val_to_string(rt, loc, &buffer);
+    printf("%s", buffer);
+    free(buffer);
 }
 
 int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location)

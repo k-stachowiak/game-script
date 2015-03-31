@@ -104,6 +104,9 @@ void rt_val_push_func_final(
 /** Peeks the header of a value at the given location. */
 struct ValueHeader rt_val_peek_header(struct Stack *stack, VAL_LOC_T location);
 
+/** Renders a string from a value. */
+void rt_val_to_string(struct Runtime *rt, VAL_LOC_T loc, char **);
+
 /** Prints a value at a given location. */
 void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate);
 
