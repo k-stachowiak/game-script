@@ -13,6 +13,7 @@
 /*
  * TODO:
  * - implement BIF(?) or for value - string conversion
+ * - make the value - string conversion unified along the platform
  * - implement key-value store
  * - finish the library API
  */
