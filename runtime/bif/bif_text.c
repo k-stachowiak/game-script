@@ -41,9 +41,16 @@ static void bif_text_error_args_left(int count)
     err_msg_set(&msg);
 }
 
-static char *bif_text_find(char *str, char value)
+static char *bif_text_find_format(char *str)
 {
-    while (*str != '\0' && *str != value) {
+    while (*str != '\0') {
+        if (*str == '%') {
+            if (*(str + 1) == '%') {
+                ++str;
+            } else {
+                return str;
+            }
+        }
         ++str;
     }
     return str;
@@ -101,7 +108,7 @@ static void bif_printf_impl(
         int argc,
         VAL_LOC_T arg_loc)
 {
-    char *copy, *end;
+    char *copy, *begin, *end;
     int args_left = argc;
     int len, result = 0;
     bool done = false;
@@ -110,24 +117,25 @@ static void bif_printf_impl(
     copy = mem_malloc(len + 1);
     memcpy(copy, str, len + 1);
 
+    begin = copy;
     while (true) {
-        end = bif_text_find(copy, '%');
+        end = bif_text_find_format(begin);
         if (*end == '\0') {
             done = true;
         }
         *end = '\0';
-        result += printf("%s", copy);
+        result += printf("%s", begin);
         if (done) {
             break;
         }
 
-        ++copy; /* skip '%' */
-        result += bif_printf_try_print_arg(rt, *copy, arg_loc);
+        begin = end + 1; /* skip '%' */
+        result += bif_printf_try_print_arg(rt, *begin, arg_loc);
         if (err_state()) {
             goto end;
         }
         arg_loc = rt_val_next_loc(rt, arg_loc);
-        ++copy; /* skip wildcard */
+        ++begin; /* skip wildcard */
 
         --args_left;
     }

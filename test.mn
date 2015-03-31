@@ -14,3 +14,7 @@
 
 (bind pts-int [ { 3 3 } { 1 1 } { 2 2 } ])
 (bind pts-real [ { 1.0 0.0 } { 0.0 1.0 } { 1.0 1.0 } { 0.0 0.0 }])
+
+(bind main (func ()
+	(printf "%s, %s" { "Hello" "World" })
+))
