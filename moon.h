@@ -30,9 +30,9 @@ struct MoonValue {
 };
 
 void mn_init(void);
-bool mn_exec_file(char *filename);
-struct MoonValue *mn_exec_command(char *source);
+bool mn_exec_file(const char *filename);
+struct MoonValue *mn_exec_command(const char *source);
 void mn_dispose(struct MoonValue* value);
-char *mn_error_message(void);
+const char *mn_error_message(void);
 
 #endif

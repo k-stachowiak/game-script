@@ -125,11 +125,11 @@ void mn_init(void)
     runtime = rt_make(64 * 1024);
 }
 
-bool mn_exec_file(char *filename)
+bool mn_exec_file(const char *filename)
 {
     struct AstNode *ast_list;
 
-    if (!(ast_list = parse_file(filename))) {
+    if (!(ast_list = parse_file((char*)filename))) {
         return false;
     }
 
@@ -140,12 +140,12 @@ bool mn_exec_file(char *filename)
     return true;
 }
 
-struct MoonValue *mn_exec(char *source)
+struct MoonValue *mn_exec_command(const char *source)
 {
     struct AstNode *expr;
     VAL_LOC_T result_loc;
 
-    expr = parse_source(source);
+    expr = parse_source((char*)source);
     rt_consume_one(runtime, expr, &result_loc, NULL);
 
     if (err_state()) {
@@ -160,7 +160,7 @@ void mn_dispose(struct MoonValue* value)
     api_value_free(value);
 }
 
-char *mn_error_message(void)
+const char *mn_error_message(void)
 {
     return err_msg();
 }
