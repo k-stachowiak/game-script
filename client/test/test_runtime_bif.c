@@ -14,8 +14,8 @@ static void test_runtime_bif_arythmetic(
     test_eval_source_expect(tc, rt, "(+ (/ 7.0 2.0) (% 7.0 2.0))", "Evaluate 7 / 2 + 7 % 2 (real)", REAL, 4.5);
     test_eval_source_expect(tc, rt, "(/ -2.0 2.0)", "Evaluate operation on negative value", REAL, -1.0);
     test_eval_source_expect(tc, rt, "(sqrt (+ (* 3.0 3.0) (* 4.0 4.0)))", "Evaluate egyptian diagonal", REAL, 5.0);
-    test_eval_source_fail(tc, rt, "(- 2.0 2)", "Evaluate - heterogenous args");
-    test_eval_source_fail(tc, rt, "(* 2 2.0)", "Evaluate * heterogenous args");
+    test_eval_source_expect(tc, rt, "(- 2.0 2)", "Evaluate - heterogenous args", REAL, 0.0);
+    test_eval_source_expect(tc, rt, "(* 2 2.0)", "Evaluate * heterogenous args", REAL, 4.0);
 }
 
 static void test_runtime_bif_logic(

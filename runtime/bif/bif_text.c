@@ -166,14 +166,10 @@ void bif_putc(struct Runtime *rt, VAL_LOC_T char_loc)
 
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
 {
-    char *string;
-    int len;
-
     if (rt_val_peek_type(rt, str_loc) != VAL_STRING) {
         bif_text_error_arg(1, "print", "must be a string");
     } else {
-        string = rt_val_peek_string(rt, str_loc);
-        len = strlen(string);
+        char *string = rt_val_peek_string(rt, str_loc);
         printf("%s", string);
     }
 }

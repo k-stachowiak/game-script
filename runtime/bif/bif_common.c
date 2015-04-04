@@ -39,18 +39,37 @@ enum BifBinaryMatch bif_match_bin(
     enum ValueType x_type = rt_val_peek_type(rt, x_loc);
     enum ValueType y_type = rt_val_peek_type(rt, y_loc);
 
-    if (x_type == VAL_INT && y_type == VAL_INT) {
+    if (x_type == VAL_INT) {
         *ix = rt_val_peek_int(rt, x_loc);
-        *iy = rt_val_peek_int(rt, y_loc);
-        return BBM_BOTH_INT;
+        switch (y_type) {
+        case VAL_INT:
+            *iy = rt_val_peek_int(rt, y_loc);
+            return BBM_BOTH_INT;
+        case VAL_REAL:
+            *rx = (VAL_REAL_T)(*ix);
+            *ry = rt_val_peek_real(rt, y_loc);
+            return BBM_HETERO;
+        default:
+            return BBM_MISMATCH;
+        }
 
-    } else if (x_type == VAL_REAL && y_type == VAL_REAL) {
+    } else if (x_type == VAL_REAL) {
         *rx = rt_val_peek_real(rt, x_loc);
-        *ry = rt_val_peek_real(rt, y_loc);
-        return BBM_BOTH_REAL;
+        switch (y_type) {
+        case VAL_INT:
+            *iy = rt_val_peek_int(rt, y_loc);
+            *ry = (VAL_REAL_T)(*iy);
+            return BBM_HETERO;
+        case VAL_REAL:
+            *ry = rt_val_peek_real(rt, y_loc);
+            return BBM_BOTH_REAL;
+        default:
+            return BBM_MISMATCH;
+        }
 
     } else {
         return BBM_MISMATCH;
+
     }
 }
 

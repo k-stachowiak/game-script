@@ -40,6 +40,9 @@ static void rt_init(struct Runtime *rt, long stack)
     sym_map_insert(gsm, "*", eval_bif(rt, bif_mul, 2), &bif_location);
     sym_map_insert(gsm, "/", eval_bif(rt, bif_div, 2), &bif_location);
     sym_map_insert(gsm, "%", eval_bif(rt, bif_mod, 2), &bif_location);
+    sym_map_insert(gsm, "floor", eval_bif(rt, bif_floor, 1), &bif_location);
+    sym_map_insert(gsm, "ceil", eval_bif(rt, bif_ceil, 1), &bif_location);
+    sym_map_insert(gsm, "round", eval_bif(rt, bif_round, 1), &bif_location);
     sym_map_insert(gsm, "=", eval_bif(rt, bif_eq, 2), &bif_location);
     sym_map_insert(gsm, "<", eval_bif(rt, bif_lt, 2), &bif_location);
     sym_map_insert(gsm, ">", eval_bif(rt, bif_gt, 2), &bif_location);

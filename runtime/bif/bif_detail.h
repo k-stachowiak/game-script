@@ -11,6 +11,7 @@
 enum BifBinaryMatch {
     BBM_BOTH_INT,
     BBM_BOTH_REAL,
+    BBM_HETERO,
     BBM_MISMATCH
 };
 

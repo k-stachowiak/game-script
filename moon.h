@@ -5,6 +5,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum MoonValueType {
     MN_BOOL,
     MN_CHAR,
@@ -34,5 +38,9 @@ bool mn_exec_file(const char *filename);
 struct MoonValue *mn_exec_command(const char *source);
 void mn_dispose(struct MoonValue* value);
 const char *mn_error_message(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

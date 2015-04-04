@@ -18,6 +18,7 @@
             rt_val_push_bool(rt->stack, NAME##_impl_int(ix, iy)); \
             break; \
         case BBM_BOTH_REAL: \
+        case BBM_HETERO: \
             rt_val_push_bool(rt->stack, NAME##_impl_real(rx, ry)); \
             break; \
         case BBM_MISMATCH: \

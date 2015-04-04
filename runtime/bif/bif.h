@@ -32,6 +32,9 @@ void bif_sub(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_mul(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_div(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_mod(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_floor(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_ceil(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_round(struct Runtime *rt, VAL_LOC_T x_loc);
 
 /* Comparison */
 void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
