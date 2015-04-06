@@ -207,3 +207,4 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
         mem_free(buffer);
     }
 }
+

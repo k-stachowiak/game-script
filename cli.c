@@ -13,8 +13,11 @@
 /*
  * TODO:
  * - implement BIF(?) or for value - string conversion
- * - make the value - string conversion unified along the platform
- * - implement key-value store
+ *   - separate common code for the atomic literals parsing
+ *   - share the code between the evalutation code and "from-string" bifs
+ *   - associate this with the rt_val module next to the rt_val_to_string
+ *   - make the value - string conversion unified along the platform
+ * - implement key-value store a.k.a. database
  * - finish the library API
  */
 
