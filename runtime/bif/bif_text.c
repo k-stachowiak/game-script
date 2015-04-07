@@ -154,6 +154,69 @@ end:
     mem_free(copy);
 }
 
+static void bif_parse_string_ast(struct AstNode *ast);
+
+static void bif_parse_string_compound(struct AstNode *ast)
+{
+    exit(1);
+}
+
+static void bif_parse_string_literal(struct AstNode *ast)
+{
+    exit(1);
+}
+
+static void bif_parse_string_ast(struct AstNode *ast)
+{
+    switch (ast->type) {
+    case AST_COMPOUND:
+        bif_parse_string_compound(&ast->data.compound);
+        break;
+
+    case AST_LITERAL:
+        bif_parse_string_literal(&ast->data.literal);
+        break;
+
+    case AST_DO_BLOCK:
+    case AST_BIND:
+    case AST_FUNC_CALL:
+    case AST_FUNC_DEF:
+    case AST_PARAFUNC:
+    case AST_REFERENCE:
+        bif_text_error_parse("Incorrect string passed to parse");
+        break;
+    }
+}
+
+static void bif_parse_string(char *string)
+{
+    struct DomNode *dom;
+    struct AstNode *ast;
+
+    dom = lex(string);
+    if (err_state()) {
+        bif_text_error_parse("Failed lexing");
+        return;
+    }
+
+    ast = parse_list(dom);
+    if (err_state()) {
+        bif_text_error_parse("Failed AST parsing");
+        dom_free(dom);
+        return;
+    }
+
+    if (ast->next != NULL) {
+        bif_text_error_parse("A non-single expression passed for parsing");
+        dom_free(dom);
+        return;
+    }
+
+    dom_free(dom);
+    bif_parse_string_ast(ast);
+    ast_node_free(ast);
+}
+
 void bif_putc(struct Runtime *rt, VAL_LOC_T char_loc)
 {
     if (rt_val_peek_type(rt, char_loc) != VAL_CHAR) {
@@ -201,10 +264,20 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     rt_val_to_string(rt, arg_loc, &buffer);
 
     if (!buffer) {
-        LOG_ERROR("Stringifying failed.");
+        bif_text_error_stringify();
     } else {
         rt_val_push_string(rt->stack, buffer);
         mem_free(buffer);
     }
+}
+
+void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
+{
+    if (rt_val_peek_type(rt, arg_loc) != VAL_STRING) {
+        bif_text_error_arg(1, "parse", "must be a string");
+        return;
+    }
+
+    bif_parse_string(rt_val_peek_string(rt, arg_loc));
 }
 
