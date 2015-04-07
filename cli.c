@@ -17,6 +17,10 @@
  *   - share the code between the evalutation code and "from-string" bifs
  *   - associate this with the rt_val module next to the rt_val_to_string
  *   - make the value - string conversion unified along the platform
+ * - break printf into:
+ *   - print: string -> int,
+ *   - format: string, args -> string and
+ *   - printf = (print (format fmt args))
  * - implement key-value store a.k.a. database
  * - finish the library API
  */
