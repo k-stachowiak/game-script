@@ -16,6 +16,7 @@
  *   - print: string -> int,
  *   - format: string, args -> string and
  *   - printf = (print (format fmt args))
+ * - organize std.mn and load it automatically
  * - implement key-value store a.k.a. database
  * - finish the library API
  */
