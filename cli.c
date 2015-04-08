@@ -13,8 +13,8 @@
 /*
  * TODO:
  * - organize std.mn and load it automatically (add printf)
+ * - add "at" bif, move car and cdr to std.mn; implement in terms of "at" and "slice"
  * - implement key-value store a.k.a. database
- * - finish the library API
  */
 
 struct {
