@@ -12,7 +12,7 @@
 
 /*
  * TODO:
- * - add "don't care" _ symbol in the patterns
+ * - test dontcare pattern
  * - break printf into:
  *   - print: string -> int,
  *   - format: string, args -> string and
