@@ -142,7 +142,7 @@ static void test_runtime_bif_cat_invalid(
     test_eval_source_fail(tc, rt, "(cat [ 1.0 ] [ 2 ])", "BIF cat hetero args");
 }
 
-static void test_runtime_bif_text(
+static void test_runtime_bif_print(
         struct TestContext *tc,
         struct Runtime *rt)
 {
@@ -161,6 +161,41 @@ static void test_runtime_bif_text(
         INT, 2);
 }
 
+static void test_runtime_bif_parse_any(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_fail(tc, rt, "(parse 1)", "Parse nonstring argument");
+
+    test_eval_source_succeed(tc, rt, "(parse \"false\")", "Parse boolean value");
+    test_eval_source_succeed(tc, rt, "(parse \"1\")", "Parse integer value");
+    test_eval_source_succeed(tc, rt, "(parse \"2.0\")", "Parse real value");
+    test_eval_source_succeed(tc, rt, "(parse \"'3'\")", "Parse character value");
+    test_eval_source_succeed(tc, rt, "(parse \"\\\"four\\\"\")", "Parse string value");
+    test_eval_source_succeed(tc, rt, "(parse \"{ 1 2.0 '3' [ \\\"four\\\" ]}\")", "Parse tuple successfully");
+    test_eval_source_succeed(tc, rt, "(parse \"[ { 1 2 } { 3 4 } ]\")", "Parse array successfully");
+
+    test_eval_source_expect(tc, rt,
+            "(do (bind { x _ } (parse \"2.0\")) x)",
+            "Parse real expect success",
+            BOOL, true);
+
+    test_eval_source_expect(tc, rt,
+            "(do (bind { _ x } (parse \"2.0\")) x)",
+            "Parse real expect value",
+            REAL, 2.0);
+
+    test_eval_source_expect(tc, rt,
+            "(do (bind { x _ } (parse \"[ { 1 2 } { 3 } ]\")) x)",
+            "Parse array homo fail",
+            BOOL, false);
+
+    test_eval_source_expect(tc, rt,
+            "(do (bind { x _ } (parse \"[ 1 2 asdf ]\")) x)",
+            "Parse array i-th element fail",
+            BOOL, false);
+}
+
 void test_runtime_bif(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make(64 * 1024);
@@ -171,7 +206,8 @@ void test_runtime_bif(struct TestContext *tc)
     test_runtime_bif_cons_invalid(tc, rt);
     test_runtime_bif_cat_valid(tc, rt);
     test_runtime_bif_cat_invalid(tc, rt);
-    test_runtime_bif_text(tc, rt);
+    test_runtime_bif_print(tc, rt);
+    test_runtime_bif_parse_any(tc, rt);
     rt_free(rt);
 }
 
