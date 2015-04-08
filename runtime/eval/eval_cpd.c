@@ -25,13 +25,13 @@ void eval_compound(
 
     /* Header. */
     switch (node->data.compound.type) {
-        case AST_CPD_ARRAY:
-            rt_val_push_array_init(rt->stack, &size_loc);
-            break;
+    case AST_CPD_ARRAY:
+        rt_val_push_array_init(rt->stack, &size_loc);
+        break;
 
-        case AST_CPD_TUPLE:
-            rt_val_push_tuple_init(rt->stack, &size_loc);
-            break;
+    case AST_CPD_TUPLE:
+        rt_val_push_tuple_init(rt->stack, &size_loc);
+        break;
     }
 
     /* Data. */

@@ -171,27 +171,84 @@ end:
     mem_free(copy);
 }
 
-static void bif_parse_string_ast(struct AstNode *ast);
+static void bif_parse_string_ast(struct Runtime *rt, struct AstNode *ast);
 
-static void bif_parse_string_ast_compound(struct AstCompound *cpd)
+static void bif_parse_string_ast_compound(
+        struct Runtime *rt,
+        struct AstCompound *cpd)
 {
-    exit(1);
+    VAL_LOC_T size_loc, data_begin, data_size;
+    struct AstNode *current = cpd->exprs;
+    VAL_LOC_T result_loc = rt->stack->top;
+
+    /* Header. */
+    switch (cpd->type) {
+    case AST_CPD_ARRAY:
+        rt_val_push_array_init(rt->stack, &size_loc);
+        break;
+
+    case AST_CPD_TUPLE:
+        rt_val_push_tuple_init(rt->stack, &size_loc);
+        break;
+    }
+
+    /* Data. */
+    data_begin = rt->stack->top;
+    while (current) {
+        bif_parse_string_ast(rt, current);
+        if (err_state()) {
+            return;
+        }
+        current = current->next;
+    }
+
+    /* Fix the header with the written size. */
+    data_size = rt->stack->top - data_begin;
+    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
+
+    /* Assert array homogenity. */
+    if (cpd->type == AST_CPD_ARRAY &&
+        rt_val_compound_homo(rt, result_loc) == false) {
+        bif_text_error_parse();
+    }
 }
 
-static void bif_parse_string_ast_literal(struct AstLiteral *literal)
+static void bif_parse_string_ast_literal(
+        struct Runtime *rt,
+        struct AstLiteral *literal)
 {
-    exit(1);
+    switch (literal->type) {
+    case AST_LIT_BOOL:
+        rt_val_push_bool(rt->stack, literal->data.boolean);
+        break;
+
+    case AST_LIT_STRING:
+        rt_val_push_string(rt->stack, literal->data.string);
+        break;
+
+    case AST_LIT_CHAR:
+        rt_val_push_char(rt->stack, literal->data.character);
+        break;
+
+    case AST_LIT_INT:
+        rt_val_push_int(rt->stack, literal->data.integer);
+        break;
+
+    case AST_LIT_REAL:
+        rt_val_push_real(rt->stack, literal->data.real);
+        break;
+    }
 }
 
-static void bif_parse_string_ast(struct AstNode *ast)
+static void bif_parse_string_ast(struct Runtime *runtime, struct AstNode *ast)
 {
     switch (ast->type) {
     case AST_COMPOUND:
-        bif_parse_string_ast_compound(&ast->data.compound);
+        bif_parse_string_ast_compound(runtime, &ast->data.compound);
         break;
 
     case AST_LITERAL:
-        bif_parse_string_ast_literal(&ast->data.literal);
+        bif_parse_string_ast_literal(runtime, &ast->data.literal);
         break;
 
     case AST_DO_BLOCK:
@@ -205,7 +262,7 @@ static void bif_parse_string_ast(struct AstNode *ast)
     }
 }
 
-static void bif_parse_string(char *string)
+static void bif_parse_string(struct Runtime *rt, char *string)
 {
     struct AstNode *ast;
 
@@ -221,7 +278,7 @@ static void bif_parse_string(char *string)
         return;
     }
 
-    bif_parse_string_ast(ast);
+    bif_parse_string_ast(rt, ast);
     ast_node_free(ast);
 }
 
@@ -286,6 +343,6 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
         return;
     }
 
-    bif_parse_string(rt_val_peek_string(rt, arg_loc));
+    bif_parse_string(rt, rt_val_peek_string(rt, arg_loc));
 }
 
