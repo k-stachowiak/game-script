@@ -40,6 +40,9 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_fail(tc, rt, "(bind [ c d ] [ 1 ])", "Fail on too many keys in compound bind");
     test_eval_source_succeed(tc, rt, "(bind { e f } { 1 2 })", "Succeed on tuple bind");
     test_eval_source_succeed(tc, rt, "(bind [ g ] [ 1.0 ])", "Succeed on array bind");
+
+    test_eval_source_expect(tc, rt, "(do (bind { s _ } { 1.0 2.0 }) s)", "Bind tuple 1st dontcare 2nd", REAL, 1.0);
+    test_eval_source_expect(tc, rt, "(do (bind { _ t } { 1.0 2.0 }) t)", "Bind tuple 2nd dontcare 1st", REAL, 2.0);
 }
 
 static void test_runtime_reference(

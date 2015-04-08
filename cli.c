@@ -12,7 +12,6 @@
 
 /*
  * TODO:
- * - test dontcare pattern
  * - break printf into:
  *   - print: string -> int,
  *   - format: string, args -> string and
