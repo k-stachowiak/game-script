@@ -13,10 +13,10 @@
 /*
  * TODO:
  * - implement BIF(?) or for value - string conversion
- *   - separate common code for the atomic literals parsing
- *   - share the code between the evalutation code and "from-string" bifs
- *   - associate this with the rt_val module next to the rt_val_to_string
- *   - make the value - string conversion unified along the platform
+ *   - [v] separate common code for the atomic literals parsing
+ *   - [ ] share the code between the evalutation code and "from-string" bifs
+ *   - [ ] associate this with the rt_val module next to the rt_val_to_string
+ *   - [ ] make the value - string conversion unified along the platform
  * - break printf into:
  *   - print: string -> int,
  *   - format: string, args -> string and
