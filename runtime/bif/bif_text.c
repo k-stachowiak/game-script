@@ -38,7 +38,7 @@ static void bif_text_error_args_left(int count)
 {
     struct ErrMessage msg;
     err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
-    err_msg_append(&msg, "%d arguments left after printf", count);
+    err_msg_append(&msg, "%d arguments left after format", count);
     err_msg_set(&msg);
 }
 
@@ -73,7 +73,11 @@ static char *bif_text_find_format(char *str)
     return str;
 }
 
-static int bif_printf_try_print_arg(struct Runtime *rt, char wc, VAL_LOC_T loc)
+static void bif_format_try_appending_arg(
+        struct Runtime *rt,
+        char **result,
+        char wc,
+        VAL_LOC_T loc)
 {
     enum ValueType type = rt_val_peek_type(rt, loc);
 
@@ -81,60 +85,66 @@ static int bif_printf_try_print_arg(struct Runtime *rt, char wc, VAL_LOC_T loc)
     case 'b':
         if (type != VAL_BOOL) {
             bif_text_error_wc_mismatch();
-            return -1;
+        } else {
+            str_append(*result, "%s", rt_val_peek_bool(rt, loc) ? "true" : "false");
         }
-        return printf("%s", rt_val_peek_bool(rt, loc) ? "true" : "false");
+        break;
 
     case 'c':
         if (type != VAL_CHAR) {
             bif_text_error_wc_mismatch();
-            return -1;
+        } else {
+            str_append(*result, "%c", rt_val_peek_char(rt, loc));
         }
-        return printf("%c", rt_val_peek_char(rt, loc));
+        break;
 
     case 'd':
         if (type != VAL_INT) {
             bif_text_error_wc_mismatch();
-            return -1;
+        } else {
+            str_append(*result, "%ld", rt_val_peek_int(rt, loc));
         }
-        return printf("%ld", rt_val_peek_int(rt, loc));
+        break;
 
     case 'f':
         if (type != VAL_REAL) {
             bif_text_error_wc_mismatch();
-            return -1;
+        } else {
+            str_append(*result, "%f", rt_val_peek_real(rt, loc));
         }
-        return printf("%f", rt_val_peek_real(rt, loc));
+        break;
 
     case 's':
         if (type != VAL_STRING) {
             bif_text_error_wc_mismatch();
-            return -1;
+        } else {
+            str_append(*result, "%s", rt_val_peek_string(rt, loc));
         }
-        return printf("%s", rt_val_peek_string(rt, loc));
+        break;
 
     default:
         bif_text_error_wc_unknown(wc);
-        return -1;
     }
 }
 
-static void bif_printf_impl(
+static void bif_format_impl(
         struct Runtime *rt,
         char *str,
         int argc,
         VAL_LOC_T arg_loc)
 {
-    char *copy, *begin, *end;
-    int args_left = argc;
-    int len, result = 0;
+    int len;
     bool done = false;
+    char *copy, *begin, *end;
+
+    int args_left = argc;
+    char *result = NULL;
 
     len = strlen(str);
     copy = mem_malloc(len + 1);
     memcpy(copy, str, len + 1);
-
     begin = copy;
+
     while (true) {
 
         end = bif_text_find_format(begin);
@@ -143,14 +153,15 @@ static void bif_printf_impl(
         }
 
         *end = '\0';
-        result += printf("%s", begin);
+        str_append(result, "%s", begin);
 
         if (done) {
             break;
         }
 
         begin = end + 1; /* skip '%' */
-        result += bif_printf_try_print_arg(rt, *begin, arg_loc);
+
+        bif_format_try_appending_arg(rt, &result, *begin, arg_loc);
         if (err_state()) {
             goto end;
         }
@@ -164,11 +175,14 @@ static void bif_printf_impl(
     if (args_left) {
         bif_text_error_args_left(args_left);
     } else {
-        rt_val_push_int(rt->stack, result);
+        rt_val_push_string(rt->stack, result);
     }
 
 end:
     mem_free(copy);
+    if (result) {
+        mem_free(result);
+    }
 }
 
 static void bif_parse_any_ast(struct Runtime *rt, struct AstNode *ast);
@@ -352,25 +366,25 @@ void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
     }
 }
 
-void bif_printf(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)
+void bif_format(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)
 {
     char *string;
     int argc;
 
     if (rt_val_peek_type(rt, fmt_loc) != VAL_STRING) {
-        bif_text_error_arg(1, "print", "must be a string");
+        bif_text_error_arg(1, "format", "must be a string");
         return;
     }
 
     if (rt_val_peek_type(rt, args_loc) != VAL_TUPLE) {
-        bif_text_error_arg(2, "print", "must be a tuple");
+        bif_text_error_arg(2, "format", "must be a tuple");
         return;
     }
 
     string = rt_val_peek_string(rt, fmt_loc);
     argc = rt_val_cpd_len(rt, args_loc);
 
-    bif_printf_impl(rt, string, argc, rt_val_cpd_first_loc(args_loc));
+    bif_format_impl(rt, string, argc, rt_val_cpd_first_loc(args_loc));
 }
 
 void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)

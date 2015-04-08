@@ -142,23 +142,23 @@ static void test_runtime_bif_cat_invalid(
     test_eval_source_fail(tc, rt, "(cat [ 1.0 ] [ 2 ])", "BIF cat hetero args");
 }
 
-static void test_runtime_bif_print(
+static void test_runtime_bif_format(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_fail(tc, rt, "(printf \"%d%f\" { 1 })", "Printf wit not enough args");
-    test_eval_source_fail(tc, rt, "(printf \"%d\" { 1.0 })", "Printf with incorrect arg type");
-    test_eval_source_fail(tc, rt, "(printf \"%d\" { 1 1.0 })", "Printf with too many args");
+    test_eval_source_fail(tc, rt, "(format \"%d%f\" { 1 })", "Format wit not enough args");
+    test_eval_source_fail(tc, rt, "(format \"%d\" { 1.0 })", "Format with incorrect arg type");
+    test_eval_source_fail(tc, rt, "(format \"%d\" { 1 1.0 })", "Format with too many args");
 
-    test_eval_source_expect(tc, rt,
-        "(printf \"%s, %s!\\n\" { \"Hello\" \"World\" } )",
-        "Printing format with two strings",
-        INT, strlen("Hello, World!\n"));
+    test_eval_source_expect_string(tc, rt,
+        "(format \"%s, %s!\\n\" { \"Hello\" \"World\" } )",
+        "Format with two strings",
+        "Hello, World!\n");
 
-    test_eval_source_expect(tc, rt,
-        "(printf \"%d%d\" { 1 2 } )",
-        "Printing format with consecutive wildcards",
-        INT, 2);
+    test_eval_source_expect_string(tc, rt,
+        "(format \"%d%d\" { 1 2 } )",
+        "Format with consecutive wildcards",
+        "12");
 }
 
 static void test_runtime_bif_parse_any(
@@ -206,7 +206,7 @@ void test_runtime_bif(struct TestContext *tc)
     test_runtime_bif_cons_invalid(tc, rt);
     test_runtime_bif_cat_valid(tc, rt);
     test_runtime_bif_cat_invalid(tc, rt);
-    test_runtime_bif_print(tc, rt);
+    test_runtime_bif_format(tc, rt);
     test_runtime_bif_parse_any(tc, rt);
     rt_free(rt);
 }
