@@ -97,6 +97,12 @@ void rt_val_push_func_final(
         VAL_LOC_T size_loc,
         VAL_SIZE_T data_begin);
 
+/* Hacking (poking) API.
+ * =====================
+ */
+
+void rt_val_poke_bool(struct Stack *stack, VAL_LOC_T loc, VAL_BOOL_T value);
+
 /* Reading (peeking) API.
  * ======================
  */

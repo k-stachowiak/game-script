@@ -338,11 +338,25 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
 
 void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
+    VAL_LOC_T size_loc, data_begin, data_size;
+
     if (rt_val_peek_type(rt, arg_loc) != VAL_STRING) {
         bif_text_error_arg(1, "parse", "must be a string");
         return;
     }
 
+    rt_val_push_tuple_init(rt->stack, &size_loc);
+    data_begin = rt->stack->top;
+    rt_val_push_bool(rt->stack, true);
+
     bif_parse_string(rt, rt_val_peek_string(rt, arg_loc));
+    if (err_state()) {
+        err_reset();
+        rt_val_poke_bool(rt->stack, data_begin, false);
+        rt_val_push_int(rt->stack, 0);
+    }
+
+    data_size = rt->stack->top - data_begin;
+    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
 }
 
