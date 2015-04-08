@@ -63,6 +63,11 @@ static void rt_init(struct Runtime *rt, long stack)
     sym_map_insert(gsm, "printf", eval_bif(rt, bif_printf, 2), &bif_location);
     sym_map_insert(gsm, "to-string", eval_bif(rt, bif_to_string, 1), &bif_location);
     sym_map_insert(gsm, "parse", eval_bif(rt, bif_parse, 1), &bif_location);
+    sym_map_insert(gsm, "parse-bool", eval_bif(rt, bif_parse_bool, 1), &bif_location);
+    sym_map_insert(gsm, "parse-string", eval_bif(rt, bif_parse_string, 1), &bif_location);
+    sym_map_insert(gsm, "parse-char", eval_bif(rt, bif_parse_char, 1), &bif_location);
+    sym_map_insert(gsm, "parse-int", eval_bif(rt, bif_parse_int, 1), &bif_location);
+    sym_map_insert(gsm, "parse-real", eval_bif(rt, bif_parse_real, 1), &bif_location);
 }
 
 static void rt_deinit(struct Runtime *rt)

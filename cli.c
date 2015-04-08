@@ -12,8 +12,8 @@
 
 /*
  * TODO:
- * - implement BIF(?) or for value - string conversion
- *   - [ ] make parse function return a tuple with a return code
+ * - implement BIF for particular atomic literals parsing
+ * - add "don't care" _ symbol in the patterns
  * - break printf into:
  *   - print: string -> int,
  *   - format: string, args -> string and

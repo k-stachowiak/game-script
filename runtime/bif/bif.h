@@ -55,5 +55,10 @@ void bif_print(struct Runtime *rt, VAL_LOC_T str_loc);
 void bif_printf(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc);
 void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc);
 void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc);
+void bif_parse_bool(struct Runtime *rt, VAL_LOC_T arg_loc);
+void bif_parse_string(struct Runtime *rt, VAL_LOC_T arg_loc);
+void bif_parse_char(struct Runtime *rt, VAL_LOC_T arg_loc);
+void bif_parse_int(struct Runtime *rt, VAL_LOC_T arg_loc);
+void bif_parse_real(struct Runtime *rt, VAL_LOC_T arg_loc);
 
 #endif
