@@ -19,7 +19,8 @@ enum Reserved {
     DOM_RES_OR,
     DOM_RES_FUNC,
     DOM_RES_TRUE,
-    DOM_RES_FALSE
+    DOM_RES_FALSE,
+    DOM_RES_DONTCARE
 };
 
 struct DomNode {

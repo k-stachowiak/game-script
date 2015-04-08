@@ -7,6 +7,7 @@
 
 enum PatternType {
     PATTERN_SYMBOL,
+    PATTERN_DONTCARE,
     PATTERN_ARRAY,
     PATTERN_TUPLE
 };
@@ -19,6 +20,7 @@ struct Pattern {
 };
 
 struct Pattern *pattern_make_symbol(char *symbol);
+struct Pattern *pattern_make_dontcare(void);
 struct Pattern *pattern_make_compound(
         struct Pattern *children,
         enum PatternType type);

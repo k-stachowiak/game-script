@@ -17,7 +17,8 @@ static char *reserved[] = {
     "||",
     "func",
     "true",
-    "false"
+    "false",
+    "_"
 };
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);

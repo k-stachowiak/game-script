@@ -116,6 +116,9 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
     if (symbol) {
         return pattern_make_symbol(symbol);
 
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_DONTCARE)) {
+        return pattern_make_dontcare();
+
     } else if (dom->type == DOM_ATOM) {
         parse_error_bind_to_literal(&dom->loc);
         return NULL;

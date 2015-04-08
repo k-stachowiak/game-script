@@ -12,7 +12,6 @@
 
 /*
  * TODO:
- * - implement BIF for particular atomic literals parsing
  * - add "don't care" _ symbol in the patterns
  * - break printf into:
  *   - print: string -> int,

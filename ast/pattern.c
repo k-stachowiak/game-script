@@ -17,6 +17,16 @@ struct Pattern *pattern_make_symbol(char *symbol)
     return result;
 }
 
+struct Pattern *pattern_make_dontcare(void)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_DONTCARE;
+    result->symbol = NULL;
+    result->children = NULL;
+    result->next = NULL;
+    return result;
+}
+
 struct Pattern *pattern_make_compound(
         struct Pattern *children,
         enum PatternType type)
@@ -43,6 +53,9 @@ void pattern_free(struct Pattern *pattern)
         switch (pattern->type) {
         case PATTERN_SYMBOL:
             mem_free(pattern->symbol);
+            break;
+
+        case PATTERN_DONTCARE:
             break;
 
         case PATTERN_ARRAY:
@@ -76,12 +89,16 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
             }
             break;
 
+        case PATTERN_DONTCARE:
+            break;
+
         case PATTERN_ARRAY:
         case PATTERN_TUPLE:
             if (pattern_list_contains_symbol(pattern->children, symbol)) {
                 return true;
             }
             break;
+
         }
         pattern = pattern->next;
     }

@@ -40,6 +40,10 @@ void eval_bind_pattern(
         return;
     }
 
+    if (pattern->type == PATTERN_DONTCARE) {
+        return;
+    }
+
     if (pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) {
         bind_error_incorrrect_type();
         return;
