@@ -21,16 +21,19 @@ void tc_deinit(struct TestContext *tc)
 void tc_report(struct TestContext *tc)
 {
     int i, successes = 0;
+    char *success_string;
     for (i = 0; i < tc->entries.size; ++i) {
 
         struct TestEntry *te = tc->entries.data + i;
 
         if (te->result) {
             ++successes;
+            success_string = "OK";
         } else {
-            printf("[FAIL] %s\n", te->name);
+            success_string = "FAIL";
         }
 
+        printf("[%s] %s\n", success_string, te->name);
     }
 
     printf("\n%d/%d tests passed.\n", successes, i);

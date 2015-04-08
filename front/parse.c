@@ -15,7 +15,6 @@
 #include "lex.h"
 #include "dom.h"
 #include "pattern.h"
-#include "ltr_parse.h"
 
 /* Error handling.
  * ===============
@@ -45,12 +44,47 @@ static void parse_error_bind_to_literal(struct SourceLocation *where)
     err_msg_set(&msg);
 }
 
+static void parse_error_char_length(int len, struct SourceLocation *where)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "PARSE", where);
+    err_msg_append(&msg, "Incorrect character length (%d)", len);
+    err_msg_set(&msg);
+}
+
 static void parse_error_read(char *what, struct SourceLocation *where)
 {
     struct ErrMessage msg;
     err_msg_init_src(&msg, "PARSE", where);
     err_msg_append(&msg, "Failed reading %s", what);
     err_msg_set(&msg);
+}
+
+/* Algorithms.
+ * ===========
+ */
+
+static char *find(char * current, char *last, char value)
+{
+    while (current != last) {
+        if (*current == value) {
+            return current;
+        }
+        ++current;
+    }
+
+    return current;
+}
+
+static bool all_of(char *current, char *last, int (*f)(int))
+{
+    while (current != last) {
+        if (!f(*current)) {
+            return false;
+        }
+        ++current;
+    }
+    return true;
 }
 
 /* Pattern parsing.
@@ -407,39 +441,230 @@ fail:
     return NULL;
 }
 
-static struct AstNode *parse_literal(struct DomNode *dom)
+static struct AstNode *parse_literal_bool(struct DomNode *dom)
 {
-    bool boolean;
-    char character;
-    double real;
-    long integer;
-    char *string;
+    LOG_TRACE_FUNC
 
-    if (err_state() || !dom_node_is_atom(dom)) {
+    if (dom_node_is_reserved_atom(dom, DOM_RES_TRUE)) {
+        return ast_make_literal_bool(&dom->loc, 1);
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_FALSE)) {
+        return ast_make_literal_bool(&dom->loc, 0);
+    } else {
+        return NULL;
+    }
+}
+
+static char *unescape_string(char *in)
+{
+    int in_len = strlen(in);
+    char *out = mem_calloc(in_len + 1, 1);
+    char *write = out;
+    while (*in) {
+
+        if (*in != '\\') {
+            *write++ = *in++;
+            continue;
+        }
+
+        switch (*++in) {
+            case 'a':
+                *write++ = '\a';
+                break;
+            case 'b':
+                *write++ = '\b';
+                break;
+            case 't':
+                *write++ = '\t';
+                break;
+            case 'n':
+                *write++ = '\n';
+                break;
+            case 'f':
+                *write++ = '\f';
+                break;
+            case 'r':
+                *write++ = '\r';
+                break;
+            case 'v':
+                *write++ = '\v';
+                break;
+            case '\\':
+                *write++ = '\\';
+                break;
+            case '"':
+                *write++ = '"';
+                break;
+            case '\0':
+                *write++ = '\0';
+                break;
+            default:
+                mem_free(out);
+                return NULL;
+        }
+        ++in;
+    }
+
+    return mem_realloc(out, write - out + 1);
+}
+
+static struct AstNode *parse_literal_string(struct DomNode *dom)
+{
+    char *atom;
+    int len;
+    char delim = TOK_DELIM_STR;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
         return NULL;
     }
 
-    if (lp_parse_bool(dom->atom, &boolean)) {
-        return ast_make_literal_bool(&dom->loc, boolean);
+    atom = dom->atom;
+    len = strlen(atom);
+
+    if (atom[0] == delim && atom[len - 1] == delim && len >= 2) {
+        char *unescaped = unescape_string(atom);
+        if (!unescaped) {
+            return NULL;
+        } else {
+            return ast_make_literal_string(&dom->loc, unescaped);
+        }
+    } else {
+        return NULL;
+    }
+}
+
+static struct AstNode *parse_literal_char(struct DomNode *dom)
+{
+    char *atom;
+    int len;
+    char delim = TOK_DELIM_CHAR;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
     }
 
-    if (lp_parse_char(dom->atom, &character)) {
-        return ast_make_literal_character(&dom->loc, character);
+    atom = dom->atom;
+    len = strlen(atom);
+
+    if (atom[0] != delim || atom[len - 1] != delim) {
+        return NULL;
     }
 
-    if (lp_parse_real(dom->atom, &real)) {
-        return ast_make_literal_real(&dom->loc, real);
+    if (len == 3) {
+        return ast_make_literal_character(&dom->loc, atom[1]);
+
+    } else if (len == 4 && atom[1] == TOK_DELIM_ESCAPE) {
+        switch(atom[2]) {
+         case 'a':
+            return ast_make_literal_character(&dom->loc, '\a');
+         case 'b':
+            return ast_make_literal_character(&dom->loc, '\b');
+         case 't':
+            return ast_make_literal_character(&dom->loc, '\t');
+         case 'n':
+            return ast_make_literal_character(&dom->loc, '\n');
+         case 'f':
+            return ast_make_literal_character(&dom->loc, '\f');
+         case 'r':
+            return ast_make_literal_character(&dom->loc, '\r');
+         case 'v':
+            return ast_make_literal_character(&dom->loc, '\v');
+         case '\\':
+            return ast_make_literal_character(&dom->loc, '\\');
+         case '\'':
+            return ast_make_literal_character(&dom->loc, '\'');
+         case '0':
+            return ast_make_literal_character(&dom->loc, '\0');
+         default:
+            return NULL;
+        }
+
+    } else {
+        parse_error_char_length(len, &dom->loc);
+        return NULL;
+    }
+}
+
+static struct AstNode *parse_literal_int(struct DomNode *dom)
+{
+    char *atom;
+    int len;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
     }
 
-    if (lp_parse_int(dom->atom, &integer)) {
-        return ast_make_literal_int(&dom->loc, integer);
-    }
+    atom = dom->atom;
+    len = strlen(atom);
 
-    if (lp_parse_str(dom->atom, &string)) {
-        return ast_make_literal_string(&dom->loc, string);
+    if (len > 0) {
+        char *first = atom, *last = atom + len;
+        if (atom[0] == '-' || atom[0] == '+') {
+            ++first;
+        }
+        if (all_of(first, last, isdigit)) {
+            long value = atol(atom);
+            return ast_make_literal_int(&dom->loc, value);
+        }
     }
 
     return NULL;
+}
+
+static struct AstNode *parse_literal_real(struct DomNode *dom)
+{
+    char *atom, *first, *period, *last;
+    double value;
+    int len;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    atom = dom->atom;
+    len = strlen(atom);
+
+    first = atom;
+    last = first + len;
+    period = find(first, last, '.');
+
+    if (atom[0] == '-' || atom[0] == '+') {
+        ++first;
+    }
+
+    if (period == last ||
+        !all_of(first, period, isdigit) ||
+        !all_of(period + 1, last, isdigit)) {
+        return NULL;
+    }
+
+    value = atof(atom);
+    return ast_make_literal_real(&dom->loc, value);
+}
+
+static struct AstNode *parse_literal(struct DomNode *dom)
+{
+    struct AstNode *result;
+
+    LOG_TRACE_FUNC
+
+    if ((!err_state() && (result = parse_literal_bool(dom))) ||
+        (!err_state() && (result = parse_literal_char(dom))) ||
+        (!err_state() && (result = parse_literal_real(dom))) ||
+        (!err_state() && (result = parse_literal_int(dom))) ||
+        (!err_state() && (result = parse_literal_string(dom)))) {
+        return result;
+
+    } else {
+        return NULL;
+    }
 }
 
 static struct AstNode *parse_reference(struct DomNode *dom)

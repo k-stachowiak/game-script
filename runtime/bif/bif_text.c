@@ -8,6 +8,7 @@
 #include "rt_val.h"
 #include "bif.h"
 #include "bif_detail.h"
+#include "parse.h"
 
 static void bif_text_error_arg(int arg, char *func, char *condition)
 {
@@ -38,6 +39,22 @@ static void bif_text_error_args_left(int count)
     struct ErrMessage msg;
     err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
     err_msg_append(&msg, "%d arguments left after printf", count);
+    err_msg_set(&msg);
+}
+
+static void bif_text_error_stringify(void)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
+    err_msg_append(&msg, "Failed rendering value as string");
+    err_msg_set(&msg);
+}
+
+static void bif_text_error_parse(void)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "BIF EVAL TEXT", eval_location_top());
+    err_msg_append(&msg, "Failed parsing string literal");
     err_msg_set(&msg);
 }
 
@@ -156,12 +173,12 @@ end:
 
 static void bif_parse_string_ast(struct AstNode *ast);
 
-static void bif_parse_string_compound(struct AstNode *ast)
+static void bif_parse_string_ast_compound(struct AstCompound *cpd)
 {
     exit(1);
 }
 
-static void bif_parse_string_literal(struct AstNode *ast)
+static void bif_parse_string_ast_literal(struct AstLiteral *literal)
 {
     exit(1);
 }
@@ -170,11 +187,11 @@ static void bif_parse_string_ast(struct AstNode *ast)
 {
     switch (ast->type) {
     case AST_COMPOUND:
-        bif_parse_string_compound(&ast->data.compound);
+        bif_parse_string_ast_compound(&ast->data.compound);
         break;
 
     case AST_LITERAL:
-        bif_parse_string_literal(&ast->data.literal);
+        bif_parse_string_ast_literal(&ast->data.literal);
         break;
 
     case AST_DO_BLOCK:
@@ -183,36 +200,27 @@ static void bif_parse_string_ast(struct AstNode *ast)
     case AST_FUNC_DEF:
     case AST_PARAFUNC:
     case AST_REFERENCE:
-        bif_text_error_parse("Incorrect string passed to parse");
+        bif_text_error_parse();
         break;
     }
 }
 
 static void bif_parse_string(char *string)
 {
-    struct DomNode *dom;
     struct AstNode *ast;
 
-    dom = lex(string);
+    ast = parse_source(string);
     if (err_state()) {
-        bif_text_error_parse("Failed lexing");
-        return;
-    }
-
-    ast = parse_list(dom);
-    if (err_state()) {
-        bif_text_error_parse("Failed AST parsing");
-        dom_free(dom);
+        bif_text_error_parse();
         return;
     }
 
     if (ast->next != NULL) {
-        bif_text_error_parse("A non-single expression passed for parsing");
-        dom_free(dom);
+        bif_text_error_parse();
+        ast_node_free(ast);
         return;
     }
 
-    dom_free(dom);
     bif_parse_string_ast(ast);
     ast_node_free(ast);
 }

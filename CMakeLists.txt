@@ -35,8 +35,8 @@ add_library(lang
     ./runtime/eval/eval_parafunc.c
     ./runtime/eval/eval_cpd.c
     ./runtime/eval/eval_fcall.c
-    ./runtime/eval/eval_bind.c
-    ./runtime/dbg.c
+	./runtime/eval/eval_bind.c
+	./runtime/dbg.c
     ./runtime/symmap.c
     ./runtime/stack.c
     ./runtime/runtime.c
@@ -47,8 +47,7 @@ add_library(lang
     ./common/term.c
     ./common/memory.c
     ./common/src_iter.c
-    ./common/ltr_parse.c
-    )
+	)
 
 add_executable(moon-lang
     ./cli.c
