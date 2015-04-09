@@ -35,19 +35,35 @@ static void bif_compare_error_arg_mismatch(void)
     err_msg_set(&msg);
 }
 
-static VAL_BOOL_T bif_eq_impl_int(VAL_INT_T x, VAL_INT_T y) { return x == y; }
 static VAL_BOOL_T bif_lt_impl_int(VAL_INT_T x, VAL_INT_T y) { return x < y; }
 static VAL_BOOL_T bif_gt_impl_int(VAL_INT_T x, VAL_INT_T y) { return x > y; }
 static VAL_BOOL_T bif_leq_impl_int(VAL_INT_T x, VAL_INT_T y) { return x <= y; }
 static VAL_BOOL_T bif_geq_impl_int(VAL_INT_T x, VAL_INT_T y) { return x >= y; }
-static VAL_BOOL_T bif_eq_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x == y; }
 static VAL_BOOL_T bif_lt_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x < y; }
 static VAL_BOOL_T bif_gt_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x > y; }
 static VAL_BOOL_T bif_leq_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x <= y; }
 static VAL_BOOL_T bif_geq_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x >= y; }
 
-BIF_COMPARE_DEF(bif_eq)
 BIF_COMPARE_DEF(bif_lt)
 BIF_COMPARE_DEF(bif_gt)
 BIF_COMPARE_DEF(bif_leq)
 BIF_COMPARE_DEF(bif_geq)
+
+void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+{
+    VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
+    VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
+
+    if (x_size != y_size) {
+        rt_val_push_bool(rt->stack, false);
+        return;
+    }
+
+    bool result = memcmp(
+            rt->stack->buffer + x_loc,
+            rt->stack->buffer + y_loc,
+            x_size + VAL_HEAD_BYTES);
+
+    rt_val_push_bool(rt->stack, result);
+}
+

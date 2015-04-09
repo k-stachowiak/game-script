@@ -45,6 +45,28 @@ static void test_runtime_bif_compare(
     test_eval_source_expect(tc, rt, "(>= 2 1)", "Evaluate greater than or equal true", BOOL, true);
 }
 
+static void test_runtime_bif_length(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(length [])", "Evaluate length of an empty array", INT, 0);
+    test_eval_source_expect(tc, rt, "(length [ 'a' 'b' 'c' ])", "Evaluate length of an non-empty array", INT, 3);
+    test_eval_source_fail(tc, rt, "(length \"asdf\")", "Fail on length of a non-array");
+}
+
+static void test_runtime_bif_at(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(at [ 1 2 3 ] 0)", "Evaluate valid at call", INT, 1);
+    test_eval_source_fail(tc, rt, "(at [ 1 ] 0 0)", "Fail at on too many arguments");
+    test_eval_source_fail(tc, rt, "(at [] 1.0)", "Fail at on non-integer index");
+    test_eval_source_fail(tc, rt, "(at 1.0 1)", "Fail at on non-array subject");
+    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] -1)", "Fail at on negative index");
+    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 3)", "Fail at on index == size");
+    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 300)", "Fail at on index beyond size");
+}
+
 static void test_runtime_bif_cat_valid(
         struct TestContext *tc,
         struct Runtime *rt)
@@ -158,6 +180,8 @@ void test_runtime_bif(struct TestContext *tc)
     test_runtime_bif_arythmetic(tc, rt);
     test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);
+    test_runtime_bif_length(tc, rt);
+    test_runtime_bif_at(tc, rt);
     test_runtime_bif_cat_valid(tc, rt);
     test_runtime_bif_cat_invalid(tc, rt);
     test_runtime_bif_format(tc, rt);

@@ -44,15 +44,6 @@ void bif_length(struct Runtime* rt, VAL_LOC_T location)
     rt_val_push_int(rt->stack, rt_val_cpd_len(rt, location));
 }
 
-void bif_empty(struct Runtime* rt, VAL_LOC_T location)
-{
-    if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
-        bif_arr_error_arg(1, "empty", "must be an array");
-    } else {
-        rt_val_push_bool(rt->stack, rt_val_peek_size(rt, location) == 0);
-    }
-}
-
 void bif_reverse(struct Runtime* rt, VAL_LOC_T location)
 {
     int i;

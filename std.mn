@@ -1,3 +1,6 @@
+### Checks whether an array is empty
+(bind empty (func (arr) (= (length arr) 0)))
+
 ### Constructs a new array from an element and an existing array
 (bind cons (func (x arr) (cat [ x ] arr)))
 

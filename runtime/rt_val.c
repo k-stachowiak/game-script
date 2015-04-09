@@ -20,9 +20,10 @@ void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
     VAL_HEAD_SIZE_T size = VAL_BOOL_BYTES;
+    VAL_BOOL_T normalized_value = !!value;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
     stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, (char*)&value);
+    stack_push(stack, size, (char*)&normalized_value);
 }
 
 void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value)

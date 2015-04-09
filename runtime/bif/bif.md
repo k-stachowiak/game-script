@@ -27,18 +27,9 @@ The returned value is always of _real_ type.
 
 In order to make sure that the result of an arythmetic computation is of integral type, one of the narrowing operations must be used such as _round_.
 
-Array functions
----------------
- * length  : _array_ -> _integer_
- * empty   : _array_ -> _boolean_
- * at      : _array_ -> _integer_ -> _?_
- * reverse : _array_ -> _array_
- * cat     : _array_ -> _array_ -> _array_
- * slice   : _array_ -> _integer_ -> _integer_ -> _array_
-
 Comparison functions
 --------------------
- * ==   : _numeric_ -> _numeric_ -> _boolean_
+ * =    : _numeric_ -> _numeric_ -> _boolean_
  * <    : _numeric_ -> _numeric_ -> _boolean_
  * >    : _numeric_ -> _numeric_ -> _boolean_
  * <=   : _numeric_ -> _numeric_ -> _boolean_
@@ -46,17 +37,25 @@ Comparison functions
 
 Logic (boolean) functions
 -------------------------
- * &&   : _boolean_ -> _boolean_ -> _boolean_
- * ||   : _boolean_ -> _boolean_ -> _boolean_
+ * &&   : ... -> _boolean_ -> _boolean_ -> _boolean_
+ * ||   : ... -> _boolean_ -> _boolean_ -> _boolean_
  * ^^   : _boolean_ -> _boolean_ -> _boolean_
  * ~~   : _boolean_ -> _boolean_ -> _boolean_
 
 **Note**
 The _&&_ and _||_ functions handle so called short circuit evaluation; e.g. if any argument of the _&&_ turns out false no further arguments are evaluated.
+Additionally they will accept an arbitrary number of arguments.
+
+Array functions
+---------------
+ * length  : _array_ -> _integer_
+ * at      : _array_ -> _integer_ -> _?_
+ * reverse : _array_ -> _array_
+ * cat     : _array_ -> _array_ -> _array_
+ * slice   : _array_ -> _integer_ -> _integer_ -> _array_
 
 Text functions
 --------------
- * putc         : _character_ -> _void_
  * print        : _string_ -> _void_
  * format       : _string_ -> _tuple_ -> _string_
  * to-string    : _?_ -> _string_

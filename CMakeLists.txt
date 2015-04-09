@@ -15,7 +15,7 @@ include_directories(
     .
     )
 
-set(CMAKE_C_FLAGS "-Wall -O3")
+set(CMAKE_C_FLAGS "-Wall -g -O0")
 set(CMAKE_C_COMPILER "clang")
 
 add_library(lang OBJECT
