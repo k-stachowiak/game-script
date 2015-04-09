@@ -16,6 +16,9 @@ static void test_runtime_bif_arythmetic(
     test_eval_source_expect(tc, rt, "(sqrt (+ (* 3.0 3.0) (* 4.0 4.0)))", "Evaluate egyptian diagonal", REAL, 5.0);
     test_eval_source_expect(tc, rt, "(- 2.0 2)", "Evaluate - heterogenous args", REAL, 0.0);
     test_eval_source_expect(tc, rt, "(* 2 2.0)", "Evaluate * heterogenous args", REAL, 4.0);
+    test_eval_source_expect(tc, rt, "(floor -3.5)", "Evaluate floor", INT, -4);
+    test_eval_source_expect(tc, rt, "(ceil -3.5)", "Evaluate ceil", INT, -3);
+    test_eval_source_expect(tc, rt, "(round 3.5)", "Evaluate round", INT, 4);
 }
 
 static void test_runtime_bif_logic(
@@ -25,6 +28,8 @@ static void test_runtime_bif_logic(
     test_eval_source_expect(tc, rt, "(^^ false true)", "Evaluate || true result", BOOL, true);
     test_eval_source_expect(tc, rt, "(^^ true true)", "Evaluate || false result", BOOL, false);
     test_eval_source_expect(tc, rt, "(~~ false)", "Evaluate ~~ false result", BOOL, false);
+    test_eval_source_expect(tc, rt, "(&& true true false)", "Evaluate &&", BOOL, false);
+    test_eval_source_expect(tc, rt, "(|| false true false)", "Evaluate ||", BOOL, true);
 }
 
 static void test_runtime_bif_compare(
@@ -65,6 +70,13 @@ static void test_runtime_bif_at(
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] -1)", "Fail at on negative index");
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 3)", "Fail at on index == size");
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 300)", "Fail at on index beyond size");
+}
+
+static void test_runtime_bif_reverse(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(= (reverse [ 'b' 'c' 'a' ]) [ 'a' 'c' 'b' ])", "Test simple reverse", BOOL, true);
 }
 
 static void test_runtime_bif_cat_valid(
@@ -118,6 +130,17 @@ static void test_runtime_bif_cat_invalid(
     test_eval_source_fail(tc, rt, "(cat [ 1 ] 2)", "BIF cat one no-array args");
     test_eval_source_fail(tc, rt, "(cat 1 [ 2 ])", "BIF cat one no-array args");
     test_eval_source_fail(tc, rt, "(cat [ 1.0 ] [ 2 ])", "BIF cat hetero args");
+}
+
+static void test_runtime_bif_slice(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 1 3) [ 2 3 ])", "Simple slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 2 2) [])", "Empty slice", BOOL, true);
+    test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] -1 0)", "Fail on negative slice index");
+    test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] 1 0)", "Fail on incorrect slice indices order");
+    test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] 1 4)", "Fail on slice index out of bounds");
 }
 
 static void test_runtime_bif_format(
@@ -177,15 +200,19 @@ static void test_runtime_bif_parse_any(
 void test_runtime_bif(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make(64 * 1024);
+
     test_runtime_bif_arythmetic(tc, rt);
     test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);
     test_runtime_bif_length(tc, rt);
     test_runtime_bif_at(tc, rt);
+    test_runtime_bif_reverse(tc, rt);
     test_runtime_bif_cat_valid(tc, rt);
     test_runtime_bif_cat_invalid(tc, rt);
+    test_runtime_bif_slice(tc, rt);
     test_runtime_bif_format(tc, rt);
     test_runtime_bif_parse_any(tc, rt);
+
     rt_free(rt);
 }
 
