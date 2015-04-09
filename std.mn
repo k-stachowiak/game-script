@@ -1,25 +1,24 @@
-### Checks whether an array is empty
-(bind empty (func (arr) (= (length arr) 0)))
+### Checks whether a compound structure is empty
+(bind empty (func (x) (= (length x) 0)))
 
 ### Constructs a new array from an element and an existing array
 (bind cons (func (x arr) (cat [ x ] arr)))
 
-### Deconstructs an array into a tuple containing the head and the tail
-### of the input array
-(bind dcons (func (arr) { (at arr 0) (slice arr 1 (length arr)) }))
+### Deconstructs compound structure into a tuple containing
+### the head and the tail of the input compound structure
+(bind dcons (func (x) { (at x 0) (slice x 1 (length x)) }))
 
-### Returns the first element of an array
-(bind car (func (arr) (at arr 0)))
+### Returns the first element of a compound structure
+(bind car (func (x) (at x 0)))
 
-### Returns the array sans the first element.
-(bind cdr (func (arr) (slice arr 1 (length arr))))
+### Returns the compound structure sans the first element.
+(bind cdr (func (x) (slice x 1 (length x))))
 
 ### Prints a formatted string
 (bind printf (func (fmt args) (print (format fmt args))))
 
-### Finds the minimum element in an array with a custom comparator.
+### Finds the minimum element in a compound structure with a custom comparator.
 (bind min-element-cmp (func (x cmp) (do
-
     (bind min-element-impl (func (element x)
         (if (empty x)
             element
@@ -29,18 +28,18 @@
             )
         )
     ))
-
     (if (= (length x) 1)
         (car x)
         (min-element-impl (car x) (cdr x))
     )
-
 )))
 
-### Finds the minimum element in an array with a default comparator: less than.
+### Finds the minimum element in a compound structure with a
+### default comparator: less than.
 (bind min-element (func (x) (min-element-cmp x <)))
 
-### Merges two sorted arrays into a sorted array with a custom comparator.
+### Merges two sorted compound structures into a sorted one
+### with a custom comparator.
 (bind merge-cmp (func (x y cmp) (do
     (bind merge-impl (func (x y result) (do
         (bind x-empty (empty x))
@@ -53,20 +52,20 @@
             (if y-empty
                 (cat result x)
                 (if (cmp (car x) (car y))
-                    (merge-impl (cdr x) y (cat result [(car x)]))
-                    (merge-impl x (cdr y) (cat result [(car y)]))
+                    (merge-impl (cdr x) y (cat result (slice x 0 1)))
+                    (merge-impl x (cdr y) (cat result (slice y 0 1)))
                 )
             )
         )
     )))
-    (merge-impl x y [])
+    (merge-impl x y (slice x 0 0)) # This slice creates empty array or tuple.
 )))
 
-### Merges two sorted arrays into a sorted array.
+### Merges two sorted compound structures into a sorted one.
 ### A default comparator less than assumed.
 (bind merge (func (x y) (merge-cmp x y <)))
 
-### Sorts an array with a custom comparator.
+### Sorts a compound structure with a custom comparator.
 (bind sort-cmp (func (x cmp) (do
     (bind len (length x))
     (bind half-len (/ len 2))
@@ -80,6 +79,6 @@
     )
 )))
 
-### Sorts an array with a default comparator: less than.
+### Sorts a compound structure with a default comparator: less than.
 (bind sort (func (x) (sort-cmp x <)))
 

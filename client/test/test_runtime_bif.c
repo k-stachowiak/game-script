@@ -115,6 +115,7 @@ static void test_runtime_bif_cat(
     test_eval_source_fail(tc, rt, "(cat [ 1.0 ] [ 2 ])", "BIF cat hetero args");
     test_eval_source_fail(tc, rt, "(cat [ 1 ] { 2 })", "BIF cat array and tuple");
     test_eval_source_fail(tc, rt, "(cat { 1 } [ 2 ])", "BIF cat tuple and array");
+    test_eval_source_fail(tc, rt, "(cat [ 1 ] { 2.0 })", "BIF cat array and tuple diffrent content types");
 }
 
 static void test_runtime_bif_slice(

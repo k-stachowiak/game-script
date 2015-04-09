@@ -110,6 +110,7 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
     if (x_type != y_type) {
         bif_cpd_error_mismatch("cat");
+        return;
     }
 
     x_size = rt_val_peek_size(rt, x_loc);
