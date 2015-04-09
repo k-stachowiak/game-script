@@ -31,9 +31,7 @@ Array functions
 ---------------
  * length  : _array_ -> _integer_
  * empty   : _array_ -> _boolean_
- * at      : _array_ -> _?_ **implement**
- * car     : _array_ -> _?_ **remove**
- * cdr     : _array_ -> _array_ **remove**
+ * at      : _array_ -> _integer_ -> _?_
  * reverse : _array_ -> _array_
  * cat     : _array_ -> _array_ -> _array_
  * slice   : _array_ -> _integer_ -> _integer_ -> _array_

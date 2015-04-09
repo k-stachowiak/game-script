@@ -53,54 +53,6 @@ void bif_empty(struct Runtime* rt, VAL_LOC_T location)
     }
 }
 
-void bif_car(struct Runtime* rt, VAL_LOC_T location)
-{
-    if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
-        bif_arr_error_arg(1, "car", "must be an array");
-        return;
-    }
-
-    if (rt_val_peek_size(rt, location) == 0) {
-        bif_arr_error_arg(1, "car", "must not be empty");
-        return;
-    }
-
-    stack_push_copy(rt->stack, location + VAL_HEAD_BYTES);
-}
-
-void bif_cdr(struct Runtime* rt, VAL_LOC_T location)
-{
-    VAL_LOC_T head_loc, size_loc;
-    VAL_LOC_T current_loc, end_loc;
-    VAL_SIZE_T full_size, head_size, tail_size;
-
-    if (rt_val_peek_type(rt, location) != VAL_ARRAY) {
-        bif_arr_error_arg(1, "cdr", "must be an array");
-        return;
-    }
-
-    if (rt_val_peek_size(rt, location) == 0) {
-        bif_arr_error_arg(1, "cdr", "must not be empty");
-        return;
-    }
-
-    head_loc = rt_val_cpd_first_loc(location);
-
-    full_size = rt_val_peek_size(rt, location);
-    head_size = rt_val_peek_size(rt, head_loc);
-    tail_size = full_size - head_size - VAL_HEAD_BYTES;
-
-    current_loc = rt_val_next_loc(rt, head_loc);
-    end_loc = head_loc + full_size;
-
-    rt_val_push_array_init(rt->stack, &size_loc);
-    while (current_loc != end_loc) {
-        stack_push_copy(rt->stack, current_loc);
-        current_loc = rt_val_next_loc(rt, current_loc);
-    }
-    rt_val_push_cpd_final(rt->stack, size_loc, tail_size);
-}
-
 void bif_reverse(struct Runtime* rt, VAL_LOC_T location)
 {
     int i;
@@ -176,6 +128,41 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     if (!rt_val_compound_homo(rt, result_loc)) {
         bif_arr_error_homo("cat");
     }
+}
+
+void bif_at(
+        struct Runtime *rt,
+        VAL_LOC_T x_loc,
+        VAL_LOC_T y_loc)
+{
+    VAL_INT_T index;
+    VAL_LOC_T loc;
+    int len, i;
+
+    if (rt_val_peek_type(rt, x_loc) != VAL_ARRAY) {
+        bif_arr_error_arg(1, "at", "must be an array");
+        return;
+    }
+
+    if (rt_val_peek_type(rt, y_loc) != VAL_INT) {
+        bif_arr_error_arg(2, "at", "must be an integer");
+        return;
+    }
+
+    index = rt_val_peek_int(rt, y_loc);
+    len = rt_val_cpd_len(rt, x_loc);
+
+    if (index < 0 || index >= len) {
+        bif_arr_error_range("index out of bounds");
+        return;
+    }
+
+    loc = rt_val_cpd_first_loc(x_loc);
+    for (i = 0; i < index; ++i) {
+        loc = rt_val_next_loc(rt, loc);
+    }
+
+    stack_push_copy(rt->stack, loc);
 }
 
 void bif_slice(

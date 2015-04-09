@@ -4,14 +4,14 @@ runtime
 This module provides a state for the execution of the scripts.
 In general the AST structures are consumed by the runtime in order to produce output or change the internal state.
 
-                           -----> result value
-           +---------+    /
-    AST -> | runtime | -<
-           +---------+    \
-                 ^        /
-                  \      /
-                   ------
-                 state change
+                              -----> result value
+              +---------+    /
+    AST ----> | runtime | -<
+              +---------+    \
+                    ^        /
+                     \      /
+                      ------
+                    state change
 
 The main sub-modules are:
  * **runtime**      the main state of the interpreter

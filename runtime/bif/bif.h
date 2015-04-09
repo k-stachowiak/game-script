@@ -18,10 +18,9 @@ extern struct SourceLocation bif_location;
 /* Array */
 void bif_length(struct Runtime* rt, VAL_LOC_T x_loc);
 void bif_empty(struct Runtime* rt, VAL_LOC_T x_loc);
-void bif_car(struct Runtime* rt, VAL_LOC_T x_loc);
-void bif_cdr(struct Runtime* rt, VAL_LOC_T x_loc);
 void bif_reverse(struct Runtime* rt, VAL_LOC_T x_loc);
 void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_at(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_slice(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc, VAL_LOC_T z_loc);
 
 /* Arythmetic */
