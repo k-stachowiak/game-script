@@ -25,7 +25,7 @@ add_library(lang OBJECT
     ./front/tok.c
     ./runtime/bif/bif_logic.c
     ./runtime/bif/bif_arythm.c
-    ./runtime/bif/bif_array.c
+    ./runtime/bif/bif_compound.c
     ./runtime/bif/bif_compare.c
     ./runtime/bif/bif_common.c
     ./runtime/bif/bif_text.c

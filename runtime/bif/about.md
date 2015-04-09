@@ -7,11 +7,12 @@ They are supposed to be basic operations within the computational basis of the b
 **Note**
  - _?_          ::= any type
  - _numeric_    ::= _integer_ or _real_
+ - _compound_   ::= _array_ or _tuple_
 
 Also note that some functions return the error code alongside the result as a tuple.
 Although many functions may fail in the runtime (e.g. accessing array element beyond bounds) only some of them handle error codes.
 A rule is followed that the error codes are only returned by the functions of which the correctness cannot be verified beforehand.
-For example client cannot verify whether a string can be parsed to an integer otherwise than trying the call.
+For example client cannot verify whether a string can be parsed to an integer otherwise than trying the call to _parse-int_.
 However client can verify whether access of the i-th element of an array is legal by checking the array's lenght up front.
 
 Arythmetic functions
@@ -35,11 +36,15 @@ In order to make sure that the result of an arythmetic computation is of integra
 
 Comparison functions
 --------------------
- * =    : _numeric_ -> _numeric_ -> _boolean_
+ * =    : _?_ -> _?_ -> _boolean_
  * <    : _numeric_ -> _numeric_ -> _boolean_
  * >    : _numeric_ -> _numeric_ -> _boolean_
  * <=   : _numeric_ -> _numeric_ -> _boolean_
  * >=   : _numeric_ -> _numeric_ -> _boolean_
+
+**Note**
+The equality function is defined for any value.
+This function realizes a member-wise comparison of values of any possible complexity, which is trivial since the semantics of the language support contiguous sorage and therefore bitwise comparison will do as the implementation of the _=_ function.
 
 Logic (boolean) functions
 -------------------------
@@ -54,11 +59,15 @@ Additionally they will accept an arbitrary number of arguments.
 
 Array functions
 ---------------
- * length  : _array_ -> _integer_
- * at      : _array_ -> _integer_ -> _?_
- * reverse : _array_ -> _array_
- * cat     : _array_ -> _array_ -> _array_
- * slice   : _array_ -> _integer_ -> _integer_ -> _array_
+ * length  : _compound_ -> _integer_
+ * at      : _compound_ -> _integer_ -> _?_
+ * reverse : _compound_ -> _compound_
+ * cat     : _compound_ -> _compound_ -> _compound_
+ * slice   : _compound_ -> _integer_ -> _integer_ -> _array_
+
+**Note**
+If more than one argument is of a compound type it is expected for the arguments to be of the same types.
+The _cat_ function which produces a compound value will perform a homogenity check if an array is to be returned.
 
 Text functions
 --------------

@@ -15,13 +15,6 @@ typedef void (*bif_ternary_func)(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T 
 
 extern struct SourceLocation bif_location;
 
-/* Array */
-void bif_length(struct Runtime* rt, VAL_LOC_T x_loc);
-void bif_reverse(struct Runtime* rt, VAL_LOC_T x_loc);
-void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
-void bif_at(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
-void bif_slice(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc, VAL_LOC_T z_loc);
-
 /* Arythmetic */
 void bif_sqrt(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_add(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
@@ -45,6 +38,13 @@ void bif_and(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_or(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_xor(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_not(struct Runtime *rt, VAL_LOC_T x_loc);
+
+/* Compound */
+void bif_length(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_reverse(struct Runtime* rt, VAL_LOC_T x_loc);
+void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_at(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_slice(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc, VAL_LOC_T z_loc);
 
 /* Text */
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc);

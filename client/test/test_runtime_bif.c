@@ -56,19 +56,22 @@ static void test_runtime_bif_length(
 {
     test_eval_source_expect(tc, rt, "(length [])", "Evaluate length of an empty array", INT, 0);
     test_eval_source_expect(tc, rt, "(length [ 'a' 'b' 'c' ])", "Evaluate length of an non-empty array", INT, 3);
-    test_eval_source_fail(tc, rt, "(length \"asdf\")", "Fail on length of a non-array");
+    test_eval_source_expect(tc, rt, "(length {})", "Evaluate length of an empty tuple", INT, 0);
+    test_eval_source_expect(tc, rt, "(length { 1 2.0 \"three\" })", "Evaluate length of an non-empty tuple", INT, 3);
+    test_eval_source_fail(tc, rt, "(length \"asdf\")", "Fail on length of a non-compound value");
 }
 
 static void test_runtime_bif_at(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(at [ 1 2 3 ] 0)", "Evaluate valid at call", INT, 1);
+    test_eval_source_expect(tc, rt, "(at [ 1 2 3 ] 0)", "Evaluate valid at call for array", INT, 1);
+    test_eval_source_expect(tc, rt, "(at { 1 2.0 \"three\" } 1)", "Evaluate valid at call for tuple", REAL, 2.0);
     test_eval_source_fail(tc, rt, "(at [ 1 ] 0 0)", "Fail at on too many arguments");
-    test_eval_source_fail(tc, rt, "(at [] 1.0)", "Fail at on non-integer index");
+    test_eval_source_fail(tc, rt, "(at {} 1.0)", "Fail at on non-integer index");
     test_eval_source_fail(tc, rt, "(at 1.0 1)", "Fail at on non-array subject");
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] -1)", "Fail at on negative index");
-    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 3)", "Fail at on index == size");
+    test_eval_source_fail(tc, rt, "(at { \"alpha\" \"beta\" \"gamma\" } 3)", "Fail at on index == size");
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 300)", "Fail at on index beyond size");
 }
 
@@ -76,70 +79,54 @@ static void test_runtime_bif_reverse(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= (reverse [ 'b' 'c' 'a' ]) [ 'a' 'c' 'b' ])", "Test simple reverse", BOOL, true);
+    test_eval_source_expect(tc, rt,
+        "(= (reverse [ 'b' 'c' 'a' ]) [ 'a' 'c' 'b' ])",
+        "Test simple reverse",
+        BOOL, true);
+
+    test_eval_source_expect(tc, rt,
+        "(= (reverse { 1 2.0 \"three\" }) { \"three\" 2.0 1 })",
+        "Test simple reverse",
+        BOOL, true);
 }
 
-static void test_runtime_bif_cat_valid(
+static void test_runtime_bif_cat(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    VAL_LOC_T results[6];
+    test_eval_source_expect(tc, rt, "(= (cat [] []) [])", "Concatenate empty arrays", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (cat {} {}) {})", "Concatenate empty tuples", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (cat [\"\"] []) [\"\"])", "Concatenate empty with non-empty array", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (cat {\"\"} {}) {\"\"})", "Concatenate empty with non-empty tuple", BOOL, true);
 
-    char *test_name = "BIF cat valid";
-    char *source =
-        "(bind x (cat [] []))\n"
-        "(bind y (cat [ \"\" ] []))\n"
-        "(bind z (cat [ 1 ] [ 2 3 ]))\n"
-        "(bind x-len (length x))\n"
-        "(bind y-len (length y))\n"
-        "(bind z-len (length z))";
+    test_eval_source_expect(tc, rt,
+        "(= (cat ['a'] ['b' 'c']) ['a' 'b' 'c'])",
+        "Concatenate non-empty arrays",
+        BOOL, true);
 
-    if (!test_eval_source(rt, source, results)) {
-        tc_record(tc, test_name, false);
-        rt_reset(rt);
-        return;
-    }
+    test_eval_source_expect(tc, rt,
+        "(= (cat {1} {2.0 \"three\"}) {1 2.0 \"three\"})",
+        "Concatenate non-empty tuples",
+        BOOL, true);
 
-    if (rt_val_peek_int(rt, results[3]) != 0) {
-        tc_record(tc, test_name, false);
-        rt_reset(rt);
-        return;
-    }
-
-    if (rt_val_peek_int(rt, results[4]) != 1) {
-        tc_record(tc, test_name, false);
-        rt_reset(rt);
-        return;
-    }
-
-    if (rt_val_peek_int(rt, results[5]) != 3) {
-        tc_record(tc, test_name, false);
-        rt_reset(rt);
-        return;
-    }
-
-    tc_record(tc, test_name, true);
-    rt_reset(rt);
-}
-
-static void test_runtime_bif_cat_invalid(
-        struct TestContext *tc,
-        struct Runtime *rt)
-{
     test_eval_source_fail(tc, rt, "(cat 1 2)", "BIF cat two non-array args");
     test_eval_source_fail(tc, rt, "(cat [ 1 ] 2)", "BIF cat one no-array args");
     test_eval_source_fail(tc, rt, "(cat 1 [ 2 ])", "BIF cat one no-array args");
     test_eval_source_fail(tc, rt, "(cat [ 1.0 ] [ 2 ])", "BIF cat hetero args");
+    test_eval_source_fail(tc, rt, "(cat [ 1 ] { 2 })", "BIF cat array and tuple");
+    test_eval_source_fail(tc, rt, "(cat { 1 } [ 2 ])", "BIF cat tuple and array");
 }
 
 static void test_runtime_bif_slice(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 1 3) [ 2 3 ])", "Simple slice", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 2 2) [])", "Empty slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 1 3) [ 2 3 ])", "Simple array slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 2 2) [])", "Empty array slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (slice {1 2.0 \"three\"} 1 3) {2.0 \"three\"})", "Simple tuple slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (slice {1 2.0 \"three\"} 2 2) {})", "Empty tuple slice", BOOL, true);
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] -1 0)", "Fail on negative slice index");
-    test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] 1 0)", "Fail on incorrect slice indices order");
+    test_eval_source_fail(tc, rt, "(slice { 1 2 3 } 1 0)", "Fail on incorrect slice indices order");
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] 1 4)", "Fail on slice index out of bounds");
 }
 
@@ -207,8 +194,7 @@ void test_runtime_bif(struct TestContext *tc)
     test_runtime_bif_length(tc, rt);
     test_runtime_bif_at(tc, rt);
     test_runtime_bif_reverse(tc, rt);
-    test_runtime_bif_cat_valid(tc, rt);
-    test_runtime_bif_cat_invalid(tc, rt);
+    test_runtime_bif_cat(tc, rt);
     test_runtime_bif_slice(tc, rt);
     test_runtime_bif_format(tc, rt);
     test_runtime_bif_parse_any(tc, rt);
