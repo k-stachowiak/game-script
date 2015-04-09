@@ -39,9 +39,11 @@ void tc_record(struct TestContext *tc, char *name, bool result)
     ARRAY_APPEND(tc->entries, te);
 }
 
-int test(int argc, char *argv[])
+int main()
 {
     struct TestContext tc;
+
+    atexit(err_reset);
 
     tc_init(&tc);
     test_front(&tc);

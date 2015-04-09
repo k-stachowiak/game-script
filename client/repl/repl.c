@@ -55,15 +55,14 @@ static void repl_handle_line(struct Runtime *rt, char *line)
     }
 }
 
-int repl(int argc, char *argv[])
+int main(void)
 {
     int result;
     bool eof_flag = false;
-    struct Runtime *rt = rt_make(64 * 1024);
 
-    if (argc != 1) {
-        printf("REPL: ignored additional command line arguments.\n");
-    }
+    atexit(err_reset);
+
+    struct Runtime *rt = rt_make(64 * 1024);
 
     repl_cmd_init(rt);
 
@@ -110,3 +109,4 @@ int repl(int argc, char *argv[])
 
     return result;
 }
+

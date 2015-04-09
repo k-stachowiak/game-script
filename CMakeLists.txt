@@ -5,7 +5,7 @@ project(moon-lang)
 include_directories(
     ./ast
     ./client/repl
-    ./client/run
+    ./client/lib
     ./client/test
     ./common
     ./front
@@ -15,10 +15,10 @@ include_directories(
     .
     )
 
-set(CMAKE_C_FLAGS "-Wall -g -O0")
-set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_C_FLAGS "-Wall -O3")
+set(CMAKE_C_COMPILER "clang")
 
-add_library(lang
+add_library(lang OBJECT
     ./front/dom.c
     ./front/lex.c
     ./front/parse.c
@@ -35,8 +35,8 @@ add_library(lang
     ./runtime/eval/eval_parafunc.c
     ./runtime/eval/eval_cpd.c
     ./runtime/eval/eval_fcall.c
-	./runtime/eval/eval_bind.c
-	./runtime/dbg.c
+    ./runtime/eval/eval_bind.c
+    ./runtime/dbg.c
     ./runtime/symmap.c
     ./runtime/stack.c
     ./runtime/runtime.c
@@ -47,24 +47,28 @@ add_library(lang
     ./common/term.c
     ./common/memory.c
     ./common/src_iter.c
-	)
+    )
 
-add_executable(moon-lang
-    ./cli.c
-    ./client/run/run.c
-    ./client/repl/repl_cmd.c
+add_library(moon STATIC $<TARGET_OBJECTS:lang>
+    ./client/lib/moon.c
+    )
+target_link_libraries(moon m)
+
+add_executable(mnrepl $<TARGET_OBJECTS:lang>
     ./client/repl/repl.c
+    ./client/repl/repl_cmd.c
     ./client/repl/repl_expr.c
+    )
+target_link_libraries(mnrepl m)
+
+add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test.c
-    ./client/test/test_helpers.c
     ./client/test/test_front.c
+    ./client/test/test_helpers.c
     ./client/test/test_runtime_basic.c
-    ./client/test/test_runtime_func.c
     ./client/test/test_runtime_bif.c
+    ./client/test/test_runtime_func.c
     ./client/test/test_runtime_parafunc.c
     )
-target_link_libraries(moon-lang m lang)
-
-add_library(moon ./moon.c)
-target_link_libraries(moon m lang)
+target_link_libraries(mntest m)
 
