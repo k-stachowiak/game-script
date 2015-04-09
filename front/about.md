@@ -10,10 +10,10 @@ The symbolic expressions based syntax is supported.
                    +-----------+
 
 The sub-modules are:
- * tokenizer        _converts stream of characters into a stream of tokens_
- * lexer            _builds a symbolic expression DOM tree from the tokens stream_
- * dom analyzer     _manages the DOM tree structure creation and analysis_
- * parser           _parses dom trees or subtrees into AST structures_
+ * **tokenizer**        _converts stream of characters into a stream of tokens_
+ * **lexer**            _builds a symbolic expression DOM tree from the tokens stream_
+ * **dom analyzer**     _manages the DOM tree structure creation and analysis_
+ * **parser**           _parses dom trees or subtrees into AST structures_
 
 See also
 --------
