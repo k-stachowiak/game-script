@@ -8,6 +8,12 @@ They are supposed to be basic operations within the computational basis of the b
  - _?_          ::= any type
  - _numeric_    ::= _integer_ or _real_
 
+Also note that some functions return the error code alongside the result as a tuple.
+Although many functions may fail in the runtime (e.g. accessing array element beyond bounds) only some of them handle error codes.
+A rule is followed that the error codes are only returned by the functions of which the correctness cannot be verified beforehand.
+For example client cannot verify whether a string can be parsed to an integer otherwise than trying the call.
+However client can verify whether access of the i-th element of an array is legal by checking the array's lenght up front.
+
 Arythmetic functions
 --------------------
  * sqrt     : _numeric_ -> _numeric_
