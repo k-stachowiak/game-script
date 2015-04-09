@@ -57,8 +57,8 @@ Logic (boolean) functions
 The _&&_ and _||_ functions handle so called short circuit evaluation; e.g. if any argument of the _&&_ turns out false no further arguments are evaluated.
 Additionally they will accept an arbitrary number of arguments.
 
-Array functions
----------------
+Compound functions
+------------------
  * length  : _compound_ -> _integer_
  * at      : _compound_ -> _integer_ -> _?_
  * reverse : _compound_ -> _compound_
@@ -66,8 +66,17 @@ Array functions
  * slice   : _compound_ -> _integer_ -> _integer_ -> _array_
 
 **Note**
+
 If more than one argument is of a compound type it is expected for the arguments to be of the same types.
 The _cat_ function which produces a compound value will perform a homogenity check if an array is to be returned.
+
+The indices in the _slice_ function refer to the _begining_ of the compound value's cell, so the following are true:
+
+    (= (slice [ 1 2 3 ] 0 0) [])
+    (= (slice [ 1 2 3 ] 0 1) [ 1 ])
+    (= (slice [ 1 2 3 ] 2 3) [ 3 ])
+    (= (slice [ 1 2 3 ] 1 3) [ 2 3 ])
+    # etc...
 
 Text functions
 --------------
@@ -80,3 +89,17 @@ Text functions
  * parse-int    : _string_ -> { _boolean_ _integer_ }
  * parse-real   : _string_ -> { _boolean_ _real_ }
 
+**Note**
+
+_format_ function addepts a *format string* and a tuple of arguments which will be matched to wildcards present in the *format string*.
+The format string is a simplified version of the concept present in the C language, in the functions like _sprintf_.
+No fine tuning of the format is possible, only the selection of the value's type.
+The following wildcards are supported (with the respective matched types):
+ * _%b_ : boolean
+ * _%c_ : character
+ * _%d_ : integer
+ * _%f_ : real
+ * _%s_ : string
+
+_print_ function will print a given string to the output.
+The function is implemented in terms of the C language's _printf_ function and therefore the according escape sequences will be accepted by this language's _print_ function.
