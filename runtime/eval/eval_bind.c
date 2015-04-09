@@ -22,6 +22,14 @@ static void bind_error_pattern_length_mismatch(void)
     err_msg_set(&msg);
 }
 
+static void bind_error_bind_void(void)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
+    err_msg_append(&msg, "Tried to bind void expression");
+    err_msg_set(&msg);
+}
+
 void eval_bind_pattern(
         struct Runtime *rt,
         struct SymMap *sym_map,
@@ -83,10 +91,17 @@ void eval_bind(
 {
     struct Pattern *pattern = node->data.bind.pattern;
     struct AstNode *expr = node->data.bind.expr;
-    VAL_LOC_T location = eval_impl(expr, rt, sym_map);
 
-    if (!err_state()) {
-        eval_bind_pattern(rt, sym_map, pattern, location, &expr->loc);
+    VAL_LOC_T location = eval_impl(expr, rt, sym_map);
+    if (err_state()) {
+        return;
     }
+
+    if (location == 0) {
+        bind_error_bind_void();
+        return;
+    }
+
+    eval_bind_pattern(rt, sym_map, pattern, location, &expr->loc);
 }
 
