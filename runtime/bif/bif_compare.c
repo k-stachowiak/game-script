@@ -59,10 +59,10 @@ void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         return;
     }
 
-    bool result = memcmp(
+    bool result = (memcmp(
             rt->stack->buffer + x_loc,
             rt->stack->buffer + y_loc,
-            x_size + VAL_HEAD_BYTES);
+            x_size + VAL_HEAD_BYTES) == 0);
 
     rt_val_push_bool(rt->stack, result);
 }

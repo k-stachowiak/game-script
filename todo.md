@@ -1,6 +1,5 @@
 TODO
 ----
- * [ ] Generalize equality BIF to accept all types as arguments
  * [ ] Provide tests for all bifs e.g. "at" anything else?
  * [ ] Runtmie check in bind evaluation for void returned from the bound expression!
        - this can be either an error or a normal null value
