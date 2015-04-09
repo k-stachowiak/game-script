@@ -131,42 +131,6 @@ void bif_reverse(struct Runtime* rt, VAL_LOC_T location)
     ARRAY_FREE(locs);
 }
 
-void bif_cons(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
-{
-    VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
-    VAL_SIZE_T x_size, y_size;
-
-    if (rt_val_peek_type(rt, y_loc) != VAL_ARRAY) {
-        bif_arr_error_arg(2, "cons", "must be an array");
-        return;
-    }
-
-    x_size = rt_val_peek_size(rt, x_loc);
-    y_size = rt_val_peek_size(rt, y_loc);
-
-    /* Build new header. */
-    rt_val_push_array_init(rt->stack, &size_loc);
-
-    /* Append x. */
-    stack_push_copy(rt->stack, x_loc);
-
-    /* Append Y. */
-    loc = rt_val_cpd_first_loc(y_loc);
-    end = loc + y_size;
-    while (loc != end) {
-        stack_push_copy(rt->stack, loc);
-        loc = rt_val_next_loc(rt, loc);
-    }
-
-    /* Finalize. */
-    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
-
-    /* Validate homogenity. */
-    if (!rt_val_compound_homo(rt, result_loc)) {
-        bif_arr_error_homo("cons");
-    }
-}
-
 void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;

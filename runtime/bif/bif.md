@@ -5,20 +5,20 @@ This document lists the Built-In Functions provided by the language.
 They are supposed to be basic operations within the computational basis of the built-in types.
 
 **Note**
- - _?_ ::= any type
- - _numeric_ ::= _integer_ or _real_
+ - _?_          ::= any type
+ - _numeric_    ::= _integer_ or _real_
 
 Arythmetic functions
 --------------------
- * sqrt  : _numeric_ -> _numeric_
- * +     : _numeric_ -> _numeric_ -> _numeric_
- * -     : _numeric_ -> _numeric_ -> _numeric_
- * *     : _numeric_ -> _numeric_ -> _numeric_
- * /     : _numeric_ -> _numeric_ -> _numeric_
- * %     : _numeric_ -> _numeric_ -> _numeric_
- * floor : _real_ -> _integer_
- * ceil  : _real_ -> _integer_
- * round : _real_ -> _integer_
+ * sqrt     : _numeric_ -> _numeric_
+ * +        : _numeric_ -> _numeric_ -> _numeric_
+ * -        : _numeric_ -> _numeric_ -> _numeric_
+ * *        : _numeric_ -> _numeric_ -> _numeric_
+ * /        : _numeric_ -> _numeric_ -> _numeric_
+ * %        : _numeric_ -> _numeric_ -> _numeric_
+ * floor    : _real_ -> _integer_
+ * ceil     : _real_ -> _integer_
+ * round    : _real_ -> _integer_
 
 **Note**
 In case of binary arythmetic operation, if type of one argument is _real_ and the type of the other one is _integer_ apromotion takes place.
@@ -35,27 +35,26 @@ Array functions
  * car     : _array_ -> _?_ **remove**
  * cdr     : _array_ -> _array_ **remove**
  * reverse : _array_ -> _array_
- * cons    : _?_ -> _array_ -> _array_ **remove**
  * cat     : _array_ -> _array_ -> _array_
  * slice   : _array_ -> _integer_ -> _integer_ -> _array_
 
 Comparison functions
 --------------------
- * == : _numeric_ -> _numeric_ -> _boolean_
- * <  : _numeric_ -> _numeric_ -> _boolean_
- * >  : _numeric_ -> _numeric_ -> _boolean_
- * <= : _numeric_ -> _numeric_ -> _boolean_
- * >= : _numeric_ -> _numeric_ -> _boolean_
+ * ==   : _numeric_ -> _numeric_ -> _boolean_
+ * <    : _numeric_ -> _numeric_ -> _boolean_
+ * >    : _numeric_ -> _numeric_ -> _boolean_
+ * <=   : _numeric_ -> _numeric_ -> _boolean_
+ * >=   : _numeric_ -> _numeric_ -> _boolean_
 
 Logic (boolean) functions
 -------------------------
- * && : _boolean_ -> _boolean_ -> _boolean_
- * || : _boolean_ -> _boolean_ -> _boolean_
- * ^^ : _boolean_ -> _boolean_ -> _boolean_
- * ~~ : _boolean_ -> _boolean_ -> _boolean_
+ * &&   : _boolean_ -> _boolean_ -> _boolean_
+ * ||   : _boolean_ -> _boolean_ -> _boolean_
+ * ^^   : _boolean_ -> _boolean_ -> _boolean_
+ * ~~   : _boolean_ -> _boolean_ -> _boolean_
 
- **Note**
- The _&&_ and _||_ functions handle so called short circuit evaluation; e.g. if any argument of the _&&_ turns out false no further arguments are evaluated.
+**Note**
+The _&&_ and _||_ functions handle so called short circuit evaluation; e.g. if any argument of the _&&_ turns out false no further arguments are evaluated.
 
 Text functions
 --------------
@@ -68,3 +67,4 @@ Text functions
  * parse-char   : _string_ -> { _boolean_ _character_ }
  * parse-int    : _string_ -> { _boolean_ _integer_ }
  * parse-real   : _string_ -> { _boolean_ _real_ }
+

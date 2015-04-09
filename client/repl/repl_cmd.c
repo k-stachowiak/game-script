@@ -108,9 +108,14 @@ static void repl_cmd_dbg_toggle(struct Runtime *rt)
 
 void repl_cmd_init(struct Runtime *rt)
 {
+    static char *std_filename = "std.mn";
+
     dbg_init(&dbg);
     dbg_enabled = false;
-    repl_cmd_dbg_toggle(rt); /* HACK to enable debugger by default. */
+
+    /* Autoexec some commands. */
+    repl_cmd_dbg_toggle(rt);
+    repl_cmd_load(rt, &std_filename, 1);
 }
 
 void repl_cmd_deinit(void)
