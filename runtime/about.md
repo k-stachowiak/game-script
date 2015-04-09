@@ -26,5 +26,6 @@ The helper sub-modules are:
 
 See also
 --------
+ * bif documentation
  * ast module
 

@@ -50,7 +50,6 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "to-string", eval_bif(rt, bif_to_string, 1), &bif_location);
     sym_map_insert(sm, "parse", eval_bif(rt, bif_parse, 1), &bif_location);
     sym_map_insert(sm, "parse-bool", eval_bif(rt, bif_parse_bool, 1), &bif_location);
-    sym_map_insert(sm, "parse-string", eval_bif(rt, bif_parse_string, 1), &bif_location);
     sym_map_insert(sm, "parse-char", eval_bif(rt, bif_parse_char, 1), &bif_location);
     sym_map_insert(sm, "parse-int", eval_bif(rt, bif_parse_int, 1), &bif_location);
     sym_map_insert(sm, "parse-real", eval_bif(rt, bif_parse_real, 1), &bif_location);
