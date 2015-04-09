@@ -14,15 +14,15 @@ In general the AST structures are consumed by the runtime in order to produce ou
                  state change
 
 The main sub-modules are:
- * **runtime**      _the main state of the interpreter_
- * **stack**        _the memory store_
- * **symbols map**  _symbols map storing references to values and function (values as well)_
- * **eval**         _the module that implements specific actions for each of the AST types_
- * **BIF**          _stores thte built-in function implementations_
+ * **runtime**      the main state of the interpreter
+ * **stack**        the memory store
+ * **symbols map**  symbols map storing references to values and function (values as well)
+ * **eval**         the module that implements specific actions for each of the AST types
+ * **BIF**          stores thte built-in function implementations
 
 The helper sub-modules are:
- * **dbg**      _enables recursive tracking of all evaluation operations_
- * **rt val**   _enables input and output of the values in the stack store_
+ * **dbg**      enables recursive tracking of all evaluation operations
+ * **rt val**   enables input and output of the values in the stack store
 
 See also
 --------
