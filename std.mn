@@ -4,6 +4,10 @@
 ### Constructs a new array from an element and an existing array
 (bind cons (func (x arr) (cat [ x ] arr)))
 
+### Deconstructs an array into a tuple containing the head and the tail
+### of the input array
+(bind dcons (func (arr) { (at arr 0) (slice arr 1 (length arr)) }))
+
 ### Returns the first element of an array
 (bind car (func (arr) (at arr 0)))
 
