@@ -144,4 +144,3 @@ char *dom_node_parse_symbol(struct DomNode *node)
 
     return result;
 }
-

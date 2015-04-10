@@ -30,21 +30,17 @@ static void test_lex_mixed(struct TestContext *tc)
 
 static void test_lex_comments(struct TestContext *tc)
 {
-    char *source1 =
+    char *source =
         "#start with a comment\n"
         "(bind # end line with a comment\n"
         "    #interleave with a comment   \n"
         "x 0)\n"
-        "(bind y 42) # comment at the end of the source\n";
+        "(bind y 42) # comment at the end of the source\n"
+		"(bind z (func ()\n"
+		"    4 # Comment before end of function\n"
+		"))";
 
-
-    char *source2 =
-        "(bind z (func ()\n"
-        "    4 # Comment before end of function\n"
-        "))";
-
-    test_lex(tc, source1, "Succeed on a code interleaved with comments 1.", true);
-    test_lex(tc, source2, "Succeed on a code interleaved with comments 2.", true);
+    test_lex(tc, source, "Succeed on a code interleaved with comments 1.", true);
 }
 
 static void test_parse_do(struct TestContext *tc)

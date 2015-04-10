@@ -94,6 +94,14 @@ static struct SourceIter find_if_not(
     return result;
 }
 
+static struct Token *find_non_comment(struct Token *token)
+{
+	while (token && tok_is_comment(token)) {
+		token = token->next;
+	}
+	return token;
+}
+
 static struct SourceIter find_nonesc_delim(
         struct SourceIter *begin,
         struct SourceIter *end,
@@ -275,6 +283,7 @@ static struct Token *tokenize(
             return NULL;
         }
 
+        LOG_TRACE("Read token from(%s) to (%s)", current.first, current.last);
         LIST_APPEND(tok, &result, &result_end);
     }
 
@@ -311,13 +320,13 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
     struct DomNode *children_end = NULL;
 
     struct Token *first = *current;
-    *current = (*current)->next;
+    *current = find_non_comment((*current)->next);
 
     while (*current) {
         if (tok_is_close_paren(*current) && tok_paren_match(first, *current)) {
             struct DomNode *result = dom_make_compound(
                 &first->loc, dom_infer_cpd_type(first), children);
-            *current = (*current)->next;
+            *current = find_non_comment((*current)->next);
             return result;
 
         } else {
@@ -346,7 +355,7 @@ static struct DomNode *dom_parse_atom_node(struct Token **current)
 {
     struct DomNode *result;
     result = dom_make_atom(&(*current)->loc, (*current)->begin, (*current)->end);
-    *current = (*current)->next;
+    *current = find_non_comment((*current)->next);
     return result;
 }
 
@@ -357,9 +366,7 @@ static struct DomNode *dom_parse_atom_node(struct Token **current)
  */
 static struct DomNode *dom_parse_node(struct Token **current)
 {
-    while (*current && tok_is_comment(*current)) {
-        *current = (*current)->next;
-    }
+    *current = find_non_comment(*current);
 
     if (!(*current)) {
         return NULL;
@@ -391,6 +398,9 @@ static struct DomNode *dom_build(struct Token *tokens)
             return NULL;
         }
         if (node) {
+        	LOG_TRACE(
+        		"parsed sexpr node \"%s\"",
+        		node->type == DOM_ATOM ? "atom" : "comopund");
             LIST_APPEND(node, &result, &result_end);
         }
     }
