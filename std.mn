@@ -58,6 +58,7 @@
             )
         )
     )))
+
     (merge-impl x y (slice x 0 0)) # This slice creates empty array or tuple.
 )))
 
