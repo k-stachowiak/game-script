@@ -67,7 +67,7 @@ void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_ARRAY;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    *size_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
+    *size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
 }
 
 void rt_val_push_tuple_init(struct Stack *stack, VAL_LOC_T *size_loc)

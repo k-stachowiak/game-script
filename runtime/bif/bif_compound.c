@@ -55,9 +55,10 @@ void bif_length(struct Runtime* rt, VAL_LOC_T location)
 
 void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-    VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
+    int size, i;
     enum ValueType x_type = rt_val_peek_type(rt, x_loc);
     enum ValueType y_type = rt_val_peek_type(rt, y_loc);
+    VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
     VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
     VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
 
@@ -80,18 +81,60 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     stack_push_copy(rt->stack, y_loc);
 
     loc = rt_val_cpd_first_loc(x_loc);
-    end = loc + x_size;
-    while (loc != end) {
+    size = rt_val_cpd_len(rt, x_loc);
+    for (i = 0; i < size; ++i) {
         stack_push_copy(rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
-    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size);
+    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
 
     /* Validate homogenity. */
     if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
-        bif_cpd_error_homo("cat");
+        bif_cpd_error_homo("push-front");
     }
+}
+
+void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+{
+	int size, i;
+	enum ValueType x_type = rt_val_peek_type(rt, x_loc);
+	enum ValueType y_type = rt_val_peek_type(rt, y_loc);
+	VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
+	VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
+	VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
+
+	if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
+		bif_cpd_error_arg(1, "push-back", "must be compound");
+		return;
+	}
+
+	if (y_type == VAL_ARRAY || y_type == VAL_TUPLE) {
+		bif_cpd_error_arg(2, "push-back", "must not be compound");
+		return;
+	}
+
+	if (x_type == VAL_ARRAY) {
+		rt_val_push_array_init(rt->stack, &size_loc);
+	} else {
+		rt_val_push_tuple_init(rt->stack, &size_loc);
+	}
+
+	loc = rt_val_cpd_first_loc(x_loc);
+	size = rt_val_cpd_len(rt, x_loc);
+	for (i = 0; i < size; ++i) {
+		stack_push_copy(rt->stack, loc);
+		loc = rt_val_next_loc(rt, loc);
+	}
+
+	stack_push_copy(rt->stack, y_loc);
+
+	rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
+
+	/* Validate homogenity. */
+	if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
+		bif_cpd_error_homo("push-back");
+	}
 }
 
 void bif_reverse(struct Runtime* rt, VAL_LOC_T location)

@@ -11,7 +11,7 @@
 (bind empty (func (x) (= (length x) 0)))
 
 ### Constructs a new array from an element and an existing array
-(bind cons (func (x arr) (cat [ x ] arr)))
+(bind cons (func (x arr) (push-front arr x)))
 
 ### Deconstructs compound structure into a tuple containing
 ### the head and the tail of the input compound structure

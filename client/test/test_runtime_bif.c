@@ -58,8 +58,10 @@ static void test_runtime_bif_pushfb(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= (push-back [] 3) [ 3 ])", "Push-back to empty", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (push-back [2 3] 1) [1 2 3])", "Push-back to non-empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (push-front [] 3) [ 3 ])", "Push-front to empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (push-front {2 3} 1) {1 2 3})", "Push-front to non-empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (push-back {} 3) { 3 })", "Push-back to empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (push-back [2 3] 1) [2 3 1])", "Push-back to non-empty", BOOL, true);
 }
 
 static void test_runtime_bif_at(
