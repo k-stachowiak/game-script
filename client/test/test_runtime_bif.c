@@ -54,6 +54,14 @@ static void test_runtime_bif_length(
     test_eval_source_fail(tc, rt, "(length \"asdf\")", "Fail on length of a non-compound value");
 }
 
+static void test_runtime_bif_pushfb(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(= (push-back [] 3) [ 3 ])", "Push-back to empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(= (push-back [2 3] 1) [1 2 3])", "Push-back to non-empty", BOOL, true);
+}
+
 static void test_runtime_bif_at(
         struct TestContext *tc,
         struct Runtime *rt)
@@ -186,6 +194,7 @@ void test_runtime_bif(struct TestContext *tc)
     test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);
     test_runtime_bif_length(tc, rt);
+    test_runtime_bif_pushfb(tc, rt);
     test_runtime_bif_at(tc, rt);
     test_runtime_bif_reverse(tc, rt);
     test_runtime_bif_cat(tc, rt);

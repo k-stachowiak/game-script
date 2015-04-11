@@ -35,6 +35,7 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "!", eval_bif(rt, bif_not, 1), &bif_location);
     sym_map_insert(sm, "length", eval_bif(rt, bif_length, 1), &bif_location);
     sym_map_insert(sm, "reverse", eval_bif(rt, bif_reverse, 1), &bif_location);
+    sym_map_insert(sm, "push-front", eval_bif(rt, bif_push_front, 2), &bif_location);
     sym_map_insert(sm, "cat", eval_bif(rt, bif_cat, 2), &bif_location);
     sym_map_insert(sm, "at", eval_bif(rt, bif_at, 2), &bif_location);
     sym_map_insert(sm, "slice", eval_bif(rt, bif_slice, 3), &bif_location);
