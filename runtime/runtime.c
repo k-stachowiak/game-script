@@ -31,9 +31,6 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "round", eval_bif(rt, bif_round, 1), &bif_location);
     sym_map_insert(sm, "=", eval_bif(rt, bif_eq, 2), &bif_location);
     sym_map_insert(sm, "<", eval_bif(rt, bif_lt, 2), &bif_location);
-    sym_map_insert(sm, ">", eval_bif(rt, bif_gt, 2), &bif_location);
-    sym_map_insert(sm, "<=", eval_bif(rt, bif_leq, 2), &bif_location);
-    sym_map_insert(sm, ">=", eval_bif(rt, bif_geq, 2), &bif_location);
     sym_map_insert(sm, "^^", eval_bif(rt, bif_xor, 2), &bif_location);
     sym_map_insert(sm, "~~", eval_bif(rt, bif_not, 1), &bif_location);
     sym_map_insert(sm, "length", eval_bif(rt, bif_length, 1), &bif_location);

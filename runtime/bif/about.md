@@ -38,13 +38,13 @@ Comparison functions
 --------------------
  * =    : _?_ -> _?_ -> _boolean_
  * <    : _numeric_ -> _numeric_ -> _boolean_
- * >    : _numeric_ -> _numeric_ -> _boolean_
- * <=   : _numeric_ -> _numeric_ -> _boolean_
- * >=   : _numeric_ -> _numeric_ -> _boolean_
 
 **Note**
+
 The equality function is defined for any value.
 This function realizes a member-wise comparison of values of any possible complexity, which is trivial since the semantics of the language support contiguous sorage and therefore bitwise comparison will do as the implementation of the _=_ function.
+
+Also note that only the less than operator has been provided as a BIF since the remaining ones such as greater than, etc. may be implemented in terms of the equality and the less than operator.
 
 Logic (boolean) functions
 -------------------------

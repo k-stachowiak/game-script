@@ -8,25 +8,6 @@
 #include "error.h"
 #include "rt_val.h"
 
-#define BIF_COMPARE_DEF(NAME) \
-    void NAME(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc) \
-    { \
-        VAL_REAL_T rx, ry; \
-        VAL_INT_T ix, iy; \
-        switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) { \
-        case BBM_BOTH_INT: \
-            rt_val_push_bool(rt->stack, NAME##_impl_int(ix, iy)); \
-            break; \
-        case BBM_BOTH_REAL: \
-        case BBM_HETERO: \
-            rt_val_push_bool(rt->stack, NAME##_impl_real(rx, ry)); \
-            break; \
-        case BBM_MISMATCH: \
-            bif_compare_error_arg_mismatch(); \
-            return; \
-        } \
-    }
-
 static void bif_compare_error_arg_mismatch(void)
 {
     struct ErrMessage msg;
@@ -34,20 +15,6 @@ static void bif_compare_error_arg_mismatch(void)
     err_msg_append(&msg, "Arguments of comparison BIF must be of equal numeric type");
     err_msg_set(&msg);
 }
-
-static VAL_BOOL_T bif_lt_impl_int(VAL_INT_T x, VAL_INT_T y) { return x < y; }
-static VAL_BOOL_T bif_gt_impl_int(VAL_INT_T x, VAL_INT_T y) { return x > y; }
-static VAL_BOOL_T bif_leq_impl_int(VAL_INT_T x, VAL_INT_T y) { return x <= y; }
-static VAL_BOOL_T bif_geq_impl_int(VAL_INT_T x, VAL_INT_T y) { return x >= y; }
-static VAL_BOOL_T bif_lt_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x < y; }
-static VAL_BOOL_T bif_gt_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x > y; }
-static VAL_BOOL_T bif_leq_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x <= y; }
-static VAL_BOOL_T bif_geq_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x >= y; }
-
-BIF_COMPARE_DEF(bif_lt)
-BIF_COMPARE_DEF(bif_gt)
-BIF_COMPARE_DEF(bif_leq)
-BIF_COMPARE_DEF(bif_geq)
 
 void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
@@ -67,3 +34,21 @@ void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     rt_val_push_bool(rt->stack, result);
 }
 
+
+void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
+{
+	VAL_REAL_T rx, ry;
+	VAL_INT_T ix, iy;
+	switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) {
+	case BBM_BOTH_INT:
+		rt_val_push_bool(rt->stack, ix < iy);
+		break;
+	case BBM_BOTH_REAL:
+	case BBM_HETERO:
+		rt_val_push_bool(rt->stack, rx < ry);
+		break;
+	case BBM_MISMATCH:
+		bif_compare_error_arg_mismatch();
+		return;
+	}
+}

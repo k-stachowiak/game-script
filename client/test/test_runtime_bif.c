@@ -40,14 +40,6 @@ static void test_runtime_bif_compare(
     test_eval_source_expect(tc, rt, "(= 12.0 23.0)", "Evaluate equality false", BOOL, false);
     test_eval_source_expect(tc, rt, "(< 12.0 23.0)", "Evaluate less than true", BOOL, true);
     test_eval_source_expect(tc, rt, "(< 2 2)", "Evaluate less than false", BOOL, false);
-    test_eval_source_expect(tc, rt, "(> 23.0 12.0)", "Evaluate greater than true", BOOL, true);
-    test_eval_source_expect(tc, rt, "(> 2 2)", "Evaluate greater than false", BOOL, false);
-    test_eval_source_expect(tc, rt, "(<= 12.0 23.0)", "Evaluate less than or equal true", BOOL, true);
-    test_eval_source_expect(tc, rt, "(<= 2 2)", "Evaluate less than or equal true", BOOL, true);
-    test_eval_source_expect(tc, rt, "(<= 2 1)", "Evaluate less than or equal false", BOOL, false);
-    test_eval_source_expect(tc, rt, "(>= 12.0 23.0)", "Evaluate greater than or equal false", BOOL, false);
-    test_eval_source_expect(tc, rt, "(>= 2 2)", "Evaluate greater than or equal true", BOOL, true);
-    test_eval_source_expect(tc, rt, "(>= 2 1)", "Evaluate greater than or equal true", BOOL, true);
 }
 
 static void test_runtime_bif_length(

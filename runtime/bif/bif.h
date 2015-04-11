@@ -29,9 +29,6 @@ void bif_round(struct Runtime *rt, VAL_LOC_T x_loc);
 /* Comparison */
 void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
-void bif_gt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
-void bif_leq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
-void bif_geq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 
 /* Logic */
 void bif_and(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
