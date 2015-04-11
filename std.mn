@@ -1,3 +1,12 @@
+### Greater than implemented in terms of less than and equality
+(bind > (func (x y) (&& (! (< x y)) (! (= x y)))))
+
+### Greater or equal implemented in terms of less than
+(bind >= (func (x y) (! (< x y))))
+
+### Less or equal implemented in terms of greater than
+(bind <= (func (x y) (! (> x y))))
+
 ### Checks whether a compound structure is empty
 (bind empty (func (x) (= (length x) 0)))
 
@@ -11,13 +20,13 @@
 ### Returns the first element of a compound structure
 (bind car (func (x) (at x 0)))
 
-### Returns the compound structure sans the first element.
+### Returns the compound structure sans the first element
 (bind cdr (func (x) (slice x 1 (length x))))
 
 ### Prints a formatted string
 (bind printf (func (fmt args) (print (format fmt args))))
 
-### Finds the minimum element in a compound structure with a custom comparator.
+### Finds the minimum element in a compound structure with a custom comparator
 (bind min-element-cmp (func (x cmp) (do
     (bind min-element-impl (func (element x)
         (if (empty x)
@@ -35,11 +44,11 @@
 )))
 
 ### Finds the minimum element in a compound structure with a
-### default comparator: less than.
+### default comparator: less than
 (bind min-element (func (x) (min-element-cmp x <)))
 
 ### Merges two sorted compound structures into a sorted one
-### with a custom comparator.
+### with a custom comparator
 (bind merge-cmp (func (x y cmp) (do
     (bind merge-impl (func (x y result) (do
         (bind x-empty (empty x))

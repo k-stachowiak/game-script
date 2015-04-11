@@ -122,7 +122,7 @@ static void test_runtime_func_cyclic_capture(
     char *test_name = "Convoluted capture / function call";
     char *source =
         "(bind cross-call (func (x) (do\n"
-    	"    (bind > (func (x y) (&& (~~ (< x y)) (~~ (= x y)))))\n"
+        "    (bind > (func (x y) (&& (! (< x y)) (! (= x y)))))\n"
         "    (bind call-ping (func (x)\n"
         "        (if (> x 0)\n"
         "            (call-pong (- x 1))\n"
