@@ -96,7 +96,6 @@ void test_eval_source_expect_string(
             break; \
         } \
         tc_record(TC, NAME, true); \
-        rt_reset(RT); \
     } while(0)
 
 
