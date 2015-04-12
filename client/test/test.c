@@ -51,6 +51,7 @@ int main()
     test_runtime_func(&tc);
     test_runtime_bif(&tc);
     test_runtime_parafunc(&tc);
+    test_runtime_scope(&tc);
     tc_report(&tc);
     tc_deinit(&tc);
 

@@ -45,6 +45,7 @@ void test_runtime_basic(struct TestContext *tc);
 void test_runtime_func(struct TestContext *tc);
 void test_runtime_bif(struct TestContext *tc);
 void test_runtime_parafunc(struct TestContext *tc);
+void test_runtime_scope(struct TestContext *tc);
 
 #endif
 

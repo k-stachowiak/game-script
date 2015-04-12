@@ -20,12 +20,14 @@ static void test_runtime_literals(
     test_eval_source_expect_string(tc, rt, "\"str\"", "Evaluate simple string literal", "str");
     test_eval_source_expect_string(tc, rt, "\"x\\\"y\"", "Evaluate string literal with escapes", "x\"y");
     test_eval_source_expect_string(tc, rt, "\"\\n\"", "Evaluate string literal with escaped whitespace", "\n");
+    rt_reset(rt);
 }
 
 static void test_runtime_do(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_fail(tc, rt, "(do)", "Fail on evaluating empty do block");
     test_eval_source_expect(tc, rt, "(do 1 2 3)", "Succeed on evaluating correct do block", INT, 3);
+    rt_reset(rt);
 }
 
 static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
@@ -45,6 +47,7 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_expect(tc, rt, "(do (bind { _ t } { 1.0 2.0 }) t)", "Bind tuple 2nd dontcare 1st", REAL, 2.0);
 
     test_eval_source_fail(tc, rt, "(bind _ (print \"print returns void\\n\"))", "Fail on binding void expression");
+    rt_reset(rt);
 }
 
 static void test_runtime_reference(
@@ -53,6 +56,7 @@ static void test_runtime_reference(
 {
     test_eval_source_fail(tc, rt, "x", "Fail on evaluating undefined reference");
     test_eval_source_expect(tc, rt, "(do (bind y 3) y)", "Succeed on evaluating defined reference", INT, 3);
+    rt_reset(rt);
 }
 
 static void test_runtime_cpd(struct TestContext *tc, struct Runtime *rt)
@@ -67,6 +71,7 @@ static void test_runtime_cpd(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_succeed(tc, rt, "{}", "Succeed on evaluating empty tuple");
     test_eval_source_succeed(tc, rt, "{ 1 2 }", "Succeed on evaluating homogenous tuple");
     test_eval_source_succeed(tc, rt, "{ 1 [] }", "Succeed on evaluating heterogenous tuple");
+    rt_reset(rt);
 }
 
 void test_runtime_basic(struct TestContext *tc)

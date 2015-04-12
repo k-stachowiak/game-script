@@ -10,6 +10,7 @@ static void test_runtime_parafunc_logic(
     test_eval_source_expect(tc, rt, "(&& false true)", "Evaluate && false result", BOOL, false);
     test_eval_source_expect(tc, rt, "(|| false true)", "Evaluate || true result", BOOL, true);
     test_eval_source_expect(tc, rt, "(|| false false)", "Evaluate || false result", BOOL, false);
+    rt_reset(rt);
 }
 
 static void test_parafunc_if(struct TestContext *tc, struct Runtime *rt)
@@ -19,6 +20,7 @@ static void test_parafunc_if(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_fail(tc, rt, "(if a b)", "Fail on evaluating incomplete if block 2");
     test_eval_source_expect(tc, rt, "(if true 1.0 2.0)", "Succeed on iff - true branch", REAL, 1.0);
     test_eval_source_expect_string(tc, rt, "(if false \"a\" \"b\")", "Succeed on iff - false branch", "b");
+    rt_reset(rt);
 }
 
 static void test_parafunc_switch(struct TestContext *tc, struct Runtime *rt)
@@ -29,6 +31,7 @@ static void test_parafunc_switch(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_fail(tc, rt, "(switch 1 { 2 })", "Fail on evaluating switch block with a 1-element");
     test_eval_source_expect(tc, rt, "(switch 1 { 1 1.0 } { 2 2.0 })", "Succeed on switch a", REAL, 1.0);
     test_eval_source_expect(tc, rt, "(switch 2 { 1 1.0 } { 2 2.0 })", "Succeed on switch b", REAL, 2.0);
+    rt_reset(rt);
 }
 
 void test_runtime_parafunc(struct TestContext *tc)

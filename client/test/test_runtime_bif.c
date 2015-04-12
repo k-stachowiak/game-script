@@ -19,6 +19,7 @@ static void test_runtime_bif_arythmetic(
     test_eval_source_expect(tc, rt, "(floor -3.5)", "Evaluate floor", INT, -4);
     test_eval_source_expect(tc, rt, "(ceil -3.5)", "Evaluate ceil", INT, -3);
     test_eval_source_expect(tc, rt, "(round 3.5)", "Evaluate round", INT, 4);
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_logic(
@@ -31,6 +32,7 @@ static void test_runtime_bif_logic(
     test_eval_source_expect(tc, rt, "(! true)", "Evaluate ! true result", BOOL, false);
     test_eval_source_expect(tc, rt, "(&& true true false)", "Evaluate &&", BOOL, false);
     test_eval_source_expect(tc, rt, "(|| false true false)", "Evaluate ||", BOOL, true);
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_compare(
@@ -41,6 +43,7 @@ static void test_runtime_bif_compare(
     test_eval_source_expect(tc, rt, "(= 12.0 23.0)", "Evaluate equality false", BOOL, false);
     test_eval_source_expect(tc, rt, "(< 12.0 23.0)", "Evaluate less than true", BOOL, true);
     test_eval_source_expect(tc, rt, "(< 2 2)", "Evaluate less than false", BOOL, false);
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_length(
@@ -52,6 +55,7 @@ static void test_runtime_bif_length(
     test_eval_source_expect(tc, rt, "(length {})", "Evaluate length of an empty tuple", INT, 0);
     test_eval_source_expect(tc, rt, "(length { 1 2.0 \"three\" })", "Evaluate length of an non-empty tuple", INT, 3);
     test_eval_source_fail(tc, rt, "(length \"asdf\")", "Fail on length of a non-compound value");
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_pushfb(
@@ -62,6 +66,7 @@ static void test_runtime_bif_pushfb(
     test_eval_source_expect(tc, rt, "(= (push-front {2 3} 1) {1 2 3})", "Push-front to non-empty", BOOL, true);
     test_eval_source_expect(tc, rt, "(= (push-back {} 3) { 3 })", "Push-back to empty", BOOL, true);
     test_eval_source_expect(tc, rt, "(= (push-back [2 3] 1) [2 3 1])", "Push-back to non-empty", BOOL, true);
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_at(
@@ -76,21 +81,7 @@ static void test_runtime_bif_at(
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] -1)", "Fail at on negative index");
     test_eval_source_fail(tc, rt, "(at { \"alpha\" \"beta\" \"gamma\" } 3)", "Fail at on index == size");
     test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 300)", "Fail at on index beyond size");
-}
-
-static void test_runtime_bif_reverse(
-        struct TestContext *tc,
-        struct Runtime *rt)
-{
-    test_eval_source_expect(tc, rt,
-        "(= (reverse [ 'b' 'c' 'a' ]) [ 'a' 'c' 'b' ])",
-        "Test simple reverse",
-        BOOL, true);
-
-    test_eval_source_expect(tc, rt,
-        "(= (reverse { 1 2.0 \"three\" }) { \"three\" 2.0 1 })",
-        "Test simple reverse",
-        BOOL, true);
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_cat(
@@ -119,6 +110,8 @@ static void test_runtime_bif_cat(
     test_eval_source_fail(tc, rt, "(cat [ 1 ] { 2 })", "BIF cat array and tuple");
     test_eval_source_fail(tc, rt, "(cat { 1 } [ 2 ])", "BIF cat tuple and array");
     test_eval_source_fail(tc, rt, "(cat [ 1 ] { 2.0 })", "BIF cat array and tuple diffrent content types");
+
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_slice(
@@ -132,6 +125,7 @@ static void test_runtime_bif_slice(
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] -1 0)", "Fail on negative slice index");
     test_eval_source_fail(tc, rt, "(slice { 1 2 3 } 1 0)", "Fail on incorrect slice indices order");
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] 1 4)", "Fail on slice index out of bounds");
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_format(
@@ -151,6 +145,7 @@ static void test_runtime_bif_format(
         "(format \"%d%d\" { 1 2 } )",
         "Format with consecutive wildcards",
         "12");
+    rt_reset(rt);
 }
 
 static void test_runtime_bif_parse_any(
@@ -186,24 +181,23 @@ static void test_runtime_bif_parse_any(
             "(do (bind { x _ } (parse \"[ 1 2 asdf ]\")) x)",
             "Parse array i-th element fail",
             BOOL, false);
+
+    rt_reset(rt);
 }
 
 void test_runtime_bif(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make(64 * 1024);
-
     test_runtime_bif_arythmetic(tc, rt);
     test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);
     test_runtime_bif_length(tc, rt);
     test_runtime_bif_pushfb(tc, rt);
     test_runtime_bif_at(tc, rt);
-    test_runtime_bif_reverse(tc, rt);
     test_runtime_bif_cat(tc, rt);
     test_runtime_bif_slice(tc, rt);
     test_runtime_bif_format(tc, rt);
     test_runtime_bif_parse_any(tc, rt);
-
     rt_free(rt);
 }
 

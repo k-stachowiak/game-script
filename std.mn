@@ -10,18 +10,18 @@
 ### Checks whether a compound structure is empty
 (bind empty (func (x) (= (length x) 0)))
 
-### Constructs a new array from an element and an existing array
-(bind cons (func (x arr) (push-front arr x)))
-
-### Deconstructs compound structure into a tuple containing
-### the head and the tail of the input compound structure
-(bind dcons (func (x) { (at x 0) (slice x 1 (length x)) }))
-
 ### Returns the first element of a compound structure
 (bind car (func (x) (at x 0)))
 
 ### Returns the compound structure sans the first element
 (bind cdr (func (x) (slice x 1 (length x))))
+
+### Constructs a new compound value from an element and an existing compound
+(bind cons (func (x arr) (push-front arr x)))
+
+### Deconstructs compound structure into a tuple containing
+### the head and the tail of the input compound structure
+(bind dcons (func (x) { (car x) (cdr x) }))
 
 ### Prints a formatted string
 (bind printf (func (fmt args) (print (format fmt args))))

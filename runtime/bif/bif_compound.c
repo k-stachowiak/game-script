@@ -42,17 +42,6 @@ static void bif_cpd_error_mismatch(char *func)
     err_msg_set(&msg);
 }
 
-void bif_length(struct Runtime* rt, VAL_LOC_T location)
-{
-    enum ValueType type = rt_val_peek_type(rt, location);
-    if (type != VAL_ARRAY && type != VAL_TUPLE) {
-        bif_cpd_error_arg(1, "length", "must be compound");
-        return;
-    }
-
-    rt_val_push_int(rt->stack, rt_val_cpd_len(rt, location));
-}
-
 void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     int size, i;
@@ -137,43 +126,6 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 	}
 }
 
-void bif_reverse(struct Runtime* rt, VAL_LOC_T location)
-{
-    int i;
-    VAL_SIZE_T size;
-    VAL_LOC_T size_loc, current_loc, end_loc;
-    struct { VAL_LOC_T *data; int cap, size; } locs = { NULL, 0, 0 };
-    enum ValueType type = rt_val_peek_type(rt, location);
-
-    if (type != VAL_ARRAY && type != VAL_TUPLE) {
-        bif_cpd_error_arg(1, "length", "must be compound");
-        return;
-    }
-
-    size = rt_val_peek_size(rt, location);
-    current_loc = rt_val_cpd_first_loc(location);
-    end_loc = current_loc + size;
-
-    while (current_loc != end_loc) {
-        ARRAY_APPEND(locs, current_loc);
-        current_loc = rt_val_next_loc(rt, current_loc);
-    }
-
-    if (type == VAL_ARRAY) {
-        rt_val_push_array_init(rt->stack, &size_loc);
-    } else {
-        rt_val_push_tuple_init(rt->stack, &size_loc);
-    }
-
-    for (i = 0; i < locs.size; ++i) {
-        stack_push_copy(rt->stack, locs.data[locs.size - i - 1]);
-    }
-
-    rt_val_push_cpd_final(rt->stack, size_loc, size);
-
-    ARRAY_FREE(locs);
-}
-
 void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
@@ -230,6 +182,17 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
         bif_cpd_error_homo("cat");
     }
+}
+
+void bif_length(struct Runtime* rt, VAL_LOC_T location)
+{
+    enum ValueType type = rt_val_peek_type(rt, location);
+    if (type != VAL_ARRAY && type != VAL_TUPLE) {
+        bif_cpd_error_arg(1, "length", "must be compound");
+        return;
+    }
+
+    rt_val_push_int(rt->stack, rt_val_cpd_len(rt, location));
 }
 
 void bif_at(

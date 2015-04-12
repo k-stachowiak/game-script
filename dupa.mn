@@ -1,0 +1,15 @@
+### Reverses a collection
+(bind reverse (func (x) (do
+    (bind reverse-impl (func (from to)
+        (if (empty from)
+            to
+            (do
+                (bind { hd tl } (dcons from))
+                (reverse-impl tl (push-back to hd))
+            )
+        )
+    ))
+    (reverse-impl x (slice x 0 0))
+)))
+
+

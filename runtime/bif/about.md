@@ -59,11 +59,12 @@ Additionally they will accept an arbitrary number of arguments.
 
 Compound functions
 ------------------
- * length  : _compound_ -> _integer_
- * at      : _compound_ -> _integer_ -> _?_
- * reverse : _compound_ -> _compound_
- * cat     : _compound_ -> _compound_ -> _compound_
- * slice   : _compound_ -> _integer_ -> _integer_ -> _array_
+ * push-front   : _compound_ -> _?_ -> _compound_
+ * push-back    : _compound_ -> _?_ -> _compound_
+ * cat          : _compound_ -> _compound_ -> _compound_
+ * length       : _compound_ -> _integer_
+ * at           : _compound_ -> _integer_ -> _?_
+ * slice        : _compound_ -> _integer_ -> _integer_ -> _array_
 
 **Note**
 
