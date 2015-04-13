@@ -17,7 +17,7 @@
 (bind cdr (func (x) (slice x 1 (length x))))
 
 ### Constructs a new compound value from an element and an existing compound
-(bind cons (func (x arr) (push-front arr x)))
+(bind cons (func (x arr) (push_front arr x)))
 
 ### Deconstructs compound structure into a tuple containing
 ### the head and the tail of the input compound structure

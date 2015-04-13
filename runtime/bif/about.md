@@ -83,7 +83,7 @@ Text functions
 --------------
  * print        : _string_ -> _void_
  * format       : _string_ -> _tuple_ -> _string_
- * to-string    : _?_ -> _string_
+ * to\_string    : _?_ -> _string_
  * parse        : _string_ -> { _boolean_ _?_ }
  * parse-bool   : _string_ -> { _boolean_ _boolean_ }
  * parse-char   : _string_ -> { _boolean_ _character_ }
