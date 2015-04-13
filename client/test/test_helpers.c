@@ -121,21 +121,17 @@ void test_eval_source_expect_string(
     VAL_LOC_T result[1];
     if (!test_eval_source(rt, source, result)) {
         tc_record(tc, test_name, false);
-        rt_reset(rt);
         return;
     }
     if (*((VAL_HEAD_TYPE_T*)(rt->stack->buffer + *result)) != VAL_STRING) {
         tc_record(tc, test_name, false);
-        rt_reset(rt);
         return;
     }
     if (!rt_val_string_eq(rt, *result, expected_value) != 0) {
         tc_record(tc, test_name, false);
-        rt_reset(rt);
         return;
     }
     tc_record(tc, test_name, true);
-    rt_reset(rt);
 }
 
 

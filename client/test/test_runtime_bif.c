@@ -168,17 +168,17 @@ static void test_runtime_bif_parse_any(
             BOOL, true);
 
     test_eval_source_expect(tc, rt,
-            "(do (bind { _ x } (parse \"2.0\")) x)",
+            "(do (bind { _ y } (parse \"2.0\")) y)",
             "Parse real expect value",
             REAL, 2.0);
 
     test_eval_source_expect(tc, rt,
-            "(do (bind { x _ } (parse \"[ { 1 2 } { 3 } ]\")) x)",
+            "(do (bind { z _ } (parse \"[ { 1 2 } { 3 } ]\")) z)",
             "Parse array homo fail",
             BOOL, false);
 
     test_eval_source_expect(tc, rt,
-            "(do (bind { x _ } (parse \"[ 1 2 asdf ]\")) x)",
+            "(do (bind { s _ } (parse \"[ 1 2 asdf ]\")) s)",
             "Parse array i-th element fail",
             BOOL, false);
 
