@@ -20,7 +20,7 @@ static void test_runtime_func_recursive(
         struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
-        "(bind gcd (func (x y) (if (= y 0) x (gcd y (% x y)) ) ))\n"
+        "(bind gcd (func (x y) (if (eq y 0) x (gcd y (% x y)) ) ))\n"
         "(bind lcm (func (x y) (* (/ x (gcd x y)) y ) ))",
         "Recursive GCD and LCM function definitions");
     test_eval_source_expect(tc, rt, "(gcd 54 24)", "GCD call", INT, 6);

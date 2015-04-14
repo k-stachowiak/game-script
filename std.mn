@@ -1,20 +1,26 @@
 ### Greater than implemented in terms of less than and equality
-(bind > (func (x y) (&& (! (< x y)) (! (= x y)))))
+(bind gt (func (x y) (and (not (lt x y)) (not (eq x y)))))
 
 ### Greater or equal implemented in terms of less than
-(bind >= (func (x y) (! (< x y))))
+(bind ge (func (x y) (not (lt x y))))
 
 ### Less or equal implemented in terms of greater than
-(bind <= (func (x y) (! (> x y))))
+(bind le (func (x y) (not (gt x y))))
 
 ### Checks whether a compound structure is empty
-(bind empty (func (x) (= (length x) 0)))
+(bind empty (func (x) (eq (length x) 0)))
 
 ### Returns the first element of a compound structure
 (bind car (func (x) (at x 0)))
 
 ### Returns the compound structure sans the first element
 (bind cdr (func (x) (slice x 1 (length x))))
+
+### Returns the first element of a compound structure
+(bind front (func (x) (at x 0)))
+
+### Returns the last element of a compound structure
+(bind back (func (x) (at x (- (length x) 1))))
 
 ### Constructs a new compound value from an element and an existing compound
 (bind cons (func (x arr) (push_front arr x)))
@@ -27,68 +33,68 @@
 (bind printf (func (fmt args) (print (format fmt args))))
 
 ### Finds the minimum element in a compound structure with a custom comparator
-(bind min-element-cmp (func (x cmp) (do
-    (bind min-element-impl (func (element x)
+(bind min_element_cmp (func (x cmp) (do
+    (bind min_element_impl (func (element x)
         (if (empty x)
             element
             (if (cmp element (car x))
-                (min-element-impl element (cdr x))
-                (min-element-impl (car x) (cdr x))
+                (min_element_impl element (cdr x))
+                (min_element_impl (car x) (cdr x))
             )
         )
     ))
-    (if (= (length x) 1)
+    (if (eq (length x) 1)
         (car x)
-        (min-element-impl (car x) (cdr x))
+        (min_element_impl (car x) (cdr x))
     )
 )))
 
 ### Finds the minimum element in a compound structure with a
 ### default comparator: less than
-(bind min-element (func (x) (min-element-cmp x <)))
+(bind min_element (func (x) (min_element_cmp x lt)))
 
 ### Merges two sorted compound structures into a sorted one
 ### with a custom comparator
-(bind merge-cmp (func (x y cmp) (do
-    (bind merge-impl (func (x y result) (do
-        (bind x-empty (empty x))
-        (bind y-empty (empty y))
-        (if x-empty
-            (if y-empty
+(bind merge_cmp (func (x y cmp) (do
+    (bind merge_impl (func (x y result) (do
+        (bind x_empty (empty x))
+        (bind y_empty (empty y))
+        (if x_empty
+            (if y_empty
                 result
                 (cat result y)
             )
-            (if y-empty
+            (if y_empty
                 (cat result x)
                 (if (cmp (car x) (car y))
-                    (merge-impl (cdr x) y (cat result (slice x 0 1)))
-                    (merge-impl x (cdr y) (cat result (slice y 0 1)))
+                    (merge_impl (cdr x) y (cat result (slice x 0 1)))
+                    (merge_impl x (cdr y) (cat result (slice y 0 1)))
                 )
             )
         )
     )))
 
-    (merge-impl x y (slice x 0 0)) # This slice creates empty array or tuple.
+    (merge_impl x y (slice x 0 0)) # This slice creates empty array or tuple.
 )))
 
 ### Merges two sorted compound structures into a sorted one.
 ### A default comparator less than assumed.
-(bind merge (func (x y) (merge-cmp x y <)))
+(bind merge (func (x y) (merge_cmp x y lt)))
 
 ### Sorts a compound structure with a custom comparator.
-(bind sort-cmp (func (x cmp) (do
+(bind sort_cmp (func (x cmp) (do
     (bind len (length x))
-    (bind half-len (/ len 2))
-    (if (<= len 1)
+    (bind half_len (/ len 2))
+    (if (le len 1)
         x
-        (merge-cmp
-            (sort-cmp (slice x 0 half-len) cmp)
-            (sort-cmp (slice x half-len len) cmp)
+        (merge_cmp
+            (sort_cmp (slice x 0 half_len) cmp)
+            (sort_cmp (slice x half_len len) cmp)
             cmp
         )
     )
 )))
 
 ### Sorts a compound structure with a default comparator: less than.
-(bind sort (func (x) (sort-cmp x <)))
+(bind sort (func (x) (sort_cmp x le)))
 

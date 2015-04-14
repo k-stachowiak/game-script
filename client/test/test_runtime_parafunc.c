@@ -6,10 +6,10 @@ static void test_runtime_parafunc_logic(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(&& true true)", "Evaluate && true result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(&& false true)", "Evaluate && false result", BOOL, false);
-    test_eval_source_expect(tc, rt, "(|| false true)", "Evaluate || true result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(|| false false)", "Evaluate || false result", BOOL, false);
+    test_eval_source_expect(tc, rt, "(and true true)", "Evaluate and true result", BOOL, true);
+    test_eval_source_expect(tc, rt, "(and false true)", "Evaluate and false result", BOOL, false);
+    test_eval_source_expect(tc, rt, "(or false true)", "Evaluate or true result", BOOL, true);
+    test_eval_source_expect(tc, rt, "(or false false)", "Evaluate or false result", BOOL, false);
     rt_reset(rt);
 }
 

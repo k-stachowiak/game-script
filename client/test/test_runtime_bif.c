@@ -26,12 +26,10 @@ static void test_runtime_bif_logic(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(^ false true)", "Evaluate || true result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(^ true true)", "Evaluate || false result", BOOL, false);
-    test_eval_source_expect(tc, rt, "(! false)", "Evaluate ! false result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(! true)", "Evaluate ! true result", BOOL, false);
-    test_eval_source_expect(tc, rt, "(&& true true false)", "Evaluate &&", BOOL, false);
-    test_eval_source_expect(tc, rt, "(|| false true false)", "Evaluate ||", BOOL, true);
+    test_eval_source_expect(tc, rt, "(xor false true)", "Evaluate xor true result", BOOL, true);
+    test_eval_source_expect(tc, rt, "(xor true true)", "Evaluate xor false result", BOOL, false);
+    test_eval_source_expect(tc, rt, "(not false)", "Evaluate not false result", BOOL, true);
+    test_eval_source_expect(tc, rt, "(not true)", "Evaluate not true result", BOOL, false);
     rt_reset(rt);
 }
 
@@ -39,10 +37,10 @@ static void test_runtime_bif_compare(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= 2 2)", "Evaluate equality true", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= 12.0 23.0)", "Evaluate equality false", BOOL, false);
-    test_eval_source_expect(tc, rt, "(< 12.0 23.0)", "Evaluate less than true", BOOL, true);
-    test_eval_source_expect(tc, rt, "(< 2 2)", "Evaluate less than false", BOOL, false);
+    test_eval_source_expect(tc, rt, "(eq 2 2)", "Evaluate equality true", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq 12.0 23.0)", "Evaluate equality false", BOOL, false);
+    test_eval_source_expect(tc, rt, "(lt 12.0 23.0)", "Evaluate less than true", BOOL, true);
+    test_eval_source_expect(tc, rt, "(lt 2 2)", "Evaluate less than false", BOOL, false);
     rt_reset(rt);
 }
 
@@ -62,10 +60,10 @@ static void test_runtime_bif_pushfb(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= (push-front [] 3) [ 3 ])", "Push-front to empty", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (push-front {2 3} 1) {1 2 3})", "Push-front to non-empty", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (push-back {} 3) { 3 })", "Push-back to empty", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (push-back [2 3] 1) [2 3 1])", "Push-back to non-empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (push_front [] 3) [ 3 ])", "Push_front to empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (push_front {2 3} 1) {1 2 3})", "Push_front to non-empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (push_back {} 3) { 3 })", "Push_back to empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (push_back [2 3] 1) [2 3 1])", "Push_back to non-empty", BOOL, true);
     rt_reset(rt);
 }
 
@@ -88,18 +86,18 @@ static void test_runtime_bif_cat(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= (cat [] []) [])", "Concatenate empty arrays", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (cat {} {}) {})", "Concatenate empty tuples", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (cat [\"\"] []) [\"\"])", "Concatenate empty with non-empty array", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (cat {\"\"} {}) {\"\"})", "Concatenate empty with non-empty tuple", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (cat [] []) [])", "Concatenate empty arrays", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (cat {} {}) {})", "Concatenate empty tuples", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (cat [\"\"] []) [\"\"])", "Concatenate empty with non-empty array", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (cat {\"\"} {}) {\"\"})", "Concatenate empty with non-empty tuple", BOOL, true);
 
     test_eval_source_expect(tc, rt,
-        "(= (cat ['a'] ['b' 'c']) ['a' 'b' 'c'])",
+        "(eq (cat ['a'] ['b' 'c']) ['a' 'b' 'c'])",
         "Concatenate non-empty arrays",
         BOOL, true);
 
     test_eval_source_expect(tc, rt,
-        "(= (cat {1} {2.0 \"three\"}) {1 2.0 \"three\"})",
+        "(eq (cat {1} {2.0 \"three\"}) {1 2.0 \"three\"})",
         "Concatenate non-empty tuples",
         BOOL, true);
 
@@ -118,10 +116,10 @@ static void test_runtime_bif_slice(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 1 3) [ 2 3 ])", "Simple array slice", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (slice [ 1 2 3 ] 2 2) [])", "Empty array slice", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (slice {1 2.0 \"three\"} 1 3) {2.0 \"three\"})", "Simple tuple slice", BOOL, true);
-    test_eval_source_expect(tc, rt, "(= (slice {1 2.0 \"three\"} 2 2) {})", "Empty tuple slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (slice [ 1 2 3 ] 1 3) [ 2 3 ])", "Simple array slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (slice [ 1 2 3 ] 2 2) [])", "Empty array slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (slice {1 2.0 \"three\"} 1 3) {2.0 \"three\"})", "Simple tuple slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (slice {1 2.0 \"three\"} 2 2) {})", "Empty tuple slice", BOOL, true);
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] -1 0)", "Fail on negative slice index");
     test_eval_source_fail(tc, rt, "(slice { 1 2 3 } 1 0)", "Fail on incorrect slice indices order");
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] 1 4)", "Fail on slice index out of bounds");

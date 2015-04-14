@@ -17,12 +17,12 @@ However client can verify whether access of the i-th element of an array is lega
 
 Arythmetic functions
 --------------------
- * sqrt     : _numeric_ -> _numeric_
  * +        : _numeric_ -> _numeric_ -> _numeric_
  * -        : _numeric_ -> _numeric_ -> _numeric_
  * *        : _numeric_ -> _numeric_ -> _numeric_
  * /        : _numeric_ -> _numeric_ -> _numeric_
  * %        : _numeric_ -> _numeric_ -> _numeric_
+ * sqrt     : _numeric_ -> _numeric_
  * floor    : _real_ -> _integer_
  * ceil     : _real_ -> _integer_
  * round    : _real_ -> _integer_
@@ -36,8 +36,8 @@ In order to make sure that the result of an arythmetic computation is of integra
 
 Comparison functions
 --------------------
- * =    : _?_ -> _?_ -> _boolean_
- * <    : _numeric_ -> _numeric_ -> _boolean_
+ * eq   : _?_ -> _?_ -> _boolean_
+ * lt   : _numeric_ -> _numeric_ -> _boolean_
 
 **Note**
 
@@ -48,10 +48,10 @@ Also note that only the less than operator has been provided as a BIF since the 
 
 Logic (boolean) functions
 -------------------------
- * &&   : ... -> _boolean_ -> _boolean_ -> _boolean_
- * ||   : ... -> _boolean_ -> _boolean_ -> _boolean_
- * ^^   : _boolean_ -> _boolean_ -> _boolean_
- * ~~   : _boolean_ -> _boolean_ -> _boolean_
+ * and  : ... -> _boolean_ -> _boolean_ -> _boolean_
+ * or   : ... -> _boolean_ -> _boolean_ -> _boolean_
+ * xor  : _boolean_ -> _boolean_ -> _boolean_
+ * not  : _boolean_ -> _boolean_ -> _boolean_
 
 **Note**
 The _&&_ and _||_ functions handle so called short circuit evaluation; e.g. if any argument of the _&&_ turns out false no further arguments are evaluated.
@@ -85,10 +85,10 @@ Text functions
  * format       : _string_ -> _tuple_ -> _string_
  * to\_string    : _?_ -> _string_
  * parse        : _string_ -> { _boolean_ _?_ }
- * parse-bool   : _string_ -> { _boolean_ _boolean_ }
- * parse-char   : _string_ -> { _boolean_ _character_ }
- * parse-int    : _string_ -> { _boolean_ _integer_ }
- * parse-real   : _string_ -> { _boolean_ _real_ }
+ * parse\_bool   : _string_ -> { _boolean_ _boolean_ }
+ * parse\_char   : _string_ -> { _boolean_ _character_ }
+ * parse\_int    : _string_ -> { _boolean_ _integer_ }
+ * parse\_real   : _string_ -> { _boolean_ _real_ }
 
 **Note**
 

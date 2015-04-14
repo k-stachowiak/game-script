@@ -8,9 +8,16 @@ if exists("b:current_syntax")
 endif
 
 syn keyword basicKeywords do and or if switch try func bind
-syn keyword stdFunctions sqrt floor ceil round
-syn keyword stdFunctions push_front push_back cat length at slice
-syn keyword stdFunctions print format to_string parse parse_bool parse_char parse_int parse_real
+syn keyword biFunctions sqrt floor ceil round
+syn keyword biFunctions eq lt
+syn keyword biFunctions and or xor not
+syn keyword biFunctions push_front push_back cat length at slice
+syn keyword biFunctions print format to_string parse parse_bool parse_char parse_int parse_real
+syn keyword stdFunctions gt ge le
+syn keyword stdFunctions empty car cdr front back cons dcons
+syn keyword stdFunctions printf
+syn keyword stdFunctions min_element min_element_cmp
+syn keyword stdFunctions merge merge_cmp sort sort_cmp
 syn keyword literalKeywords true false _
 
 syn match mnComment "#.*$"
@@ -28,7 +35,8 @@ syn region mnList start="(" end=")" fold transparent
 let b:current_syntax = "moon"
 
 hi def link basicKeywords Keyword
-hi def link stdFunctions Function
+hi def link biFunctions Function
+hi def link stdFunctions Identifier
 hi def link mnSpecialFunctions Function
 hi def link mnComment Comment
 hi def link mnNumber Constant
