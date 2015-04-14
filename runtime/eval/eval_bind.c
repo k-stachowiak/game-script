@@ -6,7 +6,7 @@
 #include "eval.h"
 #include "eval_detail.h"
 
-static void bind_error_incorrrect_type(void)
+static void bind_error_incorrect_type(void)
 {
     struct ErrMessage msg;
     err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
@@ -53,12 +53,12 @@ void eval_bind_pattern(
     }
 
     if (pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) {
-        bind_error_incorrrect_type();
+        bind_error_incorrect_type();
         return;
     }
 
     if (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE) {
-        bind_error_incorrrect_type();
+        bind_error_incorrect_type();
         return;
     }
 

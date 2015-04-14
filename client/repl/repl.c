@@ -62,7 +62,7 @@ int main(void)
 
     atexit(err_reset);
 
-    struct Runtime *rt = rt_make(64 * 1024);
+    struct Runtime *rt = rt_make(2048 * 1024);
 
     repl_cmd_init(rt);
 
