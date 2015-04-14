@@ -32,6 +32,18 @@
 ### Prints a formatted string
 (bind printf (func (fmt args) (print (format fmt args))))
 
+### Returns the lesser of the two arguments based on the less than operator
+(bind min (func (x y) (if (le x y) x y)))
+
+### Returns the lesser of the two arguments based on the provided less than operator
+(bind min_cmp (func (x y cmp) (if (cmp x y) x y)))
+
+### Returns the greater of the two arguments based on the less than operator
+(bind max (func (x y) (if (lt x y) y x)))
+
+### Returns the greager of the two arguments based on the provided less than operator
+(bind max_cmp (func (x y cmp) (if (cmp x y) y x)))
+
 ### Finds the minimum element in a compound structure with a custom comparator
 (bind min_element_cmp (func (x cmp) (do
     (bind min_element_impl (func (element x)
@@ -60,10 +72,7 @@
         (bind x_empty (empty x))
         (bind y_empty (empty y))
         (if x_empty
-            (if y_empty
-                result
-                (cat result y)
-            )
+            (if y_empty result (cat result y))
             (if y_empty
                 (cat result x)
                 (if (cmp (car x) (car y))
@@ -73,7 +82,6 @@
             )
         )
     )))
-
     (merge_impl x y (slice x 0 0)) # This slice creates empty array or tuple.
 )))
 

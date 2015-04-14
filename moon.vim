@@ -16,6 +16,7 @@ syn keyword biFunctions print format to_string parse parse_bool parse_char parse
 syn keyword stdFunctions gt ge le
 syn keyword stdFunctions empty car cdr front back cons dcons
 syn keyword stdFunctions printf
+syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions merge merge_cmp sort sort_cmp
 syn keyword literalKeywords true false _
