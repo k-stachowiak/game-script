@@ -70,6 +70,7 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test_runtime_func.c
     ./client/test/test_runtime_parafunc.c
     ./client/test/test_runtime_scope.c
+    ./client/test/test_runtime_cci.c
     )
 target_link_libraries(mntest m)
 
