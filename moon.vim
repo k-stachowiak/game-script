@@ -13,12 +13,13 @@ syn keyword biFunctions eq lt
 syn keyword biFunctions and or xor not
 syn keyword biFunctions push_front push_back cat length at slice
 syn keyword biFunctions print format to_string parse parse_bool parse_char parse_int parse_real
-syn keyword stdFunctions gt ge le
+syn keyword stdFunctions ne gt ge le
 syn keyword stdFunctions empty car cdr front back cons dcons
-syn keyword stdFunctions printf
 syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions merge merge_cmp sort sort_cmp
+syn keyword stdFunctions map zip_with
+syn keyword stdFunctions printf
 syn keyword literalKeywords true false _
 
 syn match mnComment "#.*$"
