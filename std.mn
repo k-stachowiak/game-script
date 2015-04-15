@@ -1,5 +1,5 @@
 ### Not equal in terms of equality
-(bind ne (func (x y) (not (= x y))))
+(bind ne (func (x y) (not (eq x y))))
 
 ### Greater than implemented in terms of less than and non-equality
 (bind gt (func (x y) (lt y x)))
@@ -104,7 +104,11 @@
 )))
 
 ### Sorts a compound structure with a default comparator: less than.
-(bind sort (func (x) (sort_cmp x le)))
+(bind sort (func (x) (sort_cmp x lt)))
+
+### Function composition
+(bind point (func (f g x) (g (f x))))
+#(bind point-alter (func (f g) (func (x) (g (f x)))))
 
 ### Functional map
 (bind map (func (f v)
@@ -113,6 +117,10 @@
         (cons (f (car v)) (map f (cdr v)))
     )
 ))
+# (bind map-alter (func (f)
+#     (foldr (point cons f) [])
+# )
+
 
 ### Functional map for two input collections
 (bind zip_with (func (f va vb)
@@ -121,6 +129,28 @@
         (cons
             (f (car va) (car vb))
             (zip_with f (cdr va) (cdr vb))
+        )
+    )
+))
+
+### Fold left
+(bind foldl (func (f z v)
+    (if (empty v)
+        z
+        (do
+            (bind { hd tl } (dcons v))
+            (foldl f (f z hd) tl)
+        )
+    )
+))
+
+### Fold right
+(bind foldr (func (f z v)
+    (if (empty v)
+        z
+        (do
+            (bind { hd tl } (dcons v))
+            (f hd (foldr f z tl))
         )
     )
 ))
