@@ -41,6 +41,11 @@ static void test_runtime_bif_compare(
     test_eval_source_expect(tc, rt, "(eq 12.0 23.0)", "Evaluate equality false", BOOL, false);
     test_eval_source_expect(tc, rt, "(lt 12.0 23.0)", "Evaluate less than true", BOOL, true);
     test_eval_source_expect(tc, rt, "(lt 2 2)", "Evaluate less than false", BOOL, false);
+
+    /* Handle a curious case of parsing "+" or "-" as a numeric literal. */
+    test_eval_source_fail(tc, rt, "(lt 2 -)", "Fail on performing numerical operation on a - sign");
+    test_eval_source_fail(tc, rt, "(lt + 3.0)", "Fail on performing numerical operation on a + sign");
+
     rt_reset(rt);
 }
 

@@ -610,6 +610,11 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
         if (atom[0] == '-' || atom[0] == '+') {
             ++first;
         }
+
+        if (first == last) {
+        	return NULL;
+        }
+
         if (all_of(first, last, isdigit)) {
             long value = atol(atom);
             return ast_make_literal_int(&dom->loc, value);
@@ -640,6 +645,10 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
 
     if (atom[0] == '-' || atom[0] == '+') {
         ++first;
+    }
+
+    if (first == last) {
+    	return NULL;
     }
 
     if (period == last ||

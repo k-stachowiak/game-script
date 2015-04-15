@@ -26,6 +26,10 @@ void test_parse_literal_string(
         char *source,
         char *test_name);
 
+void test_parse_literal_fail(struct TestContext *tc,
+        char *source,
+        char *test_name);
+
 #define test_parse_literal(TC, SRC, NAME, EX_ASTTYPE, EX_CTYPE, EX_VALUE) \
     do { \
         struct AstNode *node = parse_source(SRC); \
