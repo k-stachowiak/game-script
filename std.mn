@@ -108,7 +108,7 @@
 
 ### Function composition
 (bind point (func (f g x) (g (f x))))
-#(bind point-alter (func (f g) (func (x) (g (f x)))))
+#(bind point_alter (func (f g) (func (x) (g (f x)))))
 
 ### Functional map
 (bind map (func (f v)
@@ -117,7 +117,7 @@
         (cons (f (car v)) (map f (cdr v)))
     )
 ))
-# (bind map-alter (func (f)
+# (bind map_alter (func (f)
 #     (foldr (point cons f) [])
 # )
 
