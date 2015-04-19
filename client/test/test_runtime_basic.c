@@ -76,7 +76,7 @@ static void test_runtime_cpd(struct TestContext *tc, struct Runtime *rt)
 
 void test_runtime_basic(struct TestContext *tc)
 {
-    struct Runtime *rt = rt_make(64 * 1024);
+    struct Runtime *rt = rt_make();
     test_runtime_literals(tc, rt);
     test_runtime_do(tc, rt);
     test_runtime_bind(tc, rt);

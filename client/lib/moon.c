@@ -122,7 +122,7 @@ void mn_init(void)
 {
     mn_deinit();
     atexit(mn_deinit);
-    runtime = rt_make(64 * 1024);
+    runtime = rt_make();
 }
 
 bool mn_exec_file(const char *filename)

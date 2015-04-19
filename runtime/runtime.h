@@ -25,7 +25,7 @@ struct Runtime {
     EvalCallbackEnd eval_callback_end;
 };
 
-struct Runtime *rt_make(long stack);
+struct Runtime *rt_make(void);
 void rt_reset(struct Runtime *rt);
 void rt_free(struct Runtime *rt);
 

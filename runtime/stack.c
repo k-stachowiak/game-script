@@ -9,11 +9,12 @@
 #include "memory.h"
 #include "rt_val.h"
 
-struct Stack *stack_make(VAL_LOC_T size)
+struct Stack *stack_make(void)
 {
+    static int initial_size = 2;
     struct Stack *result = mem_malloc(sizeof(*result));
-    result->buffer = mem_malloc(size);
-    result->size = size;
+    result->buffer = mem_malloc(initial_size);
+    result->size = initial_size;
     result->top = 1;
     return result;
 }
@@ -32,9 +33,10 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
         return stack->top;
     }
 
-    if (stack->top + size >= stack->size) {
-        LOG_ERROR("Stack overflow.\n");
-        exit(1);
+    while (stack->top + size >= stack->size) {
+        VAL_LOC_T new_size = stack->size * 1.5;
+        stack->buffer = mem_realloc(stack->buffer, new_size);
+        stack->size = new_size;
     }
 
     dst = stack->buffer + stack->top;

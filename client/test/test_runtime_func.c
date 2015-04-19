@@ -49,7 +49,7 @@ static void test_runtime_func_simple_capture(
 
 void test_runtime_func(struct TestContext *tc)
 {
-    struct Runtime *rt = rt_make(64 * 1024);
+    struct Runtime *rt = rt_make();
     test_runtime_func_simple(tc, rt);
     test_runtime_func_recursive(tc, rt);
     test_runtime_func_simple_capture(tc, rt);

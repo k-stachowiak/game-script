@@ -49,11 +49,11 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "parse_real", eval_bif(rt, bif_parse_real, 1), &bif_location);
 }
 
-static void rt_init(struct Runtime *rt, long stack)
+static void rt_init(struct Runtime *rt)
 {
     struct SymMap *gsm;
 
-    rt->stack = stack_make(stack);
+    rt->stack = stack_make();
     rt->node_store = NULL;
     rt->eval_callback_data = NULL;
     rt->eval_callback_begin = NULL;
@@ -73,18 +73,17 @@ static void rt_deinit(struct Runtime *rt)
     stack_free(rt->stack);
 }
 
-struct Runtime *rt_make(long stack)
+struct Runtime *rt_make(void)
 {
     struct Runtime *result = mem_malloc(sizeof(*result));
-    rt_init(result, stack);
+    rt_init(result);
     return result;
 }
 
 void rt_reset(struct Runtime *rt)
 {
-    long stack = rt->stack->size;
     rt_deinit(rt);
-    rt_init(rt, stack);
+    rt_init(rt);
 }
 
 void rt_free(struct Runtime *rt)

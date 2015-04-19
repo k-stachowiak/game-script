@@ -32,7 +32,7 @@ static void test_runtime_scope_capture(
 
 void test_runtime_scope(struct TestContext *tc)
 {
-    struct Runtime *rt = rt_make(64 * 1024);
+    struct Runtime *rt = rt_make();
     test_runtime_scope_simple(tc, rt);
     test_runtime_scope_capture(tc, rt);
     rt_free(rt);

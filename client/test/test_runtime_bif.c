@@ -190,7 +190,7 @@ static void test_runtime_bif_parse_any(
 
 void test_runtime_bif(struct TestContext *tc)
 {
-    struct Runtime *rt = rt_make(64 * 1024);
+    struct Runtime *rt = rt_make();
     test_runtime_bif_arythmetic(tc, rt);
     test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);
