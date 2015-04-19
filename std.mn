@@ -33,19 +33,19 @@
 (bind dcons (func (x) { (car x) (cdr x) }))
 
 ### Returns the lesser of the two arguments based on the provided less than operator
-(bind min_cmp (func (x y cmp) (if (cmp x y) x y)))
+(bind min_cmp (func (cmp x y) (if (cmp x y) x y)))
 
 ### Returns the lesser of the two arguments based on the less than operator
-(bind min (func (x y) (min_cmp x y lt)))
+(bind min (min_cmp lt))
 
 ### Returns the greager of the two arguments based on the provided less than operator
-(bind max_cmp (func (x y cmp) (if (cmp x y) y x)))
+(bind max_cmp (func (cmp x y) (if (cmp x y) y x)))
 
 ### Returns the greater of the two arguments based on the less than operator
-(bind max (func (x y) (max_cmp x y lt)))
+(bind max (max_cmp lt))
 
 ### Finds the minimum element in a compound structure with a custom comparator
-(bind min_element_cmp (func (x cmp) (do
+(bind min_element_cmp (func (cmp x) (do
     (bind min_element_impl (func (element x)
         (if (empty x)
             element
@@ -63,11 +63,11 @@
 
 ### Finds the minimum element in a compound structure with a
 ### default comparator: less than
-(bind min_element (func (x) (min_element_cmp x lt)))
+(bind min_element (min_element_cmp lt))
 
 ### Merges two sorted compound structures into a sorted one
 ### with a custom comparator
-(bind merge_cmp (func (x y cmp) (do
+(bind merge_cmp (func (cmp x y) (do
     (bind merge_impl (func (x y result) (do
         (bind x_empty (empty x))
         (bind y_empty (empty y))
@@ -87,24 +87,30 @@
 
 ### Merges two sorted compound structures into a sorted one.
 ### A default comparator less than assumed.
-(bind merge (func (x y) (merge_cmp x y lt)))
+(bind merge (merge_cmp lt))
 
-### Sorts a compound structure with a custom comparator.
-(bind sort_cmp (func (x cmp) (do
+### Merge-sorts a compound structure with a custom comparator.
+(bind merge_sort_cmp (func (cmp x) (do
     (bind len (length x))
     (bind half_len (/ len 2))
     (if (le len 1)
         x
         (merge_cmp
-            (sort_cmp (slice x 0 half_len) cmp)
-            (sort_cmp (slice x half_len len) cmp)
             cmp
+            (merge_sort_cmp cmp (slice x 0 half_len))
+            (merge_sort_cmp cmp (slice x half_len len))
         )
     )
 )))
 
-### Sorts a compound structure with a default comparator: less than.
-(bind sort (func (x) (sort_cmp x lt)))
+### Merge-sorts a compound structure with a default comparator: less than.
+(bind merge_sort (merge_sort_cmp lt))
+
+### Default sorting function accepting a comparison function as an argument.
+(bind sort_cmp merge_sort_cmp)
+
+### Default sorting function with the comparison defaulted to less than.
+(bind sort (sort_cmp lt))
 
 ### Function composition
 (bind point (func (f g x) (g (f x))))
@@ -120,7 +126,6 @@
 # (bind map_alter (func (f)
 #     (foldr (point cons f) [])
 # )
-
 
 ### Functional map for two input collections
 (bind zip_with (func (f va vb)

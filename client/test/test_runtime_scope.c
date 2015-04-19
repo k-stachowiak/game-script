@@ -20,6 +20,16 @@ static void test_runtime_scope_simple(
     rt_reset(rt);
 }
 
+static void test_runtime_scope_capture(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_succeed(tc, rt,
+        "(bind adder (func (x) (func (y) (+ x y))))",
+        "Ignore nested function arguments on capture");
+    rt_reset(rt);
+}
+
 void test_runtime_scope(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make(64 * 1024);

@@ -17,7 +17,8 @@ syn keyword stdFunctions ne gt ge le
 syn keyword stdFunctions empty car cdr front back cons dcons
 syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
-syn keyword stdFunctions merge merge_cmp sort sort_cmp
+syn keyword stdFunctions merge merge_cmp merge_sort merge_sort_cmp
+syn keyword stdFunctions sort sort_cmp
 syn keyword stdFunctions point map zip_with foldl foldr
 syn keyword stdFunctions printf
 syn keyword literalKeywords true false _

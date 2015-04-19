@@ -113,9 +113,11 @@ void repl_cmd_init(struct Runtime *rt)
     dbg_init(&dbg);
     dbg_enabled = false;
 
-    /* Autoexec some commands. */
-    repl_cmd_dbg_toggle(rt);
+    /* Preload standard library. */
     repl_cmd_load(rt, &std_filename, 1);
+
+    /* Toggle the debugger on (_after_ initializing the standard library). */
+    repl_cmd_dbg_toggle(rt);
 }
 
 void repl_cmd_deinit(void)
