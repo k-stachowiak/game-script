@@ -49,7 +49,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
  * If it does, then true is returned and the "symbol" argument is set to the
  * said symbol value. Otherwise false is returned.
  */
-static bool efd_has_symbol(struct AstNode *node, char **symbol)
+static bool efd_refers_to_symbol(struct AstNode *node, char **symbol)
 {
     if (node->type == AST_REFERENCE) {
         *symbol = node->data.reference.symbol;
@@ -65,10 +65,12 @@ static bool efd_has_symbol(struct AstNode *node, char **symbol)
 }
 
 /** Checks whether symbol is defined in the symbol map. */
+/*
 static bool efd_is_defined(char *symbol, struct SymMap *sym_map)
 {
     return (bool)(sym_map_find(sym_map, symbol));
 }
+*/
 
 /**
  * Simple wrapper around the non global symbol lookup.
@@ -90,6 +92,7 @@ static bool efd_is_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *loc)
  * Pushes on the stack all the values refered to that are not global and
  * not passed in as an argument.
  */
+/*
 static void efd_push_captures(
         struct Stack *stack,
         struct SymMap *sym_map,
@@ -115,24 +118,11 @@ static void efd_push_captures(
             ARRAY_APPEND(to_visit, to_append);
         }
 
-        if (efd_has_symbol(node, &symbol) &&
+        if (efd_refers_to_symbol(node, &symbol) &&
             !efd_is_global(symbol, sym_map, &cap_location) &&
-            !pattern_list_contains_symbol(func_def->formal_args, symbol)) {
+            !pattern_list_contains_symbol(func_def->formal_args, symbol) &&
+            !efd_is_defined(symbol, sym_map)) {
                 if (!efd_is_defined(symbol, sym_map)) {
-                    if (node->type != AST_FUNC_CALL) {
-                        /* Note: it is allowed for the func call symbol not to
-                         * be defined. In such case it shall not be captured in
-                         * the closure and will result in runtime error if
-                         * called before the definition is made.
-                         *
-                         * This _HACK_ enables an easy and greasy recursion in
-                         * the scripts and works around the necessity of
-                         * introducing of the forward declarations or performing
-                         * AST preprocessing during the closure evaluation.
-                         */
-                        eval_error_not_found(symbol);
-                    }
-                    return;
                 }
                 rt_val_push_func_cap(stack, symbol, cap_location);
                 ++cap_count;
@@ -144,6 +134,47 @@ static void efd_push_captures(
     rt_val_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
     ARRAY_FREE(to_visit);
 }
+*/
+
+static int efd_push_captures_rec(
+        struct Stack *stack,
+        struct SymMap *sym_map,
+        struct AstFuncDef *func_def,
+        struct AstNode *node)
+{
+    char *symbol;
+    VAL_LOC_T cap_location;
+    int captures = 0;
+    struct AstNode *child = efd_get_children(node);
+
+    /* Store a capture from the current node if necessary and possible. */
+    if (efd_refers_to_symbol(node, &symbol) &&
+            !efd_is_global(symbol, sym_map, &cap_location) &&
+            !pattern_list_contains_symbol(func_def->formal_args, symbol)) {
+        rt_val_push_func_cap(stack, symbol, cap_location);
+        ++captures;
+    }
+
+    /* Analyze children of the current node. */
+    while (child) {
+        captures += efd_push_captures_rec(stack, sym_map, func_def, child);
+        child = child->next;
+    }
+
+    return captures;
+}
+
+static void efd_push_captures_2(
+        struct Stack *stack,
+        struct SymMap *sym_map,
+        struct AstFuncDef *func_def)
+{
+    VAL_LOC_T cap_count_loc;
+    VAL_SIZE_T cap_count = 0;
+    rt_val_push_func_cap_init_deferred(stack, &cap_count_loc);
+    cap_count = efd_push_captures_rec(stack, sym_map, func_def, func_def->expr);
+    rt_val_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
+}
 
 void eval_func_def(
         struct AstNode *node,
@@ -153,7 +184,7 @@ void eval_func_def(
     VAL_LOC_T size_loc, data_begin;
     VAL_SIZE_T arity = node->data.func_def.arg_count;
     rt_val_push_func_init(stack, &size_loc, &data_begin, arity, (void*)node, NULL);
-    efd_push_captures(stack, sym_map, &node->data.func_def);
+    efd_push_captures_2(stack, sym_map, &node->data.func_def);
     if (err_state()) {
         return;
     }
