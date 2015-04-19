@@ -25,8 +25,8 @@ static void test_runtime_scope_capture(
         struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
-        "(bind adder (func (x) (func (y) (+ x y))))",
-        "Ignore nested function arguments on capture");
+        "(bind point (func (f g) (func (x) (g (f x)))))",
+        "Nested function definition / call capture");
     rt_reset(rt);
 }
 
@@ -34,5 +34,6 @@ void test_runtime_scope(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make(64 * 1024);
     test_runtime_scope_simple(tc, rt);
+    test_runtime_scope_capture(tc, rt);
     rt_free(rt);
 }
