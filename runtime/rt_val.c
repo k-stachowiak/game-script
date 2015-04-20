@@ -63,6 +63,16 @@ void rt_val_push_string(struct Stack *stack, char *value)
     stack_push(stack, size, value);
 }
 
+void rt_val_push_string_slice(struct Stack *stack, char *value, int len)
+{
+    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_STRING;
+    VAL_HEAD_SIZE_T size = len + 1;
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
+    stack_push(stack, len, value);
+    stack_push(stack, 1, (char*)&zero);
+}
+
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_ARRAY;

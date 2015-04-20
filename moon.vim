@@ -23,7 +23,7 @@ syn keyword stdFunctions sort sort_cmp
 syn keyword stdFunctions point map zip_with foldl foldr
 syn keyword stdFunctions printf
 syn keyword stdFunctions test
-syn keyword literalKeywords true false _
+syn keyword literalKeywords unit true false _
 
 syn match mnComment "#.*$"
 

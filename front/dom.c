@@ -16,6 +16,7 @@ static char *reserved[] = {
     "and",
     "or",
     "func",
+    "unit",
     "true",
     "false",
     "_"

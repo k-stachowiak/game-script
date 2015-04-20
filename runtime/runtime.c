@@ -133,12 +133,13 @@ void rt_consume_one(
         VAL_LOC_T *loc,
         struct AstNode **next)
 {
-    VAL_LOC_T result;
+    VAL_LOC_T begin, result;
 
     if (next) {
         *next = ast->next;
     }
 
+    begin = rt->stack->top;
     result = eval(ast, rt, &rt->global_sym_map);
 
     if (loc) {
@@ -154,7 +155,7 @@ void rt_consume_one(
         rt->node_store = ast;
 
     } else {
-        rt->stack->top = *loc;
+        rt->stack->top = begin; /* Discard result value to save the stack. */
         ast_node_free_one(ast);
     }
 }

@@ -92,6 +92,16 @@ struct AstNode *ast_make_parafunc(
     return result;
 }
 
+struct AstNode *ast_make_literal_unit(struct SourceLocation *loc)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+    result->next = NULL;
+    result->type = AST_LITERAL;
+    result->loc = *loc;
+    result->data.literal.type = AST_LIT_UNIT;
+    return result;
+}
+
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));

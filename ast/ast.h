@@ -28,6 +28,7 @@ enum AstCompoundType {
 };
 
 enum AstLiteralType {
+    AST_LIT_UNIT,
     AST_LIT_BOOL,
     AST_LIT_STRING,
     AST_LIT_CHAR,
@@ -155,6 +156,7 @@ struct AstNode *ast_make_parafunc(
     enum AstParafuncType type,
     struct AstNode *args);
 
+struct AstNode *ast_make_literal_unit(struct SourceLocation *loc);
 struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value);
 struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value);
 struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char value);

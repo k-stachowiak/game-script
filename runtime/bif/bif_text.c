@@ -232,6 +232,9 @@ static void bif_parse_any_ast_literal(
         struct AstLiteral *literal)
 {
     switch (literal->type) {
+    case AST_LIT_UNIT:
+        break;
+
     case AST_LIT_BOOL:
         rt_val_push_bool(rt->stack, literal->data.boolean);
         break;

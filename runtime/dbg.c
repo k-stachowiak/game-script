@@ -43,6 +43,9 @@ static void dbg_print_node_func_call(struct AstFuncCall *func_call)
 static void dbg_print_node_literal(struct AstLiteral *literal)
 {
     switch (literal->type) {
+    case AST_LIT_UNIT:
+        printf("unit\n");
+        break;
     case AST_LIT_BOOL:
         printf("%s\n", literal->data.boolean ? "true" : "false");
         break;

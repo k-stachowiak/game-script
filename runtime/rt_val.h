@@ -53,6 +53,7 @@ void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
 void rt_val_push_string(struct Stack *stack, char *value);
+void rt_val_push_string_slice(struct Stack *stack, char *value, int len);
 
 /* Compound values.
  * ----------------

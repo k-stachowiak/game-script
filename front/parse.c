@@ -444,10 +444,19 @@ fail:
     return NULL;
 }
 
+static struct AstNode *parse_literal_unit(struct DomNode *dom)
+{
+    LOG_TRACE_FUNC
+    if (dom_node_is_reserved_atom(dom, DOM_RES_UNIT)) {
+        return ast_make_literal_unit(&dom->loc);
+    } else {
+        return NULL;
+    }
+}
+
 static struct AstNode *parse_literal_bool(struct DomNode *dom)
 {
     LOG_TRACE_FUNC
-
     if (dom_node_is_reserved_atom(dom, DOM_RES_TRUE)) {
         return ast_make_literal_bool(&dom->loc, 1);
     } else if (dom_node_is_reserved_atom(dom, DOM_RES_FALSE)) {
@@ -667,7 +676,8 @@ static struct AstNode *parse_literal(struct DomNode *dom)
 
     LOG_TRACE_FUNC
 
-    if ((!err_state() && (result = parse_literal_bool(dom))) ||
+    if ((!err_state() && (result = parse_literal_unit(dom))) ||
+        (!err_state() && (result = parse_literal_bool(dom))) ||
         (!err_state() && (result = parse_literal_char(dom))) ||
         (!err_state() && (result = parse_literal_real(dom))) ||
         (!err_state() && (result = parse_literal_int(dom))) ||

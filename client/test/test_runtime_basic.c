@@ -6,6 +6,14 @@ static void test_runtime_literals(
         struct TestContext *tc,
         struct Runtime *rt)
 {
+    /* Pretty special test case for the unit literal. */
+    VAL_LOC_T top_before, top_after;
+    top_before = rt->stack->top;
+    test_eval_source_succeed(tc, rt, "unit", "Don't fail on unit");
+    top_after = rt->stack->top;
+    tc_record(tc, "Don't push on unit", top_before == top_after);
+
+    /* Simple tests for the evaluation of regular literals. */
     test_eval_source_expect(tc, rt, "true", "Evaluate true literal", BOOL, true);
     test_eval_source_expect(tc, rt, "false", "Evaluate false literal", BOOL, false);
     test_eval_source_expect(tc, rt, "'a'", "Evaluate 'a' literal", CHAR, 'a');
