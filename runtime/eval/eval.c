@@ -80,7 +80,7 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
     case AST_LIT_STRING:
         string = node->data.literal.data.string;
         string_len = strlen(string);
-        rt_val_push_string_slice(stack, string + 1, string_len - 2);
+        rt_val_push_string_slice_as_array(stack, string + 1, string_len - 2);
         break;
     }
 }

@@ -115,10 +115,12 @@ static void bif_format_try_appending_arg(
         break;
 
     case 's':
-        if (type != VAL_STRING) {
+        if (!rt_val_is_string(rt, loc)) {
             bif_text_error_wc_mismatch();
         } else {
-            str_append(*result, "%s", rt_val_peek_string(rt, loc));
+            char *str = rt_val_peek_cpd_as_string(rt, loc);
+            str_append(*result, "%s", str);
+            mem_free(str);
         }
         break;
 
@@ -175,7 +177,7 @@ static void bif_format_impl(
     if (args_left) {
         bif_text_error_args_left(args_left);
     } else {
-        rt_val_push_string(rt->stack, result);
+        rt_val_push_string_as_array(rt->stack, result);
     }
 
 end:
@@ -240,7 +242,7 @@ static void bif_parse_any_ast_literal(
         break;
 
     case AST_LIT_STRING:
-        rt_val_push_string(rt->stack, literal->data.string);
+        rt_val_push_string_as_array(rt->stack, literal->data.string);
         break;
 
     case AST_LIT_CHAR:
@@ -307,9 +309,10 @@ static void bif_parse_atom(
 {
     VAL_LOC_T size_loc, data_begin, data_size;
     struct AstNode *ast = NULL;
+    char *source;
 
     /* Assert input. */
-    if (rt_val_peek_type(rt, arg_loc) != VAL_STRING) {
+    if (!rt_val_is_string(rt, arg_loc)) {
         bif_text_error_arg(1, func, "must be a string");
         return;
     }
@@ -317,22 +320,25 @@ static void bif_parse_atom(
     /* Push header. */
     rt_val_push_tuple_init(rt->stack, &size_loc);
     data_begin = rt->stack->top;
-    ast = parse_source(rt_val_peek_string(rt, arg_loc));
+
+    source = rt_val_peek_cpd_as_string(rt, arg_loc);
+    ast = parse_source(source);
+    mem_free(source);
 
     /* Error detection. */
     if (!ast) {
         rt_val_push_bool(rt->stack, false);
-        rt_val_push_string(rt->stack, "Failed parsing literal");
+        rt_val_push_string_as_array(rt->stack, "Failed parsing literal");
         goto end;
     }
     if (ast->next != NULL) {
         rt_val_push_bool(rt->stack, false);
-        rt_val_push_string(rt->stack, "Too many nodes.");
+        rt_val_push_string_as_array(rt->stack, "Too many nodes.");
         goto end;
     }
     if (ast->type != AST_LITERAL || ast->data.literal.type != type) {
         rt_val_push_bool(rt->stack, false);
-        rt_val_push_string(rt->stack, "Incorrect type.");
+        rt_val_push_string_as_array(rt->stack, "Incorrect type.");
         goto end;
     }
 
@@ -350,11 +356,12 @@ end:
 
 void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
 {
-    if (rt_val_peek_type(rt, str_loc) != VAL_STRING) {
+    if (!rt_val_is_string(rt, str_loc)) {
         bif_text_error_arg(1, "print", "must be a string");
     } else {
-        char *string = rt_val_peek_string(rt, str_loc);
+        char *string = rt_val_peek_cpd_as_string(rt, str_loc);
         printf("%s", string);
+        mem_free(string);
     }
 }
 
@@ -363,7 +370,7 @@ void bif_format(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)
     char *string;
     int argc;
 
-    if (rt_val_peek_type(rt, fmt_loc) != VAL_STRING) {
+    if (!rt_val_is_string(rt, fmt_loc)) {
         bif_text_error_arg(1, "format", "must be a string");
         return;
     }
@@ -373,10 +380,12 @@ void bif_format(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)
         return;
     }
 
-    string = rt_val_peek_string(rt, fmt_loc);
+    string = rt_val_peek_cpd_as_string(rt, fmt_loc);
     argc = rt_val_cpd_len(rt, args_loc);
 
     bif_format_impl(rt, string, argc, rt_val_cpd_first_loc(args_loc));
+
+    mem_free(string);
 }
 
 void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
@@ -387,7 +396,7 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     if (!buffer) {
         bif_text_error_stringify();
     } else {
-        rt_val_push_string(rt->stack, buffer);
+        rt_val_push_string_as_array(rt->stack, buffer);
         mem_free(buffer);
     }
 }
@@ -395,8 +404,9 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
 void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
     VAL_LOC_T size_loc, data_begin, result_begin, data_size;
+    char *string;
 
-    if (rt_val_peek_type(rt, arg_loc) != VAL_STRING) {
+    if (!rt_val_is_string(rt, arg_loc)) {
         bif_text_error_arg(1, "parse", "must be a string");
         return;
     }
@@ -407,11 +417,14 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
     rt_val_push_bool(rt->stack, true);
     result_begin = rt->stack->top;
 
-    bif_parse_any(rt, rt_val_peek_string(rt, arg_loc));
+    string = rt_val_peek_cpd_as_string(rt, arg_loc);
+    bif_parse_any(rt, string);
+    mem_free(string);
+
     if (err_state()) {
         stack_collapse(rt->stack, result_begin, rt->stack->top);
         rt_val_poke_bool(rt->stack, data_begin, false);
-        rt_val_push_string(rt->stack, err_msg());
+        rt_val_push_string_as_array(rt->stack, err_msg());
         err_reset();
     }
 

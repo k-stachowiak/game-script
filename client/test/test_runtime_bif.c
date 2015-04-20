@@ -57,7 +57,9 @@ static void test_runtime_bif_length(
     test_eval_source_expect(tc, rt, "(length [ 'a' 'b' 'c' ])", "Evaluate length of an non-empty array", INT, 3);
     test_eval_source_expect(tc, rt, "(length {})", "Evaluate length of an empty tuple", INT, 0);
     test_eval_source_expect(tc, rt, "(length { 1 2.0 \"three\" })", "Evaluate length of an non-empty tuple", INT, 3);
-    test_eval_source_fail(tc, rt, "(length \"asdf\")", "Fail on length of a non-compound value");
+    test_eval_source_expect(tc, rt, "(length \"\")", "Evaluate length of an empty string", INT, 0);
+    test_eval_source_expect(tc, rt, "(length \"asd\\n\")", "Evaluate length of a non-empty string", INT, 4);
+    test_eval_source_fail(tc, rt, "(length 'x')", "Fail on length of a non-compound value");
     rt_reset(rt);
 }
 
@@ -69,6 +71,8 @@ static void test_runtime_bif_pushfb(
     test_eval_source_expect(tc, rt, "(eq (push_front {2 3} 1) {1 2 3})", "Push_front to non-empty", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (push_back {} 3) { 3 })", "Push_back to empty", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (push_back [2 3] 1) [2 3 1])", "Push_back to non-empty", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (push_back \"\" 'a') \"a\")", "Push_back to empty string", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (push_back \"as\" 'd') \"asd\")", "Push_back to non-empty string", BOOL, true);
     rt_reset(rt);
 }
 
@@ -78,6 +82,7 @@ static void test_runtime_bif_at(
 {
     test_eval_source_expect(tc, rt, "(at [ 1 2 3 ] 0)", "Evaluate valid at call for array", INT, 1);
     test_eval_source_expect(tc, rt, "(at { 1 2.0 \"three\" } 1)", "Evaluate valid at call for tuple", REAL, 2.0);
+    test_eval_source_expect(tc, rt, "(at \"asd\" 1)", "Evaluate valid at call for string", CHAR, 's');
     test_eval_source_fail(tc, rt, "(at [ 1 ] 0 0)", "Fail at on too many arguments");
     test_eval_source_fail(tc, rt, "(at {} 1.0)", "Fail at on non-integer index");
     test_eval_source_fail(tc, rt, "(at 1.0 1)", "Fail at on non-array subject");
@@ -93,8 +98,10 @@ static void test_runtime_bif_cat(
 {
     test_eval_source_expect(tc, rt, "(eq (cat [] []) [])", "Concatenate empty arrays", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (cat {} {}) {})", "Concatenate empty tuples", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (cat \"\" \"\") \"\")", "Concatenate empty strings", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (cat [\"\"] []) [\"\"])", "Concatenate empty with non-empty array", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (cat {\"\"} {}) {\"\"})", "Concatenate empty with non-empty tuple", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (cat \"asdf\" \"\") \"asdf\")", "Concatenate empty with non-empty string", BOOL, true);
 
     test_eval_source_expect(tc, rt,
         "(eq (cat ['a'] ['b' 'c']) ['a' 'b' 'c'])",
@@ -104,6 +111,11 @@ static void test_runtime_bif_cat(
     test_eval_source_expect(tc, rt,
         "(eq (cat {1} {2.0 \"three\"}) {1 2.0 \"three\"})",
         "Concatenate non-empty tuples",
+        BOOL, true);
+
+    test_eval_source_expect(tc, rt,
+        "(eq (cat \"a\" \"sd\") \"asd\")",
+        "Concatenate non-empty string",
         BOOL, true);
 
     test_eval_source_fail(tc, rt, "(cat 1 2)", "BIF cat two non-array args");
@@ -124,6 +136,7 @@ static void test_runtime_bif_slice(
     test_eval_source_expect(tc, rt, "(eq (slice [ 1 2 3 ] 1 3) [ 2 3 ])", "Simple array slice", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (slice [ 1 2 3 ] 2 2) [])", "Empty array slice", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (slice {1 2.0 \"three\"} 1 3) {2.0 \"three\"})", "Simple tuple slice", BOOL, true);
+    test_eval_source_expect(tc, rt, "(eq (slice \"asdf\" 1 3) \"sd\")", "Simple string slice", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (slice {1 2.0 \"three\"} 2 2) {})", "Empty tuple slice", BOOL, true);
     test_eval_source_fail(tc, rt, "(slice [ 1 2 3 ] -1 0)", "Fail on negative slice index");
     test_eval_source_fail(tc, rt, "(slice { 1 2 3 } 1 0)", "Fail on incorrect slice indices order");

@@ -18,22 +18,8 @@ static void bif_compare_error_arg_mismatch(void)
 
 void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-    VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
-    VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
-
-    if (x_size != y_size) {
-        rt_val_push_bool(rt->stack, false);
-        return;
-    }
-
-    bool result = (memcmp(
-            rt->stack->buffer + x_loc,
-            rt->stack->buffer + y_loc,
-            x_size + VAL_HEAD_BYTES) == 0);
-
-    rt_val_push_bool(rt->stack, result);
+    rt_val_push_bool(rt->stack, rt_val_eq_bin(rt, x_loc, y_loc));
 }
-
 
 void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {

@@ -7,7 +7,7 @@ They are supposed to be basic operations within the computational basis of the b
 **Note**
  - _?_          ::= any type
  - _numeric_    ::= _integer_ or _real_
- - _compound_   ::= _array_ or _tuple_
+ - _compound_   ::= _array_, _tuple_ or _string_ (string is implicitly treated as an array of characters)
 
 Also note that some functions return the error code alongside the result as a tuple.
 Although many functions may fail in the runtime (e.g. accessing array element beyond bounds) only some of them handle error codes.

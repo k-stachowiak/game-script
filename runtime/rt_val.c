@@ -53,24 +53,29 @@ void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
     stack_push(stack, size, (char*)&value);
 }
 
-void rt_val_push_string(struct Stack *stack, char *value)
+void rt_val_push_string_as_array(struct Stack *stack, char *value)
 {
-    int len = strlen(value);
-    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_STRING;
-    VAL_HEAD_SIZE_T size = len + 1;
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, value);
+    VAL_LOC_T data_begin, size_loc;
+    rt_val_push_array_init(stack, &size_loc);
+    data_begin = stack->top;
+    while (*value) {
+        rt_val_push_char(stack, *value);
+        ++value;
+    }
+    rt_val_push_cpd_final(stack, size_loc, stack->top - data_begin);
 }
 
-void rt_val_push_string_slice(struct Stack *stack, char *value, int len)
+void rt_val_push_string_slice_as_array(struct Stack *stack, char *value, int len)
 {
-    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_STRING;
-    VAL_HEAD_SIZE_T size = len + 1;
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, len, value);
-    stack_push(stack, 1, (char*)&zero);
+    VAL_LOC_T data_begin,  size_loc;
+    rt_val_push_array_init(stack, &size_loc);
+    data_begin = stack->top;
+    while (len) {
+        rt_val_push_char(stack, *value);
+        ++value;
+        --len;
+    }
+    rt_val_push_cpd_final(stack, size_loc, stack->top - data_begin);
 }
 
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
@@ -200,11 +205,15 @@ static void rt_val_to_string_compound(struct Runtime *rt, VAL_LOC_T x, char **st
 void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
 {
     enum ValueType type = rt_val_peek_type(rt, x);
-    switch (type) {
-    case VAL_STRING:
-        str_append(*str, "%s", rt_val_peek_string(rt, x));
-        break;
 
+    if (rt_val_is_string(rt, x)) {
+        char *string = rt_val_peek_cpd_as_string(rt, x);
+        str_append(*str, "%s", string);
+        mem_free(string);
+        return;
+    }
+
+    switch (type) {
     case VAL_BOOL:
         if (rt_val_peek_bool(rt, x)) {
             str_append(*str, "true");
@@ -248,44 +257,62 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
     char *buffer = NULL;
 
     if (annotate) {
-        switch (rt_val_peek_type(rt, loc)) {
-        case VAL_BOOL:
-            str_append(buffer, "bool :: ");
-            break;
-
-        case VAL_CHAR:
-            str_append(buffer, "char :: ");
-            break;
-
-        case VAL_INT:
-            str_append(buffer, "integer :: ");
-            break;
-
-        case VAL_REAL:
-            str_append(buffer, "real :: ");
-            break;
-
-        case VAL_STRING:
+        if (rt_val_is_string(rt, loc)) {
             str_append(buffer, "string :: ");
-            break;
+        } else {
+            switch (rt_val_peek_type(rt, loc)) {
+            case VAL_BOOL:
+                str_append(buffer, "bool :: ");
+                break;
 
-        case VAL_ARRAY:
-            str_append(buffer, "array :: ");
-            break;
+            case VAL_CHAR:
+                str_append(buffer, "char :: ");
+                break;
 
-        case VAL_TUPLE:
-            str_append(buffer, "tuple :: ");
-            break;
+            case VAL_INT:
+                str_append(buffer, "integer :: ");
+                break;
 
-        case VAL_FUNCTION:
-            str_append(buffer, "function :: ");
-            break;
+            case VAL_REAL:
+                str_append(buffer, "real :: ");
+                break;
+
+            case VAL_ARRAY:
+                str_append(buffer, "array :: ");
+                break;
+
+            case VAL_TUPLE:
+                str_append(buffer, "tuple :: ");
+                break;
+
+            case VAL_FUNCTION:
+                str_append(buffer, "function :: ");
+                break;
+            }
         }
     }
 
     rt_val_to_string(rt, loc, &buffer);
     printf("%s", buffer);
     free(buffer);
+}
+
+bool rt_val_is_string(struct Runtime *rt, VAL_LOC_T loc)
+{
+    if (rt_val_peek_type(rt, loc) != VAL_ARRAY) {
+        return false;
+    }
+
+    if (rt_val_cpd_len(rt, loc) == 0) {
+        return true;
+    }
+
+    loc = rt_val_cpd_first_loc(loc);
+    if (rt_val_peek_type(rt, loc) != VAL_CHAR) {
+        return false;
+    }
+
+    return true;
 }
 
 int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location)
@@ -350,14 +377,22 @@ VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
-char* rt_val_peek_string(struct Runtime *rt, VAL_LOC_T loc)
-{
-    return rt->stack->buffer + loc + VAL_HEAD_BYTES;
-}
-
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc)
 {
     return loc + VAL_HEAD_BYTES;
+}
+
+char* rt_val_peek_cpd_as_string(struct Runtime *rt, VAL_LOC_T loc)
+{
+    VAL_LOC_T current = rt_val_cpd_first_loc(loc);
+    int i, len = rt_val_cpd_len(rt, loc);
+    char *result = mem_malloc(len + 1);
+    for (i = 0; i < len; ++i) {
+        result[i] = rt_val_peek_char(rt, current);
+        current = rt_val_next_loc(rt, current);
+    }
+    result[i] = '\0';
+    return result;
 }
 
 struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
@@ -443,7 +478,6 @@ static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y
         (header_x.type == VAL_CHAR && header_y.type == VAL_CHAR) ||
         (header_x.type == VAL_INT && header_y.type == VAL_INT) ||
         (header_x.type == VAL_REAL && header_y.type == VAL_REAL) ||
-        (header_x.type == VAL_STRING && header_y.type == VAL_STRING) ||
         (header_x.type == VAL_FUNCTION && header_y.type == VAL_FUNCTION)
     );
 }
@@ -538,7 +572,7 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc)
     return true;
 }
 
-bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
     enum ValueType xtype, ytype;
     int xlen, ylen;
@@ -567,9 +601,6 @@ bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     case VAL_REAL:
         return rt_val_peek_real(rt, x) == rt_val_peek_real(rt, y);
 
-    case VAL_STRING:
-        return strcmp(rt_val_peek_string(rt, x), rt_val_peek_string(rt, y)) == 0;
-
     case VAL_ARRAY:
     case VAL_TUPLE:
         xlen = rt_val_cpd_len(rt, x);
@@ -580,7 +611,7 @@ bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
         x = rt_val_cpd_first_loc(x);
         y = rt_val_cpd_first_loc(y);
         while (xlen) {
-            if (!rt_val_eq(rt, x, y)) {
+            if (!rt_val_eq_rec(rt, x, y)) {
                 return false;
             }
             x = rt_val_next_loc(rt, x);
@@ -597,15 +628,25 @@ bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     exit(1);
 }
 
+bool rt_val_eq_bin(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+{
+    VAL_SIZE_T x_size = rt_val_peek_size(rt, x);
+    VAL_SIZE_T y_size = rt_val_peek_size(rt, y);
+
+    if (x_size != y_size) {
+        return false;
+    }
+
+    return memcmp(
+            rt->stack->buffer + x,
+            rt->stack->buffer + y,
+            x_size + VAL_HEAD_BYTES) == 0;
+}
+
 bool rt_val_string_eq(struct Runtime *rt, VAL_LOC_T loc, char *str)
 {
-    char *stack_str = rt_val_peek_string(rt, loc);
-    while (*str) {
-        if (*stack_str != *str) {
-            return false;
-        }
-        ++str;
-        ++stack_str;
-    }
-    return true;
+    char *stack_str = rt_val_peek_cpd_as_string(rt, loc);
+    bool result = strcmp(stack_str, str) == 0;
+    mem_free(stack_str);
+    return result;
 }

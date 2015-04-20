@@ -14,7 +14,6 @@ enum ValueType {
     VAL_CHAR,
     VAL_INT,
     VAL_REAL,
-    VAL_STRING,
     VAL_ARRAY,
     VAL_TUPLE,
     VAL_FUNCTION
@@ -52,8 +51,8 @@ void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value);
 void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
-void rt_val_push_string(struct Stack *stack, char *value);
-void rt_val_push_string_slice(struct Stack *stack, char *value, int len);
+void rt_val_push_string_as_array(struct Stack *stack, char *value);
+void rt_val_push_string_slice_as_array(struct Stack *stack, char *value, int len);
 
 /* Compound values.
  * ----------------
@@ -117,6 +116,9 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T loc, char **str);
 /** Prints a value at a given location. */
 void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate);
 
+/** Checks whether a value is a string i.e. an array of characters. */
+bool rt_val_is_string(struct Runtime *rt, VAL_LOC_T loc);
+
 /* Value iteration.
  * ----------------
  */
@@ -157,11 +159,14 @@ VAL_INT_T rt_val_peek_int(struct Runtime *rt, VAL_LOC_T loc);
 /** Peek a real value at the given location. */
 VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc);
 
-/** Peek a string value at the given location. */
-char* rt_val_peek_string(struct Runtime *rt, VAL_LOC_T loc);
-
 /** Returns the location of the first element of the compound value. */
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc);
+
+/**
+ * Peek an array of char as a string.
+ * NOTE that the client is responsible for releasing the string buffer.
+ */
+char* rt_val_peek_cpd_as_string(struct Runtime *rt, VAL_LOC_T loc);
 
 /** Computes the relevant locations of a function value. */
 struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc);
@@ -188,7 +193,8 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc);
  * ==================
  */
 
-bool rt_val_eq(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T Y);
+bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
+bool rt_val_eq_bin(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 bool rt_val_string_eq(struct Runtime *rt, VAL_LOC_T loc, char *str);
 
 #endif

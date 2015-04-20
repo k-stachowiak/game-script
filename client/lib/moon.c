@@ -36,11 +36,15 @@ static struct MoonValue *make_api_value_compound(VAL_LOC_T loc)
 
 static struct MoonValue *make_api_value(VAL_LOC_T loc)
 {
-    int len;
-    char *str;
-
     struct MoonValue *result = mem_malloc(sizeof(*result));
     result->next = NULL;
+
+    if (rt_val_is_string(runtime, loc)) {
+        char *string = rt_val_peek_cpd_as_string(runtime, loc);
+        result->type = MN_STRING;
+        result->data.string = string;
+        return result;
+    }
 
     switch (rt_val_peek_type(runtime, loc)) {
     case VAL_BOOL:
@@ -61,14 +65,6 @@ static struct MoonValue *make_api_value(VAL_LOC_T loc)
     case VAL_REAL:
         result->type = MN_REAL;
         result->data.real = rt_val_peek_real(runtime, loc);
-        break;
-
-    case VAL_STRING:
-        str = rt_val_peek_string(runtime, loc);
-        len = strlen(str);
-        result->type = MN_STRING;
-        result->data.string = mem_malloc(len + 1);
-        memcpy(result->data.string, str, len + 1);
         break;
 
     case VAL_ARRAY:

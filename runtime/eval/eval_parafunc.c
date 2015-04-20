@@ -155,7 +155,7 @@ static bool eval_parafunc_switch_case(
     case_key = rt_val_cpd_first_loc(case_loc);
     case_value = rt_val_next_loc(rt, case_key);
 
-    if (rt_val_eq(rt, switch_loc, case_key)) {
+    if (rt_val_eq_bin(rt, switch_loc, case_key)) {
         stack_push_copy(rt->stack, case_value);
         result = true;
     }

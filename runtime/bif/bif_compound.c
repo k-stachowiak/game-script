@@ -46,18 +46,12 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     int size, i;
     enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-    enum ValueType y_type = rt_val_peek_type(rt, y_loc);
     VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
     VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
     VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
 
     if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
         bif_cpd_error_arg(1, "push-front", "must be compound");
-        return;
-    }
-
-    if (y_type == VAL_ARRAY || y_type == VAL_TUPLE) {
-        bif_cpd_error_arg(2, "push-front", "must not be compound");
         return;
     }
 
@@ -88,18 +82,12 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
 	int size, i;
 	enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-	enum ValueType y_type = rt_val_peek_type(rt, y_loc);
 	VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
 	VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
 	VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
 
 	if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
 		bif_cpd_error_arg(1, "push-back", "must be compound");
-		return;
-	}
-
-	if (y_type == VAL_ARRAY || y_type == VAL_TUPLE) {
-		bif_cpd_error_arg(2, "push-back", "must not be compound");
 		return;
 	}
 

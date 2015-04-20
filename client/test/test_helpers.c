@@ -123,7 +123,7 @@ void test_eval_source_expect_string(
         tc_record(tc, test_name, false);
         return;
     }
-    if (*((VAL_HEAD_TYPE_T*)(rt->stack->buffer + *result)) != VAL_STRING) {
+    if (!rt_val_is_string(rt, *result)) {
         tc_record(tc, test_name, false);
         return;
     }
