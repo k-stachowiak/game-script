@@ -127,7 +127,7 @@ void rt_set_eval_callback(
     rt->eval_callback_end = end;
 }
 
-void rt_consume_one(
+bool rt_consume_one(
         struct Runtime *rt,
         struct AstNode *ast,
         VAL_LOC_T *loc,
@@ -148,7 +148,7 @@ void rt_consume_one(
 
     if (err_state()) {
         ast_node_free_one(ast);
-        return;
+        return false;
 
     } else if (ast->type == AST_BIND) {
         ast->next = rt->node_store;
@@ -158,17 +158,21 @@ void rt_consume_one(
         rt->stack->top = begin; /* Discard result value to save the stack. */
         ast_node_free_one(ast);
     }
+
+    return true;
 }
 
-bool rt_consume_list(struct Runtime *rt, struct AstNode *ast_list)
+bool rt_consume_list(
+        struct Runtime *rt,
+        struct AstNode *ast_list,
+        VAL_LOC_T *last_loc)
 {
     struct AstNode *next;
 
     rt_save(rt);
 
     while (ast_list) {
-        rt_consume_one(rt, ast_list, NULL, &next);
-        if (err_state()) {
+        if (!rt_consume_one(rt, ast_list, last_loc, &next)) {
             rt_restore(rt);
             /* NOTE: ast_list is used for the iteration so upon error,
             * no nodes that have already been consumed will be freed.

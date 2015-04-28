@@ -39,13 +39,16 @@ void rt_set_eval_callback(
         EvalCallbackBegin begin,
         EvalCallbackEnd end);
 
-void rt_consume_one(
+bool rt_consume_one(
         struct Runtime *rt,
         struct AstNode *ast,
         VAL_LOC_T *loc,
         struct AstNode **next);
 
-bool rt_consume_list(struct Runtime *rt, struct AstNode *ast);
+bool rt_consume_list(
+        struct Runtime *rt,
+        struct AstNode *ast,
+        VAL_LOC_T *last_loc);
 
 void rt_for_each_stack_val(struct Runtime *rt, void(*f)(void*, VAL_LOC_T));
 void rt_for_each_sym(struct Runtime *rt, void(*f)(void*, char*, VAL_LOC_T));

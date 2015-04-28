@@ -77,7 +77,7 @@ static enum ReplCmdResult repl_cmd_load(
         return REPL_CMD_INTERNAL_ERROR;
     }
 
-    if (!rt_consume_list(rt, ast_list)) {
+    if (!rt_consume_list(rt, ast_list, NULL)) {
         mem_free(source);
         return REPL_CMD_INTERNAL_ERROR;
     }

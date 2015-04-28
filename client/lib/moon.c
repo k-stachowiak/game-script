@@ -145,7 +145,7 @@ bool mn_exec_file(const char *filename)
         return false;
     }
 
-    if (!rt_consume_list(runtime, ast_list)) {
+    if (!rt_consume_list(runtime, ast_list, NULL)) {
         mem_free(source);
         return false;
     }
