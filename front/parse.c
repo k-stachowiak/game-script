@@ -765,22 +765,3 @@ struct AstNode *parse_source(char *source)
     return ast;
 }
 
-struct AstNode *parse_file(char *filename)
-{
-    struct AstNode *result;
-    char *source = my_getfile(filename);
-
-    if (!source) {
-        struct ErrMessage msg;
-        err_msg_init(&msg, "PARSE");
-        err_msg_append(&msg, "Failed loading file \"%s\"", filename);
-        err_msg_set(&msg);
-        return NULL;
-    }
-
-    result = parse_source(source);
-    mem_free(source);
-
-    return result;
-}
-

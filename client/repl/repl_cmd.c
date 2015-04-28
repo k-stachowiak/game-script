@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "log.h"
+#include "term.h"
 #include "error.h"
 #include "repl_cmd.h"
 #include "runtime.h"
@@ -15,6 +16,14 @@
 
 static struct Debugger dbg;
 static bool dbg_enabled;
+
+static void repl_cmd_error_nofile(void)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg, "Failed loading a file");
+    err_msg_set(&msg);
+}
 
 static void repl_cmd_error_bad(void)
 {
@@ -48,6 +57,7 @@ static enum ReplCmdResult repl_cmd_load(
         int num_pieces)
 {
     char *filename;
+    char *source;
     struct AstNode *ast_list;
 
     if (num_pieces != 1) {
@@ -57,14 +67,22 @@ static enum ReplCmdResult repl_cmd_load(
 
     filename = pieces[0];
 
-    if (!(ast_list = parse_file(filename))) {
+    if (!(source = my_getfile(filename))) {
+        repl_cmd_error_nofile();
+        return REPL_CMD_INTERNAL_ERROR;
+    }
+
+    if (!(ast_list = parse_source(source))) {
+        mem_free(source);
         return REPL_CMD_INTERNAL_ERROR;
     }
 
     if (!rt_consume_list(rt, ast_list)) {
+        mem_free(source);
         return REPL_CMD_INTERNAL_ERROR;
     }
 
+    mem_free(source);
     return REPL_CMD_OK;
 }
 

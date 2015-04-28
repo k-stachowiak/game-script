@@ -4,11 +4,20 @@
 
 #include "error.h"
 #include "memory.h"
+#include "term.h"
 #include "collection.h"
 #include "runtime.h"
 #include "rt_val.h"
 #include "parse.h"
 #include "moon.h"
+
+static void moon_error_nofile(void)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "REPL");
+    err_msg_append(&msg, "Failed loading a file");
+    err_msg_set(&msg);
+}
 
 static struct Runtime *runtime;
 
@@ -123,16 +132,25 @@ void mn_init(void)
 
 bool mn_exec_file(const char *filename)
 {
+    char *source;
     struct AstNode *ast_list;
 
-    if (!(ast_list = parse_file((char*)filename))) {
+    if (!(source = my_getfile((char*)filename))) {
+        moon_error_nofile();
+        return false;
+    }
+
+    if (!(ast_list = parse_source(source))) {
+        mem_free(source);
         return false;
     }
 
     if (!rt_consume_list(runtime, ast_list)) {
+        mem_free(source);
         return false;
     }
 
+    mem_free(source);
     return true;
 }
 
