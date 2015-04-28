@@ -97,8 +97,8 @@
             (if y_empty
                 (cat result x)
                 (if (cmp (car x) (car y))
-                    (merge_impl (cdr x) y (cat result (slice x 0 1)))
-                    (merge_impl x (cdr y) (cat result (slice y 0 1)))
+                    (merge_impl (cdr x) y (push_back result (car x)))
+                    (merge_impl x (cdr y) (push_back result (car y)))
                 )
             )
         )
