@@ -3,7 +3,6 @@
 #include "log.h"
 #include "eval.h"
 #include "bif.h"
-#include "define.h"
 #include "bif_detail.h"
 #include "stack.h"
 #include "runtime.h"

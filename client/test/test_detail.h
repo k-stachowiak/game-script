@@ -5,7 +5,6 @@
 
 #include <stdbool.h>
 
-#include "define.h"
 #include "error.h"
 #include "collection.h"
 

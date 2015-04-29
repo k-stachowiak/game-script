@@ -3,7 +3,7 @@
 #ifndef BIF_H
 #define BIF_H
 
-#include "define.h"
+#include "rt_val.h"
 
 #define BIF_MAX_ARITY 3
 

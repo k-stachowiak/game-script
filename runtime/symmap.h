@@ -3,7 +3,6 @@
 #include <stddef.h>
 
 #include "runtime.h"
-#include "define.h"
 
 #ifndef SYMMAP_H
 #define SYMMAP_H

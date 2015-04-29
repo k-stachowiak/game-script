@@ -3,7 +3,6 @@
 #ifndef AST_H
 #define AST_H
 
-#include "define.h"
 #include "src_iter.h"
 #include "pattern.h"
 
