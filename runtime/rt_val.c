@@ -21,6 +21,12 @@ static VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
  * ==================
  */
 
+void rt_val_push_copy(struct Stack *stack, VAL_LOC_T location)
+{
+    struct ValueHeader header = rt_val_peek_header(stack, location);
+    stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + location);
+}
+
 void rt_val_push_bool_payload(struct Stack *stack, VAL_BOOL_T value)
 {
     VAL_BOOL_T normalized_value = !!value;
@@ -140,7 +146,7 @@ void rt_val_push_func_cap(struct Stack *stack, char *symbol, VAL_LOC_T loc)
     VAL_SIZE_T len = strlen(symbol) + 1;
     stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
     stack_push(stack, len, symbol);
-    stack_push_copy(stack, loc);
+    rt_val_push_copy(stack, loc);
 }
 
 void rt_val_push_func_cap_copy(struct Stack *stack, VAL_LOC_T loc)
@@ -149,7 +155,7 @@ void rt_val_push_func_cap_copy(struct Stack *stack, VAL_LOC_T loc)
     VAL_SIZE_T len = strlen(symbol);
     stack_push(stack, VAL_SIZE_BYTES, (char*)&len);
     stack_push(stack, len + 1, symbol);
-    stack_push_copy(stack, loc + len + 1);
+    rt_val_push_copy(stack, loc + len + 1);
 }
 
 void rt_val_push_func_cap_final_deferred(

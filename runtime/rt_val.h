@@ -33,7 +33,7 @@
 
 struct Stack;
 
-/* Data structores.
+/* Data structures.
  * ================
  */
 
@@ -70,6 +70,8 @@ struct ValueFuncData {
 /* Writing (pushing) API.
  * ======================
  */
+
+void rt_val_push_copy(struct Stack *stack, VAL_LOC_T location);
 
 /* Simple values.
  * --------------

@@ -114,7 +114,7 @@ static void efc_curry_on(
     rt_val_push_func_appl_init(rt->stack, arg_count);
     current_loc = func_data->appl_start;
     for (i = 0; i < func_data->appl_count; ++i) {
-        stack_push_copy(rt->stack, current_loc);
+        rt_val_push_copy(rt->stack, current_loc);
         current_loc += rt_val_fun_next_appl_loc(rt, current_loc);
     }
 

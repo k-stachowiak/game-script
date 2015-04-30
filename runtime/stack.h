@@ -18,7 +18,6 @@ struct Stack *stack_make(void);
 void stack_free(struct Stack *stack);
 
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data);
-void stack_push_copy(struct Stack *stack, VAL_LOC_T location);
 
 VAL_SIZE_T stack_peek_size(struct Stack *stack, VAL_LOC_T loc);
 void *stack_peek_ptr(struct Stack *stack, VAL_LOC_T loc);

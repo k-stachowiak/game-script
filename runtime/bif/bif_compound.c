@@ -61,12 +61,12 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         rt_val_push_tuple_init(rt->stack, &size_loc);
     }
 
-    stack_push_copy(rt->stack, y_loc);
+    rt_val_push_copy(rt->stack, y_loc);
 
     loc = rt_val_cpd_first_loc(x_loc);
     size = rt_val_cpd_len(rt, x_loc);
     for (i = 0; i < size; ++i) {
-        stack_push_copy(rt->stack, loc);
+        rt_val_push_copy(rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
@@ -80,38 +80,38 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
 void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	int size, i;
-	enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-	VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
-	VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
-	VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
+    int size, i;
+    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
+    VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
+    VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
+    VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
 
-	if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
-		bif_cpd_error_arg(1, "push-back", "must be compound");
-		return;
-	}
+    if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
+        bif_cpd_error_arg(1, "push-back", "must be compound");
+        return;
+    }
 
-	if (x_type == VAL_ARRAY) {
-		rt_val_push_array_init(rt->stack, &size_loc);
-	} else {
-		rt_val_push_tuple_init(rt->stack, &size_loc);
-	}
+    if (x_type == VAL_ARRAY) {
+        rt_val_push_array_init(rt->stack, &size_loc);
+    } else {
+        rt_val_push_tuple_init(rt->stack, &size_loc);
+    }
 
-	loc = rt_val_cpd_first_loc(x_loc);
-	size = rt_val_cpd_len(rt, x_loc);
-	for (i = 0; i < size; ++i) {
-		stack_push_copy(rt->stack, loc);
-		loc = rt_val_next_loc(rt, loc);
-	}
+    loc = rt_val_cpd_first_loc(x_loc);
+    size = rt_val_cpd_len(rt, x_loc);
+    for (i = 0; i < size; ++i) {
+        rt_val_push_copy(rt->stack, loc);
+        loc = rt_val_next_loc(rt, loc);
+    }
 
-	stack_push_copy(rt->stack, y_loc);
+    rt_val_push_copy(rt->stack, y_loc);
 
-	rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
+    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
 
-	/* Validate homogenity. */
-	if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
-		bif_cpd_error_homo("push-back");
-	}
+    /* Validate homogenity. */
+    if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
+        bif_cpd_error_homo("push-back");
+    }
 }
 
 void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
@@ -151,7 +151,7 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     loc = rt_val_cpd_first_loc(x_loc);
     end = loc + x_size;
     while (loc != end) {
-        stack_push_copy(rt->stack, loc);
+        rt_val_push_copy(rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
@@ -159,7 +159,7 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     loc = rt_val_cpd_first_loc(y_loc);
     end = loc + y_size;
     while (loc != end) {
-        stack_push_copy(rt->stack, loc);
+        rt_val_push_copy(rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
@@ -216,7 +216,7 @@ void bif_at(
         loc = rt_val_next_loc(rt, loc);
     }
 
-    stack_push_copy(rt->stack, loc);
+    rt_val_push_copy(rt->stack, loc);
 }
 
 void bif_slice(
@@ -266,7 +266,7 @@ void bif_slice(
     end = loc + rt_val_peek_size(rt, x_loc);
     while (loc != end) {
         if (index >= first && index < last) {
-            stack_push_copy(rt->stack, loc);
+            rt_val_push_copy(rt->stack, loc);
             size += rt_val_peek_size(rt, loc) + VAL_HEAD_BYTES;
         }
         loc = rt_val_next_loc(rt, loc);

@@ -46,12 +46,6 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
     return stack->top - size;
 }
 
-void stack_push_copy(struct Stack *stack, VAL_LOC_T location)
-{
-    struct ValueHeader header = rt_val_peek_header(stack, location);
-    stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + location);
-}
-
 /** Peek a size_t at a given location */
 VAL_SIZE_T stack_peek_size(struct Stack *stack, VAL_LOC_T loc)
 {

@@ -98,7 +98,7 @@ static void eval_reference(
         return;
     }
 
-    stack_push_copy(stack, kvp->stack_loc);
+    rt_val_push_copy(stack, kvp->stack_loc);
 }
 
 /* Main evaluation dispatch.
