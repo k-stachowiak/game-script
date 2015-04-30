@@ -75,6 +75,11 @@ struct ValueFuncData {
  * --------------
  */
 
+void rt_val_push_bool_payload(struct Stack *stack, VAL_BOOL_T value);
+void rt_val_push_char_payload(struct Stack *stack, VAL_CHAR_T value);
+void rt_val_push_int_payload(struct Stack *stack, VAL_INT_T value);
+void rt_val_push_real_payload(struct Stack *stack, VAL_REAL_T value);
+
 void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value);
 void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);

@@ -12,45 +12,66 @@
 
 static VAL_HEAD_SIZE_T zero = 0;
 
+static VAL_HEAD_SIZE_T bool_size = VAL_BOOL_BYTES;
+static VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
+static VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
+static VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
+
 /* Writing / pushing.
  * ==================
  */
 
+void rt_val_push_bool_payload(struct Stack *stack, VAL_BOOL_T value)
+{
+    VAL_BOOL_T normalized_value = !!value;
+    stack_push(stack, bool_size, (char*)&normalized_value);
+}
+
+void rt_val_push_char_payload(struct Stack *stack, VAL_CHAR_T value)
+{
+    stack_push(stack, char_size, (char*)&value);
+}
+
+void rt_val_push_int_payload(struct Stack *stack, VAL_INT_T value)
+{
+    stack_push(stack, int_size, (char*)&value);
+}
+
+void rt_val_push_real_payload(struct Stack *stack, VAL_REAL_T value)
+{
+    stack_push(stack, real_size, (char*)&value);
+}
+
 void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_BOOL;
-    VAL_HEAD_SIZE_T size = VAL_BOOL_BYTES;
-    VAL_BOOL_T normalized_value = !!value;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, (char*)&normalized_value);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&bool_size);
+    rt_val_push_bool_payload(stack, value);
 }
 
 void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_CHAR;
-    VAL_HEAD_SIZE_T size = VAL_CHAR_BYTES;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, (char*)&value);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&char_size);
+    rt_val_push_char_payload(stack, value);
 }
 
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_INT;
-    VAL_HEAD_SIZE_T size = VAL_INT_BYTES;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, (char*)&value);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&int_size);
+    rt_val_push_int_payload(stack, value);
 }
 
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_REAL;
-    VAL_HEAD_SIZE_T size = VAL_REAL_BYTES;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&size);
-    stack_push(stack, size, (char*)&value);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&real_size);
+    rt_val_push_real_payload(stack, value);
 }
 
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
