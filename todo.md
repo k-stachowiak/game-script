@@ -1,8 +1,9 @@
 TODO
 ----
  * [ ] Improve the packing of the arrays storage not to contain a header
-    - stop tracking size in all values
-    - assure only rt_val API is used for the compound access (i.e. no raw pushes outside rt_val module)
+    - fix the code around the occurances of the rt_val_push_array_init
+      to properly pack the data inside arrays; disallow compound values in arrays :(
+    - fix the code that accesses arrays sequentially (e.g. rt_val_cpd_next_loc)
  * [ ] Add benchmarking facilities to support possible optimization refactoirng
  * [ ] Add "random" BIFs at least for uniform number, optionally for exp and normal
  * [ ] Add compound construction BIFs, e.g. range: (func (from to) ...)
