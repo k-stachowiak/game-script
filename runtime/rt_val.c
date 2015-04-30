@@ -53,31 +53,6 @@ void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
     stack_push(stack, size, (char*)&value);
 }
 
-void rt_val_push_string_as_array(struct Stack *stack, char *value)
-{
-    VAL_LOC_T data_begin, size_loc;
-    rt_val_push_array_init(stack, &size_loc);
-    data_begin = stack->top;
-    while (*value) {
-        rt_val_push_char(stack, *value);
-        ++value;
-    }
-    rt_val_push_cpd_final(stack, size_loc, stack->top - data_begin);
-}
-
-void rt_val_push_string_slice_as_array(struct Stack *stack, char *value, int len)
-{
-    VAL_LOC_T data_begin,  size_loc;
-    rt_val_push_array_init(stack, &size_loc);
-    data_begin = stack->top;
-    while (len) {
-        rt_val_push_char(stack, *value);
-        ++value;
-        --len;
-    }
-    rt_val_push_cpd_final(stack, size_loc, stack->top - data_begin);
-}
-
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_ARRAY;
@@ -98,6 +73,17 @@ void rt_val_push_cpd_final(
         VAL_SIZE_T size)
 {
     memcpy(stack->buffer + size_loc, &size, VAL_HEAD_SIZE_BYTES);
+}
+
+void rt_val_push_string(struct Stack *stack, char *begin, char *end)
+{
+    VAL_LOC_T data_begin, size_loc;
+    rt_val_push_array_init(stack, &size_loc);
+    data_begin = stack->top;
+    while (begin != end) {
+        rt_val_push_char(stack, *begin++);
+    }
+    rt_val_push_cpd_final(stack, size_loc, stack->top - data_begin);
 }
 
 void rt_val_push_func_init(

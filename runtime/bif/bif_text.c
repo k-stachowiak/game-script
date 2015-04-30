@@ -177,7 +177,7 @@ static void bif_format_impl(
     if (args_left) {
         bif_text_error_args_left(args_left);
     } else {
-        rt_val_push_string_as_array(rt->stack, result);
+        rt_val_push_string(rt->stack, result, result + strlen(result));
     }
 
 end:
@@ -233,6 +233,7 @@ static void bif_parse_any_ast_literal(
         struct Runtime *rt,
         struct AstLiteral *literal)
 {
+    char *str;
     switch (literal->type) {
     case AST_LIT_UNIT:
         break;
@@ -242,7 +243,8 @@ static void bif_parse_any_ast_literal(
         break;
 
     case AST_LIT_STRING:
-        rt_val_push_string_as_array(rt->stack, literal->data.string);
+        str = literal->data.string;
+        rt_val_push_string(rt->stack, str, str + strlen(str));
         break;
 
     case AST_LIT_CHAR:
@@ -309,7 +311,7 @@ static void bif_parse_atom(
 {
     VAL_LOC_T size_loc, data_begin, data_size;
     struct AstNode *ast = NULL;
-    char *source;
+    char *source, *err;
 
     /* Assert input. */
     if (!rt_val_is_string(rt, arg_loc)) {
@@ -327,18 +329,21 @@ static void bif_parse_atom(
 
     /* Error detection. */
     if (!ast) {
+        err = "Failed parsing literal";
         rt_val_push_bool(rt->stack, false);
-        rt_val_push_string_as_array(rt->stack, "Failed parsing literal");
+        rt_val_push_string(rt->stack, err, err + strlen(err));
         goto end;
     }
     if (ast->next != NULL) {
+        err = "Too many nodes.";
         rt_val_push_bool(rt->stack, false);
-        rt_val_push_string_as_array(rt->stack, "Too many nodes.");
+        rt_val_push_string(rt->stack, err, err + strlen(err));
         goto end;
     }
     if (ast->type != AST_LITERAL || ast->data.literal.type != type) {
+        err = "Incorrect type.";
         rt_val_push_bool(rt->stack, false);
-        rt_val_push_string_as_array(rt->stack, "Incorrect type.");
+        rt_val_push_string(rt->stack, err, err + strlen(err));
         goto end;
     }
 
@@ -396,7 +401,7 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     if (!buffer) {
         bif_text_error_stringify();
     } else {
-        rt_val_push_string_as_array(rt->stack, buffer);
+        rt_val_push_string(rt->stack, buffer, buffer + strlen(buffer));
         mem_free(buffer);
     }
 }
@@ -424,7 +429,7 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
     if (err_state()) {
         stack_collapse(rt->stack, result_begin, rt->stack->top);
         rt_val_poke_bool(rt->stack, data_begin, false);
-        rt_val_push_string_as_array(rt->stack, err_msg());
+        rt_val_push_string(rt->stack, err_msg(), err_msg() + strlen(err_msg()));
         err_reset();
     }
 
