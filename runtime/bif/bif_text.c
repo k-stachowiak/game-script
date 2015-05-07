@@ -1,6 +1,7 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "eval.h"
 #include "memory.h"
@@ -102,9 +103,9 @@ static void bif_format_try_appending_arg(
         if (type != VAL_INT) {
             bif_text_error_wc_mismatch();
         } else {
-            str_append(*result, "%ld", rt_val_peek_int(rt, loc));
+			str_append(*result, "%" PRIu64, rt_val_peek_int(rt, loc));
         }
-        break;
+		break;
 
     case 'f':
         if (type != VAL_REAL) {
@@ -193,7 +194,7 @@ static void bif_parse_any_ast_compound(
         struct Runtime *rt,
         struct AstCompound *cpd)
 {
-    VAL_LOC_T size_loc, data_begin, data_size;
+    VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = cpd->exprs;
     VAL_LOC_T result_loc = rt->stack->top;
 

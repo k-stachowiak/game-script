@@ -34,7 +34,7 @@ VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)
     }
 
     while (stack->top + size >= stack->size) {
-        VAL_LOC_T new_size = stack->size * 1.5;
+		VAL_LOC_T new_size = (VAL_LOC_T)(stack->size * 1.5);
         stack->buffer = mem_realloc(stack->buffer, new_size);
         stack->size = new_size;
     }
