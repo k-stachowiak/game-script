@@ -19,7 +19,7 @@ void eval_compound(
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
-    VAL_LOC_T size_loc, data_begin, data_size;
+    VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
     VAL_LOC_T result_loc = rt->stack->top;
 

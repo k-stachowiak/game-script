@@ -240,7 +240,7 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
         break;
 
     case VAL_INT:
-        str_append(*str, "%ld", rt_val_peek_int(rt, x));
+        str_append(*str, "%" PRIu64, rt_val_peek_int(rt, x));
         break;
 
     case VAL_REAL:
