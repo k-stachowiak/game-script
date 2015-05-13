@@ -18,11 +18,11 @@
             exit(2); \
         } \
         if (!(TXT)) { \
-            _new_text_ = mem_malloc(_new_len_ + 1); \
+            _new_text_ = (char *)mem_malloc(_new_len_ + 1); \
             memcpy(_new_text_, _buffer_, _new_len_ + 1); \
         } else { \
             _old_len_ = strlen((TXT)); \
-            _new_text_ = mem_malloc(_old_len_ + _new_len_ + 1); \
+            _new_text_ = (char *)mem_malloc(_old_len_ + _new_len_ + 1); \
             memcpy(_new_text_, (TXT), _old_len_); \
             memcpy(_new_text_ + _old_len_, _buffer_, _new_len_ + 1); \
             mem_free((TXT)); \

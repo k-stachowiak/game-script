@@ -15,8 +15,11 @@ include_directories(
     .
     )
 
+set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_C_FLAGS "-Wall -g -O0")
-set(CMAKE_C_COMPILER "clang")
+
+set(CMAKE_CXX_COMPILER "gcc")
+set(CMAKE_CXX_FLAGS "-g -O0 -std=c++0x")
 
 add_library(lang OBJECT
     ./front/dom.c
@@ -29,6 +32,7 @@ add_library(lang OBJECT
     ./runtime/bif/bif_compare.c
     ./runtime/bif/bif_common.c
     ./runtime/bif/bif_text.c
+    ./runtime/bif/bif_random.cpp
     ./runtime/eval/eval.c
     ./runtime/eval/eval_fdef.c
     ./runtime/eval/eval_do.c

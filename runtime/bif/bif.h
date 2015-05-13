@@ -54,4 +54,12 @@ void bif_parse_char(struct Runtime *rt, VAL_LOC_T arg_loc);
 void bif_parse_int(struct Runtime *rt, VAL_LOC_T arg_loc);
 void bif_parse_real(struct Runtime *rt, VAL_LOC_T arg_loc);
 
+/* Random */
+void bif_rand_ui(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc);
+void bif_rand_ur(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc);
+void bif_rand_ber(struct Runtime *rt, VAL_LOC_T p_loc);
+void bif_rand_exp(struct Runtime *rt, VAL_LOC_T l_loc);
+void bif_rand_gauss(struct Runtime *rt, VAL_LOC_T u_loc, VAL_LOC_T s_loc);
+void bif_rand_distr(struct Runtime *rt, VAL_LOC_T d_loc);
+
 #endif
