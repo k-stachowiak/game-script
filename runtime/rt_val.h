@@ -8,10 +8,10 @@
 
 #define VAL_LOC_T ptrdiff_t
 
-#define VAL_SIZE_T uint32_t
+#define VAL_SIZE_T uint16_t
 #define VAL_SIZE_BYTES sizeof(VAL_SIZE_T)
 
-#define VAL_HEAD_TYPE_T uint32_t
+#define VAL_HEAD_TYPE_T uint8_t
 #define VAL_HEAD_SIZE_T VAL_SIZE_T
 #define VAL_HEAD_TYPE_BYTES sizeof(VAL_HEAD_TYPE_T)
 #define VAL_HEAD_SIZE_BYTES VAL_SIZE_BYTES
