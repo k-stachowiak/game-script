@@ -13,6 +13,7 @@ syn keyword biFunctions eq lt
 syn keyword biFunctions and or xor not
 syn keyword biFunctions push_front push_back cat length at slice
 syn keyword biFunctions print format to_string parse parse_bool parse_char parse_int parse_real
+syn keyword biFunctions rand_ui rand_ur rand_ber rand_exp rand_gauss, rand_distr
 syn keyword stdFunctions f_and f_or
 syn keyword stdFunctions ne gt ge le
 syn keyword stdFunctions empty car cdr front back cons dcons

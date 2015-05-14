@@ -16,10 +16,10 @@ include_directories(
     )
 
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_C_FLAGS "-Wall -g -O0")
+set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c99")
 
 set(CMAKE_CXX_COMPILER "gcc")
-set(CMAKE_CXX_FLAGS "-g -O0 -std=c++0x")
+set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=gnu++11")
 
 add_library(lang OBJECT
     ./front/dom.c
@@ -32,7 +32,7 @@ add_library(lang OBJECT
     ./runtime/bif/bif_compare.c
     ./runtime/bif/bif_common.c
     ./runtime/bif/bif_text.c
-    ./runtime/bif/bif_random.cpp
+    ./runtime/bif/bif_random.c
     ./runtime/eval/eval.c
     ./runtime/eval/eval_fdef.c
     ./runtime/eval/eval_do.c
@@ -40,6 +40,7 @@ add_library(lang OBJECT
     ./runtime/eval/eval_cpd.c
     ./runtime/eval/eval_fcall.c
     ./runtime/eval/eval_bind.c
+	./runtime/cpprand.cpp
     ./runtime/dbg.c
     ./runtime/symmap.c
     ./runtime/stack.c
@@ -56,14 +57,14 @@ add_library(lang OBJECT
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
     ./client/lib/moon.c
     )
-target_link_libraries(moon m)
+target_link_libraries(moon m stdc++)
 
 add_executable(mnrepl $<TARGET_OBJECTS:lang>
     ./client/repl/repl.c
     ./client/repl/repl_cmd.c
     ./client/repl/repl_expr.c
     )
-target_link_libraries(mnrepl m)
+target_link_libraries(mnrepl m stdc++)
 
 add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test.c
@@ -76,5 +77,5 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test_runtime_scope.c
     ./client/test/test_cci.c
     )
-target_link_libraries(mntest m)
+target_link_libraries(mntest m stdc++)
 

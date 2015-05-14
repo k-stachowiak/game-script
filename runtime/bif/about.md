@@ -104,3 +104,16 @@ The following wildcards are supported (with the respective matched types):
 
 _print_ function will print a given string to the output.
 The function is implemented in terms of the C language's _printf_ function and therefore the according escape sequences will be accepted by this language's _print_ function.
+
+Random functions
+----------------
+ * rand\_ui    : _integer_ -> _integer_ -> _integer_
+ * rand\_ur    : _real_ -> _real_ -> _real_
+ * rand\_ber   : _real_ -> _boolean_
+ * rand\_exp   : _real_ -> _real_
+ * rand\_gauss : _real_ -> _real_ -> _real_
+ * rand\_distr : [ _real_ ] -> _integer_
+
+These functions are implemented in terms of the C++ standard random library (since C++11).
+_ui_ stands for "uniform integer", _ur_ stands for "uniform real" and the rest should be self-explanatory.
+
