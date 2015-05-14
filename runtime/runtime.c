@@ -26,6 +26,7 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "/", eval_bif(rt, bif_div, 2), &bif_location);
     sym_map_insert(sm, "%", eval_bif(rt, bif_mod, 2), &bif_location);
     sym_map_insert(sm, "sqrt", eval_bif(rt, bif_sqrt, 1), &bif_location);
+    sym_map_insert(sm, "real", eval_bif(rt, bif_real, 1), &bif_location);
     sym_map_insert(sm, "floor", eval_bif(rt, bif_floor, 1), &bif_location);
     sym_map_insert(sm, "ceil", eval_bif(rt, bif_ceil, 1), &bif_location);
     sym_map_insert(sm, "round", eval_bif(rt, bif_round, 1), &bif_location);

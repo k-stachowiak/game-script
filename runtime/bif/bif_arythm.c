@@ -77,8 +77,13 @@ static void bif_arythm_error_trunc_arg(void)
     err_msg_set(&msg);
 }
 
-static VAL_INT_T bif_sqrt_impl_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }
-static VAL_REAL_T bif_sqrt_impl_real(VAL_REAL_T x) { return sqrt(x); }
+static void bif_arythm_error_exp_arg(void)
+{
+    struct ErrMessage msg;
+    err_msg_init_src(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
+    err_msg_append(&msg, "Arguments of expanding arythmetic BIF must be of integer type");
+    err_msg_set(&msg);
+}
 
 static VAL_INT_T bif_add_impl_int(VAL_INT_T x, VAL_INT_T y) { return x + y; }
 static VAL_INT_T bif_sub_impl_int(VAL_INT_T x, VAL_INT_T y) { return x - y; }
@@ -91,12 +96,26 @@ static VAL_REAL_T bif_mul_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x * y; 
 static VAL_REAL_T bif_div_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return x / y; }
 static VAL_REAL_T bif_mod_impl_real(VAL_REAL_T x, VAL_REAL_T y) { return fmod(x, y); }
 
-BIF_ARYTHM_UNARY_DEF(bif_sqrt)
+static VAL_INT_T bif_sqrt_impl_int(VAL_INT_T x) { return (VAL_INT_T)sqrt((double)x); }
+static VAL_REAL_T bif_sqrt_impl_real(VAL_REAL_T x) { return sqrt(x); }
+
 BIF_ARYTHM_BINARY_DEF(bif_add)
 BIF_ARYTHM_BINARY_DEF(bif_sub)
 BIF_ARYTHM_BINARY_DEF(bif_mul)
 BIF_ARYTHM_BINARY_DEF(bif_div)
 BIF_ARYTHM_BINARY_DEF(bif_mod)
+BIF_ARYTHM_UNARY_DEF(bif_sqrt)
+
+void bif_real(struct Runtime *rt, VAL_LOC_T x_loc)
+{
+	VAL_INT_T x;
+	if (rt_val_peek_type(rt, x_loc) != VAL_INT) {
+		bif_arythm_error_exp_arg();
+		return;
+	}
+	x = rt_val_peek_int(rt, x_loc);
+	rt_val_push_real(rt->stack, (VAL_REAL_T)x);
+}
 
 static VAL_INT_T bif_floor_impl(VAL_REAL_T x) { return (VAL_INT_T)floor(x); }
 static VAL_INT_T bif_ceil_impl(VAL_REAL_T x) { return (VAL_INT_T)ceil(x); }

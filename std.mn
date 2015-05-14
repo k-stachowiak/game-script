@@ -180,6 +180,25 @@
     )
 ))
 
+# Compound generators
+# -------------------
+
+### Produce sequence of first n natural numbers (including 0).
+(bind seq (func (n) (do
+	(bind seq_impl (func (current last acc)
+		(if (eq current last)
+			acc
+			(seq_impl (+ current 1) last (push_back acc current))
+		)
+	))
+	(seq_impl 0 n [])
+)))
+
+### Returns an array containing a range of integer values
+(bind range_int (func (init count) (do
+	(map (+ init) (seq count))
+)))
+
 # Text related
 # ------------
 
@@ -248,6 +267,10 @@
         (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
         (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
         (test "Fold right" (eq (foldr - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -5))
+
+		# Sequences
+		(test "Sequence empty" (eq (seq 0) []))
+		(test "Sequence non-empty" (eq (seq 5) [ 0 1 2 3 4 ]))
     ])
 ))
 

@@ -16,12 +16,13 @@ typedef void (*bif_ternary_func)(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T 
 extern struct SourceLocation bif_location;
 
 /* Arythmetic */
-void bif_sqrt(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_add(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_sub(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_mul(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_div(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_mod(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
+void bif_sqrt(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_real(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_floor(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_ceil(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_round(struct Runtime *rt, VAL_LOC_T x_loc);

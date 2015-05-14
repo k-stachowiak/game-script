@@ -17,8 +17,8 @@
 #define VAL_HEAD_SIZE_BYTES VAL_SIZE_BYTES
 #define VAL_HEAD_BYTES (VAL_HEAD_TYPE_BYTES + VAL_HEAD_SIZE_BYTES)
 
-#define VAL_BOOL_T uint8_t
-#define VAL_CHAR_T uint8_t
+#define VAL_BOOL_T char
+#define VAL_CHAR_T char
 #define VAL_INT_T int64_t
 #define VAL_REAL_T double
 
@@ -53,7 +53,6 @@ struct ValueHeader {
 };
 
 struct ValueFuncData {
-
     VAL_LOC_T arity_loc;
     VAL_LOC_T ast_def_loc;
     VAL_LOC_T bif_impl_loc;

@@ -23,6 +23,7 @@ Arythmetic functions
  * /        : _numeric_ -> _numeric_ -> _numeric_
  * %        : _numeric_ -> _numeric_ -> _numeric_
  * sqrt     : _numeric_ -> _numeric_
+ * real     : _integer_ -> _real_
  * floor    : _real_ -> _integer_
  * ceil     : _real_ -> _integer_
  * round    : _real_ -> _integer_
