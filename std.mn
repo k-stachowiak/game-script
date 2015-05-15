@@ -186,6 +186,17 @@
 ### Prints a formatted string
 (bind printf (func (fmt args) (print (format fmt args))))
 
+### Returns a sequence of n first natural numbers (including 0)
+(bind seq (func (n) (do
+	(bind seq_impl (func (first last acc)
+		(if (eq first last)
+			acc
+			(seq_impl (+ first 1) last (push_back acc first))
+		)
+    ))
+	(seq_impl 0 n [])
+)))
+
 # Automatic testing
 # -----------------
 
