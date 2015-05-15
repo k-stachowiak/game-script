@@ -70,3 +70,32 @@ struct MoonValue *make_api_value(VAL_LOC_T loc)
     return result;
 }
 
+void api_value_free(struct MoonValue *value)
+{
+    while (value) {
+
+        struct MoonValue *next_value = value->next;
+
+        switch (value->type) {
+        case MN_BOOL:
+        case MN_CHAR:
+        case MN_INT:
+        case MN_REAL:
+        case MN_FUNCTION:
+            break;
+
+        case MN_STRING:
+            mem_free(value->data.string);
+            break;
+
+        case MN_ARRAY:
+        case MN_TUPLE:
+            api_value_free(value->data.compound);
+            break;
+        }
+
+        mem_free(value);
+        value = next_value;
+    }
+}
+
