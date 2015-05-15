@@ -20,6 +20,7 @@ void stack_free(struct Stack *stack);
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data);
 
 VAL_SIZE_T stack_peek_size(struct Stack *stack, VAL_LOC_T loc);
+VAL_TYPE_T stack_peek_type(struct Stack *stack, VAL_LOC_T loc);
 void *stack_peek_ptr(struct Stack *stack, VAL_LOC_T loc);
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end);

@@ -7,17 +7,17 @@
 #ifndef SYMMAP_H
 #define SYMMAP_H
 
-struct SymMap {
-    struct SymMap *global;
-    struct SymMapKvp *map;
-    struct SymMapKvp *end;
-};
-
 struct SymMapKvp {
     char *key;
     VAL_LOC_T stack_loc;
     struct SourceLocation source_loc;
     struct SymMapKvp *next;
+};
+
+struct SymMap {
+    struct SymMap *global;
+    struct SymMapKvp *map;
+    struct SymMapKvp *end;
 };
 
 void sym_map_init_global(struct SymMap *sym_map);

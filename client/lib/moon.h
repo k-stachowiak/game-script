@@ -33,7 +33,10 @@ struct MoonValue {
     struct MoonValue *next;
 };
 
+typedef struct MoonValue* (*ClifHandler)(struct MoonValue *args);
+
 void mn_init(void);
+void mn_register_clif(char *symbol, int arity, ClifHandler handler);
 bool mn_exec_file(const char *filename);
 struct MoonValue *mn_exec_command(const char *source);
 void mn_dispose(struct MoonValue* value);

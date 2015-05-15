@@ -142,7 +142,7 @@
 ### Functional map
 (bind map (func (f v)
     (if (empty v)
-        (slice v 0 0)
+        v
         (cons (f (car v)) (map f (cdr v)))
     )
 ))

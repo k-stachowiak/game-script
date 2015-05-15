@@ -98,15 +98,15 @@ void rt_val_push_func_init(
         VAL_LOC_T *size_loc,
         VAL_LOC_T *data_begin,
         VAL_SIZE_T arity,
-        void *ast_def,
-        void *bif_impl)
+		enum ValueFuncType func_type,
+        void *impl)
 {
     static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
     *size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
     *data_begin = stack_push(stack, VAL_SIZE_BYTES, (char*)&arity);
-    stack_push(stack, VAL_PTR_BYTES, (char*)&ast_def);
-    stack_push(stack, VAL_PTR_BYTES, (char*)&bif_impl);
+	stack_push(stack, VAL_TYPE_BYTES, (char*)&func_type);
+    stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
 }
 
 void rt_val_push_func_cap_init_deferred(
@@ -403,10 +403,10 @@ struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
     result.arity_loc = loc;
     loc += VAL_SIZE_BYTES;
 
-    result.ast_def_loc = loc;
-    loc += VAL_PTR_BYTES;
+    result.type_loc = loc;
+    loc += VAL_TYPE_BYTES;
 
-    result.bif_impl_loc = loc;
+    result.impl_loc = loc;
     loc += VAL_PTR_BYTES;
 
     cap_count_loc = loc;
@@ -428,8 +428,8 @@ struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
      */
 
     result.arity = stack_peek_size(rt->stack, result.arity_loc);
-    result.ast_def = (struct AstNode*)stack_peek_ptr(rt->stack, result.ast_def_loc);
-    result.bif_impl = (void*)stack_peek_ptr(rt->stack, result.bif_impl_loc);
+	result.func_type = stack_peek_type(rt->stack, result.type_loc);
+    result.impl = (void*)stack_peek_ptr(rt->stack, result.impl_loc);
     result.cap_count = stack_peek_size(rt->stack, cap_count_loc);
     result.appl_count = stack_peek_size(rt->stack, appl_count_loc);
 

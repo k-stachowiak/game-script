@@ -133,6 +133,19 @@ void rt_set_eval_callback(
     rt->eval_callback_end = end;
 }
 
+void rt_register_clif_handler(
+		struct Runtime *rt,
+		char *symbol,
+		int arity,
+		ClifIntraHandler handler)
+{
+    sym_map_insert(
+		&rt->global_sym_map,
+		symbol,
+		eval_clif(rt, handler, arity),
+		&bif_location);
+}
+
 bool rt_consume_one(
         struct Runtime *rt,
         struct AstNode *ast,

@@ -54,6 +54,14 @@ VAL_SIZE_T stack_peek_size(struct Stack *stack, VAL_LOC_T loc)
     return result;
 }
 
+/** Peek a type_t at a given location */
+VAL_TYPE_T stack_peek_type(struct Stack *stack, VAL_LOC_T loc)
+{
+    VAL_TYPE_T result;
+    memcpy(&result, stack->buffer + loc, VAL_TYPE_BYTES);
+    return result;
+}
+
 /** Peek a ptr_t at a given location */
 void *stack_peek_ptr(struct Stack *stack, VAL_LOC_T loc)
 {

@@ -192,7 +192,17 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 VAL_LOC_T eval_bif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
 {
     VAL_LOC_T size_loc, data_begin, result_loc = rt->stack->top;
-    rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, NULL, impl);
+    rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_BIF, impl);
+    rt_val_push_func_cap_init(rt->stack, 0);
+    rt_val_push_func_appl_init(rt->stack, 0);
+    rt_val_push_func_final(rt->stack, size_loc, data_begin);
+    return result_loc;
+}
+
+VAL_LOC_T eval_clif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
+{
+    VAL_LOC_T size_loc, data_begin, result_loc = rt->stack->top;
+    rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_CLIF, impl);
     rt_val_push_func_cap_init(rt->stack, 0);
     rt_val_push_func_appl_init(rt->stack, 0);
     rt_val_push_func_final(rt->stack, size_loc, data_begin);

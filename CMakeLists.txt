@@ -55,6 +55,8 @@ add_library(lang OBJECT
     )
 
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
+	./client/lib/clif.c
+	./client/lib/mndetail.c
     ./client/lib/moon.c
     )
 target_link_libraries(moon m stdc++)
