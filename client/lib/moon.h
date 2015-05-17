@@ -4,6 +4,7 @@
 #define MOON_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +26,7 @@ struct MoonValue {
     union {
         bool boolean;
         char character;
-        long integer;
+        uint64_t integer;
         double real;
         char *string;
         struct MoonValue *compound;

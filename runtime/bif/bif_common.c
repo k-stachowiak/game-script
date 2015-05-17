@@ -7,8 +7,6 @@
 #include "rt_val.h"
 #include "src_iter.h"
 
-struct SourceLocation bif_location = { SRC_LOC_BIF, -1, -1 };
-
 enum ValueType bif_match_un(
         struct Runtime *rt,
         VAL_LOC_T x_loc,

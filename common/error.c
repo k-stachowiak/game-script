@@ -33,6 +33,9 @@ void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocatio
     case SRC_LOC_BIF:
         str_append(buffer, "[%s] (BIF) :", module);
         break;
+	case SRC_LOC_CLIF:
+		str_append(buffer, "[%s] (CLIF) :", module);
+		break;
     case SRC_LOC_FUNC_CONTAINED:
         str_append(buffer, "[%s] (FUNC) :", module);
         break;

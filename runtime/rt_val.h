@@ -31,6 +31,13 @@
 
 #define VAL_PTR_BYTES sizeof(void*)
 
+/* Allocate variables of significant values to copy from. */
+static VAL_HEAD_SIZE_T zero = 0;
+static VAL_HEAD_SIZE_T bool_size = VAL_BOOL_BYTES;
+static VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
+static VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
+static VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
+
 #include "runtime.h"
 
 struct Stack;

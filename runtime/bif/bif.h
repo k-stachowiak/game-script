@@ -13,8 +13,6 @@ typedef void (*bif_unary_func)(struct Runtime *rt, VAL_LOC_T x_loc);
 typedef void (*bif_binary_func)(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 typedef void (*bif_ternary_func)(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc, VAL_LOC_T z_loc);
 
-extern struct SourceLocation bif_location;
-
 /* Arythmetic */
 void bif_sqrt(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_add(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
