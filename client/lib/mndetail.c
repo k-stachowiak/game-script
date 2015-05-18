@@ -6,20 +6,20 @@
 
 struct Runtime *runtime;
 
-struct MoonValue *make_api_value_compound(VAL_LOC_T loc)
+struct MoonValue *mn_make_api_value_compound(VAL_LOC_T loc)
 {
     int i, len = rt_val_cpd_len(runtime, loc);
     VAL_LOC_T current_loc = rt_val_cpd_first_loc(loc);
     struct MoonValue *result = NULL, *result_end = NULL;
     for (i = 0; i < len; ++i) {
-        struct MoonValue *value = make_api_value(current_loc);
+        struct MoonValue *value = mn_make_api_value(current_loc);
         LIST_APPEND(value, &result, &result_end);
         current_loc = rt_val_next_loc(runtime, current_loc);
     }
     return result;
 }
 
-struct MoonValue *make_api_value(VAL_LOC_T loc)
+struct MoonValue *mn_make_api_value(VAL_LOC_T loc)
 {
     struct MoonValue *result = mem_malloc(sizeof(*result));
     result->next = NULL;
@@ -54,12 +54,12 @@ struct MoonValue *make_api_value(VAL_LOC_T loc)
 
     case VAL_ARRAY:
         result->type = MN_ARRAY;
-        result->data.compound = make_api_value_compound(loc);
+        result->data.compound = mn_make_api_value_compound(loc);
         break;
 
     case VAL_TUPLE:
         result->type = MN_TUPLE;
-        result->data.compound = make_api_value_compound(loc);
+        result->data.compound = mn_make_api_value_compound(loc);
         break;
 
     case VAL_FUNCTION:
@@ -70,7 +70,7 @@ struct MoonValue *make_api_value(VAL_LOC_T loc)
     return result;
 }
 
-void api_value_free(struct MoonValue *value)
+void mn_api_value_free(struct MoonValue *value)
 {
     while (value) {
 
@@ -90,7 +90,7 @@ void api_value_free(struct MoonValue *value)
 
         case MN_ARRAY:
         case MN_TUPLE:
-            api_value_free(value->data.compound);
+            mn_api_value_free(value->data.compound);
             break;
         }
 

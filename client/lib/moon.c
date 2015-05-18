@@ -36,10 +36,10 @@ void mn_init(void)
 	clif_init();
 }
 
-void mn_register_clif(char *symbol, int arity, ClifHandler handler)
+void mn_register_clif(const char *symbol, int arity, ClifHandler handler)
 {
-	clif_register(symbol, handler);
-	rt_register_clif_handler(runtime, symbol, arity, clif_common_handler);
+	clif_register((char*)symbol, handler);
+	rt_register_clif_handler(runtime, (char*)symbol, arity, clif_common_handler);
 }
 
 bool mn_exec_file(const char *filename)
@@ -78,12 +78,12 @@ struct MoonValue *mn_exec_command(const char *source)
         return NULL;
     }
 
-    return make_api_value(result_loc);
+    return mn_make_api_value(result_loc);
 }
 
 void mn_dispose(struct MoonValue* value)
 {
-    api_value_free(value);
+    mn_api_value_free(value);
 }
 
 const char *mn_error_message(void)

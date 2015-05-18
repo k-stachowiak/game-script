@@ -3,6 +3,7 @@
 #include "collection.h"
 #include "error.h"
 #include "mndetail.h"
+#include "rt_val.h"
 
 struct ClifMapKvp {
 	char *key;
@@ -21,6 +22,82 @@ static void clif_error_already_inserted(char *symbol)
     err_msg_init(&msg, "LIB");
     err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
     err_msg_set(&msg);
+}
+
+static void clif_error_symbol_not_found(char *symbol)
+{
+    struct ErrMessage msg;
+    err_msg_init(&msg, "LIB");
+    err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
+    err_msg_set(&msg);
+}
+
+static struct MoonValue *clif_read_args(VAL_LOC_T *arg_locs, int arg_count)
+{
+	if (arg_count == 0) {
+		return NULL;
+	}
+
+	struct MoonValue *result = mn_make_api_value(*arg_locs);
+	result->next = clif_read_args(arg_locs + 1, arg_count - 1);
+	return result;
+}
+
+static void clif_push_result(struct MoonValue *value)
+{
+	VAL_LOC_T size_loc, data_begin, data_end;
+	struct MoonValue *child = value->data.compound;
+
+	switch (value->type) {
+    case MN_BOOL:
+		rt_val_push_bool(runtime->stack, value->data.boolean);
+		break;
+
+    case MN_CHAR:
+		rt_val_push_char(runtime->stack, value->data.character);
+		break;
+
+    case MN_INT:
+		rt_val_push_int(runtime->stack, value->data.integer);
+		break;
+
+    case MN_REAL:
+		rt_val_push_real(runtime->stack, value->data.real);
+		break;
+
+    case MN_STRING:
+		rt_val_push_string(
+			runtime->stack,
+			value->data.string,
+			value->data.string + strlen(value->data.string));
+		break;
+
+    case MN_ARRAY:
+		rt_val_push_array_init(runtime->stack, &size_loc);
+		data_begin = runtime->stack->top;
+		while (child) {
+			clif_push_result(child);
+			child = child->next;
+		}
+		data_end = runtime->stack->top;
+		rt_val_push_cpd_final(runtime->stack, size_loc, data_end - data_begin);
+		break;
+
+    case MN_TUPLE:
+		rt_val_push_tuple_init(runtime->stack, &size_loc);
+		data_begin = runtime->stack->top;
+		while (child) {
+			clif_push_result(child);
+			child = child->next;
+		}
+		data_end = runtime->stack->top;
+		rt_val_push_cpd_final(runtime->stack, size_loc, data_end - data_begin);
+		break;
+
+	case MN_FUNCTION:
+		LOG_ERROR("Function manipulation not yet handled in the library.");
+		exit(1);
+	}
 }
 
 void clif_init(void)
@@ -54,6 +131,7 @@ void clif_register(char *symbol, ClifHandler handler)
 			clif_error_already_inserted(symbol);
 			return;
 		}
+		kvp = kvp->next;
     }
 
     kvp = mem_malloc(sizeof(*kvp));
@@ -66,5 +144,28 @@ void clif_register(char *symbol, ClifHandler handler)
 
 void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count)
 {
+	struct ClifMapKvp *kvp = clif_map.map;
+
+	while (kvp) {
+		struct MoonValue *arg_list;
+		struct MoonValue *result;
+
+		if (strcmp(kvp->key, symbol) != 0) {
+			kvp = kvp->next;
+			continue;
+		}
+
+		arg_list = clif_read_args(arg_locs, arg_count);
+		result = kvp->handler(arg_list);
+
+		clif_push_result(result);
+
+		mn_dispose(arg_list);
+		mn_dispose(result);
+
+		return;
+	}
+
+	clif_error_symbol_not_found(symbol);
 }
 
