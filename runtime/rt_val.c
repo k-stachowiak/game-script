@@ -9,6 +9,12 @@
 #include "runtime.h"
 #include "rt_val.h"
 
+VAL_HEAD_SIZE_T zero = 0;
+VAL_HEAD_SIZE_T bool_size = VAL_BOOL_BYTES;
+VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
+VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
+VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
+
 static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 
 static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
