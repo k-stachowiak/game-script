@@ -5,6 +5,7 @@
 #include "eval.h"
 #include "eval_detail.h"
 
+#include "collection.h"
 #include "log.h"
 #include "error.h"
 #include "bif.h"
@@ -96,8 +97,8 @@ static void efc_curry_on(
         &size_loc,
         &data_begin,
         func_data->arity,
-        func_data->ast_def,
-        func_data->bif_impl);
+        func_data->func_type,
+        func_data->impl);
 
     /* Captures. */
     rt_val_push_func_cap_init(rt->stack, func_data->cap_count);
@@ -184,14 +185,15 @@ static void efc_evaluate_ast(
 
     struct SymMap local_sym_map;
 
-    struct Pattern *formal_args = func_data->ast_def->data.func_def.formal_args;
+	struct AstNode *ast_def = (struct AstNode *)func_data->impl;
+    struct Pattern *formal_args = ast_def->data.func_def.formal_args;
 
-    struct SourceLocation *arg_locs = func_data->ast_def->data.func_def.arg_locs;
+    struct SourceLocation *arg_locs = ast_def->data.func_def.arg_locs;
     struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
 
     /* Initialize local scope. */
     efc_evaluate_ast_init_local_sym_map(sym_map, symbol, &local_sym_map);
-    sym_map_insert(&local_sym_map, symbol, func_loc, &func_data->ast_def->loc);
+    sym_map_insert(&local_sym_map, symbol, func_loc, &ast_def->loc);
 
     /* Insert captures into the scope. */
     for (i = 0; i < func_data->cap_count; ++i) {
@@ -232,7 +234,7 @@ static void efc_evaluate_ast(
     temp_end = rt->stack->top;
 
     /* Evaluate the function expression. */
-    eval_impl(func_data->ast_def->data.func_def.expr, rt, &local_sym_map);
+    eval_impl(ast_def->data.func_def.expr, rt, &local_sym_map);
 
     efc_log_result(rt, temp_end);
 
@@ -293,15 +295,15 @@ static void efc_evaluate_bif(
     /* Evaluate the function implementation. */
     switch (func_data->arity) {
     case 1:
-        ((bif_unary_func)func_data->bif_impl)(rt, arg_locs[0]);
+        ((bif_unary_func)func_data->impl)(rt, arg_locs[0]);
         break;
 
     case 2:
-        ((bif_binary_func)func_data->bif_impl)(rt, arg_locs[0], arg_locs[1]);
+        ((bif_binary_func)func_data->impl)(rt, arg_locs[0], arg_locs[1]);
         break;
 
     case 3:
-        ((bif_ternary_func)func_data->bif_impl)(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
+        ((bif_ternary_func)func_data->impl)(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
         break;
     }
 
@@ -309,6 +311,43 @@ static void efc_evaluate_bif(
 
     /* Collapse the temporaries. */
     stack_collapse(rt->stack, temp_begin, temp_end);
+}
+
+/** Evaluates a CLIF. */
+static void efc_evaluate_clif(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        char *symbol,
+        struct AstNode *actual_args,
+        struct ValueFuncData *func_data)
+{
+	VAL_SIZE_T i;
+    struct { VAL_LOC_T *data; int size, cap; } arg_locs = { 0 };
+    VAL_LOC_T temp_begin, temp_end;
+    VAL_LOC_T appl_loc = func_data->appl_start;
+	ClifIntraHandler handler = (ClifIntraHandler)func_data->impl;
+
+    /* Peal out already applied args. */
+    for (i = 0; i < func_data->appl_count; ++i) {
+		ARRAY_APPEND(arg_locs, appl_loc);
+        appl_loc = rt_val_next_loc(rt, appl_loc);
+    }
+
+    /* Evaluate the missing args. */
+    temp_begin = rt->stack->top;
+    for (; actual_args; actual_args = actual_args->next) {
+        VAL_LOC_T temp_loc = eval_impl(actual_args, rt, sym_map);
+        if (err_state()) {
+            return;
+        }
+		ARRAY_APPEND(arg_locs, temp_loc);
+    }
+    temp_end = rt->stack->top;
+
+	handler(symbol, arg_locs.data, arg_locs.size);
+
+    stack_collapse(rt->stack, temp_begin, temp_end);
+	ARRAY_FREE(arg_locs);
 }
 
 void eval_func_call(
@@ -334,16 +373,19 @@ void eval_func_call(
         efc_curry_on(rt, sym_map, actual_args, &func_data);
 
     } else if (func_data.arity == applied) {
-        if (func_data.ast_def && !func_data.bif_impl) {
+		switch (func_data.func_type) {
+		case VAL_FUNC_AST:
             efc_evaluate_ast(rt, sym_map, symbol, val_loc, actual_args, &func_data);
+			break;
 
-        } else if (!func_data.ast_def && func_data.bif_impl) {
+		case VAL_FUNC_BIF:
             efc_evaluate_bif(rt, sym_map, symbol, actual_args, &func_data);
+			break;
 
-        } else {
-            LOG_ERROR("Malformed function value evaluated.\n");
-            exit(1);
-        }
+		case VAL_FUNC_CLIF:
+            efc_evaluate_clif(rt, sym_map, symbol, actual_args, &func_data);
+			break;
+		}
 
     } else {
         fcall_error_too_many_args(symbol, func_data.arity, applied);

@@ -12,6 +12,8 @@
 typedef void (*EvalCallbackBegin)(void*, struct AstNode*);
 typedef void (*EvalCallbackEnd)(void*, struct Runtime*, VAL_LOC_T);
 
+typedef void (*ClifIntraHandler)(char*, VAL_LOC_T*, int);
+
 struct Runtime {
     struct Stack *stack;
     struct SymMap global_sym_map;
@@ -38,6 +40,12 @@ void rt_set_eval_callback(
         void *data,
         EvalCallbackBegin begin,
         EvalCallbackEnd end);
+
+void rt_register_clif_handler(
+		struct Runtime *rt,
+		char *symbol,
+		int arity,
+		ClifIntraHandler handler);
 
 bool rt_consume_one(
         struct Runtime *rt,

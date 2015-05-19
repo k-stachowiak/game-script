@@ -38,5 +38,6 @@ struct SourceLocation *eval_location_top(void);
 
 VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 VAL_LOC_T eval_bif(struct Runtime *rt, void *impl, VAL_SIZE_T arity);
+VAL_LOC_T eval_clif(struct Runtime *rt, void *impl, VAL_SIZE_T arity);
 
 #endif

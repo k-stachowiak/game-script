@@ -8,6 +8,7 @@
 enum SourceLocationType {
     SRC_LOC_REGULAR,
     SRC_LOC_BIF,
+	SRC_LOC_CLIF,
     SRC_LOC_FUNC_CONTAINED
 };
 

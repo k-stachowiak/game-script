@@ -46,6 +46,9 @@ add_library(lang OBJECT
     ./runtime/stack.c
     ./runtime/runtime.c
     ./runtime/rt_val.c
+    ./runtime/rt_val_peek.c
+    ./runtime/rt_val_poke.c
+    ./runtime/rt_val_push.c
     ./ast/ast.c
     ./ast/pattern.c
     ./common/error.c
@@ -55,6 +58,8 @@ add_library(lang OBJECT
     )
 
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
+	./client/lib/clif.c
+	./client/lib/mndetail.c
     ./client/lib/moon.c
     )
 target_link_libraries(moon m stdc++)

@@ -8,12 +8,14 @@
 
 #define VAL_LOC_T ptrdiff_t
 
+#define VAL_TYPE_T uint8_t
+#define VAL_TYPE_BYTES sizeof(VAL_TYPE_T)
 #define VAL_SIZE_T uint16_t
 #define VAL_SIZE_BYTES sizeof(VAL_SIZE_T)
 
-#define VAL_HEAD_TYPE_T uint8_t
+#define VAL_HEAD_TYPE_T VAL_TYPE_T
 #define VAL_HEAD_SIZE_T VAL_SIZE_T
-#define VAL_HEAD_TYPE_BYTES sizeof(VAL_HEAD_TYPE_T)
+#define VAL_HEAD_TYPE_BYTES VAL_TYPE_BYTES
 #define VAL_HEAD_SIZE_BYTES VAL_SIZE_BYTES
 #define VAL_HEAD_BYTES (VAL_HEAD_TYPE_BYTES + VAL_HEAD_SIZE_BYTES)
 
@@ -28,6 +30,13 @@
 #define VAL_REAL_BYTES sizeof(VAL_REAL_T)
 
 #define VAL_PTR_BYTES sizeof(void*)
+
+/* Allocate variables of significant values to copy from. */
+extern VAL_HEAD_SIZE_T zero;
+extern VAL_HEAD_SIZE_T bool_size;
+extern VAL_HEAD_SIZE_T char_size;
+extern VAL_HEAD_SIZE_T int_size;
+extern VAL_HEAD_SIZE_T real_size;
 
 #include "runtime.h"
 
@@ -52,18 +61,24 @@ struct ValueHeader {
     VAL_HEAD_SIZE_T size;
 };
 
+enum ValueFuncType {
+	VAL_FUNC_AST,
+	VAL_FUNC_BIF,
+	VAL_FUNC_CLIF
+};
+
 struct ValueFuncData {
     VAL_LOC_T arity_loc;
-    VAL_LOC_T ast_def_loc;
-    VAL_LOC_T bif_impl_loc;
+    VAL_LOC_T type_loc;
+    VAL_LOC_T impl_loc;
     VAL_LOC_T cap_start;
     VAL_LOC_T appl_start;
 
     VAL_SIZE_T arity;
-    struct AstNode *ast_def;
-    void *bif_impl;
     VAL_SIZE_T appl_count;
     VAL_SIZE_T cap_count;
+	VAL_TYPE_T func_type;
+	void *impl;
 };
 
 /* Writing (pushing) API.
@@ -103,8 +118,8 @@ void rt_val_push_func_init(
         VAL_LOC_T *size_loc,
         VAL_LOC_T *data_begin,
         VAL_SIZE_T arity,
-        void *ast_def,
-        void *bif_impl);
+		enum ValueFuncType type,
+        void *impl);
 
 void rt_val_push_func_cap_init_deferred(
         struct Stack *stack,

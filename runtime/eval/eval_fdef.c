@@ -131,7 +131,7 @@ void eval_func_def(
 {
     VAL_LOC_T size_loc, data_begin;
     VAL_SIZE_T arity = node->data.func_def.arg_count;
-    rt_val_push_func_init(stack, &size_loc, &data_begin, arity, (void*)node, NULL);
+    rt_val_push_func_init(stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)node);
     efd_push_captures_2(stack, sym_map, &node->data.func_def);
     if (err_state()) {
         return;

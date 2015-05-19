@@ -1,4 +1,3 @@
-# Compiled Object files
 *.slo
 *.lo
 *.o
@@ -33,3 +32,4 @@ gmon.out
 build/
 *[#]
 *~
+/libtest.cpp

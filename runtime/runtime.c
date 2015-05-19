@@ -20,6 +20,8 @@ static void rt_free_stored(struct Runtime *rt)
 
 static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
 {
+	static struct SourceLocation bif_location = { SRC_LOC_BIF, -1, -1 };
+
     sym_map_insert(sm, "+", eval_bif(rt, bif_add, 2), &bif_location);
     sym_map_insert(sm, "-", eval_bif(rt, bif_sub, 2), &bif_location);
     sym_map_insert(sm, "*", eval_bif(rt, bif_mul, 2), &bif_location);
@@ -132,6 +134,21 @@ void rt_set_eval_callback(
     rt->eval_callback_data = data;
     rt->eval_callback_begin = begin;
     rt->eval_callback_end = end;
+}
+
+void rt_register_clif_handler(
+		struct Runtime *rt,
+		char *symbol,
+		int arity,
+		ClifIntraHandler handler)
+{
+	static struct SourceLocation clif_location = { SRC_LOC_CLIF, -1, -1 };
+
+    sym_map_insert(
+		&rt->global_sym_map,
+		symbol,
+		eval_clif(rt, handler, arity),
+		&clif_location);
 }
 
 bool rt_consume_one(
