@@ -8,6 +8,14 @@
 #include "memory.h"
 #include "error.h"
 
+struct ErrFrame {
+	char *message;
+	struct SourceLocation *location;
+	struct ErrFrame *next;
+} *err_stack = NULL;
+
+void err_push(char *message, struct SourceLocation *loc);
+
 static char *err_message = NULL;
 
 static void err_internal_error(void)
