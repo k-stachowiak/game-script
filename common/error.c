@@ -76,6 +76,17 @@ char *err_msg(void)
 
 void err_report(void)
 {
-	exit(1);
+	struct ErrFrame *frame;
+	while (frame) {
+		char *message = NULL;
+		str_append(message, "[%s] ", frame->module);
+		if (frame->src_loc.type == SRC_LOC_NORMAL) {
+			str_append(message, "(%d,%d) ", frame->src_loc.line, frame->src_loc.column);
+		}
+		str_append(message, ": %s\n", frame->message);
+		printf("%s", message);
+		mem_free(message);
+		frame = frame->next;
+	}
 }
 

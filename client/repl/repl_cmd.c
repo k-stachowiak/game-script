@@ -143,6 +143,12 @@ void repl_cmd_init(struct Runtime *rt)
 
     /* Toggle the debugger on (_after_ initializing the standard library). */
     repl_cmd_dbg_toggle(rt);
+
+	/* Report error if occurred. */
+	if (err_state()) {
+		err_report();
+		err_reset();
+	}
 }
 
 void repl_cmd_deinit(void)
@@ -172,7 +178,7 @@ enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
         return REPL_CMD_QUIT;
 
     } else if (strcmp(pieces[0], "ld") == 0) {
-        return repl_cmd_load(rt, pieces + 1, num_pieces - 1);
+		return repl_cmd_load(rt, pieces + 1, num_pieces - 1);
 
     } else if (strcmp(pieces[0], "pst") == 0) {
         repl_cmd_print_stack(rt);

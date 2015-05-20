@@ -22,7 +22,8 @@ static void repl_handle_command(struct Runtime *rt, char *cmd)
 
     case REPL_CMD_ERROR:
     case REPL_CMD_INTERNAL_ERROR:
-        printf("Command error : %s.\n", err_msg());
+		err_report();
+		err_reset();
         break;
 
     case REPL_CMD_QUIT:
@@ -39,7 +40,8 @@ static void repl_handle_expression(struct Runtime *rt, char *expr)
 
     case REPL_EXPR_ERROR:
     case REPL_EXPR_INTERNAL_ERROR:
-        printf("Expr error : %s.\n", err_msg());
+		err_report();
+		err_reset();
         break;
     }
 }
@@ -51,7 +53,7 @@ static void repl_handle_line(struct Runtime *rt, char *line)
     } else if (*line == ':') {
         repl_handle_command(rt, line + 1);
     } else {
-        repl_handle_expression(rt, line);
+		repl_handle_expression(rt, line);
     }
 }
 
