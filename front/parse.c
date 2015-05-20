@@ -322,7 +322,6 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     /* 3. Has 0 or more expressions. */
     exprs = parse_list(dom->cpd_children);
     if (err_state()) {
-		err_push("PARSE", dom->cpd_children->loc, "Failed parsing compound node");
         return NULL;
     } else {
         return ast_make_compound(&dom->loc, type, exprs);
@@ -358,7 +357,6 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     /* 3.2. Has 0 or more further children being any expression. */
     args = parse_list(child);
     if (err_state()) {
-		err_push("PARSE", child->loc, "Failed parsing function call");
         return NULL;
     } else {
         return ast_make_func_call(&dom->loc, symbol, args);
@@ -692,7 +690,6 @@ static struct AstNode *parse_literal(struct DomNode *dom)
         return result;
 
     } else {
-		err_push("PARSE", dom->loc, "Failed parsing literal node");
         return NULL;
     }
 }
