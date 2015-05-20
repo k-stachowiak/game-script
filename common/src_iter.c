@@ -1,11 +1,23 @@
 #include "src_iter.h"
 
+struct SourceLocation src_loc_normal(int line, int column)
+{
+	struct SourceLocation result = { SRC_LOC_NORMAL, line, column };
+	return result;
+}
+
+struct SourceLocation src_loc_virtual(void)
+{
+	struct SourceLocation result = { SRC_LOC_VIRTUAL, -1, -1 };
+	return result;
+}
+
 void si_init(struct SourceIter *si, char *first, char *last)
 {
     si->first = first;
     si->current = first;
     si->last = last;
-    si->loc.type = SRC_LOC_REGULAR;
+    si->loc.type = SRC_LOC_NORMAL;
     si->loc.line = 0;
     si->loc.column = 0;
 }

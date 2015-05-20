@@ -15,6 +15,10 @@ static void para_error_invalid_argc(char *func, int count)
         "Incorrect arguments count passed to _%s_: %d",
         func, count);
     err_msg_set(&msg);
+
+	err_push("EVAL PARAFUNC", *eval_location_top(),
+        "Incorrect arguments count passed to _%s_: %d",
+        func, count);
 }
 
 static void para_error_arg_not_bool(char *func, int index)
@@ -25,6 +29,10 @@ static void para_error_arg_not_bool(char *func, int index)
         "argument %d of _%s_ is not of boolean type",
         index, func);
     err_msg_set(&msg);
+
+	err_push("EVAL PARAFUNC", *eval_location_top(),
+        "argument %d of _%s_ is not of boolean type",
+        index, func);
 }
 static void para_error_no_case_matched(void)
 {
@@ -32,6 +40,7 @@ static void para_error_no_case_matched(void)
     err_msg_init_src(&msg, "EVAL PARAFUNC", eval_location_top());
     err_msg_append(&msg, "Unmached case in a swithc");
     err_msg_set(&msg);
+	err_push("EVAL PARAFUNC", *eval_location_top(), "Unmached case in a swithc");
 }
 
 static void para_error_case(char *unmet)
@@ -40,6 +49,7 @@ static void para_error_case(char *unmet)
     err_msg_init_src(&msg, "EVAL PARAFUNC", eval_location_top());
     err_msg_append(&msg, "Case %s", unmet);
     err_msg_set(&msg);
+	err_push("EVAL PARAFUNC", *eval_location_top(), "Case %s", unmet);
 }
 
 static void eval_parafunc_logic(
@@ -62,6 +72,7 @@ static void eval_parafunc_logic(
 
         VAL_LOC_T loc = eval_impl(args, rt, sym_map);
         if (err_state()) {
+			err_push("EVAL", args->loc, "Failed evaluating logic parafunc element");
             return;
         }
 
@@ -102,6 +113,7 @@ static void eval_parafunc_if(
     temp_end = rt->stack->top;
 
     if (err_state()) {
+		err_push("EVAL", args->loc, "Failed evaluating if test");
         return;
     }
 
@@ -137,6 +149,7 @@ static bool eval_parafunc_switch_case(
     temp_end = rt->stack->top;
 
     if (err_state()) {
+		err_push("EVAL", case_node->loc, "Failed evaluating case expression");
         goto end;
     }
 
@@ -183,16 +196,18 @@ static void eval_parafunc_switch(
     temp_end = rt->stack->top;
 
     if (err_state()) {
+		err_push("EVAL", args->loc, "Failed evaluating switch expression");
         goto end;
     }
 
     args = args->next;
-    
+
     while (args) {
         if (eval_parafunc_switch_case(switch_loc, rt, sym_map, args)) {
             goto end;
         } else {
             if (err_state()) {
+				err_push("EVAL", src_loc_virtual(), "Failed evaluating switch case");
                 goto end;
             }
             args = args->next;

@@ -40,6 +40,7 @@ static void bif_logic_error_arg_mismatch(void)
     err_msg_init_src(&msg, "EVAL BIF LOGIC", eval_location_top());
     err_msg_append(&msg, "Arguments of logic BIF must be of boolean type");
     err_msg_set(&msg);
+	err_push("EVAL BIF LOGIC", *eval_location_top(), "Arguments of logic BIF must be of boolean type");
 }
 
 static VAL_BOOL_T bif_xor_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x ^ (bool)y; }

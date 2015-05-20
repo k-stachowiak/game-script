@@ -6,10 +6,8 @@
 #include <stdbool.h>
 
 enum SourceLocationType {
-    SRC_LOC_REGULAR,
-    SRC_LOC_BIF,
-	SRC_LOC_CLIF,
-    SRC_LOC_FUNC_CONTAINED
+	SRC_LOC_NORMAL,
+	SRC_LOC_VIRTUAL
 };
 
 struct SourceLocation {
@@ -17,6 +15,9 @@ struct SourceLocation {
     int line;
     int column;
 };
+
+struct SourceLocation src_loc_normal(int line, int column);
+struct SourceLocation src_loc_virtual(void);
 
 struct SourceIter {
     char *first;

@@ -14,6 +14,7 @@ static void bif_compare_error_arg_mismatch(void)
     err_msg_init_src(&msg, "EVAL BIF COMPARE", eval_location_top());
     err_msg_append(&msg, "Arguments of comparison BIF must be of equal numeric type");
     err_msg_set(&msg);
+	err_push("EVAL BIF COMPARE", *eval_location_top(), "Arguments of comparison BIF must be of equal numeric type");
 }
 
 void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)

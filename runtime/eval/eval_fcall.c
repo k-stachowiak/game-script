@@ -55,6 +55,11 @@ static void fcall_error_too_many_args(char *symbol, int arity, int applied)
     err_msg_append(&msg, "Passed too many arguments to \"%s\"", symbol);
     err_msg_append(&msg, "Expected %d, applied %d", arity, applied);
     err_msg_set(&msg);
+	err_push(
+		"EVAL FUNC CALL",
+		*eval_location_top(),
+		"Passed too many arguments to \"%s\". Expected %d, applied %d",
+		symbol, arity, applied);
 }
 
 /**
@@ -123,6 +128,7 @@ static void efc_curry_on(
     for (; actual_args; actual_args = actual_args->next) {
         eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
+			err_push("EVAL", actual_args->loc, "Failed evaluating function argument");
             break;
         }
     }
@@ -143,11 +149,13 @@ static bool efc_insert_expression(
 {
     *location = eval_impl(arg_node, rt, caller_sym_map);
     if (err_state()) {
+		err_push("EVAL", arg_node->loc, "Failed evaluating function argument expression");
         return false;
     }
 
     eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
     if (err_state()) {
+		err_push("EVAL", src_loc_virtual(), "Failed registering function argument in the local scope");
         return false;
     }
 
@@ -189,19 +197,20 @@ static void efc_evaluate_ast(
     struct Pattern *formal_args = ast_def->data.func_def.formal_args;
 
     struct SourceLocation *arg_locs = ast_def->data.func_def.arg_locs;
-    struct SourceLocation cont_loc = { SRC_LOC_FUNC_CONTAINED, -1, -1 };
+    struct SourceLocation cont_loc = src_loc_virtual();
 
     /* Initialize local scope. */
     efc_evaluate_ast_init_local_sym_map(sym_map, symbol, &local_sym_map);
-    sym_map_insert(&local_sym_map, symbol, func_loc, &ast_def->loc);
+    sym_map_insert(&local_sym_map, symbol, func_loc, ast_def->loc);
 
     /* Insert captures into the scope. */
     for (i = 0; i < func_data->cap_count; ++i) {
         char *cap_symbol = rt_val_peek_fun_cap_symbol(rt, cap_loc);
         VAL_LOC_T cap_val_loc = rt_val_fun_cap_loc(rt, cap_loc);
-        sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, &cont_loc);
+        sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, cont_loc);
         cap_loc = rt_val_fun_next_cap_loc(rt, cap_loc);
         if (err_state()) {
+			err_push("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
             goto cleanup;
         }
     }
@@ -215,6 +224,7 @@ static void efc_evaluate_ast(
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
         if (err_state()) {
+			err_push("EVAL", src_loc_virtual(), "Failed re-evaluating funtcion applied arguments");
             goto cleanup;
         }
     }
@@ -281,6 +291,7 @@ static void efc_evaluate_bif(
         ++arg_count;
 
         if (err_state()) {
+			err_push("EVAL", src_loc_virtual(), "Failed evaluating new funtcion arguments");
             return;
         }
     }
@@ -338,6 +349,7 @@ static void efc_evaluate_clif(
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T temp_loc = eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
+			err_push("EVAL", src_loc_virtual(), "Failed evaluating new funtcion arguments");
             return;
         }
 		ARRAY_APPEND(arg_locs, temp_loc);

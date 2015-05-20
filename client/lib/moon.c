@@ -18,6 +18,7 @@ static void moon_error_nofile(void)
     err_msg_init(&msg, "LIB");
     err_msg_append(&msg, "Failed loading a file");
     err_msg_set(&msg);
+	err_push("LIB", src_loc_virtual(), "Failed loading a file");
 }
 
 static void mn_deinit(void)
@@ -75,6 +76,7 @@ struct MoonValue *mn_exec_command(const char *source)
     rt_consume_one(runtime, expr, &result_loc, NULL);
 
     if (err_state()) {
+		err_push("REPL", clif_location, "Failed executing command: %s", source);
         return NULL;
     }
 

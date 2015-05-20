@@ -18,6 +18,7 @@ static void lex_error_undelimited(char *what, struct SourceLocation *where)
     err_msg_init_src(&msg, "lex", where);
     err_msg_append(&msg, "undelimited %s", what);
     err_msg_set(&msg);
+	err_push("LEX", *where, "undelimited %s", what);
 }
 
 static void lex_error_close_unopen(struct SourceLocation *where)
@@ -26,6 +27,7 @@ static void lex_error_close_unopen(struct SourceLocation *where)
     err_msg_init_src(&msg, "lex", where);
     err_msg_append(&msg, "closing unopened compound node");
     err_msg_set(&msg);
+	err_push("LEX", *where, "closing unopened compound node");
 }
 
 static void lex_error_read(char *what, struct SourceLocation *where)
@@ -34,6 +36,7 @@ static void lex_error_read(char *what, struct SourceLocation *where)
     err_msg_init_src(&msg, "LEX", where);
     err_msg_append(&msg, "Failed reading %s", what);
     err_msg_set(&msg);
+	err_push("LEX", *where, "Failed reading %s", what);
 }
 
 /* Tokenization.
@@ -255,6 +258,7 @@ static struct Token *tok_read_token(
         (!err_state() && (result = tok_read_comment(current, end)))) {
         return result;
     } else {
+		err_push("LEX", current->loc, "Failed reading token at %s", current->first);
         return NULL;
     }
 }
@@ -279,6 +283,7 @@ static struct Token *tokenize(
             if (!err_state()) {
                 lex_error_read("token", &begin.loc);
             }
+			err_push("LEX", current.loc, "Failed tokenizing at %s", current.first);
             tok_free(result);
             return NULL;
         }
@@ -332,6 +337,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         } else {
             struct DomNode *child = dom_parse_node(current);
             if (err_state()) {
+				err_push("LEX", (*current)->loc, "Failed parsing compound node: %s", (*current)->begin);
                 goto fail;
 
             } else if (!child) {
@@ -394,14 +400,15 @@ static struct DomNode *dom_build(struct Token *tokens)
     while (current) {
         struct DomNode *node = dom_parse_node(&current);
         if (err_state()) {
+			err_push("LEX", current->loc, "Failed building DOM: %s", current->begin);
             dom_free(result);
             return NULL;
         }
         if (node) {
-        	LOG_TRACE(
-        		"parsed sexpr node \"%s\"",
-        		node->type == DOM_ATOM ? "atom" : "comopund");
-            LIST_APPEND(node, &result, &result_end);
+			LOG_TRACE(
+				"parsed sexpr node \"%s\"",
+				node->type == DOM_ATOM ? "atom" : "comopund");
+			LIST_APPEND(node, &result, &result_end);
         }
     }
 

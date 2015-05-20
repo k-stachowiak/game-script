@@ -112,7 +112,7 @@ static int efd_push_captures_rec(
     return captures;
 }
 
-static void efd_push_captures_2(
+static void efd_push_captures(
         struct Stack *stack,
         struct SymMap *sym_map,
         struct AstFuncDef *func_def)
@@ -132,8 +132,9 @@ void eval_func_def(
     VAL_LOC_T size_loc, data_begin;
     VAL_SIZE_T arity = node->data.func_def.arg_count;
     rt_val_push_func_init(stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)node);
-    efd_push_captures_2(stack, sym_map, &node->data.func_def);
+    efd_push_captures(stack, sym_map, &node->data.func_def);
     if (err_state()) {
+		err_push("EVAL", node->loc, "Failed evaluating function definition expression");
         return;
     }
     rt_val_push_func_appl_init(stack, 0);

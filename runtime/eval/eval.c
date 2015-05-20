@@ -50,6 +50,7 @@ void eval_error_not_found(char *symbol)
     err_msg_init_src(&msg, "EVAL", eval_location_top());
     err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
     err_msg_set(&msg);
+	err_push("EVAL BIF TEXT", *eval_location_top(), "Symbol \"%s\" not found", symbol);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
@@ -155,6 +156,7 @@ VAL_LOC_T eval_impl(
     }
 
     if (err_state()) {
+		err_push("EVAL", node->loc, "Failed evaluating expression");
         return -1;
 
     } else {
@@ -182,6 +184,7 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
     end = rt->stack->top;
 
     if (err_state()) {
+		err_push("EVAL", node->loc, "Failed evaluating expression");
         stack_collapse(rt->stack, begin, end);
         return -1;
     } else {

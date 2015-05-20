@@ -20,42 +20,42 @@ static void rt_free_stored(struct Runtime *rt)
 
 static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
 {
-	static struct SourceLocation bif_location = { SRC_LOC_BIF, -1, -1 };
+	struct SourceLocation bif_location = src_loc_virtual();
 
-    sym_map_insert(sm, "+", eval_bif(rt, bif_add, 2), &bif_location);
-    sym_map_insert(sm, "-", eval_bif(rt, bif_sub, 2), &bif_location);
-    sym_map_insert(sm, "*", eval_bif(rt, bif_mul, 2), &bif_location);
-    sym_map_insert(sm, "/", eval_bif(rt, bif_div, 2), &bif_location);
-    sym_map_insert(sm, "%", eval_bif(rt, bif_mod, 2), &bif_location);
-    sym_map_insert(sm, "sqrt", eval_bif(rt, bif_sqrt, 1), &bif_location);
-    sym_map_insert(sm, "real", eval_bif(rt, bif_real, 1), &bif_location);
-    sym_map_insert(sm, "floor", eval_bif(rt, bif_floor, 1), &bif_location);
-    sym_map_insert(sm, "ceil", eval_bif(rt, bif_ceil, 1), &bif_location);
-    sym_map_insert(sm, "round", eval_bif(rt, bif_round, 1), &bif_location);
-    sym_map_insert(sm, "eq", eval_bif(rt, bif_eq, 2), &bif_location);
-    sym_map_insert(sm, "lt", eval_bif(rt, bif_lt, 2), &bif_location);
-    sym_map_insert(sm, "xor", eval_bif(rt, bif_xor, 2), &bif_location);
-    sym_map_insert(sm, "not", eval_bif(rt, bif_not, 1), &bif_location);
-    sym_map_insert(sm, "push_front", eval_bif(rt, bif_push_front, 2), &bif_location);
-    sym_map_insert(sm, "push_back", eval_bif(rt, bif_push_back, 2), &bif_location);
-    sym_map_insert(sm, "cat", eval_bif(rt, bif_cat, 2), &bif_location);
-    sym_map_insert(sm, "length", eval_bif(rt, bif_length, 1), &bif_location);
-    sym_map_insert(sm, "at", eval_bif(rt, bif_at, 2), &bif_location);
-    sym_map_insert(sm, "slice", eval_bif(rt, bif_slice, 3), &bif_location);
-    sym_map_insert(sm, "print", eval_bif(rt, bif_print, 1), &bif_location);
-    sym_map_insert(sm, "format", eval_bif(rt, bif_format, 2), &bif_location);
-    sym_map_insert(sm, "to_string", eval_bif(rt, bif_to_string, 1), &bif_location);
-    sym_map_insert(sm, "parse", eval_bif(rt, bif_parse, 1), &bif_location);
-    sym_map_insert(sm, "parse_bool", eval_bif(rt, bif_parse_bool, 1), &bif_location);
-    sym_map_insert(sm, "parse_char", eval_bif(rt, bif_parse_char, 1), &bif_location);
-    sym_map_insert(sm, "parse_int", eval_bif(rt, bif_parse_int, 1), &bif_location);
-    sym_map_insert(sm, "parse_real", eval_bif(rt, bif_parse_real, 1), &bif_location);
-    sym_map_insert(sm, "rand_ui", eval_bif(rt, bif_rand_ui, 2), &bif_location);
-    sym_map_insert(sm, "rand_ur", eval_bif(rt, bif_rand_ur, 2), &bif_location);
-    sym_map_insert(sm, "rand_ber", eval_bif(rt, bif_rand_ber, 1), &bif_location);
-    sym_map_insert(sm, "rand_exp", eval_bif(rt, bif_rand_exp, 1), &bif_location);
-    sym_map_insert(sm, "rand_gauss", eval_bif(rt, bif_rand_gauss, 2), &bif_location);
-    sym_map_insert(sm, "rand_distr", eval_bif(rt, bif_rand_distr, 1), &bif_location);
+    sym_map_insert(sm, "+", eval_bif(rt, bif_add, 2), bif_location);
+    sym_map_insert(sm, "-", eval_bif(rt, bif_sub, 2), bif_location);
+    sym_map_insert(sm, "*", eval_bif(rt, bif_mul, 2), bif_location);
+    sym_map_insert(sm, "/", eval_bif(rt, bif_div, 2), bif_location);
+    sym_map_insert(sm, "%", eval_bif(rt, bif_mod, 2), bif_location);
+    sym_map_insert(sm, "sqrt", eval_bif(rt, bif_sqrt, 1), bif_location);
+    sym_map_insert(sm, "real", eval_bif(rt, bif_real, 1), bif_location);
+    sym_map_insert(sm, "floor", eval_bif(rt, bif_floor, 1), bif_location);
+    sym_map_insert(sm, "ceil", eval_bif(rt, bif_ceil, 1), bif_location);
+    sym_map_insert(sm, "round", eval_bif(rt, bif_round, 1), bif_location);
+    sym_map_insert(sm, "eq", eval_bif(rt, bif_eq, 2), bif_location);
+    sym_map_insert(sm, "lt", eval_bif(rt, bif_lt, 2), bif_location);
+    sym_map_insert(sm, "xor", eval_bif(rt, bif_xor, 2), bif_location);
+    sym_map_insert(sm, "not", eval_bif(rt, bif_not, 1), bif_location);
+    sym_map_insert(sm, "push_front", eval_bif(rt, bif_push_front, 2), bif_location);
+    sym_map_insert(sm, "push_back", eval_bif(rt, bif_push_back, 2), bif_location);
+    sym_map_insert(sm, "cat", eval_bif(rt, bif_cat, 2), bif_location);
+    sym_map_insert(sm, "length", eval_bif(rt, bif_length, 1), bif_location);
+    sym_map_insert(sm, "at", eval_bif(rt, bif_at, 2), bif_location);
+    sym_map_insert(sm, "slice", eval_bif(rt, bif_slice, 3), bif_location);
+    sym_map_insert(sm, "print", eval_bif(rt, bif_print, 1), bif_location);
+    sym_map_insert(sm, "format", eval_bif(rt, bif_format, 2), bif_location);
+    sym_map_insert(sm, "to_string", eval_bif(rt, bif_to_string, 1), bif_location);
+    sym_map_insert(sm, "parse", eval_bif(rt, bif_parse, 1), bif_location);
+    sym_map_insert(sm, "parse_bool", eval_bif(rt, bif_parse_bool, 1), bif_location);
+    sym_map_insert(sm, "parse_char", eval_bif(rt, bif_parse_char, 1), bif_location);
+    sym_map_insert(sm, "parse_int", eval_bif(rt, bif_parse_int, 1), bif_location);
+    sym_map_insert(sm, "parse_real", eval_bif(rt, bif_parse_real, 1), bif_location);
+    sym_map_insert(sm, "rand_ui", eval_bif(rt, bif_rand_ui, 2), bif_location);
+    sym_map_insert(sm, "rand_ur", eval_bif(rt, bif_rand_ur, 2), bif_location);
+    sym_map_insert(sm, "rand_ber", eval_bif(rt, bif_rand_ber, 1), bif_location);
+    sym_map_insert(sm, "rand_exp", eval_bif(rt, bif_rand_exp, 1), bif_location);
+    sym_map_insert(sm, "rand_gauss", eval_bif(rt, bif_rand_gauss, 2), bif_location);
+    sym_map_insert(sm, "rand_distr", eval_bif(rt, bif_rand_distr, 1), bif_location);
 }
 
 static void rt_init(struct Runtime *rt)
@@ -142,13 +142,11 @@ void rt_register_clif_handler(
 		int arity,
 		ClifIntraHandler handler)
 {
-	static struct SourceLocation clif_location = { SRC_LOC_CLIF, -1, -1 };
-
     sym_map_insert(
 		&rt->global_sym_map,
 		symbol,
 		eval_clif(rt, handler, arity),
-		&clif_location);
+		src_loc_virtual());
 }
 
 bool rt_consume_one(
@@ -171,6 +169,7 @@ bool rt_consume_one(
     }
 
     if (err_state()) {
+		err_push("RUNTIME", ast->loc, "Failed consuming AST node");
         ast_node_free_one(ast);
         return false;
 

@@ -10,5 +10,7 @@ void clif_deinit(void);
 void clif_register(char *symbol, ClifHandler handler);
 void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count);
 
+extern struct SourceLocation clif_location;
+
 #endif
 

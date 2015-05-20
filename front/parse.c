@@ -26,6 +26,7 @@ static void parse_error_pattern_core(struct SourceLocation *where)
     err_msg_init_src(&msg, "PARSE", where);
     err_msg_append(&msg, "Core compound encountered where a pattern was expected");
     err_msg_set(&msg);
+	err_push("PARSE", *where, "Core compound encountered where a pattern was expected");
 }
 
 static void parse_error_empty_pattern(struct SourceLocation *where)
@@ -34,6 +35,7 @@ static void parse_error_empty_pattern(struct SourceLocation *where)
     err_msg_init_src(&msg, "PARSE", where);
     err_msg_append(&msg, "Empty compound pattern encountered");
     err_msg_set(&msg);
+	err_push("PARSE", *where, "Empty compound pattern encountered");
 }
 
 static void parse_error_bind_to_literal(struct SourceLocation *where)
@@ -42,6 +44,7 @@ static void parse_error_bind_to_literal(struct SourceLocation *where)
     err_msg_init_src(&msg, "PARSE", where);
     err_msg_append(&msg, "Attempt at binding to a literal");
     err_msg_set(&msg);
+	err_push("PARSE", *where, "Attempt at binding to a literal");
 }
 
 static void parse_error_char_length(int len, struct SourceLocation *where)
@@ -50,6 +53,7 @@ static void parse_error_char_length(int len, struct SourceLocation *where)
     err_msg_init_src(&msg, "PARSE", where);
     err_msg_append(&msg, "Incorrect character length (%d)", len);
     err_msg_set(&msg);
+	err_push("PARSE", *where, "Incorrect character length (%d)", len);
 }
 
 static void parse_error_read(char *what, struct SourceLocation *where)
@@ -58,6 +62,7 @@ static void parse_error_read(char *what, struct SourceLocation *where)
     err_msg_init_src(&msg, "PARSE", where);
     err_msg_append(&msg, "Failed reading %s", what);
     err_msg_set(&msg);
+	err_push("PARSE", *where, "Failed reading %s", what);
 }
 
 /* Algorithms.
@@ -317,6 +322,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     /* 3. Has 0 or more expressions. */
     exprs = parse_list(dom->cpd_children);
     if (err_state()) {
+		err_push("PARSE", dom->cpd_children->loc, "Failed parsing compound node");
         return NULL;
     } else {
         return ast_make_compound(&dom->loc, type, exprs);
@@ -352,6 +358,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     /* 3.2. Has 0 or more further children being any expression. */
     args = parse_list(child);
     if (err_state()) {
+		err_push("PARSE", child->loc, "Failed parsing function call");
         return NULL;
     } else {
         return ast_make_func_call(&dom->loc, symbol, args);
@@ -621,7 +628,7 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
         }
 
         if (first == last) {
-        	return NULL;
+			return NULL;
         }
 
         if (all_of(first, last, isdigit)) {
@@ -657,7 +664,7 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
     }
 
     if (first == last) {
-    	return NULL;
+		return NULL;
     }
 
     if (period == last ||
@@ -685,6 +692,7 @@ static struct AstNode *parse_literal(struct DomNode *dom)
         return result;
 
     } else {
+		err_push("PARSE", dom->loc, "Failed parsing literal node");
         return NULL;
     }
 }
@@ -718,6 +726,7 @@ static struct AstNode *parse_one(struct DomNode *dom)
         return node;
 
     } else {
+		err_push("PARSE", dom->loc, "Failed parsing DOM node");
         if (!err_state()) {
             parse_error_read("AST node", &dom->loc);
         }
@@ -752,11 +761,13 @@ struct AstNode *parse_source(char *source)
 
     dom = lex(source);
     if (err_state()) {
+		err_push("PARSE", src_loc_virtual(), "Failed parsing source");
         return NULL;
     }
 
     ast = parse_list(dom);
     if (err_state()) {
+		err_push("PARSE", src_loc_virtual(), "Failed parsing DOM list");
         dom_free(dom);
         return NULL;
     }

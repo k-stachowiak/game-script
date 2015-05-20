@@ -11,6 +11,7 @@ static void bif_rand_error_arg(int arg, char *func, char *condition)
     err_msg_init_src(&msg, (char*)"BIF EVAL RANDOM", eval_location_top());
     err_msg_append(&msg, "Argument %d of _%s_ %s", arg, func, condition);
     err_msg_set(&msg);
+	err_push("EVAL BIF RANDOM", *eval_location_top(), "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 void bif_rand_ui(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc)

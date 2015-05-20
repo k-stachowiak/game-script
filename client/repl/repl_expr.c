@@ -20,6 +20,9 @@ static void repl_expr_error_ast_len(int actual)
     err_msg_append(&msg,
         "Parsed more than one AST node (%d) - only one allowed", actual);
     err_msg_set(&msg);
+
+	err_push("REPL", src_loc_virtual(),
+        "Parsed more than one AST node (%d) - only one allowed", actual);
 }
 
 static void repl_expr_error_ast_illegal(char *reason)
@@ -28,6 +31,7 @@ static void repl_expr_error_ast_illegal(char *reason)
     err_msg_init(&msg, "REPL");
     err_msg_append(&msg, "Illegal expression: %s", reason);
     err_msg_set(&msg);
+	err_push("REPL", src_loc_virtual(), "Illegal expression: %s", reason);
 }
 
 enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
@@ -54,6 +58,7 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
 
     rt_consume_one(rt, ast, &location, NULL);
     if (err_state()) {
+		err_push("REPL", ast->loc, "Failed executing expression: %s", expression_line);
         return REPL_EXPR_INTERNAL_ERROR;
     }
 

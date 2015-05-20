@@ -28,7 +28,7 @@ void sym_map_insert(
         struct SymMap *sym_map,
         char *key,
         VAL_LOC_T stack_loc,
-        struct SourceLocation *source_loc);
+        struct SourceLocation source_loc);
 
 struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key);

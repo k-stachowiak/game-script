@@ -8,13 +8,8 @@
 #include "memory.h"
 #include "error.h"
 
-struct ErrFrame {
-	char *message;
-	struct SourceLocation *location;
-	struct ErrFrame *next;
-} *err_stack = NULL;
-
-void err_push(char *message, struct SourceLocation *loc);
+struct ErrFrame *err_stack = NULL;
+struct ErrFrame *err_stack_end = NULL;
 
 static char *err_message = NULL;
 
@@ -35,17 +30,11 @@ void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocatio
 {
     char *buffer = NULL;
     switch (loc->type) {
-    case SRC_LOC_REGULAR:
+    case SRC_LOC_NORMAL:
         str_append(buffer, "[%s] (%d:%d) :", module, loc->line, loc->column);
         break;
-    case SRC_LOC_BIF:
-        str_append(buffer, "[%s] (BIF) :", module);
-        break;
-	case SRC_LOC_CLIF:
-		str_append(buffer, "[%s] (CLIF) :", module);
-		break;
-    case SRC_LOC_FUNC_CONTAINED:
-        str_append(buffer, "[%s] (FUNC) :", module);
+    case SRC_LOC_VIRTUAL:
+        str_append(buffer, "[%s] (-:-) :", module);
         break;
     }
     msg->text = buffer;
@@ -65,15 +54,28 @@ void err_reset(void)
         mem_free(err_message);
         err_message = NULL;
     }
+
+	err_stack_end = NULL;
+	while (err_stack) {
+		struct ErrFrame *next = err_stack->next;
+		mem_free(err_stack->message);
+		mem_free(err_stack);
+		err_stack = next;
+	}
 }
 
 bool err_state(void)
 {
-    return (bool)err_message;
+    return (bool)err_message || (bool)err_stack;
 }
 
 char *err_msg(void)
 {
     return err_message;
+}
+
+void err_report(void)
+{
+	exit(1);
 }
 

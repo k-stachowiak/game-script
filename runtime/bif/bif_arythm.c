@@ -67,6 +67,7 @@ static void bif_arythm_error_arg_mismatch(void)
     err_msg_init_src(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
     err_msg_append(&msg, "Arguments of arythmetic BIF must be of equal numeric type");
     err_msg_set(&msg);
+	err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type");
 }
 
 static void bif_arythm_error_trunc_arg(void)
@@ -75,6 +76,7 @@ static void bif_arythm_error_trunc_arg(void)
     err_msg_init_src(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
     err_msg_append(&msg, "Arguments of truncating arythmetic BIF must be of real type");
     err_msg_set(&msg);
+	err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type");
 }
 
 static void bif_arythm_error_exp_arg(void)
@@ -83,6 +85,7 @@ static void bif_arythm_error_exp_arg(void)
     err_msg_init_src(&msg, "EVAL BIF ARYTHMETIC", eval_location_top());
     err_msg_append(&msg, "Arguments of expanding arythmetic BIF must be of integer type");
     err_msg_set(&msg);
+	err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of expanding arythmetic BIF must be of integer type");
 }
 
 static VAL_INT_T bif_add_impl_int(VAL_INT_T x, VAL_INT_T y) { return x + y; }

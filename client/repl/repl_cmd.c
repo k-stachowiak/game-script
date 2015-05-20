@@ -23,6 +23,7 @@ static void repl_cmd_error_nofile(void)
     err_msg_init(&msg, "REPL");
     err_msg_append(&msg, "Failed loading a file");
     err_msg_set(&msg);
+	err_push("REPL", src_loc_virtual(), "Failed loading a file");
 }
 
 static void repl_cmd_error_bad(void)
@@ -31,6 +32,7 @@ static void repl_cmd_error_bad(void)
     err_msg_init(&msg, "REPL");
     err_msg_append(&msg, "Bad command or file name");
     err_msg_set(&msg);
+	err_push("REPL", src_loc_virtual(), "Bad command or file name");
 }
 
 static void repl_cmd_error_no(void)
@@ -39,6 +41,7 @@ static void repl_cmd_error_no(void)
     err_msg_init(&msg, "REPL");
     err_msg_append(&msg, "No command provided");
     err_msg_set(&msg);
+	err_push("REPL", src_loc_virtual(), "No command provided");
 }
 
 static void repl_cmd_error_args(char *cmd, int expected, int actual)
@@ -49,6 +52,10 @@ static void repl_cmd_error_args(char *cmd, int expected, int actual)
         "Invalid arguments to command \"%s\" : %d (expected %d)",
         cmd, actual, expected);
     err_msg_set(&msg);
+
+	err_push("REPL", src_loc_virtual(),
+        "Invalid arguments to command \"%s\" : %d (expected %d)",
+        cmd, actual, expected);
 }
 
 static enum ReplCmdResult repl_cmd_load(

@@ -77,7 +77,7 @@ int main(void)
         line = my_getline(&eof_flag);
 
         if (err_state()) {
-            printf("IO error in line \"%s\" : \"%s\".\n", line, err_msg());
+			err_push("REPL", src_loc_virtual(), "IO error in line \"%s\" : \"%s\".\n", line, err_msg());
             result = 1;
             mem_free(line);
             break;
@@ -98,14 +98,8 @@ int main(void)
     }
 
     repl_cmd_deinit();
-
     rt_free(rt);
-
-    if (result != 0) {
-        printf("REPL error: %s\n", err_msg());
-    } else {
-        printf("REPL terminated correctly.\n");
-    }
+	err_report();
 
     return result;
 }

@@ -22,6 +22,7 @@ static void clif_error_already_inserted(char *symbol)
     err_msg_init(&msg, "LIB");
     err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
     err_msg_set(&msg);
+	err_push("LIB", src_loc_virtual(), "Symbol \"%s\" already inserted", symbol);
 }
 
 static void clif_error_symbol_not_found(char *symbol)
@@ -30,6 +31,7 @@ static void clif_error_symbol_not_found(char *symbol)
     err_msg_init(&msg, "LIB");
     err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
     err_msg_set(&msg);
+	err_push("LIB", src_loc_virtual(), "Symbol \"%s\" not found", symbol);
 }
 
 static struct MoonValue *clif_read_args(VAL_LOC_T *arg_locs, int arg_count)

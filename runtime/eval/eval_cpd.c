@@ -12,6 +12,7 @@ static void eval_error_array_hetero(void)
     err_msg_init_src(&msg, "EVAL", eval_location_top());
     err_msg_append(&msg, "Heterogenous array literal evaluated");
     err_msg_set(&msg);
+	err_push("EVAL", *eval_location_top(), "Heterogenous array literal evaluated");
 }
 
 void eval_compound(
@@ -39,6 +40,7 @@ void eval_compound(
     while (current) {
         eval_impl(current, rt, sym_map);
         if (err_state()) {
+			err_push("EVAL", current->loc, "Failed evaluating compound expression element");
             return;
         }
         current = current->next;

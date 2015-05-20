@@ -16,6 +16,7 @@ static void symmap_error_already_inserted(char *symbol)
     err_msg_init_src(&msg, "SYM MAP", eval_location_top());
     err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
     err_msg_set(&msg);
+	err_push("SYM MAP", *eval_location_top(), "Symbol \"%s\" already inserted", symbol);
 }
 
 void sym_map_init_global(struct SymMap *sym_map)
@@ -52,7 +53,7 @@ void sym_map_insert(
         struct SymMap *sym_map,
         char *key,
         VAL_LOC_T stack_loc,
-        struct SourceLocation *source_loc)
+        struct SourceLocation source_loc)
 {
     struct SymMapKvp *kvp;
     int len = strlen(key);
@@ -68,7 +69,7 @@ void sym_map_insert(
     kvp = mem_malloc(sizeof(*kvp));
     kvp->key = key_copy;
     kvp->stack_loc = stack_loc;
-    kvp->source_loc = *source_loc;
+    kvp->source_loc = source_loc;
     kvp->next = NULL;
 
     LIST_APPEND(kvp, &sym_map->map, &sym_map->end);

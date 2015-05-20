@@ -12,6 +12,7 @@ static void bind_error_incorrect_type(void)
     err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
     err_msg_append(&msg, "Compound type mismatched");
     err_msg_set(&msg);
+	err_push("EVAL BIND", *eval_location_top(), "Compound type mismatched");
 }
 
 static void bind_error_pattern_length_mismatch(void)
@@ -20,6 +21,7 @@ static void bind_error_pattern_length_mismatch(void)
     err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
     err_msg_append(&msg, "Compound bind length mismatched");
     err_msg_set(&msg);
+	err_push("EVAL BIND", *eval_location_top(), "Compound bind length mismatched");
 }
 
 static void bind_error_bind_void(void)
@@ -28,6 +30,7 @@ static void bind_error_bind_void(void)
     err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
     err_msg_append(&msg, "Tried to bind void expression");
     err_msg_set(&msg);
+	err_push("EVAL BIND", *eval_location_top(), "Tried to bind void expression");
 }
 
 void eval_bind_pattern(
@@ -44,7 +47,7 @@ void eval_bind_pattern(
     int i, cpd_len, pattern_len, len;
 
     if (pattern->type == PATTERN_SYMBOL) {
-        sym_map_insert(sym_map, pattern->symbol, location, source_loc);
+        sym_map_insert(sym_map, pattern->symbol, location, *source_loc);
         return;
     }
 
@@ -77,6 +80,7 @@ void eval_bind_pattern(
     for (i = 0; i < len; ++i) {
         eval_bind_pattern(rt, sym_map, child_pat, child_loc, source_loc);
         if (err_state()) {
+			err_push("EVAL", src_loc_virtual(), "Failed evaluating bind pattern");
             return;
         }
         child_loc = rt_val_next_loc(rt, child_loc);
@@ -94,6 +98,7 @@ void eval_bind(
 
     VAL_LOC_T location = eval_impl(expr, rt, sym_map);
     if (err_state()) {
+		err_push("EVAL", expr->loc, "Failed evaluating bind expression");
         return;
     }
 

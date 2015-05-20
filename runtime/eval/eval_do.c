@@ -21,6 +21,7 @@ void eval_do_block(
     for (; expr; expr = expr->next) {
         VAL_LOC_T new_end = eval_impl(expr, rt, &local_sym_map);
         if (err_state()) {
+			err_push("EVAL", node->loc, "Failed evaluating do expression");
             break;
         } else {
             end = new_end;
