@@ -398,9 +398,10 @@ static struct DomNode *dom_build(struct Token *tokens)
 
     err_reset();
     while (current) {
+		struct SourceLocation current_loc = current->loc;
         struct DomNode *node = dom_parse_node(&current);
         if (err_state()) {
-			err_push("LEX", current->loc, "Failed building DOM: %s", current->begin);
+			err_push("LEX", current_loc, "Failed building DOM");
             dom_free(result);
             return NULL;
         }
