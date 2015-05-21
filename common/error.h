@@ -29,7 +29,7 @@ bool err_state(void);
 char *err_msg(void);
 void err_report(void);
 
-#define err_push(MODULE, SRC_LOC, FORMAT, ...) \
+#define err_push_src(MODULE, SRC_LOC, FORMAT, ...) \
 	do { \
 		struct ErrFrame *_frame_ = mem_malloc(sizeof(*_frame_)); \
 		_frame_->module = (MODULE); \
@@ -40,6 +40,6 @@ void err_report(void);
 		LIST_APPEND(_frame_, &err_stack, &err_stack_end); \
 	} while(0)
 
-#define err_push_virt(MODULE, FORMAT, ...) err_push(MODULE, src_loc_virtual(), FORMAT, ##__VA_ARGS__)
+#define err_push(MODULE, FORMAT, ...) err_push_src(MODULE, src_loc_virtual(), FORMAT, ##__VA_ARGS__)
 
 #endif

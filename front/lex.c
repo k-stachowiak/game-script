@@ -167,7 +167,7 @@ static struct Token *tok_read_delim_atom(
     atom_end = find_nonesc_delim(current, end, delimiter);
 
     if (si_eq(&atom_end, end) || (*(atom_end.current) != delimiter)) {
-		err_push("LEX", atom_begin.loc,
+		err_push_src("LEX", atom_begin.loc,
 				"undelimited %s",
 				delimiter == TOK_DELIM_STR ? "string" : "character");
         return NULL;
@@ -247,7 +247,7 @@ static struct Token *tokenize(
         struct Token *tok = tok_read_token(&current, &end);
 
         if (!tok) {
-			err_push("LEX", current.loc, "Failed reading token at %s", begin.first);
+			err_push_src("LEX", current.loc, "Failed reading token at %s", begin.first);
             tok_free(result);
             return NULL;
         }
@@ -312,7 +312,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         }
     }
 
-	err_push("LEX", first->loc, "undelimited compound DOM node");
+	err_push_src("LEX", first->loc, "undelimited compound DOM node");
 
 fail:
     dom_free(children);
@@ -340,7 +340,7 @@ static struct DomNode *dom_parse_node(struct Token **current)
         return NULL;
 
     } else if (tok_is_close_paren(*current)) {
-		err_push("LEX", (*current)->loc, "closing unopened compound node");
+		err_push_src("LEX", (*current)->loc, "closing unopened compound node");
         return NULL;
 
     } else if (tok_is_open_paren(*current)) {

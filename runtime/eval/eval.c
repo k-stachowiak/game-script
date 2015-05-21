@@ -15,7 +15,7 @@
 /* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
-	err_push_virt("EVAL", "Symbol \"%s\" not found", symbol);
+	err_push("EVAL", "Symbol \"%s\" not found", symbol);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
@@ -120,7 +120,7 @@ VAL_LOC_T eval_impl(
     }
 
     if (err_state()) {
-		err_push("EVAL", node->loc, "Failed evaluating expression");
+		err_push_src("EVAL", node->loc, "Failed evaluating expression");
         return -1;
 
     } else {
@@ -146,7 +146,7 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
     end = rt->stack->top;
 
     if (err_state()) {
-		err_push("EVAL", node->loc, "Failed evaluating expression");
+		err_push_src("EVAL", node->loc, "Failed evaluating expression");
         stack_collapse(rt->stack, begin, end);
         return -1;
     } else {
