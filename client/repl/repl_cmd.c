@@ -17,42 +17,8 @@
 static struct Debugger dbg;
 static bool dbg_enabled;
 
-static void repl_cmd_error_nofile(void)
-{
-    struct ErrMessage msg;
-    err_msg_init(&msg, "REPL");
-    err_msg_append(&msg, "Failed loading a file");
-    err_msg_set(&msg);
-	err_push("REPL", src_loc_virtual(), "Failed loading a file");
-}
-
-static void repl_cmd_error_bad(void)
-{
-    struct ErrMessage msg;
-    err_msg_init(&msg, "REPL");
-    err_msg_append(&msg, "Bad command or file name");
-    err_msg_set(&msg);
-	err_push("REPL", src_loc_virtual(), "Bad command or file name");
-}
-
-static void repl_cmd_error_no(void)
-{
-    struct ErrMessage msg;
-    err_msg_init(&msg, "REPL");
-    err_msg_append(&msg, "No command provided");
-    err_msg_set(&msg);
-	err_push("REPL", src_loc_virtual(), "No command provided");
-}
-
 static void repl_cmd_error_args(char *cmd, int expected, int actual)
 {
-    struct ErrMessage msg;
-    err_msg_init(&msg, "REPL");
-    err_msg_append(&msg,
-        "Invalid arguments to command \"%s\" : %d (expected %d)",
-        cmd, actual, expected);
-    err_msg_set(&msg);
-
 	err_push("REPL", src_loc_virtual(),
         "Invalid arguments to command \"%s\" : %d (expected %d)",
         cmd, actual, expected);
@@ -75,7 +41,7 @@ static enum ReplCmdResult repl_cmd_load(
     filename = pieces[0];
 
     if (!(source = my_getfile(filename))) {
-        repl_cmd_error_nofile();
+		err_push("REPL", src_loc_virtual(), "Failed loading a file");
         return REPL_CMD_INTERNAL_ERROR;
     }
 
@@ -170,7 +136,7 @@ enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
     }
 
     if (num_pieces == 0) {
-        repl_cmd_error_no();
+		err_push("REPL", src_loc_virtual(), "No command provided");
         return REPL_CMD_ERROR;
     }
 
@@ -190,7 +156,7 @@ enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
         repl_cmd_dbg_toggle(rt);
 
     } else {
-        repl_cmd_error_bad();
+		err_push("REPL", src_loc_virtual(), "Bad command or file name");
         return REPL_CMD_ERROR;
     }
 

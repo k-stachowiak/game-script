@@ -15,22 +15,12 @@
 
 static void repl_expr_error_ast_len(int actual)
 {
-    struct ErrMessage msg;
-    err_msg_init(&msg, "REPL");
-    err_msg_append(&msg,
-        "Parsed more than one AST node (%d) - only one allowed", actual);
-    err_msg_set(&msg);
-
 	err_push("REPL", src_loc_virtual(),
         "Parsed more than one AST node (%d) - only one allowed", actual);
 }
 
 static void repl_expr_error_ast_illegal(char *reason)
 {
-    struct ErrMessage msg;
-    err_msg_init(&msg, "REPL");
-    err_msg_append(&msg, "Illegal expression: %s", reason);
-    err_msg_set(&msg);
 	err_push("REPL", src_loc_virtual(), "Illegal expression: %s", reason);
 }
 

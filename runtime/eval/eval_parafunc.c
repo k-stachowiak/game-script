@@ -9,13 +9,6 @@
 
 static void para_error_invalid_argc(char *func, int count)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL PARAFUNC", eval_location_top());
-    err_msg_append(&msg,
-        "Incorrect arguments count passed to _%s_: %d",
-        func, count);
-    err_msg_set(&msg);
-
 	err_push("EVAL PARAFUNC", *eval_location_top(),
         "Incorrect arguments count passed to _%s_: %d",
         func, count);
@@ -23,32 +16,13 @@ static void para_error_invalid_argc(char *func, int count)
 
 static void para_error_arg_not_bool(char *func, int index)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL PARAFUNC", eval_location_top());
-    err_msg_append(&msg,
-        "argument %d of _%s_ is not of boolean type",
-        index, func);
-    err_msg_set(&msg);
-
 	err_push("EVAL PARAFUNC", *eval_location_top(),
         "argument %d of _%s_ is not of boolean type",
         index, func);
 }
-static void para_error_no_case_matched(void)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL PARAFUNC", eval_location_top());
-    err_msg_append(&msg, "Unmached case in a swithc");
-    err_msg_set(&msg);
-	err_push("EVAL PARAFUNC", *eval_location_top(), "Unmached case in a swithc");
-}
 
 static void para_error_case(char *unmet)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL PARAFUNC", eval_location_top());
-    err_msg_append(&msg, "Case %s", unmet);
-    err_msg_set(&msg);
 	err_push("EVAL PARAFUNC", *eval_location_top(), "Case %s", unmet);
 }
 
@@ -214,7 +188,8 @@ static void eval_parafunc_switch(
         }
     }
 
-    para_error_no_case_matched();
+	err_push("EVAL PARAFUNC", *eval_location_top(), "Unmached case in a swithc");
+
 end:
     stack_collapse(rt->stack, temp_begin, temp_end);
 }

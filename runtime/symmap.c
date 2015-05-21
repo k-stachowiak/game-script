@@ -10,15 +10,6 @@
 #include "symmap.h"
 #include "eval.h"
 
-static void symmap_error_already_inserted(char *symbol)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "SYM MAP", eval_location_top());
-    err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
-    err_msg_set(&msg);
-	err_push("SYM MAP", *eval_location_top(), "Symbol \"%s\" already inserted", symbol);
-}
-
 void sym_map_init_global(struct SymMap *sym_map)
 {
     sym_map->global = NULL;
@@ -62,7 +53,7 @@ void sym_map_insert(
 
     kvp = sym_map_find_shallow(sym_map, key);
     if (kvp) {
-        symmap_error_already_inserted(key);
+		err_push("SYM MAP", *eval_location_top(), "Symbol \"%s\" already inserted", key);
         return;
     }
 

@@ -12,15 +12,6 @@
 #include "mndetail.h"
 #include "clif.h"
 
-static void moon_error_nofile(void)
-{
-    struct ErrMessage msg;
-    err_msg_init(&msg, "LIB");
-    err_msg_append(&msg, "Failed loading a file");
-    err_msg_set(&msg);
-	err_push("LIB", src_loc_virtual(), "Failed loading a file");
-}
-
 static void mn_deinit(void)
 {
 	clif_deinit();
@@ -49,7 +40,7 @@ bool mn_exec_file(const char *filename)
     struct AstNode *ast_list;
 
     if (!(source = my_getfile((char*)filename))) {
-        moon_error_nofile();
+		err_push("LIB", src_loc_virtual(), "Failed loading a file");
         return false;
     }
 

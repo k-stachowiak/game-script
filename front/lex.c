@@ -8,37 +8,6 @@
 #include "error.h"
 #include "lex.h"
 
-/* Error reporting.
- * ================
- */
-
-static void lex_error_undelimited(char *what, struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "lex", where);
-    err_msg_append(&msg, "undelimited %s", what);
-    err_msg_set(&msg);
-	err_push("LEX", *where, "undelimited %s", what);
-}
-
-static void lex_error_close_unopen(struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "lex", where);
-    err_msg_append(&msg, "closing unopened compound node");
-    err_msg_set(&msg);
-	err_push("LEX", *where, "closing unopened compound node");
-}
-
-static void lex_error_read(char *what, struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "LEX", where);
-    err_msg_append(&msg, "Failed reading %s", what);
-    err_msg_set(&msg);
-	err_push("LEX", *where, "Failed reading %s", what);
-}
-
 /* Tokenization.
  * =============
  */
@@ -198,9 +167,9 @@ static struct Token *tok_read_delim_atom(
     atom_end = find_nonesc_delim(current, end, delimiter);
 
     if (si_eq(&atom_end, end) || (*(atom_end.current) != delimiter)) {
-        lex_error_undelimited(
-            delimiter == TOK_DELIM_STR ? "string" : "character",
-            &atom_begin.loc);
+		err_push("LEX", atom_begin.loc,
+				"undelimited %s",
+				delimiter == TOK_DELIM_STR ? "string" : "character");
         return NULL;
     }
 
@@ -280,9 +249,6 @@ static struct Token *tokenize(
         struct Token *tok = tok_read_token(&current, &end);
 
         if (!tok) {
-            if (!err_state()) {
-                lex_error_read("token", &begin.loc);
-            }
 			err_push("LEX", current.loc, "Failed tokenizing at %s", current.first);
             tok_free(result);
             return NULL;
@@ -337,11 +303,10 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         } else {
             struct DomNode *child = dom_parse_node(current);
             if (err_state()) {
-				err_push("LEX", (*current)->loc, "Failed parsing compound node: %s", (*current)->begin);
                 goto fail;
 
             } else if (!child) {
-                lex_error_read("compound DOM node", &(*current)->loc);
+				err_push("LEX", (*current)->loc, "Failed parsing compound node: %s", (*current)->begin);
                 goto fail;
 
             } else {
@@ -350,7 +315,7 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
         }
     }
 
-    lex_error_undelimited("compound DOM node", &first->loc);
+	err_push("LEX", first->loc, "undelimited compound DOM node");
 
 fail:
     dom_free(children);
@@ -378,7 +343,7 @@ static struct DomNode *dom_parse_node(struct Token **current)
         return NULL;
 
     } else if (tok_is_close_paren(*current)) {
-        lex_error_close_unopen(&(*current)->loc);
+		err_push("LEX", (*current)->loc, "closing unopened compound node");
         return NULL;
 
     } else if (tok_is_open_paren(*current)) {

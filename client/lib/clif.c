@@ -16,24 +16,6 @@ struct ClifMap {
 	struct ClifMapKvp *end;
 } clif_map;
 
-static void clif_error_already_inserted(char *symbol)
-{
-    struct ErrMessage msg;
-    err_msg_init(&msg, "LIB");
-    err_msg_append(&msg, "Symbol \"%s\" already inserted", symbol);
-    err_msg_set(&msg);
-	err_push("LIB", src_loc_virtual(), "Symbol \"%s\" already inserted", symbol);
-}
-
-static void clif_error_symbol_not_found(char *symbol)
-{
-    struct ErrMessage msg;
-    err_msg_init(&msg, "LIB");
-    err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
-    err_msg_set(&msg);
-	err_push("LIB", src_loc_virtual(), "Symbol \"%s\" not found", symbol);
-}
-
 static struct MoonValue *clif_read_args(VAL_LOC_T *arg_locs, int arg_count)
 {
 	if (arg_count == 0) {
@@ -130,7 +112,7 @@ void clif_register(char *symbol, ClifHandler handler)
 
     while (kvp) {
 		if (strcmp(kvp->key, symbol) == 0) {
-			clif_error_already_inserted(symbol);
+			err_push("LIB", src_loc_virtual(), "Symbol \"%s\" already inserted", symbol);
 			return;
 		}
 		kvp = kvp->next;
@@ -168,6 +150,6 @@ void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count)
 		return;
 	}
 
-	clif_error_symbol_not_found(symbol);
+	err_push("LIB", src_loc_virtual(), "Symbol \"%s\" not found", symbol);
 }
 

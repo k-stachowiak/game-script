@@ -14,7 +14,7 @@
     { \
         enum ValueType x_type = rt_val_peek_type(rt, x_loc); \
         if (x_type != VAL_BOOL) { \
-            bif_logic_error_arg_mismatch(); \
+			err_push("EVAL BIF LOGIC", *eval_location_top(), "Arguments of logic BIF must be of boolean type"); \
             return; \
         } \
         rt_val_push_bool(rt->stack, NAME##_impl(rt_val_peek_bool(rt, x_loc))); \
@@ -26,22 +26,13 @@
         enum ValueType x_type = rt_val_peek_type(rt, x_loc); \
         enum ValueType y_type = rt_val_peek_type(rt, y_loc); \
         if (x_type != VAL_BOOL || y_type != VAL_BOOL) { \
-            bif_logic_error_arg_mismatch(); \
+			err_push("EVAL BIF LOGIC", *eval_location_top(), "Arguments of logic BIF must be of boolean type"); \
             return; \
         } \
         rt_val_push_bool(rt->stack, NAME##_impl( \
                 rt_val_peek_bool(rt, x_loc), \
                 rt_val_peek_bool(rt, y_loc))); \
     }
-
-static void bif_logic_error_arg_mismatch(void)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL BIF LOGIC", eval_location_top());
-    err_msg_append(&msg, "Arguments of logic BIF must be of boolean type");
-    err_msg_set(&msg);
-	err_push("EVAL BIF LOGIC", *eval_location_top(), "Arguments of logic BIF must be of boolean type");
-}
 
 static VAL_BOOL_T bif_xor_impl(VAL_BOOL_T x, VAL_BOOL_T y) { return (bool)x ^ (bool)y; }
 static VAL_BOOL_T bif_not_impl(VAL_BOOL_T x) { return !((bool)x); }

@@ -46,10 +46,6 @@ struct SourceLocation *eval_location_top(void)
 /* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL", eval_location_top());
-    err_msg_append(&msg, "Symbol \"%s\" not found", symbol);
-    err_msg_set(&msg);
 	err_push("EVAL BIF TEXT", *eval_location_top(), "Symbol \"%s\" not found", symbol);
 }
 

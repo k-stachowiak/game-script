@@ -8,29 +8,7 @@
 
 static void bind_error_incorrect_type(void)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
-    err_msg_append(&msg, "Compound type mismatched");
-    err_msg_set(&msg);
 	err_push("EVAL BIND", *eval_location_top(), "Compound type mismatched");
-}
-
-static void bind_error_pattern_length_mismatch(void)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
-    err_msg_append(&msg, "Compound bind length mismatched");
-    err_msg_set(&msg);
-	err_push("EVAL BIND", *eval_location_top(), "Compound bind length mismatched");
-}
-
-static void bind_error_bind_void(void)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL BIND", eval_location_top());
-    err_msg_append(&msg, "Tried to bind void expression");
-    err_msg_set(&msg);
-	err_push("EVAL BIND", *eval_location_top(), "Tried to bind void expression");
 }
 
 void eval_bind_pattern(
@@ -68,7 +46,7 @@ void eval_bind_pattern(
     cpd_len = rt_val_cpd_len(rt, location);
     pattern_len = pattern_list_len(pattern->children);
     if (cpd_len != pattern_len) {
-        bind_error_pattern_length_mismatch();
+		err_push("EVAL BIND", *eval_location_top(), "Compound bind length mismatched");
         return;
     } else {
         len = pattern_len;
@@ -103,7 +81,7 @@ void eval_bind(
     }
 
     if (location == 0) {
-        bind_error_bind_void();
+		err_push("EVAL BIND", *eval_location_top(), "Tried to bind void expression");
         return;
     }
 

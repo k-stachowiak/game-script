@@ -24,6 +24,11 @@ struct ErrFrame {
 extern struct ErrFrame *err_stack;
 extern struct ErrFrame *err_stack_end;
 
+void err_reset(void);
+bool err_state(void);
+char *err_msg(void);
+void err_report(void);
+
 #define err_push(MODULE, SRC_LOC, FORMAT, ...) \
 	do { \
 		struct ErrFrame *_frame_ = mem_malloc(sizeof(*_frame_)); \
@@ -34,24 +39,5 @@ extern struct ErrFrame *err_stack_end;
 		str_append(_frame_->message, FORMAT, ##__VA_ARGS__); \
 		LIST_APPEND(_frame_, &err_stack, &err_stack_end); \
 	} while(0)
-
-struct ErrMessage {
-    char *text;
-};
-
-void err_reset(void);
-bool err_state(void);
-char *err_msg(void);
-void err_report(void);
-
-void err_msg_init(struct ErrMessage *msg, char *module);
-void err_msg_init_src(struct ErrMessage *msg, char *module, struct SourceLocation *loc);
-void err_msg_set(struct ErrMessage *msg);
-
-#define err_msg_append(MSG, FORMAT, ...) \
-    do { \
-        str_append((MSG)->text, " "); \
-        str_append((MSG)->text, FORMAT, ##__VA_ARGS__); \
-    } while (0)
 
 #endif

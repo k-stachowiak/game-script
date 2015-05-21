@@ -48,20 +48,6 @@ static void efc_log_bif_call(
 }
 #endif
 
-static void fcall_error_too_many_args(char *symbol, int arity, int applied)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL FUNC CALL", eval_location_top());
-    err_msg_append(&msg, "Passed too many arguments to \"%s\"", symbol);
-    err_msg_append(&msg, "Expected %d, applied %d", arity, applied);
-    err_msg_set(&msg);
-	err_push(
-		"EVAL FUNC CALL",
-		*eval_location_top(),
-		"Passed too many arguments to \"%s\". Expected %d, applied %d",
-		symbol, arity, applied);
-}
-
 /**
  * Performs a lookup for the called function in the symbol map.
  * Then performs the lookup of the function value on the stack.
@@ -400,7 +386,11 @@ void eval_func_call(
 		}
 
     } else {
-        fcall_error_too_many_args(symbol, func_data.arity, applied);
+		err_push(
+			"EVAL FUNC CALL",
+			*eval_location_top(),
+			"Passed too many arguments to \"%s\". Expected %d, applied %d",
+			symbol, func_data.arity, applied);
 
     }
 }

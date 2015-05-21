@@ -16,55 +16,6 @@
 #include "dom.h"
 #include "pattern.h"
 
-/* Error handling.
- * ===============
- */
-
-static void parse_error_pattern_core(struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "PARSE", where);
-    err_msg_append(&msg, "Core compound encountered where a pattern was expected");
-    err_msg_set(&msg);
-	err_push("PARSE", *where, "Core compound encountered where a pattern was expected");
-}
-
-static void parse_error_empty_pattern(struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "PARSE", where);
-    err_msg_append(&msg, "Empty compound pattern encountered");
-    err_msg_set(&msg);
-	err_push("PARSE", *where, "Empty compound pattern encountered");
-}
-
-static void parse_error_bind_to_literal(struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "PARSE", where);
-    err_msg_append(&msg, "Attempt at binding to a literal");
-    err_msg_set(&msg);
-	err_push("PARSE", *where, "Attempt at binding to a literal");
-}
-
-static void parse_error_char_length(int len, struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "PARSE", where);
-    err_msg_append(&msg, "Incorrect character length (%d)", len);
-    err_msg_set(&msg);
-	err_push("PARSE", *where, "Incorrect character length (%d)", len);
-}
-
-static void parse_error_read(char *what, struct SourceLocation *where)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "PARSE", where);
-    err_msg_append(&msg, "Failed reading %s", what);
-    err_msg_set(&msg);
-	err_push("PARSE", *where, "Failed reading %s", what);
-}
-
 /* Algorithms.
  * ===========
  */
@@ -125,19 +76,19 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
         return pattern_make_dontcare();
 
     } else if (dom->type == DOM_ATOM) {
-        parse_error_bind_to_literal(&dom->loc);
+		err_push("PARSE", dom->loc, "Attempt at binding to a literal");
         return NULL;
 
     } else {
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
-            parse_error_pattern_core(&dom->loc);
+			err_push("PARSE", dom->loc, "Core compound encountered where a pattern was expected");
             return NULL;
 
         case DOM_CPD_ARRAY:
             if (!(children = parse_pattern_list(dom->cpd_children))) {
                 if (!err_state()) {
-                    parse_error_empty_pattern(&dom->loc);
+					err_push("PARSE", dom->loc, "Empty compound pattern encountered");
                 }
                 return NULL;
 
@@ -148,7 +99,7 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
         case DOM_CPD_TUPLE:
             if (!(children = parse_pattern_list(dom->cpd_children))) {
                 if (!err_state()) {
-                    parse_error_empty_pattern(&dom->loc);
+					err_push("PARSE", dom->loc, "Empty compound pattern encountered");
                 }
                 return NULL;
 
@@ -600,7 +551,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         }
 
     } else {
-        parse_error_char_length(len, &dom->loc);
+		err_push("PARSE", dom->loc, "Incorrect character length (%d)", len);
         return NULL;
     }
 }
@@ -724,9 +675,6 @@ static struct AstNode *parse_one(struct DomNode *dom)
 
     } else {
 		err_push("PARSE", dom->loc, "Failed parsing DOM node");
-        if (!err_state()) {
-            parse_error_read("AST node", &dom->loc);
-        }
         return NULL;
     }
 }

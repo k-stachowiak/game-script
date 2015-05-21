@@ -12,37 +12,21 @@
 
 static void bif_cpd_error_homo(char *func)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "BIF EVAL COMPOUND", eval_location_top());
-    err_msg_append(&msg, "Function _%s_ must produce homogenous result.", func);
-    err_msg_set(&msg);
 	err_push("BIF EVAL COMPOUND", *eval_location_top(), "Function _%s_ must produce homogenous result.", func);
 }
 
 static void bif_cpd_error_arg(int arg, char *func, char *condition)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "BIF EVAL COMPOUND", eval_location_top());
-    err_msg_append(&msg, "Argument %d of _%s_ %s", arg, func, condition);
-    err_msg_set(&msg);
 	err_push("BIF EVAL COMPOUND", *eval_location_top(), "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 static void bif_cpd_error_range(char *condition)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "BIF EVAL COMPOUND", eval_location_top());
-    err_msg_append(&msg, "In _slice_ : %s", condition);
-    err_msg_set(&msg);
 	err_push("BIF EVAL COMPOUND", *eval_location_top(), "In _slice_ : %s", condition);
 }
 
 static void bif_cpd_error_mismatch(char *func)
 {
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "BIF EVAL COMPOUND", eval_location_top());
-    err_msg_append(&msg, "Arguments of _%s_ must be of matching types", func);
-    err_msg_set(&msg);
 	err_push("BIF EVAL COMPOUND", *eval_location_top(), "Arguments of _%s_ must be of matching types", func);
 }
 

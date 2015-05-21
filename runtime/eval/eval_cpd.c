@@ -6,15 +6,6 @@
 #include "eval_detail.h"
 #include "eval.h"
 
-static void eval_error_array_hetero(void)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL", eval_location_top());
-    err_msg_append(&msg, "Heterogenous array literal evaluated");
-    err_msg_set(&msg);
-	err_push("EVAL", *eval_location_top(), "Heterogenous array literal evaluated");
-}
-
 void eval_compound(
         struct AstNode *node,
         struct Runtime *rt,
@@ -53,7 +44,7 @@ void eval_compound(
     /* Assert array homogenity. */
     if (node->data.compound.type == AST_CPD_ARRAY &&
         rt_val_compound_homo(rt, result_loc) == false) {
-        eval_error_array_hetero();
+		err_push("EVAL", *eval_location_top(), "Heterogenous array literal evaluated");
     }
 }
 

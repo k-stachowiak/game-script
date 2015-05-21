@@ -8,15 +8,6 @@
 #include "error.h"
 #include "rt_val.h"
 
-static void bif_compare_error_arg_mismatch(void)
-{
-    struct ErrMessage msg;
-    err_msg_init_src(&msg, "EVAL BIF COMPARE", eval_location_top());
-    err_msg_append(&msg, "Arguments of comparison BIF must be of equal numeric type");
-    err_msg_set(&msg);
-	err_push("EVAL BIF COMPARE", *eval_location_top(), "Arguments of comparison BIF must be of equal numeric type");
-}
-
 void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     rt_val_push_bool(rt->stack, rt_val_eq_bin(rt, x_loc, y_loc));
@@ -35,7 +26,7 @@ void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         rt_val_push_bool(rt->stack, rx < ry);
         break;
     case BBM_MISMATCH:
-        bif_compare_error_arg_mismatch();
+		err_push("EVAL BIF COMPARE", *eval_location_top(), "Arguments of comparison BIF must be of equal numeric type");
         return;
     }
 }
