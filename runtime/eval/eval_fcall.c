@@ -387,7 +387,7 @@ void eval_func_call(
 
     } else {
 		err_push(
-			"EVAL FUNC CALL",
+			"EVAL",
 			*eval_location_top(),
 			"Passed too many arguments to \"%s\". Expected %d, applied %d",
 			symbol, func_data.arity, applied);

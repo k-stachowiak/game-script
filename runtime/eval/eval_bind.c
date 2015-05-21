@@ -8,7 +8,7 @@
 
 static void bind_error_incorrect_type(void)
 {
-	err_push("EVAL BIND", *eval_location_top(), "Compound type mismatched");
+	err_push("EVAL", *eval_location_top(), "Compound type mismatched");
 }
 
 void eval_bind_pattern(
@@ -46,7 +46,7 @@ void eval_bind_pattern(
     cpd_len = rt_val_cpd_len(rt, location);
     pattern_len = pattern_list_len(pattern->children);
     if (cpd_len != pattern_len) {
-		err_push("EVAL BIND", *eval_location_top(), "Compound bind length mismatched");
+		err_push("EVAL", *eval_location_top(), "Compound bind length mismatched");
         return;
     } else {
         len = pattern_len;
@@ -81,7 +81,7 @@ void eval_bind(
     }
 
     if (location == 0) {
-		err_push("EVAL BIND", *eval_location_top(), "Tried to bind void expression");
+		err_push("EVAL", *eval_location_top(), "Tried to bind void expression");
         return;
     }
 

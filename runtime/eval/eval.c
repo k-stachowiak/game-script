@@ -46,7 +46,7 @@ struct SourceLocation *eval_location_top(void)
 /* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
-	err_push("EVAL BIF TEXT", *eval_location_top(), "Symbol \"%s\" not found", symbol);
+	err_push("EVAL", *eval_location_top(), "Symbol \"%s\" not found", symbol);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)

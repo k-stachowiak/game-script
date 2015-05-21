@@ -25,7 +25,7 @@
             rt_val_push_real(rt->stack, NAME##_impl_real(r)); \
             break; \
         default: \
-			err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type"); \
+			err_push("BIF", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type"); \
             break; \
         } \
     }
@@ -44,7 +44,7 @@
             rt_val_push_real(rt->stack, NAME##_impl_real(rx, ry)); \
             break; \
         case BBM_MISMATCH: \
-			err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type"); \
+			err_push("BIF", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type"); \
             break; \
         } \
     }
@@ -54,7 +54,7 @@
     { \
         VAL_REAL_T x; \
         if (rt_val_peek_type(rt, x_loc) != VAL_REAL) { \
-			err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type"); \
+			err_push("BIF", *eval_location_top(), "Arguments of arythmetic BIF must be of equal numeric type"); \
             return; \
         } \
         x = rt_val_peek_real(rt, x_loc); \
@@ -86,7 +86,7 @@ void bif_real(struct Runtime *rt, VAL_LOC_T x_loc)
 {
 	VAL_INT_T x;
 	if (rt_val_peek_type(rt, x_loc) != VAL_INT) {
-		err_push("EVAL BIF ARYTHMETIC", *eval_location_top(), "Arguments of expanding arythmetic BIF must be of integer type");
+		err_push("BIF", *eval_location_top(), "Arguments of expanding arythmetic BIF must be of integer type");
 		return;
 	}
 	x = rt_val_peek_int(rt, x_loc);

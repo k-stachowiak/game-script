@@ -67,7 +67,7 @@ struct MoonValue *mn_exec_command(const char *source)
     rt_consume_one(runtime, expr, &result_loc, NULL);
 
     if (err_state()) {
-		err_push("REPL", clif_location, "Failed executing command: %s", source);
+		err_push("LIB", clif_location, "Failed executing command: %s", source);
         return NULL;
     }
 
