@@ -76,10 +76,11 @@ char *err_msg(void)
 
 void err_report(void)
 {
-	struct ErrFrame *frame;
+	struct ErrFrame *frame = err_stack;
+	int i = 0;
 	while (frame) {
 		char *message = NULL;
-		str_append(message, "[%s] ", frame->module);
+		str_append(message, "%d: [%s] ", i++, frame->module);
 		if (frame->src_loc.type == SRC_LOC_NORMAL) {
 			str_append(message, "(%d,%d) ", frame->src_loc.line, frame->src_loc.column);
 		}
