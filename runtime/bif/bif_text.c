@@ -131,6 +131,10 @@ static void bif_format_impl(
 
         begin = end + 1; /* skip '%' */
 
+		if (args_left == 0) {
+			err_push_virt("BIF", "Not enough arguments passed");
+			goto end;
+		}
         bif_format_try_appending_arg(rt, &result, *begin, arg_loc);
         if (err_state()) {
 			err_push_virt("BIF", "Failed parsing DOM list");

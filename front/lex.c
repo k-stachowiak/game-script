@@ -227,7 +227,6 @@ static struct Token *tok_read_token(
         (!err_state() && (result = tok_read_comment(current, end)))) {
         return result;
     } else {
-		err_push("LEX", current->loc, "Failed reading token at %s", current->first);
         return NULL;
     }
 }
@@ -243,13 +242,12 @@ static struct Token *tokenize(
 
     LOG_TRACE_FUNC
 
-    err_reset();
     while (!si_eq(&current, &end)) {
 
         struct Token *tok = tok_read_token(&current, &end);
 
         if (!tok) {
-			err_push("LEX", current.loc, "Failed tokenizing at %s", current.first);
+			err_push("LEX", current.loc, "Failed reading token at %s", begin.first);
             tok_free(result);
             return NULL;
         }
@@ -306,7 +304,6 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
                 goto fail;
 
             } else if (!child) {
-				err_push("LEX", (*current)->loc, "Failed parsing compound node: %s", (*current)->begin);
                 goto fail;
 
             } else {
@@ -361,12 +358,9 @@ static struct DomNode *dom_build(struct Token *tokens)
     struct DomNode *result = NULL;
     struct DomNode *result_end = NULL;
 
-    err_reset();
     while (current) {
-		struct SourceLocation current_loc = current->loc;
         struct DomNode *node = dom_parse_node(&current);
         if (err_state()) {
-			err_push("LEX", current_loc, "Failed building DOM");
             dom_free(result);
             return NULL;
         }

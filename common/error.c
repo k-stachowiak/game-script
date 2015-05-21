@@ -50,8 +50,12 @@ char *err_msg(void)
 
 void err_report(void)
 {
-	char *msg = err_msg();
-	printf("%s", msg);
-	mem_free(msg);
+	if (err_state()) {
+		char *msg = err_msg();
+		printf("%s", msg);
+		mem_free(msg);
+	} else {
+		printf("No error\n");
+	}
 }
 

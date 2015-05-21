@@ -4,7 +4,6 @@
 #include <assert.h>
 
 #include "memory.h"
-#include "error.h"
 #include "ast.h"
 
 struct AstNode *ast_make_do_block(

@@ -8,7 +8,10 @@ void test_lex(
         char *test_name,
         bool expect_success)
 {
-    struct DomNode *node = lex(source);
+    struct DomNode *node;
+
+	err_reset();
+	node = lex(source);
     tc_record(tc, test_name, !(expect_success ^ (!!node)));
     if (node) {
         dom_free(node);
@@ -21,7 +24,10 @@ void test_parse(
         char *test_name,
         bool expect_success)
 {
-    struct AstNode *node = parse_source(source);
+    struct AstNode *node;
+
+	err_reset();
+	node = parse_source(source);
     tc_record(tc, test_name, !(expect_success ^ (!!node)));
     if (node) {
         ast_node_free(node);
@@ -33,8 +39,10 @@ void test_parse_literal_string(
         char *source,
         char *test_name)
 {
-    struct AstNode *node = parse_source(source);
+    struct AstNode *node;
 
+	err_reset();
+	node = parse_source(source);
     if (!node) {
         tc_record(tc, test_name, false);
         return;
@@ -133,5 +141,4 @@ void test_eval_source_expect_string(
     }
     tc_record(tc, test_name, true);
 }
-
 

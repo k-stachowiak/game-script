@@ -251,7 +251,7 @@ static void efc_evaluate_bif(
         struct AstNode *actual_args,
         struct ValueFuncData *func_data)
 {
-    VAL_LOC_T arg_locs[BIF_MAX_ARITY];
+    VAL_LOC_T arg_locs[BIF_MAX_ARITY] = { 0 };
     VAL_SIZE_T arg_count = 0, i;
     VAL_LOC_T temp_begin, temp_end;
     VAL_LOC_T appl_loc = func_data->appl_start;
