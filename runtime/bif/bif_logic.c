@@ -14,7 +14,7 @@
     { \
         enum ValueType x_type = rt_val_peek_type(rt, x_loc); \
         if (x_type != VAL_BOOL) { \
-			err_push_virt("BIF", "Arguments of logic BIF must be of boolean type"); \
+			err_push("BIF", "Arguments of logic BIF must be of boolean type"); \
             return; \
         } \
         rt_val_push_bool(rt->stack, NAME##_impl(rt_val_peek_bool(rt, x_loc))); \
@@ -26,7 +26,7 @@
         enum ValueType x_type = rt_val_peek_type(rt, x_loc); \
         enum ValueType y_type = rt_val_peek_type(rt, y_loc); \
         if (x_type != VAL_BOOL || y_type != VAL_BOOL) { \
-			err_push_virt("BIF", "Arguments of logic BIF must be of boolean type"); \
+			err_push("BIF", "Arguments of logic BIF must be of boolean type"); \
             return; \
         } \
         rt_val_push_bool(rt->stack, NAME##_impl( \

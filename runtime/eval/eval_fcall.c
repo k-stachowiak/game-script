@@ -114,7 +114,7 @@ static void efc_curry_on(
     for (; actual_args; actual_args = actual_args->next) {
         eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
-			err_push("EVAL", actual_args->loc, "Failed evaluating function argument");
+			err_push_src("EVAL", actual_args->loc, "Failed evaluating function argument");
             break;
         }
     }
@@ -135,13 +135,13 @@ static bool efc_insert_expression(
 {
     *location = eval_impl(arg_node, rt, caller_sym_map);
     if (err_state()) {
-		err_push("EVAL", arg_node->loc, "Failed evaluating function argument expression");
+		err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
         return false;
     }
 
     eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
     if (err_state()) {
-		err_push_virt("EVAL", "Failed registering function argument in the local scope");
+		err_push("EVAL", "Failed registering function argument in the local scope");
         return false;
     }
 
@@ -196,7 +196,7 @@ static void efc_evaluate_ast(
         sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, cont_loc);
         cap_loc = rt_val_fun_next_cap_loc(rt, cap_loc);
         if (err_state()) {
-			err_push("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
+			err_push_src("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
             goto cleanup;
         }
     }
@@ -210,7 +210,7 @@ static void efc_evaluate_ast(
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
         if (err_state()) {
-			err_push_virt("EVAL", "Failed re-evaluating funtcion applied arguments");
+			err_push("EVAL", "Failed re-evaluating funtcion applied arguments");
             goto cleanup;
         }
     }
@@ -277,7 +277,7 @@ static void efc_evaluate_bif(
         ++arg_count;
 
         if (err_state()) {
-			err_push_virt("EVAL", "Failed evaluating new funtcion arguments");
+			err_push("EVAL", "Failed evaluating new funtcion arguments");
             return;
         }
     }
@@ -335,7 +335,7 @@ static void efc_evaluate_clif(
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T temp_loc = eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
-			err_push_virt("EVAL", "Failed evaluating new funtcion arguments");
+			err_push("EVAL", "Failed evaluating new funtcion arguments");
             return;
         }
 		ARRAY_APPEND(arg_locs, temp_loc);
@@ -386,7 +386,7 @@ void eval_func_call(
 		}
 
     } else {
-		err_push_virt("EVAL",
+		err_push("EVAL",
 			"Passed too many arguments to \"%s\". Expected %d, applied %d",
 			symbol, func_data.arity, applied);
 

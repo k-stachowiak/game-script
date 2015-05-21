@@ -76,19 +76,19 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
         return pattern_make_dontcare();
 
     } else if (dom->type == DOM_ATOM) {
-		err_push("PARSE", dom->loc, "Attempt at binding to a literal");
+		err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
         return NULL;
 
     } else {
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
-			err_push("PARSE", dom->loc, "Core compound encountered where a pattern was expected");
+			err_push_src("PARSE", dom->loc, "Core compound encountered where a pattern was expected");
             return NULL;
 
         case DOM_CPD_ARRAY:
             if (!(children = parse_pattern_list(dom->cpd_children))) {
                 if (!err_state()) {
-					err_push("PARSE", dom->loc, "Empty compound pattern encountered");
+					err_push_src("PARSE", dom->loc, "Empty compound pattern encountered");
                 }
                 return NULL;
 
@@ -99,7 +99,7 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
         case DOM_CPD_TUPLE:
             if (!(children = parse_pattern_list(dom->cpd_children))) {
                 if (!err_state()) {
-					err_push("PARSE", dom->loc, "Empty compound pattern encountered");
+					err_push_src("PARSE", dom->loc, "Empty compound pattern encountered");
                 }
                 return NULL;
 
@@ -551,7 +551,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         }
 
     } else {
-		err_push("PARSE", dom->loc, "Incorrect character length (%d)", len);
+		err_push_src("PARSE", dom->loc, "Incorrect character length (%d)", len);
         return NULL;
     }
 }
@@ -674,7 +674,7 @@ static struct AstNode *parse_one(struct DomNode *dom)
         return node;
 
     } else {
-		err_push("PARSE", dom->loc, "Failed parsing DOM node");
+		err_push_src("PARSE", dom->loc, "Failed parsing DOM node");
         return NULL;
     }
 }
@@ -706,13 +706,13 @@ struct AstNode *parse_source(char *source)
 
     dom = lex(source);
     if (err_state()) {
-		err_push_virt("PARSE", "Failed parsing source");
+		err_push("PARSE", "Failed parsing source");
         return NULL;
     }
 
     ast = parse_list(dom);
     if (err_state()) {
-		err_push_virt("PARSE", "Failed parsing DOM list");
+		err_push("PARSE", "Failed parsing DOM list");
         dom_free(dom);
         return NULL;
     }

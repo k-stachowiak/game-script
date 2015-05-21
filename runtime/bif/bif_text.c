@@ -13,17 +13,17 @@
 
 static void bif_text_error_arg(int arg, char *func, char *condition)
 {
-	err_push_virt("BIF", "Argument %d of _%s_ %s", arg, func, condition);
+	err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 static void bif_text_error_wc_mismatch(void)
 {
-	err_push_virt("BIF", "Wildcard type mismatched argument");
+	err_push("BIF", "Wildcard type mismatched argument");
 }
 
 static void bif_text_error_parse(void)
 {
-	err_push_virt("BIF", "Failed parsing string literal");
+	err_push("BIF", "Failed parsing string literal");
 }
 
 static char *bif_text_find_format(char *str)
@@ -93,7 +93,7 @@ static void bif_format_try_appending_arg(
         break;
 
     default:
-		err_push_virt("BIF", "Wildcard '%c' unknown", wc);
+		err_push("BIF", "Wildcard '%c' unknown", wc);
     }
 }
 
@@ -132,12 +132,12 @@ static void bif_format_impl(
         begin = end + 1; /* skip '%' */
 
 		if (args_left == 0) {
-			err_push_virt("BIF", "Not enough arguments passed");
+			err_push("BIF", "Not enough arguments passed");
 			goto end;
 		}
         bif_format_try_appending_arg(rt, &result, *begin, arg_loc);
         if (err_state()) {
-			err_push_virt("BIF", "Failed parsing DOM list");
+			err_push("BIF", "Failed parsing DOM list");
             goto end;
         }
 
@@ -148,7 +148,7 @@ static void bif_format_impl(
     }
 
     if (args_left) {
-		err_push_virt("BIF", "%d arguments left after format", args_left);
+		err_push("BIF", "%d arguments left after format", args_left);
     } else {
         rt_val_push_string(rt->stack, result, result + strlen(result));
     }
@@ -186,7 +186,7 @@ static void bif_parse_any_ast_compound(
     while (current) {
         bif_parse_any_ast(rt, current);
         if (err_state()) {
-			err_push_virt("BIF", "Failed parsing compound AST node");
+			err_push("BIF", "Failed parsing compound AST node");
             return;
         }
         current = current->next;
@@ -373,7 +373,7 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     rt_val_to_string(rt, arg_loc, &buffer);
 
     if (!buffer) {
-		err_push_virt("BIF",  "Failed rendering value as string");
+		err_push("BIF",  "Failed rendering value as string");
     } else {
         rt_val_push_string(rt->stack, buffer, buffer + strlen(buffer));
         mem_free(buffer);

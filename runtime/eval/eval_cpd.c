@@ -31,7 +31,7 @@ void eval_compound(
     while (current) {
         eval_impl(current, rt, sym_map);
         if (err_state()) {
-			err_push("EVAL", current->loc, "Failed evaluating compound expression element");
+			err_push_src("EVAL", current->loc, "Failed evaluating compound expression element");
             return;
         }
         current = current->next;
@@ -44,7 +44,7 @@ void eval_compound(
     /* Assert array homogenity. */
     if (node->data.compound.type == AST_CPD_ARRAY &&
         rt_val_compound_homo(rt, result_loc) == false) {
-		err_push_virt("EVAL", "Heterogenous array literal evaluated");
+		err_push("EVAL", "Heterogenous array literal evaluated");
     }
 }
 

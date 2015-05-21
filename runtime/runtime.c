@@ -167,7 +167,7 @@ bool rt_consume_one(
     }
 
     if (err_state()) {
-		err_push("RUNTIME", ast->loc, "Failed consuming AST node");
+		err_push_src("RUNTIME", ast->loc, "Failed consuming AST node");
         ast_node_free_one(ast);
         return false;
 

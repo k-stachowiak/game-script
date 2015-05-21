@@ -53,7 +53,7 @@ void sym_map_insert(
 
     kvp = sym_map_find_shallow(sym_map, key);
     if (kvp) {
-		err_push_virt("RUNTIME", "Symbol \"%s\" already inserted", key);
+		err_push("RUNTIME", "Symbol \"%s\" already inserted", key);
         return;
     }
 

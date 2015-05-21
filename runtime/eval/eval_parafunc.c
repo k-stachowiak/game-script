@@ -9,21 +9,21 @@
 
 static void para_error_invalid_argc(char *func, int count)
 {
-	err_push_virt("EVAL",
+	err_push("EVAL",
         "Incorrect arguments count passed to _%s_: %d",
         func, count);
 }
 
 static void para_error_arg_not_bool(char *func, int index)
 {
-	err_push_virt("EVAL",
+	err_push("EVAL",
         "argument %d of _%s_ is not of boolean type",
         index, func);
 }
 
 static void para_error_case(char *unmet)
 {
-	err_push_virt("EVAL", "Case %s", unmet);
+	err_push("EVAL", "Case %s", unmet);
 }
 
 static void eval_parafunc_logic(
@@ -46,7 +46,7 @@ static void eval_parafunc_logic(
 
         VAL_LOC_T loc = eval_impl(args, rt, sym_map);
         if (err_state()) {
-			err_push("EVAL", args->loc, "Failed evaluating logic parafunc element");
+			err_push_src("EVAL", args->loc, "Failed evaluating logic parafunc element");
             return;
         }
 
@@ -87,7 +87,7 @@ static void eval_parafunc_if(
     temp_end = rt->stack->top;
 
     if (err_state()) {
-		err_push("EVAL", args->loc, "Failed evaluating if test");
+		err_push_src("EVAL", args->loc, "Failed evaluating if test");
         return;
     }
 
@@ -123,7 +123,7 @@ static bool eval_parafunc_switch_case(
     temp_end = rt->stack->top;
 
     if (err_state()) {
-		err_push("EVAL", case_node->loc, "Failed evaluating case expression");
+		err_push_src("EVAL", case_node->loc, "Failed evaluating case expression");
         goto end;
     }
 
@@ -170,7 +170,7 @@ static void eval_parafunc_switch(
     temp_end = rt->stack->top;
 
     if (err_state()) {
-		err_push("EVAL", args->loc, "Failed evaluating switch expression");
+		err_push_src("EVAL", args->loc, "Failed evaluating switch expression");
         goto end;
     }
 
@@ -181,14 +181,14 @@ static void eval_parafunc_switch(
             goto end;
         } else {
             if (err_state()) {
-				err_push_virt("EVAL", "Failed evaluating switch case");
+				err_push("EVAL", "Failed evaluating switch case");
                 goto end;
             }
             args = args->next;
         }
     }
 
-	err_push_virt("EVAL", "Unmached case in a swithc");
+	err_push("EVAL", "Unmached case in a swithc");
 
 end:
     stack_collapse(rt->stack, temp_begin, temp_end);
