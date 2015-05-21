@@ -1,8 +1,10 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "log.h"
+#include "tok.h"
 #include "ast.h"
 #include "parse.h"
 #include "error.h"
@@ -24,13 +26,14 @@ static void repl_expr_error_ast_illegal(char *reason)
 	err_push_virt("REPL", "Illegal expression: %s", reason);
 }
 
-enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
+enum ReplExprResult repl_expr_eval(struct Runtime *rt, char *expression)
 {
     struct AstNode *ast;
     int ast_len;
     VAL_LOC_T location;
 
-    ast = parse_source(expression_line);
+	err_reset();
+    ast = parse_source(expression);
     if (!ast) {
         return REPL_EXPR_INTERNAL_ERROR;
     }
@@ -48,7 +51,7 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
 
     rt_consume_one(rt, ast, &location, NULL);
     if (err_state()) {
-		err_push("REPL", ast->loc, "Failed executing expression: %s", expression_line);
+		err_push("REPL", ast->loc, "Failed executing expression: %s", expression);
         return REPL_EXPR_INTERNAL_ERROR;
     }
 
@@ -58,5 +61,17 @@ enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
     }
 
     return REPL_EXPR_OK;
+}
+
+enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)
+{
+	enum ReplExprResult result = repl_expr_eval(rt, expression_line);
+	if (result != REPL_EXPR_OK) {
+		char *with_paren = NULL;
+		str_append(with_paren, "%c%s%c", TOK_CORE_OPEN, expression_line, TOK_CORE_CLOSE);
+		result = repl_expr_eval(rt, with_paren);
+		mem_free(with_paren);
+	}
+	return result;
 }
 
