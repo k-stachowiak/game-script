@@ -19,7 +19,7 @@ static bool dbg_enabled;
 
 static void repl_cmd_error_args(char *cmd, int expected, int actual)
 {
-	err_push("REPL", src_loc_virtual(),
+	err_push_virt("REPL",
         "Invalid arguments to command \"%s\" : %d (expected %d)",
         cmd, actual, expected);
 }
@@ -41,7 +41,7 @@ static enum ReplCmdResult repl_cmd_load(
     filename = pieces[0];
 
     if (!(source = my_getfile(filename))) {
-		err_push("REPL", src_loc_virtual(), "Failed loading a file");
+		err_push_virt("REPL", "Failed loading a file");
         return REPL_CMD_INTERNAL_ERROR;
     }
 
@@ -136,7 +136,7 @@ enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
     }
 
     if (num_pieces == 0) {
-		err_push("REPL", src_loc_virtual(), "No command provided");
+		err_push_virt("REPL", "No command provided");
         return REPL_CMD_ERROR;
     }
 
@@ -156,7 +156,7 @@ enum ReplCmdResult repl_cmd_command(struct Runtime * rt, char *command_line)
         repl_cmd_dbg_toggle(rt);
 
     } else {
-		err_push("REPL", src_loc_virtual(), "Bad command or file name");
+		err_push_virt("REPL", "Bad command or file name");
         return REPL_CMD_ERROR;
     }
 

@@ -12,41 +12,10 @@
 #include "runtime.h"
 #include "rt_val.h"
 
-struct {
-    struct SourceLocation *data;
-    int size, cap;
-} location_stack = { NULL, 0, 0 };
-
-void eval_init(void)
-{
-    eval_location_reset();
-    atexit(eval_location_reset);
-}
-
-void eval_location_reset(void)
-{
-    ARRAY_FREE(location_stack);
-}
-
-void eval_location_push(struct SourceLocation *loc)
-{
-    ARRAY_APPEND(location_stack, *loc);
-}
-
-void eval_location_pop(void)
-{
-    ARRAY_POP(location_stack);
-}
-
-struct SourceLocation *eval_location_top(void)
-{
-    return location_stack.data + location_stack.size - 1;
-}
-
 /* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
-	err_push("EVAL", *eval_location_top(), "Symbol \"%s\" not found", symbol);
+	err_push_virt("EVAL", "Symbol \"%s\" not found", symbol);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
@@ -108,7 +77,6 @@ VAL_LOC_T eval_impl(
         struct SymMap *sym_map)
 {
     VAL_LOC_T begin = rt->stack->top;
-    eval_location_push(&node->loc);
     if (rt->eval_callback_begin) {
         rt->eval_callback_begin(rt->eval_callback_data, node);
     }
@@ -159,7 +127,6 @@ VAL_LOC_T eval_impl(
         if (rt->eval_callback_end) {
             rt->eval_callback_end(rt->eval_callback_data, rt, begin);
         }
-        eval_location_pop();
         if (begin == rt->stack->top) {
             return 0;
         } else {
@@ -173,7 +140,6 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
     VAL_LOC_T begin, result, end;
 
     err_reset();
-    eval_location_reset();
 
     begin = rt->stack->top;
     result = eval_impl(node, rt, sym_map);

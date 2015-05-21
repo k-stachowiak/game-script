@@ -15,13 +15,13 @@
 
 static void repl_expr_error_ast_len(int actual)
 {
-	err_push("REPL", src_loc_virtual(),
+	err_push_virt("REPL",
         "Parsed more than one AST node (%d) - only one allowed", actual);
 }
 
 static void repl_expr_error_ast_illegal(char *reason)
 {
-	err_push("REPL", src_loc_virtual(), "Illegal expression: %s", reason);
+	err_push_virt("REPL", "Illegal expression: %s", reason);
 }
 
 enum ReplExprResult repl_expr_command(struct Runtime *rt, char *expression_line)

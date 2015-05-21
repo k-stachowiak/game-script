@@ -40,7 +40,7 @@ bool mn_exec_file(const char *filename)
     struct AstNode *ast_list;
 
     if (!(source = my_getfile((char*)filename))) {
-		err_push("LIB", src_loc_virtual(), "Failed loading a file");
+		err_push_virt("LIB", "Failed loading a file");
         return false;
     }
 

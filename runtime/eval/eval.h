@@ -28,14 +28,6 @@ void efc_log_bif_call(
 #    define efc_log_bif_call(A, B, C, D, E)
 #endif
 
-void eval_init(void);
-
-void eval_location_reset(void);
-void eval_location_push(struct SourceLocation *loc);
-void eval_location_swap(struct SourceLocation *loc);
-void eval_location_pop(void);
-struct SourceLocation *eval_location_top(void);
-
 VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 VAL_LOC_T eval_bif(struct Runtime *rt, void *impl, VAL_SIZE_T arity);
 VAL_LOC_T eval_clif(struct Runtime *rt, void *impl, VAL_SIZE_T arity);

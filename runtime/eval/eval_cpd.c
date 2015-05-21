@@ -44,7 +44,7 @@ void eval_compound(
     /* Assert array homogenity. */
     if (node->data.compound.type == AST_CPD_ARRAY &&
         rt_val_compound_homo(rt, result_loc) == false) {
-		err_push("EVAL", *eval_location_top(), "Heterogenous array literal evaluated");
+		err_push_virt("EVAL", "Heterogenous array literal evaluated");
     }
 }
 

@@ -9,21 +9,21 @@
 
 static void para_error_invalid_argc(char *func, int count)
 {
-	err_push("EVAL", *eval_location_top(),
+	err_push_virt("EVAL",
         "Incorrect arguments count passed to _%s_: %d",
         func, count);
 }
 
 static void para_error_arg_not_bool(char *func, int index)
 {
-	err_push("EVAL", *eval_location_top(),
+	err_push_virt("EVAL",
         "argument %d of _%s_ is not of boolean type",
         index, func);
 }
 
 static void para_error_case(char *unmet)
 {
-	err_push("EVAL", *eval_location_top(), "Case %s", unmet);
+	err_push_virt("EVAL", "Case %s", unmet);
 }
 
 static void eval_parafunc_logic(
@@ -181,14 +181,14 @@ static void eval_parafunc_switch(
             goto end;
         } else {
             if (err_state()) {
-				err_push("EVAL", src_loc_virtual(), "Failed evaluating switch case");
+				err_push_virt("EVAL", "Failed evaluating switch case");
                 goto end;
             }
             args = args->next;
         }
     }
 
-	err_push("EVAL", *eval_location_top(), "Unmached case in a swithc");
+	err_push_virt("EVAL", "Unmached case in a swithc");
 
 end:
     stack_collapse(rt->stack, temp_begin, temp_end);

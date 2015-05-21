@@ -70,8 +70,6 @@ static void rt_init(struct Runtime *rt)
 
     gsm = &rt->global_sym_map;
     sym_map_init_global(gsm);
-
-    eval_init();
     rt_init_bif(rt, gsm);
 }
 

@@ -79,7 +79,7 @@ int main(void)
         line = my_getline(&eof_flag);
 
         if (err_state()) {
-			err_push("REPL", src_loc_virtual(), "IO error in line \"%s\" : \"%s\".\n", line, err_msg());
+			err_push_virt("REPL", "IO error in line \"%s\" : \"%s\".\n", line, err_msg());
             result = 1;
             mem_free(line);
             break;

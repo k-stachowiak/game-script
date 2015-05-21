@@ -112,7 +112,7 @@ void clif_register(char *symbol, ClifHandler handler)
 
     while (kvp) {
 		if (strcmp(kvp->key, symbol) == 0) {
-			err_push("LIB", src_loc_virtual(), "Symbol \"%s\" already inserted", symbol);
+			err_push_virt("LIB", "Symbol \"%s\" already inserted", symbol);
 			return;
 		}
 		kvp = kvp->next;
@@ -150,6 +150,6 @@ void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count)
 		return;
 	}
 
-	err_push("LIB", src_loc_virtual(), "Symbol \"%s\" not found", symbol);
+	err_push_virt("LIB", "Symbol \"%s\" not found", symbol);
 }
 

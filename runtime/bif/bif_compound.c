@@ -12,22 +12,22 @@
 
 static void bif_cpd_error_homo(char *func)
 {
-	err_push("BIF", *eval_location_top(), "Function _%s_ must produce homogenous result.", func);
+	err_push_virt("BIF", "Function _%s_ must produce homogenous result.", func);
 }
 
 static void bif_cpd_error_arg(int arg, char *func, char *condition)
 {
-	err_push("BIF", *eval_location_top(), "Argument %d of _%s_ %s", arg, func, condition);
+	err_push_virt("BIF", "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 static void bif_cpd_error_range(char *condition)
 {
-	err_push("BIF", *eval_location_top(), "In _slice_ : %s", condition);
+	err_push_virt("BIF", "In _slice_ : %s", condition);
 }
 
 static void bif_cpd_error_mismatch(char *func)
 {
-	err_push("BIF", *eval_location_top(), "Arguments of _%s_ must be of matching types", func);
+	err_push_virt("BIF", "Arguments of _%s_ must be of matching types", func);
 }
 
 void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)

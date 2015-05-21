@@ -7,7 +7,7 @@
 
 static void bif_rand_error_arg(int arg, char *func, char *condition)
 {
-	err_push("BIF", *eval_location_top(), "Argument %d of _%s_ %s", arg, func, condition);
+	err_push_virt("BIF", "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 void bif_rand_ui(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc)

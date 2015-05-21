@@ -40,4 +40,6 @@ void err_report(void);
 		LIST_APPEND(_frame_, &err_stack, &err_stack_end); \
 	} while(0)
 
+#define err_push_virt(MODULE, FORMAT, ...) err_push(MODULE, src_loc_virtual(), FORMAT, ##__VA_ARGS__)
+
 #endif

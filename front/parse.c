@@ -706,13 +706,13 @@ struct AstNode *parse_source(char *source)
 
     dom = lex(source);
     if (err_state()) {
-		err_push("PARSE", src_loc_virtual(), "Failed parsing source");
+		err_push_virt("PARSE", "Failed parsing source");
         return NULL;
     }
 
     ast = parse_list(dom);
     if (err_state()) {
-		err_push("PARSE", src_loc_virtual(), "Failed parsing DOM list");
+		err_push_virt("PARSE", "Failed parsing DOM list");
         dom_free(dom);
         return NULL;
     }
