@@ -1,5 +1,4 @@
 TODO
 ----
- * [ ] enable registering user data with the clif (to attach runtime pointer to the REPL commands)
- * [ ] refactor repl special commands to use CLIF mechanism (another approach to totally move towards lib API).
- * [ ] remove necessity of passing the function name to the CLIF handler
+ * implement REPL in terms of the lib API
+ * code review

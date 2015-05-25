@@ -26,7 +26,7 @@ struct MoonValue {
     union {
         bool boolean;
         char character;
-        uint64_t integer;
+        int64_t integer;
         double real;
         char *string;
         struct MoonValue *compound;
