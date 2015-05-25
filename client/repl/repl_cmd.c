@@ -42,6 +42,7 @@ static enum ReplCmdResult repl_cmd_load(
 
     if (!(source = my_getfile(filename))) {
 		err_push("REPL", "Failed loading a file \"%s\"", filename);
+		err_push("REPL", "Failed loading a file");
         return REPL_CMD_INTERNAL_ERROR;
     }
 
