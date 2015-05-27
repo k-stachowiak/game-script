@@ -64,12 +64,15 @@ add_library(moon STATIC $<TARGET_OBJECTS:lang>
     )
 target_link_libraries(moon m stdc++)
 
-add_executable(mnrepl $<TARGET_OBJECTS:lang>
+add_executable(mnrepl2 $<TARGET_OBJECTS:lang>
     ./client/repl/repl.c
     ./client/repl/repl_cmd.c
     ./client/repl/repl_expr.c
     )
-target_link_libraries(mnrepl m stdc++)
+target_link_libraries(mnrepl2 m stdc++)
+
+add_executable(mnrepl ./REPL/main.c)
+target_link_libraries(mnrepl m stdc++ moon)
 
 add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test.c

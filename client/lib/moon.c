@@ -39,6 +39,8 @@ bool mn_exec_file(const char *filename)
     char *source;
     struct AstNode *ast_list;
 
+	err_reset();
+
     if (!(source = my_getfile((char*)filename))) {
 		err_push("LIB", "Failed loading a file");
         return false;
@@ -63,20 +65,35 @@ struct MoonValue *mn_exec_command(const char *source)
     struct AstNode *expr;
     VAL_LOC_T result_loc;
 
-    expr = parse_source((char*)source);
-    rt_consume_one(runtime, expr, &result_loc, NULL);
+	err_reset();
 
+    expr = parse_source((char*)source);
     if (err_state()) {
-		err_push_src("LIB", clif_location, "Failed executing command: %s", source);
+		err_push("LIB", "Failed executing command: %s", source);
         return NULL;
     }
 
-    return mn_make_api_value(result_loc);
+    rt_consume_one(runtime, expr, &result_loc, NULL);
+    if (err_state()) {
+		err_push("LIB", "Failed executing command: %s", source);
+        return NULL;
+    }
+
+	if (result_loc) {
+		return mn_make_api_value(result_loc);
+	} else {
+		return NULL;
+	}
 }
 
 void mn_dispose(struct MoonValue* value)
 {
     mn_api_value_free(value);
+}
+
+bool mn_error_state(void)
+{
+	return err_state();
 }
 
 const char *mn_error_message(void)

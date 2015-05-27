@@ -45,6 +45,7 @@ struct MoonValue *mn_exec_command(const char *source);
 
 void mn_dispose(struct MoonValue* value);
 
+bool mn_error_state(void);
 const char *mn_error_message(void);
 
 #ifdef __cplusplus

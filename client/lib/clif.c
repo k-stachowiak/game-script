@@ -141,12 +141,12 @@ void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count)
 
 		arg_list = clif_read_args(arg_locs, arg_count);
 		result = kvp->handler(arg_list);
-
-		clif_push_result(result);
-
 		mn_dispose(arg_list);
-		mn_dispose(result);
 
+		if (result) {
+			clif_push_result(result);
+			mn_dispose(result);
+		}
 		return;
 	}
 
