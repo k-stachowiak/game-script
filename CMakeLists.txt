@@ -4,7 +4,6 @@ project(moon-lang)
 
 include_directories(
     ./ast
-    ./client/repl
     ./client/lib
     ./client/test
     ./common
@@ -57,23 +56,6 @@ add_library(lang OBJECT
     ./common/src_iter.c
     )
 
-add_library(moon STATIC $<TARGET_OBJECTS:lang>
-	./client/lib/clif.c
-	./client/lib/mndetail.c
-    ./client/lib/moon.c
-    )
-target_link_libraries(moon m stdc++)
-
-add_executable(mnrepl2 $<TARGET_OBJECTS:lang>
-    ./client/repl/repl.c
-    ./client/repl/repl_cmd.c
-    ./client/repl/repl_expr.c
-    )
-target_link_libraries(mnrepl2 m stdc++)
-
-add_executable(mnrepl ./REPL/main.c)
-target_link_libraries(mnrepl m stdc++ moon)
-
 add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test.c
     ./client/test/test_front.c
@@ -86,4 +68,14 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     ./client/test/test_cci.c
     )
 target_link_libraries(mntest m stdc++)
+
+add_library(moon STATIC $<TARGET_OBJECTS:lang>
+	./client/lib/clif.c
+	./client/lib/mndetail.c
+    ./client/lib/moon.c
+    )
+target_link_libraries(moon m stdc++)
+
+add_executable(mnrepl ./REPL/main.c)
+target_link_libraries(mnrepl moon)
 
