@@ -77,8 +77,8 @@ VAL_LOC_T eval_impl(
         struct SymMap *sym_map)
 {
     VAL_LOC_T begin = rt->stack->top;
-    if (rt->eval_callback_begin) {
-        rt->eval_callback_begin(rt->eval_callback_data, node);
+    if (rt->debug) {
+        dbg_callback_begin(&rt->debugger, node);
     }
 
     switch (node->type) {
@@ -124,13 +124,17 @@ VAL_LOC_T eval_impl(
         return -1;
 
     } else {
-        if (rt->eval_callback_end) {
-            rt->eval_callback_end(rt->eval_callback_data, rt, begin);
+
+        if (rt->debug) {
+            dbg_callback_end(&rt->debugger, rt, begin);
         }
+
         if (begin == rt->stack->top) {
             return 0;
+
         } else {
             return begin;
+
         }
     }
 }

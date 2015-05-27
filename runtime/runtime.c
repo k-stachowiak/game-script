@@ -64,17 +64,19 @@ static void rt_init(struct Runtime *rt)
 
     rt->stack = stack_make();
     rt->node_store = NULL;
-    rt->eval_callback_data = NULL;
-    rt->eval_callback_begin = NULL;
-    rt->eval_callback_end = NULL;
 
     gsm = &rt->global_sym_map;
     sym_map_init_global(gsm);
+
+    rt->debug = false;
+    dbg_init(&rt->debugger);
+
     rt_init_bif(rt, gsm);
 }
 
 static void rt_deinit(struct Runtime *rt)
 {
+    dbg_deinit(&rt->debugger);
     rt_free_stored(rt);
     sym_map_deinit(&rt->global_sym_map);
     stack_free(rt->stack);
@@ -114,24 +116,6 @@ void rt_restore(struct Runtime *rt)
     }
 
     stack_collapse(rt->stack, rt->saved_loc, rt->stack->top);
-}
-
-void rt_reset_eval_callback(struct Runtime *rt)
-{
-    rt->eval_callback_data = NULL;
-    rt->eval_callback_begin = NULL;
-    rt->eval_callback_end = NULL;
-}
-
-void rt_set_eval_callback(
-        struct Runtime *rt,
-        void *data,
-        EvalCallbackBegin begin,
-        EvalCallbackEnd end)
-{
-    rt->eval_callback_data = data;
-    rt->eval_callback_begin = begin;
-    rt->eval_callback_end = end;
 }
 
 void rt_register_clif_handler(

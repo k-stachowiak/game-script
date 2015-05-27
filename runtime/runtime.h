@@ -5,12 +5,10 @@
 
 #include <stdbool.h>
 
+#include "dbg.h"
 #include "ast.h"
 #include "stack.h"
 #include "symmap.h"
-
-typedef void (*EvalCallbackBegin)(void*, struct AstNode*);
-typedef void (*EvalCallbackEnd)(void*, struct Runtime*, VAL_LOC_T);
 
 typedef void (*ClifIntraHandler)(char*, VAL_LOC_T*, int);
 
@@ -19,12 +17,11 @@ struct Runtime {
     struct SymMap global_sym_map;
     struct AstNode *node_store;
 
+    bool debug;
+    struct Debugger debugger;
+
     VAL_LOC_T saved_loc;
     struct AstNode *saved_store;
-
-    void *eval_callback_data;
-    EvalCallbackBegin eval_callback_begin;
-    EvalCallbackEnd eval_callback_end;
 };
 
 struct Runtime *rt_make(void);
@@ -33,13 +30,6 @@ void rt_free(struct Runtime *rt);
 
 void rt_save(struct Runtime *rt);
 void rt_restore(struct Runtime *rt);
-
-void rt_reset_eval_callback(struct Runtime *rt);
-void rt_set_eval_callback(
-        struct Runtime *rt,
-        void *data,
-        EvalCallbackBegin begin,
-        EvalCallbackEnd end);
 
 void rt_register_clif_handler(
 		struct Runtime *rt,

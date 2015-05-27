@@ -37,6 +37,7 @@ struct MoonValue {
 typedef struct MoonValue* (*ClifHandler)(struct MoonValue *args);
 
 void mn_init(void);
+void mn_set_debugger(bool state);
 
 void mn_register_clif(const char *symbol, int arity, ClifHandler handler);
 

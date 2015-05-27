@@ -88,11 +88,11 @@ static void repl_cmd_print_sym_map(struct Runtime *rt)
 static void repl_cmd_dbg_toggle(struct Runtime *rt)
 {
     if (dbg_enabled) {
-        rt_reset_eval_callback(rt);
+        rt->debug = false;
         dbg_enabled = false;
         printf("debugger disabled\n");
     } else {
-        rt_set_eval_callback(rt, &dbg, dbg_callback_begin, dbg_callback_end);
+        rt->debug = true;
         dbg_enabled = true;
         printf("debugger enabled\n");
     }

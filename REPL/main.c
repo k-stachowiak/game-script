@@ -12,18 +12,28 @@
 #include "moon.h"
 
 static bool quit_request = false;
-// static bool debug_state = false;
+static bool debug_state = false;
 
 static char *stdfilename = "std.mn";
-static char *prompt = "> ";
-static char *response_prefix = " ... ";
+static char *prompt = ": ";
+static char *response_prefix = "> ";
 static char *banner =
     "Moon language REPL\n"
     "Copyright (C) 2014-2015 Krzysztof Stachowiak\n";
 
 struct MoonValue *repl_clif_dbg(struct MoonValue *args)
 {
-	exit(1);
+    if (debug_state) {
+        debug_state = false;
+        mn_set_debugger(debug_state);
+        printf("Debugger disabled\n");
+
+    } else {
+        debug_state = true;
+        mn_set_debugger(debug_state);
+        printf("Debugger enabled\n");
+    }
+
 	return NULL;
 }
 
@@ -127,7 +137,7 @@ int main()
         } else {
 			printf("%s", response_prefix);
 			repl_print(value);
-			printf("\n");
+			printf("\n\n");
 			mn_dispose(value);
 		}
 

@@ -4,6 +4,7 @@
 #define DBG_H
 
 #include "ast.h"
+#include "rt_val.h"
 #include "runtime.h"
 
 struct Debugger {

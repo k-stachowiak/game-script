@@ -28,6 +28,11 @@ void mn_init(void)
 	clif_init();
 }
 
+void mn_set_debugger(bool state)
+{
+    runtime->debug = state;
+}
+
 void mn_register_clif(const char *symbol, int arity, ClifHandler handler)
 {
 	clif_register((char*)symbol, handler);
