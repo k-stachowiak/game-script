@@ -8,6 +8,12 @@
 #include "dom.h"
 #include "tok.h"
 
+/**
+ * The string representations of the reserved words.
+ * Note that the indices of the words in this array must correspond to the
+ * indices of the enum "Reserved" or at least this is what the rest of
+ * this module assumes.
+ */
 static char *reserved[] = {
     "do",
     "bind",
@@ -145,3 +151,4 @@ char *dom_node_parse_symbol(struct DomNode *node)
 
     return result;
 }
+
