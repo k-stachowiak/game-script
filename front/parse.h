@@ -5,6 +5,9 @@
 
 #include "ast.h"
 
+/**
+ * Parses source code to produce an abstract syntax tree.
+ */
 struct AstNode *parse_source(char *source);
 
 #endif

@@ -59,3 +59,30 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs)
     return lhs->current == rhs->current;
 }
 
+struct SourceIter si_find(
+		struct SourceIter *begin,
+		struct SourceIter *end,
+		int value)
+{
+    struct SourceIter result = *begin;
+
+    while (!si_eq(&result, end) && *(result.current) != value) {
+        si_adv(&result);
+    }
+
+    return result;
+}
+
+struct SourceIter si_find_if_not(struct SourceIter *begin,
+		struct SourceIter *end,
+		int (*pred)(int))
+{
+    struct SourceIter result = *begin;
+
+    while (!si_eq(&result, end) && pred(*(result.current))) {
+        si_adv(&result);
+    }
+
+    return result;
+}
+

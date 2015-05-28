@@ -20,7 +20,7 @@
  * ===========
  */
 
-static char *find(char * current, char *last, char value)
+static char *find(char *current, char *last, char value)
 {
     while (current != last) {
         if (*current == value) {

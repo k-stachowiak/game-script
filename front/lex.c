@@ -34,45 +34,6 @@ static int tok_is_allowed_in_atom(int c)
            c != TOK_COMMENT;
 }
 
-static struct SourceIter find(
-        struct SourceIter *begin,
-        struct SourceIter *end,
-        int value)
-{
-    struct SourceIter result = *begin;
-
-    LOG_TRACE_FUNC
-
-    while (!si_eq(&result, end) && *(result.current) != value) {
-        si_adv(&result);
-    }
-
-    return result;
-}
-
-static struct SourceIter find_if_not(
-        struct SourceIter *begin,
-        struct SourceIter *end,
-        int (*pred)(int))
-{
-    struct SourceIter result = *begin;
-
-    LOG_TRACE_FUNC
-
-    while (!si_eq(&result, end) && pred(*(result.current))) {
-        si_adv(&result);
-    }
-
-    return result;
-}
-
-static struct Token *find_non_comment(struct Token *token)
-{
-	while (token && tok_is_comment(token)) {
-		token = token->next;
-	}
-	return token;
-}
 
 static struct SourceIter find_nonesc_delim(
         struct SourceIter *begin,
@@ -118,7 +79,7 @@ static struct Token *tok_read_paren(
     si_adv(current);
     result = tok_make_token(&prev, current);
 
-    *current = find_if_not(current, end, isspace);
+    *current = si_find_if_not(current, end, isspace);
 
     return result;
 }
@@ -136,10 +97,10 @@ static struct Token *tok_read_reg_atom(
         return NULL;
     }
 
-    atom_end = find_if_not(current, end, tok_is_allowed_in_atom);
+    atom_end = si_find_if_not(current, end, tok_is_allowed_in_atom);
 
     result = tok_make_token(current, &atom_end);
-    *current = find_if_not(&atom_end, end, isspace);
+    *current = si_find_if_not(&atom_end, end, isspace);
     return result;
 }
 
@@ -176,7 +137,7 @@ static struct Token *tok_read_delim_atom(
     si_adv(&atom_end);
     result = tok_make_token(&atom_begin, &atom_end);
 
-    *current = find_if_not(&atom_end, end, isspace);
+    *current = si_find_if_not(&atom_end, end, isspace);
 
     return result;
 }
@@ -185,12 +146,6 @@ static struct Token *tok_read_comment(
         struct SourceIter *current,
         struct SourceIter *end)
 {
-    /* Note that the comments are to be discarded, however in order to
-     * maintain a consistent algorithm's structure they will be treated
-     * like other tokens at this stage. They must be filtered out at
-     * a later stage.
-     */
-
     struct Token *result;
     struct SourceIter comment_end;
 
@@ -200,12 +155,12 @@ static struct Token *tok_read_comment(
         return NULL;
     }
 
-    comment_end = find(current, end, '\n');
+    comment_end = si_find(current, end, '\n');
     result = tok_make_token(current, &comment_end);
 
     if (!si_eq(&comment_end, end)) {
         si_adv(&comment_end);
-        *current = find_if_not(&comment_end, end, isspace);
+        *current = si_find_if_not(&comment_end, end, isspace);
     } else {
         *current = *end;
     }
@@ -252,8 +207,12 @@ static struct Token *tokenize(
             return NULL;
         }
 
-        LOG_TRACE("Read token from(%s) to (%s)", current.first, current.last);
-        LIST_APPEND(tok, &result, &result_end);
+		if (tok_is_comment(tok)) {
+			LOG_TRACE("Skipping comment token");
+		} else {
+			LOG_TRACE("Read token from(%s) to (%s)", current.first, current.last);
+			LIST_APPEND(tok, &result, &result_end);
+		}
     }
 
     return result;
@@ -289,13 +248,13 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
     struct DomNode *children_end = NULL;
 
     struct Token *first = *current;
-    *current = find_non_comment((*current)->next);
+    *current = (*current)->next;
 
     while (*current) {
         if (tok_is_close_paren(*current) && tok_paren_match(first, *current)) {
             struct DomNode *result = dom_make_compound(
                 &first->loc, dom_infer_cpd_type(first), children);
-            *current = find_non_comment((*current)->next);
+            *current = (*current)->next;
             return result;
 
         } else {
@@ -323,19 +282,12 @@ static struct DomNode *dom_parse_atom_node(struct Token **current)
 {
     struct DomNode *result;
     result = dom_make_atom(&(*current)->loc, (*current)->begin, (*current)->end);
-    *current = find_non_comment((*current)->next);
+    *current = (*current)->next;
     return result;
 }
 
-/**
- * Parses a DOM node starting from the current token.
- * NOTE: this will silently skip all the tokens
- * starting with the comment character.
- */
 static struct DomNode *dom_parse_node(struct Token **current)
 {
-    *current = find_non_comment(*current);
-
     if (!(*current)) {
         return NULL;
 
