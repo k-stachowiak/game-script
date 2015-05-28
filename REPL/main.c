@@ -67,7 +67,7 @@ static struct MoonValue *repl_evaluate(char *line)
 static void repl_print(struct MoonValue *value)
 {
 	if (!value) {
-		printf("null");
+		printf("unit");
 	}
 
 	while (value) {
@@ -103,7 +103,7 @@ static void repl_print(struct MoonValue *value)
 		}
 
 		if ((value = value->next)) {
-			printf(", ");
+			printf(" ");
 		}
 	}
 }
