@@ -75,12 +75,3 @@ void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
     stack->top -= removed;
 }
 
-void stack_for_each(struct Stack *stack, void *state, void(*f)(void*, VAL_LOC_T))
-{
-    VAL_LOC_T loc = 0;
-    while (loc != stack->top) {
-        struct ValueHeader header = rt_val_peek_header(stack, loc);
-        f(state, loc);
-        loc += header.size + VAL_HEAD_BYTES;
-    }
-}

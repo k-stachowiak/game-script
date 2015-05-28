@@ -24,6 +24,5 @@ VAL_TYPE_T stack_peek_type(struct Stack *stack, VAL_LOC_T loc);
 void *stack_peek_ptr(struct Stack *stack, VAL_LOC_T loc);
 
 void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end);
-void stack_for_each(struct Stack *stack, void *state, void(*f)(void*, VAL_LOC_T));
 
 #endif

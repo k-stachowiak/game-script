@@ -33,6 +33,5 @@ void sym_map_insert(
 struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key);
 struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key);
-void sym_map_for_each(struct SymMap *sym_map, void *state, void(*f)(void*, char*, VAL_LOC_T));
 
 #endif

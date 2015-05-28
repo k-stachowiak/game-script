@@ -49,7 +49,4 @@ bool rt_consume_list(
         struct AstNode *ast,
         VAL_LOC_T *last_loc);
 
-void rt_for_each_stack_val(struct Runtime *rt, void(*f)(void*, VAL_LOC_T));
-void rt_for_each_sym(struct Runtime *rt, void(*f)(void*, char*, VAL_LOC_T));
-
 #endif

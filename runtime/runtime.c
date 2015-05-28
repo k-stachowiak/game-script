@@ -193,13 +193,3 @@ bool rt_consume_list(
     return true;
 }
 
-void rt_for_each_stack_val(struct Runtime *rt, void(*f)(void*, VAL_LOC_T))
-{
-    stack_for_each(&rt->stack, rt, f);
-}
-
-void rt_for_each_sym(struct Runtime *rt, void(*f)(void*, char*, VAL_LOC_T))
-{
-    sym_map_for_each(&rt->global_sym_map, rt, f);
-}
-

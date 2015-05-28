@@ -112,16 +112,3 @@ struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
     }
 }
 
-void sym_map_for_each(struct SymMap *sym_map, void *state, void(*f)(void*, char*, VAL_LOC_T))
-{
-    struct SymMapKvp *kvp;
-
-    if (sym_map->global) {
-        sym_map_for_each(sym_map->global, state, f);
-    }
-
-    for (kvp = sym_map->map; kvp; kvp = kvp->next) {
-        f(state, kvp->key, kvp->stack_loc);
-    }
-}
-
