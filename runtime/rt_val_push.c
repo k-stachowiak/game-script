@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "rt_val.h"
+#include "stack.h"
 
 void rt_val_push_copy(struct Stack *stack, VAL_LOC_T location)
 {

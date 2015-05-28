@@ -17,7 +17,7 @@
 			err_push("BIF", "Arguments of logic BIF must be of boolean type"); \
             return; \
         } \
-        rt_val_push_bool(rt->stack, NAME##_impl(rt_val_peek_bool(rt, x_loc))); \
+        rt_val_push_bool(&rt->stack, NAME##_impl(rt_val_peek_bool(rt, x_loc))); \
     }
 
 #define BIF_LOGIC_BINARY_DEF(NAME) \
@@ -29,7 +29,7 @@
 			err_push("BIF", "Arguments of logic BIF must be of boolean type"); \
             return; \
         } \
-        rt_val_push_bool(rt->stack, NAME##_impl( \
+        rt_val_push_bool(&rt->stack, NAME##_impl( \
                 rt_val_peek_bool(rt, x_loc), \
                 rt_val_peek_bool(rt, y_loc))); \
     }

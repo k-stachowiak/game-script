@@ -9,20 +9,17 @@
 #include "memory.h"
 #include "rt_val.h"
 
-struct Stack *stack_make(void)
+void stack_init(struct Stack *stack)
 {
     static int initial_size = 2;
-    struct Stack *result = mem_malloc(sizeof(*result));
-    result->buffer = mem_malloc(initial_size);
-    result->size = initial_size;
-    result->top = 1;
-    return result;
+    stack->buffer = mem_malloc(initial_size);
+    stack->size = initial_size;
+    stack->top = 1;
 }
 
-void stack_free(struct Stack *stack)
+void stack_deinit(struct Stack *stack)
 {
     mem_free(stack->buffer);
-    mem_free(stack);
 }
 
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data)

@@ -129,7 +129,7 @@ void dbg_deinit(struct Debugger *dbg)
 {
 }
 
-void dbg_callback_begin(void *dbg_void, struct AstNode* node)
+void dbg_call_begin(void *dbg_void, struct AstNode* node)
 {
     struct Debugger *dbg = (struct Debugger*)dbg_void;
     dbg_print_indent(dbg);
@@ -137,7 +137,7 @@ void dbg_callback_begin(void *dbg_void, struct AstNode* node)
     ++dbg->lvl;
 }
 
-void dbg_callback_end(void *dbg_void, struct Runtime* rt, VAL_LOC_T val_loc)
+void dbg_call_end(void *dbg_void, struct Runtime* rt, VAL_LOC_T val_loc)
 {
     struct Debugger *dbg = (struct Debugger*)dbg_void;
     --dbg->lvl;

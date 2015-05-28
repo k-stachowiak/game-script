@@ -76,9 +76,9 @@ VAL_LOC_T eval_impl(
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
-    VAL_LOC_T begin = rt->stack->top;
+    VAL_LOC_T begin = rt->stack.top;
     if (rt->debug) {
-        dbg_callback_begin(&rt->debugger, node);
+        dbg_call_begin(&rt->debugger, node);
     }
 
     switch (node->type) {
@@ -87,7 +87,7 @@ VAL_LOC_T eval_impl(
         break;
 
     case AST_LITERAL:
-        eval_literal(node, rt->stack);
+        eval_literal(node, &rt->stack);
         break;
 
     case AST_DO_BLOCK:
@@ -99,11 +99,11 @@ VAL_LOC_T eval_impl(
         break;
 
     case AST_REFERENCE:
-        eval_reference(node, rt->stack, sym_map);
+        eval_reference(node, &rt->stack, sym_map);
         break;
 
     case AST_FUNC_DEF:
-        eval_func_def(node, rt->stack, sym_map);
+        eval_func_def(node, &rt->stack, sym_map);
         break;
 
     case AST_PARAFUNC:
@@ -126,10 +126,10 @@ VAL_LOC_T eval_impl(
     } else {
 
         if (rt->debug) {
-            dbg_callback_end(&rt->debugger, rt, begin);
+            dbg_call_end(&rt->debugger, rt, begin);
         }
 
-        if (begin == rt->stack->top) {
+        if (begin == rt->stack.top) {
             return 0;
 
         } else {
@@ -145,13 +145,13 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 
     err_reset();
 
-    begin = rt->stack->top;
+    begin = rt->stack.top;
     result = eval_impl(node, rt, sym_map);
-    end = rt->stack->top;
+    end = rt->stack.top;
 
     if (err_state()) {
 		err_push_src("EVAL", node->loc, "Failed evaluating expression");
-        stack_collapse(rt->stack, begin, end);
+        stack_collapse(&rt->stack, begin, end);
         return -1;
     } else {
         return result;
@@ -160,21 +160,21 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 
 VAL_LOC_T eval_bif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
 {
-    VAL_LOC_T size_loc, data_begin, result_loc = rt->stack->top;
-    rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_BIF, impl);
-    rt_val_push_func_cap_init(rt->stack, 0);
-    rt_val_push_func_appl_init(rt->stack, 0);
-    rt_val_push_func_final(rt->stack, size_loc, data_begin);
+    VAL_LOC_T size_loc, data_begin, result_loc = rt->stack.top;
+    rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_BIF, impl);
+    rt_val_push_func_cap_init(&rt->stack, 0);
+    rt_val_push_func_appl_init(&rt->stack, 0);
+    rt_val_push_func_final(&rt->stack, size_loc, data_begin);
     return result_loc;
 }
 
 VAL_LOC_T eval_clif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
 {
-    VAL_LOC_T size_loc, data_begin, result_loc = rt->stack->top;
-    rt_val_push_func_init(rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_CLIF, impl);
-    rt_val_push_func_cap_init(rt->stack, 0);
-    rt_val_push_func_appl_init(rt->stack, 0);
-    rt_val_push_func_final(rt->stack, size_loc, data_begin);
+    VAL_LOC_T size_loc, data_begin, result_loc = rt->stack.top;
+    rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_CLIF, impl);
+    rt_val_push_func_cap_init(&rt->stack, 0);
+    rt_val_push_func_appl_init(&rt->stack, 0);
+    rt_val_push_func_final(&rt->stack, size_loc, data_begin);
     return result_loc;
 }
 

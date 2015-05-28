@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "rt_val.h"
+#include "stack.h"
 
 void rt_val_poke_bool(struct Stack *stack, VAL_LOC_T loc, VAL_BOOL_T value)
 {

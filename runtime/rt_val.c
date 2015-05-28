@@ -20,8 +20,8 @@ static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
     struct ValueHeader
-        header_x = rt_val_peek_header(rt->stack, x),
-        header_y = rt_val_peek_header(rt->stack, y);
+        header_x = rt_val_peek_header(&rt->stack, x),
+        header_y = rt_val_peek_header(&rt->stack, y);
 
     return (
         (header_x.type == VAL_BOOL && header_y.type == VAL_BOOL) ||
@@ -38,8 +38,8 @@ static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T 
     int i, len_x, len_y;
 
     struct ValueHeader
-        header_x = rt_val_peek_header(rt->stack, x),
-        header_y = rt_val_peek_header(rt->stack, y);
+        header_x = rt_val_peek_header(&rt->stack, x),
+        header_y = rt_val_peek_header(&rt->stack, y);
 
     if (header_x.type == VAL_ARRAY && header_y.type == VAL_ARRAY) {
 
@@ -188,8 +188,8 @@ bool rt_val_eq_bin(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     }
 
     return memcmp(
-            rt->stack->buffer + x,
-            rt->stack->buffer + y,
+            rt->stack.buffer + x,
+            rt->stack.buffer + y,
             x_size + VAL_HEAD_BYTES) == 0;
 }
 

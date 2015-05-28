@@ -19,10 +19,10 @@
         VAL_INT_T i; \
         switch (bif_match_un(rt, x_loc, &i, &r)) { \
         case VAL_INT: \
-            rt_val_push_int(rt->stack, NAME##_impl_int(i)); \
+            rt_val_push_int(&rt->stack, NAME##_impl_int(i)); \
             break; \
         case VAL_REAL: \
-            rt_val_push_real(rt->stack, NAME##_impl_real(r)); \
+            rt_val_push_real(&rt->stack, NAME##_impl_real(r)); \
             break; \
         default: \
 			err_push("BIF", "Arguments of arythmetic BIF must be of equal numeric type"); \
@@ -37,11 +37,11 @@
         VAL_INT_T ix, iy; \
         switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) { \
         case BBM_BOTH_INT: \
-            rt_val_push_int(rt->stack, NAME##_impl_int(ix, iy)); \
+            rt_val_push_int(&rt->stack, NAME##_impl_int(ix, iy)); \
             break; \
         case BBM_BOTH_REAL: \
         case BBM_HETERO: \
-            rt_val_push_real(rt->stack, NAME##_impl_real(rx, ry)); \
+            rt_val_push_real(&rt->stack, NAME##_impl_real(rx, ry)); \
             break; \
         case BBM_MISMATCH: \
 			err_push("BIF", "Arguments of arythmetic BIF must be of equal numeric type"); \
@@ -58,7 +58,7 @@
             return; \
         } \
         x = rt_val_peek_real(rt, x_loc); \
-        rt_val_push_int(rt->stack, NAME##_impl(x)); \
+        rt_val_push_int(&rt->stack, NAME##_impl(x)); \
     }
 
 static VAL_INT_T bif_add_impl_int(VAL_INT_T x, VAL_INT_T y) { return x + y; }
@@ -90,7 +90,7 @@ void bif_real(struct Runtime *rt, VAL_LOC_T x_loc)
 		return;
 	}
 	x = rt_val_peek_int(rt, x_loc);
-	rt_val_push_real(rt->stack, (VAL_REAL_T)x);
+	rt_val_push_real(&rt->stack, (VAL_REAL_T)x);
 }
 
 static VAL_INT_T bif_floor_impl(VAL_REAL_T x) { return (VAL_INT_T)floor(x); }

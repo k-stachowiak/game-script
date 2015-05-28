@@ -34,7 +34,7 @@ static void eval_parafunc_logic(
         char *func)
 {
     int i = 0;
-    VAL_LOC_T temp_begin = rt->stack->top;
+    VAL_LOC_T temp_begin = rt->stack.top;
     VAL_BOOL_T result = !breaking_value;
 
     if (!args) {
@@ -64,8 +64,8 @@ static void eval_parafunc_logic(
         ++i;
     }
 
-    stack_collapse(rt->stack, temp_begin, rt->stack->top);
-    rt_val_push_bool(rt->stack, result);
+    stack_collapse(&rt->stack, temp_begin, rt->stack.top);
+    rt_val_push_bool(&rt->stack, result);
 }
 
 static void eval_parafunc_if(
@@ -82,9 +82,9 @@ static void eval_parafunc_if(
         return;
     }
 
-    temp_begin = rt->stack->top;
+    temp_begin = rt->stack.top;
     test_loc = eval_impl(args, rt, sym_map);
-    temp_end = rt->stack->top;
+    temp_end = rt->stack.top;
 
     if (err_state()) {
 		err_push_src("EVAL", args->loc, "Failed evaluating if test");
@@ -93,12 +93,12 @@ static void eval_parafunc_if(
 
     if (rt_val_peek_type(rt, test_loc) != VAL_BOOL) {
         para_error_arg_not_bool("if", 1);
-        stack_collapse(rt->stack, temp_begin, temp_end);
+        stack_collapse(&rt->stack, temp_begin, temp_end);
         return;
     }
 
     test_val = rt_val_peek_bool(rt, test_loc);
-    stack_collapse(rt->stack, temp_begin, temp_end);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 
     if (test_val) {
         eval_impl(args->next, rt, sym_map);
@@ -118,9 +118,9 @@ static bool eval_parafunc_switch_case(
     int case_len;
     bool result = false;
 
-    temp_begin = rt->stack->top;
+    temp_begin = rt->stack.top;
     case_loc = eval_impl(case_node, rt, sym_map);
-    temp_end = rt->stack->top;
+    temp_end = rt->stack.top;
 
     if (err_state()) {
 		err_push_src("EVAL", case_node->loc, "Failed evaluating case expression");
@@ -143,12 +143,12 @@ static bool eval_parafunc_switch_case(
     case_value = rt_val_next_loc(rt, case_key);
 
     if (rt_val_eq_bin(rt, switch_loc, case_key)) {
-        rt_val_push_copy(rt->stack, case_value);
+        rt_val_push_copy(&rt->stack, case_value);
         result = true;
     }
 
 end:
-    stack_collapse(rt->stack, temp_begin, temp_end);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
     return result;
 }
 
@@ -165,9 +165,9 @@ static void eval_parafunc_switch(
         return;
     }
 
-    temp_begin = rt->stack->top;
+    temp_begin = rt->stack.top;
     switch_loc = eval_impl(args, rt, sym_map);
-    temp_end = rt->stack->top;
+    temp_end = rt->stack.top;
 
     if (err_state()) {
 		err_push_src("EVAL", args->loc, "Failed evaluating switch expression");
@@ -191,7 +191,7 @@ static void eval_parafunc_switch(
 	err_push("EVAL", "Unmached case in a swithc");
 
 end:
-    stack_collapse(rt->stack, temp_begin, temp_end);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 void eval_parafunc(

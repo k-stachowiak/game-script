@@ -84,7 +84,7 @@ static void efc_curry_on(
     VAL_SIZE_T i, arg_count;
 
     rt_val_push_func_init(
-        rt->stack,
+        &rt->stack,
         &size_loc,
         &data_begin,
         func_data->arity,
@@ -92,10 +92,10 @@ static void efc_curry_on(
         func_data->impl);
 
     /* Captures. */
-    rt_val_push_func_cap_init(rt->stack, func_data->cap_count);
+    rt_val_push_func_cap_init(&rt->stack, func_data->cap_count);
     current_loc = func_data->cap_start;
     for (i = 0; i < func_data->cap_count; ++i) {
-        rt_val_push_func_cap_copy(rt->stack, current_loc);
+        rt_val_push_func_cap_copy(&rt->stack, current_loc);
         current_loc += rt_val_fun_next_cap_loc(rt, current_loc);
     }
 
@@ -103,10 +103,10 @@ static void efc_curry_on(
     arg_count = func_data->appl_count + ast_list_len(actual_args);
 
     /* ...already applied, */
-    rt_val_push_func_appl_init(rt->stack, arg_count);
+    rt_val_push_func_appl_init(&rt->stack, arg_count);
     current_loc = func_data->appl_start;
     for (i = 0; i < func_data->appl_count; ++i) {
-        rt_val_push_copy(rt->stack, current_loc);
+        rt_val_push_copy(&rt->stack, current_loc);
         current_loc += rt_val_fun_next_appl_loc(rt, current_loc);
     }
 
@@ -120,7 +120,7 @@ static void efc_curry_on(
     }
 
     /* Finalize. */
-    rt_val_push_func_final(rt->stack, size_loc, data_begin);
+    rt_val_push_func_final(&rt->stack, size_loc, data_begin);
 }
 
 /** Evaluates an expression and inserts into a provided symbol map. */
@@ -216,7 +216,7 @@ static void efc_evaluate_ast(
     }
 
     /* Evaluate and insert new arguments. */
-    temp_begin = rt->stack->top;
+    temp_begin = rt->stack.top;
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T actual_loc;
         if (efc_insert_expression(rt, sym_map, &local_sym_map,
@@ -227,7 +227,7 @@ static void efc_evaluate_ast(
             goto cleanup;
         }
     }
-    temp_end = rt->stack->top;
+    temp_end = rt->stack.top;
 
     /* Evaluate the function expression. */
     eval_impl(ast_def->data.func_def.expr, rt, &local_sym_map);
@@ -235,7 +235,7 @@ static void efc_evaluate_ast(
     efc_log_result(rt, temp_end);
 
     /* Collapse the temporaries. */
-    stack_collapse(rt->stack, temp_begin, temp_end);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 
 cleanup:
 
@@ -264,7 +264,7 @@ static void efc_evaluate_bif(
     }
 
     /* Evaluate the missing args. */
-    temp_begin = rt->stack->top;
+    temp_begin = rt->stack.top;
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T temp_loc;
         if (arg_count >= BIF_MAX_ARITY) {
@@ -281,7 +281,7 @@ static void efc_evaluate_bif(
             return;
         }
     }
-    temp_end = rt->stack->top;
+    temp_end = rt->stack.top;
 
     /* Assert arguments count. */
     if (func_data->arity != arg_count) {
@@ -307,7 +307,7 @@ static void efc_evaluate_bif(
     efc_log_bif_call(rt, symbol, arg_locs, arg_count, temp_end);
 
     /* Collapse the temporaries. */
-    stack_collapse(rt->stack, temp_begin, temp_end);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 /** Evaluates a CLIF. */
@@ -331,7 +331,7 @@ static void efc_evaluate_clif(
     }
 
     /* Evaluate the missing args. */
-    temp_begin = rt->stack->top;
+    temp_begin = rt->stack.top;
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T temp_loc = eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
@@ -340,11 +340,11 @@ static void efc_evaluate_clif(
         }
 		ARRAY_APPEND(arg_locs, temp_loc);
     }
-    temp_end = rt->stack->top;
+    temp_end = rt->stack.top;
 
 	handler(symbol, arg_locs.data, arg_locs.size);
 
-    stack_collapse(rt->stack, temp_begin, temp_end);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 	ARRAY_FREE(arg_locs);
 }
 

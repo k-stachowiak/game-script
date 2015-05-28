@@ -4,6 +4,7 @@
 #include "error.h"
 #include "mndetail.h"
 #include "rt_val.h"
+#include "runtime.h"
 
 struct ClifMapKvp {
 	char *key;
@@ -34,48 +35,48 @@ static void clif_push_result(struct MoonValue *value)
 
 	switch (value->type) {
     case MN_BOOL:
-		rt_val_push_bool(runtime->stack, value->data.boolean);
+		rt_val_push_bool(&runtime->stack, value->data.boolean);
 		break;
 
     case MN_CHAR:
-		rt_val_push_char(runtime->stack, value->data.character);
+		rt_val_push_char(&runtime->stack, value->data.character);
 		break;
 
     case MN_INT:
-		rt_val_push_int(runtime->stack, value->data.integer);
+		rt_val_push_int(&runtime->stack, value->data.integer);
 		break;
 
     case MN_REAL:
-		rt_val_push_real(runtime->stack, value->data.real);
+		rt_val_push_real(&runtime->stack, value->data.real);
 		break;
 
     case MN_STRING:
 		rt_val_push_string(
-			runtime->stack,
+			&runtime->stack,
 			value->data.string,
 			value->data.string + strlen(value->data.string));
 		break;
 
     case MN_ARRAY:
-		rt_val_push_array_init(runtime->stack, &size_loc);
-		data_begin = runtime->stack->top;
+		rt_val_push_array_init(&runtime->stack, &size_loc);
+		data_begin = runtime->stack.top;
 		while (child) {
 			clif_push_result(child);
 			child = child->next;
 		}
-		data_end = runtime->stack->top;
-		rt_val_push_cpd_final(runtime->stack, size_loc, data_end - data_begin);
+		data_end = runtime->stack.top;
+		rt_val_push_cpd_final(&runtime->stack, size_loc, data_end - data_begin);
 		break;
 
     case MN_TUPLE:
-		rt_val_push_tuple_init(runtime->stack, &size_loc);
-		data_begin = runtime->stack->top;
+		rt_val_push_tuple_init(&runtime->stack, &size_loc);
+		data_begin = runtime->stack.top;
 		while (child) {
 			clif_push_result(child);
 			child = child->next;
 		}
-		data_end = runtime->stack->top;
-		rt_val_push_cpd_final(runtime->stack, size_loc, data_end - data_begin);
+		data_end = runtime->stack.top;
+		rt_val_push_cpd_final(&runtime->stack, size_loc, data_end - data_begin);
 		break;
 
 	case MN_FUNCTION:

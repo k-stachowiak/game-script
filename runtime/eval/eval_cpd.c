@@ -13,21 +13,21 @@ void eval_compound(
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
-    VAL_LOC_T result_loc = rt->stack->top;
+    VAL_LOC_T result_loc = rt->stack.top;
 
     /* Header. */
     switch (node->data.compound.type) {
     case AST_CPD_ARRAY:
-        rt_val_push_array_init(rt->stack, &size_loc);
+        rt_val_push_array_init(&rt->stack, &size_loc);
         break;
 
     case AST_CPD_TUPLE:
-        rt_val_push_tuple_init(rt->stack, &size_loc);
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
         break;
     }
 
     /* Data. */
-    data_begin = rt->stack->top;
+    data_begin = rt->stack.top;
     while (current) {
         eval_impl(current, rt, sym_map);
         if (err_state()) {
@@ -38,8 +38,8 @@ void eval_compound(
     }
 
     /* Hack value size to correct value. */
-    data_size = rt->stack->top - data_begin;
-    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
+    data_size = rt->stack.top - data_begin;
+    rt_val_push_cpd_final(&rt->stack, size_loc, data_size);
 
     /* Assert array homogenity. */
     if (node->data.compound.type == AST_CPD_ARRAY &&

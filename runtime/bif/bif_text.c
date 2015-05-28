@@ -150,7 +150,7 @@ static void bif_format_impl(
     if (args_left) {
 		err_push("BIF", "%d arguments left after format", args_left);
     } else {
-        rt_val_push_string(rt->stack, result, result + strlen(result));
+        rt_val_push_string(&rt->stack, result, result + strlen(result));
     }
 
 end:
@@ -168,21 +168,21 @@ static void bif_parse_any_ast_compound(
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = cpd->exprs;
-    VAL_LOC_T result_loc = rt->stack->top;
+    VAL_LOC_T result_loc = rt->stack.top;
 
     /* Header. */
     switch (cpd->type) {
     case AST_CPD_ARRAY:
-        rt_val_push_array_init(rt->stack, &size_loc);
+        rt_val_push_array_init(&rt->stack, &size_loc);
         break;
 
     case AST_CPD_TUPLE:
-        rt_val_push_tuple_init(rt->stack, &size_loc);
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
         break;
     }
 
     /* Data. */
-    data_begin = rt->stack->top;
+    data_begin = rt->stack.top;
     while (current) {
         bif_parse_any_ast(rt, current);
         if (err_state()) {
@@ -193,8 +193,8 @@ static void bif_parse_any_ast_compound(
     }
 
     /* Fix the header with the written size. */
-    data_size = rt->stack->top - data_begin;
-    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
+    data_size = rt->stack.top - data_begin;
+    rt_val_push_cpd_final(&rt->stack, size_loc, data_size);
 
     /* Assert array homogenity. */
     if (cpd->type == AST_CPD_ARRAY &&
@@ -213,24 +213,24 @@ static void bif_parse_any_ast_literal(
         break;
 
     case AST_LIT_BOOL:
-        rt_val_push_bool(rt->stack, literal->data.boolean);
+        rt_val_push_bool(&rt->stack, literal->data.boolean);
         break;
 
     case AST_LIT_STRING:
         str = literal->data.string;
-        rt_val_push_string(rt->stack, str, str + strlen(str));
+        rt_val_push_string(&rt->stack, str, str + strlen(str));
         break;
 
     case AST_LIT_CHAR:
-        rt_val_push_char(rt->stack, literal->data.character);
+        rt_val_push_char(&rt->stack, literal->data.character);
         break;
 
     case AST_LIT_INT:
-        rt_val_push_int(rt->stack, literal->data.integer);
+        rt_val_push_int(&rt->stack, literal->data.integer);
         break;
 
     case AST_LIT_REAL:
-        rt_val_push_real(rt->stack, literal->data.real);
+        rt_val_push_real(&rt->stack, literal->data.real);
         break;
     }
 }
@@ -294,8 +294,8 @@ static void bif_parse_atom(
     }
 
     /* Push header. */
-    rt_val_push_tuple_init(rt->stack, &size_loc);
-    data_begin = rt->stack->top;
+    rt_val_push_tuple_init(&rt->stack, &size_loc);
+    data_begin = rt->stack.top;
 
     source = rt_val_peek_cpd_as_string(rt, arg_loc);
     ast = parse_source(source);
@@ -304,30 +304,30 @@ static void bif_parse_atom(
     /* Error detection. */
     if (!ast) {
         err = "Failed parsing literal";
-        rt_val_push_bool(rt->stack, false);
-        rt_val_push_string(rt->stack, err, err + strlen(err));
+        rt_val_push_bool(&rt->stack, false);
+        rt_val_push_string(&rt->stack, err, err + strlen(err));
         goto end;
     }
     if (ast->next != NULL) {
         err = "Too many nodes.";
-        rt_val_push_bool(rt->stack, false);
-        rt_val_push_string(rt->stack, err, err + strlen(err));
+        rt_val_push_bool(&rt->stack, false);
+        rt_val_push_string(&rt->stack, err, err + strlen(err));
         goto end;
     }
     if (ast->type != AST_LITERAL || ast->data.literal.type != type) {
         err = "Incorrect type.";
-        rt_val_push_bool(rt->stack, false);
-        rt_val_push_string(rt->stack, err, err + strlen(err));
+        rt_val_push_bool(&rt->stack, false);
+        rt_val_push_string(&rt->stack, err, err + strlen(err));
         goto end;
     }
 
     /* Correct case. */
-    rt_val_push_bool(rt->stack, true);
+    rt_val_push_bool(&rt->stack, true);
     bif_parse_any_ast_literal(rt, &ast->data.literal);
 
 end:
-    data_size = rt->stack->top - data_begin;
-    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
+    data_size = rt->stack.top - data_begin;
+    rt_val_push_cpd_final(&rt->stack, size_loc, data_size);
     if (ast) {
         ast_node_free(ast);
     }
@@ -375,7 +375,7 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     if (!buffer) {
 		err_push("BIF",  "Failed rendering value as string");
     } else {
-        rt_val_push_string(rt->stack, buffer, buffer + strlen(buffer));
+        rt_val_push_string(&rt->stack, buffer, buffer + strlen(buffer));
         mem_free(buffer);
     }
 }
@@ -390,11 +390,11 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
         return;
     }
 
-    rt_val_push_tuple_init(rt->stack, &size_loc);
-    data_begin = rt->stack->top;
+    rt_val_push_tuple_init(&rt->stack, &size_loc);
+    data_begin = rt->stack.top;
 
-    rt_val_push_bool(rt->stack, true);
-    result_begin = rt->stack->top;
+    rt_val_push_bool(&rt->stack, true);
+    result_begin = rt->stack.top;
 
     string = rt_val_peek_cpd_as_string(rt, arg_loc);
     bif_parse_any(rt, string);
@@ -404,16 +404,16 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
 		char *message = err_msg();
 
 		/* NOTE: the error here is intentionally sweeped under the carpet. */
-        stack_collapse(rt->stack, result_begin, rt->stack->top);
-        rt_val_poke_bool(rt->stack, data_begin, false);
-        rt_val_push_string(rt->stack, message, message + strlen(message));
+        stack_collapse(&rt->stack, result_begin, rt->stack.top);
+        rt_val_poke_bool(&rt->stack, data_begin, false);
+        rt_val_push_string(&rt->stack, message, message + strlen(message));
         err_reset();
 
 		mem_free(message);
     }
 
-    data_size = rt->stack->top - data_begin;
-    rt_val_push_cpd_final(rt->stack, size_loc, data_size);
+    data_size = rt->stack.top - data_begin;
+    rt_val_push_cpd_final(&rt->stack, size_loc, data_size);
 }
 
 void bif_parse_bool(struct Runtime *rt, VAL_LOC_T arg_loc)

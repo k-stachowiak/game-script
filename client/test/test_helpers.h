@@ -91,12 +91,12 @@ void test_eval_source_expect_string(
             rt_reset(RT); \
             break; \
         } \
-        if (*((VAL_HEAD_TYPE_T*)(RT->stack->buffer + *result)) != VAL_ ## EX_TYPE) { \
+        if (*((VAL_HEAD_TYPE_T*)(RT->stack.buffer + *result)) != VAL_ ## EX_TYPE) { \
             tc_record(TC, NAME, false); \
             rt_reset(RT); \
             break; \
         } \
-        if (*((VAL_ ## EX_TYPE ## _T*)(RT->stack->buffer + *result + VAL_HEAD_BYTES)) != EX_VALUE) { \
+        if (*((VAL_ ## EX_TYPE ## _T*)(RT->stack.buffer + *result + VAL_HEAD_BYTES)) != EX_VALUE) { \
             tc_record(TC, NAME, false); \
             rt_reset(RT); \
             break; \

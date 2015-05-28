@@ -13,12 +13,13 @@
 typedef void (*ClifIntraHandler)(char*, VAL_LOC_T*, int);
 
 struct Runtime {
-    struct Stack *stack;
+    struct Stack stack;
     struct SymMap global_sym_map;
+    struct Debugger debugger;
+
     struct AstNode *node_store;
 
     bool debug;
-    struct Debugger debugger;
 
     VAL_LOC_T saved_loc;
     struct AstNode *saved_store;

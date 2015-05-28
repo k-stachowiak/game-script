@@ -8,9 +8,9 @@ static void test_runtime_literals(
 {
     /* Pretty special test case for the unit literal. */
     VAL_LOC_T top_before, top_after;
-    top_before = rt->stack->top;
+    top_before = rt->stack.top;
     test_eval_source_succeed(tc, rt, "unit", "Don't fail on unit");
-    top_after = rt->stack->top;
+    top_after = rt->stack.top;
     tc_record(tc, "Don't push on unit", top_before == top_after);
 
     /* Simple tests for the evaluation of regular literals. */

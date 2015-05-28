@@ -5,6 +5,8 @@
 #include <inttypes.h>
 
 #include "strbuild.h"
+#include "stack.h"
+#include "runtime.h"
 #include "rt_val.h"
 #include "log.h"
 
@@ -161,47 +163,47 @@ int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location)
 
 VAL_LOC_T rt_val_next_loc(struct Runtime *rt, VAL_LOC_T loc)
 {
-	struct ValueHeader header = rt_val_peek_header(rt->stack, loc);
+	struct ValueHeader header = rt_val_peek_header(&rt->stack, loc);
 	return loc + VAL_HEAD_BYTES + header.size;
 }
 
 enum ValueType rt_val_peek_type(struct Runtime *rt, VAL_LOC_T loc)
 {
-	struct ValueHeader header = rt_val_peek_header(rt->stack, loc);
+	struct ValueHeader header = rt_val_peek_header(&rt->stack, loc);
 	return (enum ValueType)header.type;
 }
 
 VAL_SIZE_T rt_val_peek_size(struct Runtime *rt, VAL_LOC_T loc)
 {
-	struct ValueHeader header = rt_val_peek_header(rt->stack, loc);
+	struct ValueHeader header = rt_val_peek_header(&rt->stack, loc);
 	return header.size;
 }
 
 VAL_BOOL_T rt_val_peek_bool(struct Runtime *rt, VAL_LOC_T loc)
 {
 	VAL_BOOL_T result;
-	memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_BOOL_BYTES);
+	memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_BOOL_BYTES);
 	return result;
 }
 
 VAL_CHAR_T rt_val_peek_char(struct Runtime *rt, VAL_LOC_T loc)
 {
 	VAL_CHAR_T result;
-	memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_CHAR_BYTES);
+	memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_CHAR_BYTES);
 	return result;
 }
 
 VAL_INT_T rt_val_peek_int(struct Runtime *rt, VAL_LOC_T loc)
 {
 	VAL_INT_T result;
-	memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_INT_BYTES);
+	memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_INT_BYTES);
 	return result;
 }
 
 VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc)
 {
 	VAL_REAL_T result;
-	memcpy(&result, rt->stack->buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
+	memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
 	return result;
 }
 
@@ -247,7 +249,7 @@ struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
 	cap_count_loc = loc;
 	result.cap_start = cap_count_loc + VAL_SIZE_BYTES;
 
-	cap_count = stack_peek_size(rt->stack, loc);
+	cap_count = stack_peek_size(&rt->stack, loc);
 
 	loc += VAL_SIZE_BYTES;
 
@@ -262,24 +264,24 @@ struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
 	* ==============
 	*/
 
-	result.arity = stack_peek_size(rt->stack, result.arity_loc);
-	result.func_type = stack_peek_type(rt->stack, result.type_loc);
-	result.impl = (void*)stack_peek_ptr(rt->stack, result.impl_loc);
-	result.cap_count = stack_peek_size(rt->stack, cap_count_loc);
-	result.appl_count = stack_peek_size(rt->stack, appl_count_loc);
+	result.arity = stack_peek_size(&rt->stack, result.arity_loc);
+	result.func_type = stack_peek_type(&rt->stack, result.type_loc);
+	result.impl = (void*)stack_peek_ptr(&rt->stack, result.impl_loc);
+	result.cap_count = stack_peek_size(&rt->stack, cap_count_loc);
+	result.appl_count = stack_peek_size(&rt->stack, appl_count_loc);
 
 	return result;
 }
 
 char *rt_val_peek_fun_cap_symbol(struct Runtime *rt, VAL_LOC_T cap_loc)
 {
-	return rt->stack->buffer + VAL_SIZE_BYTES + cap_loc;
+	return rt->stack.buffer + VAL_SIZE_BYTES + cap_loc;
 }
 
 VAL_LOC_T rt_val_fun_cap_loc(struct Runtime *rt, VAL_LOC_T cap_loc)
 {
 	VAL_SIZE_T len;
-	memcpy(&len, rt->stack->buffer + cap_loc, VAL_SIZE_BYTES);
+	memcpy(&len, rt->stack.buffer + cap_loc, VAL_SIZE_BYTES);
 	return cap_loc + VAL_SIZE_BYTES + len;
 }
 

@@ -34,7 +34,7 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     int size, i;
     enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-    VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
+    VAL_LOC_T size_loc, loc, result_loc = rt->stack.top;
     VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
     VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
 
@@ -44,21 +44,21 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     }
 
     if (x_type == VAL_ARRAY) {
-        rt_val_push_array_init(rt->stack, &size_loc);
+        rt_val_push_array_init(&rt->stack, &size_loc);
     } else {
-        rt_val_push_tuple_init(rt->stack, &size_loc);
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
 
-    rt_val_push_copy(rt->stack, y_loc);
+    rt_val_push_copy(&rt->stack, y_loc);
 
     loc = rt_val_cpd_first_loc(x_loc);
     size = rt_val_cpd_len(rt, x_loc);
     for (i = 0; i < size; ++i) {
-        rt_val_push_copy(rt->stack, loc);
+        rt_val_push_copy(&rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
-    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
+    rt_val_push_cpd_final(&rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
 
     /* Validate homogenity. */
     if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
@@ -70,7 +70,7 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     int size, i;
     enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-    VAL_LOC_T size_loc, loc, result_loc = rt->stack->top;
+    VAL_LOC_T size_loc, loc, result_loc = rt->stack.top;
     VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
     VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
 
@@ -80,21 +80,21 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     }
 
     if (x_type == VAL_ARRAY) {
-        rt_val_push_array_init(rt->stack, &size_loc);
+        rt_val_push_array_init(&rt->stack, &size_loc);
     } else {
-        rt_val_push_tuple_init(rt->stack, &size_loc);
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
 
     loc = rt_val_cpd_first_loc(x_loc);
     size = rt_val_cpd_len(rt, x_loc);
     for (i = 0; i < size; ++i) {
-        rt_val_push_copy(rt->stack, loc);
+        rt_val_push_copy(&rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
-    rt_val_push_copy(rt->stack, y_loc);
+    rt_val_push_copy(&rt->stack, y_loc);
 
-    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
+    rt_val_push_cpd_final(&rt->stack, size_loc, x_size + y_size + VAL_HEAD_BYTES);
 
     /* Validate homogenity. */
     if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
@@ -104,7 +104,7 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
 void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-    VAL_LOC_T size_loc, loc, end, result_loc = rt->stack->top;
+    VAL_LOC_T size_loc, loc, end, result_loc = rt->stack.top;
     VAL_SIZE_T x_size, y_size;
     enum ValueType x_type = rt_val_peek_type(rt, x_loc);
     enum ValueType y_type = rt_val_peek_type(rt, y_loc);
@@ -130,16 +130,16 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
     /* Build new header. */
     if (x_type == VAL_ARRAY) {
-        rt_val_push_array_init(rt->stack, &size_loc);
+        rt_val_push_array_init(&rt->stack, &size_loc);
     } else {
-        rt_val_push_tuple_init(rt->stack, &size_loc);
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
 
     /* Append X. */
     loc = rt_val_cpd_first_loc(x_loc);
     end = loc + x_size;
     while (loc != end) {
-        rt_val_push_copy(rt->stack, loc);
+        rt_val_push_copy(&rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
@@ -147,12 +147,12 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     loc = rt_val_cpd_first_loc(y_loc);
     end = loc + y_size;
     while (loc != end) {
-        rt_val_push_copy(rt->stack, loc);
+        rt_val_push_copy(&rt->stack, loc);
         loc = rt_val_next_loc(rt, loc);
     }
 
     /* Finalize. */
-    rt_val_push_cpd_final(rt->stack, size_loc, x_size + y_size);
+    rt_val_push_cpd_final(&rt->stack, size_loc, x_size + y_size);
 
     /* Validate homogenity. */
     if (x_type == VAL_ARRAY && !rt_val_compound_homo(rt, result_loc)) {
@@ -168,7 +168,7 @@ void bif_length(struct Runtime* rt, VAL_LOC_T location)
         return;
     }
 
-    rt_val_push_int(rt->stack, rt_val_cpd_len(rt, location));
+    rt_val_push_int(&rt->stack, rt_val_cpd_len(rt, location));
 }
 
 void bif_at(
@@ -204,7 +204,7 @@ void bif_at(
         loc = rt_val_next_loc(rt, loc);
     }
 
-    rt_val_push_copy(rt->stack, loc);
+    rt_val_push_copy(&rt->stack, loc);
 }
 
 void bif_slice(
@@ -244,9 +244,9 @@ void bif_slice(
 
     /* Build new header. */
     if (x_type == VAL_ARRAY) {
-        rt_val_push_array_init(rt->stack, &size_loc);
+        rt_val_push_array_init(&rt->stack, &size_loc);
     } else {
-        rt_val_push_tuple_init(rt->stack, &size_loc);
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
 
     /* Iterate over array */
@@ -254,7 +254,7 @@ void bif_slice(
     end = loc + rt_val_peek_size(rt, x_loc);
     while (loc != end) {
         if (index >= first && index < last) {
-            rt_val_push_copy(rt->stack, loc);
+            rt_val_push_copy(&rt->stack, loc);
             size += rt_val_peek_size(rt, loc) + VAL_HEAD_BYTES;
         }
         loc = rt_val_next_loc(rt, loc);
@@ -273,6 +273,6 @@ void bif_slice(
     }
 
     /* Finalize. */
-    rt_val_push_cpd_final(rt->stack, size_loc, size);
+    rt_val_push_cpd_final(&rt->stack, size_loc, size);
 }
 

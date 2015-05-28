@@ -62,7 +62,7 @@ static void rt_init(struct Runtime *rt)
 {
     struct SymMap *gsm;
 
-    rt->stack = stack_make();
+    stack_init(&rt->stack);
     rt->node_store = NULL;
 
     gsm = &rt->global_sym_map;
@@ -79,7 +79,7 @@ static void rt_deinit(struct Runtime *rt)
     dbg_deinit(&rt->debugger);
     rt_free_stored(rt);
     sym_map_deinit(&rt->global_sym_map);
-    stack_free(rt->stack);
+    stack_deinit(&rt->stack);
 }
 
 struct Runtime *rt_make(void)
@@ -103,7 +103,7 @@ void rt_free(struct Runtime *rt)
 
 void rt_save(struct Runtime *rt)
 {
-    rt->saved_loc = rt->stack->top;
+    rt->saved_loc = rt->stack.top;
     rt->saved_store = rt->node_store;
 }
 
@@ -115,7 +115,7 @@ void rt_restore(struct Runtime *rt)
         rt->node_store = rt->node_store->next;
     }
 
-    stack_collapse(rt->stack, rt->saved_loc, rt->stack->top);
+    stack_collapse(&rt->stack, rt->saved_loc, rt->stack.top);
 }
 
 void rt_register_clif_handler(
@@ -143,7 +143,7 @@ bool rt_consume_one(
         *next = ast->next;
     }
 
-    begin = rt->stack->top;
+    begin = rt->stack.top;
     result = eval(ast, rt, &rt->global_sym_map);
 
     if (loc) {
@@ -160,7 +160,7 @@ bool rt_consume_one(
         rt->node_store = ast;
 
     } else {
-        rt->stack->top = begin; /* Discard result value to save the stack. */
+        rt->stack.top = begin; /* Discard result value to save the stack. */
         ast_node_free_one(ast);
     }
 
@@ -195,7 +195,7 @@ bool rt_consume_list(
 
 void rt_for_each_stack_val(struct Runtime *rt, void(*f)(void*, VAL_LOC_T))
 {
-    stack_for_each(rt->stack, rt, f);
+    stack_for_each(&rt->stack, rt, f);
 }
 
 void rt_for_each_sym(struct Runtime *rt, void(*f)(void*, char*, VAL_LOC_T))

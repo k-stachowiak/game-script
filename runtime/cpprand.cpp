@@ -4,13 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "cpprand.h"
+#include "rt_val.h"
 
 namespace {
-
-std::random_device device;
-std::mt19937 generator(device());
-
+    std::random_device device;
+    std::mt19937 generator(device());
 }
 
 extern "C" {

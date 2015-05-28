@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #define VAL_LOC_T ptrdiff_t
 
@@ -38,8 +39,7 @@ extern VAL_HEAD_SIZE_T char_size;
 extern VAL_HEAD_SIZE_T int_size;
 extern VAL_HEAD_SIZE_T real_size;
 
-#include "runtime.h"
-
+struct Runtime;
 struct Stack;
 
 /* Data structures.

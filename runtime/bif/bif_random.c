@@ -30,7 +30,7 @@ void bif_rand_ui(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc)
     lo = rt_val_peek_int(rt, lo_loc);
     hi = rt_val_peek_int(rt, hi_loc);
 
-    rt_val_push_int(rt->stack, cpprand_ui(lo, hi));
+    rt_val_push_int(&rt->stack, cpprand_ui(lo, hi));
 }
 
 void bif_rand_ur(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc)
@@ -53,7 +53,7 @@ void bif_rand_ur(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc)
     lo = rt_val_peek_real(rt, lo_loc);
     hi = rt_val_peek_real(rt, hi_loc);
 
-    rt_val_push_real(rt->stack, cpprand_ur(lo, hi));
+    rt_val_push_real(&rt->stack, cpprand_ur(lo, hi));
 }
 
 void bif_rand_ber(struct Runtime *rt, VAL_LOC_T p_loc)
@@ -65,7 +65,7 @@ void bif_rand_ber(struct Runtime *rt, VAL_LOC_T p_loc)
         return;
     }
     p = rt_val_peek_real(rt, p_loc);
-    rt_val_push_bool(rt->stack, cpprand_ber(p));
+    rt_val_push_bool(&rt->stack, cpprand_ber(p));
 }
 
 void bif_rand_exp(struct Runtime *rt, VAL_LOC_T l_loc)
@@ -77,7 +77,7 @@ void bif_rand_exp(struct Runtime *rt, VAL_LOC_T l_loc)
         return;
     }
     l = rt_val_peek_real(rt, l_loc);
-    rt_val_push_real(rt->stack, cpprand_exp(l));
+    rt_val_push_real(&rt->stack, cpprand_exp(l));
 }
 
 void bif_rand_gauss(struct Runtime *rt, VAL_LOC_T u_loc, VAL_LOC_T s_loc)
@@ -100,7 +100,7 @@ void bif_rand_gauss(struct Runtime *rt, VAL_LOC_T u_loc, VAL_LOC_T s_loc)
     u = rt_val_peek_real(rt, u_loc);
     s = rt_val_peek_real(rt, s_loc);
 
-    rt_val_push_real(rt->stack, cpprand_gauss(u, s));
+    rt_val_push_real(&rt->stack, cpprand_gauss(u, s));
 }
 
 void bif_rand_distr(struct Runtime *rt, VAL_LOC_T d_loc)
@@ -138,6 +138,6 @@ void bif_rand_distr(struct Runtime *rt, VAL_LOC_T d_loc)
     result = cpprand_distr(density, len);
 	mem_free(density);
 
-    rt_val_push_int(rt->stack, result);
+    rt_val_push_int(&rt->stack, result);
 }
 

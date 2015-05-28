@@ -14,8 +14,8 @@ struct Stack {
     VAL_LOC_T top;
 };
 
-struct Stack *stack_make(void);
-void stack_free(struct Stack *stack);
+void stack_init(struct Stack *stack);
+void stack_deinit(struct Stack *stack);
 
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data);
 
