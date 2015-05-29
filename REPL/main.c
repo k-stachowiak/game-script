@@ -70,10 +70,6 @@ struct MoonValue *repl_clif_load(struct MoonValue *args)
 {
 	char *str;
 
-	if (args == NULL || args->next != NULL) {
-		return make_error(false, "load: Incorrect args count");
-	}
-
 	if (args->type != MN_STRING) {
 		return make_error(false, "load: Argument not string");
 	}
@@ -81,7 +77,7 @@ struct MoonValue *repl_clif_load(struct MoonValue *args)
 	str = args->data.string;
 	file_to_load = mem_malloc(strlen(str) + 1);
 	memcpy(file_to_load, str, strlen(str) + 1);
-	return make_error(true, "");
+	return make_error(true, "No issue");
 }
 
 static char *repl_read(void)
