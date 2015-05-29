@@ -13,6 +13,7 @@
 
 static bool quit_request = false;
 static bool debug_state = false;
+static char *file_to_load = NULL;
 
 static char *stdfilename = "std.mn";
 static char *prompt = ": ";
@@ -20,6 +21,28 @@ static char *response_prefix = "> ";
 static char *banner =
     "Moon language REPL\n"
     "Copyright (C) 2014-2015 Krzysztof Stachowiak\n";
+
+static struct MoonValue *make_error(bool value, char *message)
+{
+	struct MoonValue *result = mem_malloc(sizeof(*result));
+	struct MoonValue *result_val = mem_malloc(sizeof(*result));
+	struct MoonValue *result_msg = mem_malloc(sizeof(*result));
+
+	result_val->type = MN_BOOL;
+	result_val->data.boolean = value;
+	result_val->next = result_msg;
+
+	result_msg->type = MN_STRING;
+	result_msg->data.string = mem_malloc(strlen(message) + 1);
+	memcpy(result_msg->data.string, message, strlen(message) + 1);
+	result_msg->next = NULL;
+
+	result->type = MN_TUPLE;
+	result->data.compound = result_val;
+	result->next = NULL;
+
+	return result;
+}
 
 struct MoonValue *repl_clif_dbg(struct MoonValue *args)
 {
@@ -43,6 +66,24 @@ struct MoonValue *repl_clif_quit(struct MoonValue *args)
 	return NULL;
 }
 
+struct MoonValue *repl_clif_load(struct MoonValue *args)
+{
+	char *str;
+
+	if (args == NULL || args->next != NULL) {
+		return make_error(false, "load: Incorrect args count");
+	}
+
+	if (args->type != MN_STRING) {
+		return make_error(false, "load: Argument not string");
+	}
+
+	str = args->data.string;
+	file_to_load = mem_malloc(strlen(str) + 1);
+	memcpy(file_to_load, str, strlen(str) + 1);
+	return make_error(true, "");
+}
+
 static char *repl_read(void)
 {
     bool eof_flag = false;
@@ -61,7 +102,16 @@ static char *repl_read(void)
 
 static struct MoonValue *repl_evaluate(char *line)
 {
-	return mn_exec_command(line);
+	struct MoonValue *result = mn_exec_command(line);
+	if (file_to_load != NULL) {
+		if (!mn_exec_file(file_to_load)) {
+			mn_dispose(result);
+			result = make_error(false, "load: Failed loading file");
+		}
+		mem_free(file_to_load);
+		file_to_load = NULL;
+	}
+	return result;
 }
 
 static void repl_print(struct MoonValue *value)
@@ -116,6 +166,7 @@ int main()
     mn_exec_file(stdfilename);
     mn_register_clif("debug", 0, repl_clif_dbg);
     mn_register_clif("quit", 0, repl_clif_quit);
+	mn_register_clif("load", 1, repl_clif_load);
 
     while (!quit_request) {
 
