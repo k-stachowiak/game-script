@@ -165,11 +165,8 @@ static void efc_evaluate_ast(
         }
     }
 
-    efc_log_gen_call_sym(symbol);
-
     /* Insert already applied arguments. */
     for (i = 0; i < func_data->appl_count; ++i) {
-        efc_log_gen_call_arg(rt, appl_loc);
         eval_bind_pattern(rt, &local_sym_map, formal_args, appl_loc, &cont_loc);
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
@@ -186,7 +183,6 @@ static void efc_evaluate_ast(
         if (efc_insert_expression(rt, sym_map, &local_sym_map,
             actual_args, arg_locs++, formal_args, &actual_loc)) {
             formal_args = formal_args->next;
-            efc_log_gen_call_arg(rt, actual_loc);
         } else {
             goto cleanup;
         }
@@ -195,8 +191,6 @@ static void efc_evaluate_ast(
 
     /* Evaluate the function expression. */
     eval_impl(ast_def->data.func_def.expr, rt, &local_sym_map);
-
-    efc_log_result(rt, temp_end);
 
     /* Collapse the temporaries. */
     stack_collapse(&rt->stack, temp_begin, temp_end);
@@ -267,8 +261,6 @@ static void efc_evaluate_bif(
         ((bif_ternary_func)func_data->impl)(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
         break;
     }
-
-    efc_log_bif_call(rt, symbol, arg_locs, arg_count, temp_end);
 
     /* Collapse the temporaries. */
     stack_collapse(&rt->stack, temp_begin, temp_end);

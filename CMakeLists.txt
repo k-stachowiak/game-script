@@ -4,13 +4,12 @@ project(moon-lang)
 
 include_directories(
     ./ast
-    ./client/lib
-    ./client/test
     ./common
     ./front
     ./runtime
     ./runtime/bif
     ./runtime/eval
+    ./LIB
     .
     )
 
@@ -57,22 +56,22 @@ add_library(lang OBJECT
     )
 
 add_executable(mntest $<TARGET_OBJECTS:lang>
-    ./client/test/test.c
-    ./client/test/test_front.c
-    ./client/test/test_helpers.c
-    ./client/test/test_runtime_basic.c
-    ./client/test/test_runtime_bif.c
-    ./client/test/test_runtime_func.c
-    ./client/test/test_runtime_parafunc.c
-    ./client/test/test_runtime_scope.c
-    ./client/test/test_cci.c
+    ./TEST/test.c
+    ./TEST/test_front.c
+    ./TEST/test_helpers.c
+    ./TEST/test_runtime_basic.c
+    ./TEST/test_runtime_bif.c
+    ./TEST/test_runtime_func.c
+    ./TEST/test_runtime_parafunc.c
+    ./TEST/test_runtime_scope.c
+    ./TEST/test_cci.c
     )
 target_link_libraries(mntest m stdc++)
 
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
-	./client/lib/clif.c
-	./client/lib/mndetail.c
-    ./client/lib/moon.c
+	./LIB/clif.c
+	./LIB/mndetail.c
+    ./LIB/moon.c
     )
 target_link_libraries(moon m stdc++)
 
