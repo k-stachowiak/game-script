@@ -208,6 +208,7 @@ static struct Token *tokenize(
         }
 
 		if (tok_is_comment(tok)) {
+			tok_free(tok);
 			LOG_TRACE("Skipping comment token");
 		} else {
 			LOG_TRACE("Read token from(%s) to (%s)", current.first, current.last);
