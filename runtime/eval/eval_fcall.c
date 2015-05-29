@@ -12,42 +12,6 @@
 #include "runtime.h"
 #include "rt_val.h"
 
-#if RT_DEBUG
-static void efc_log_gen_call_sym(char *symbol)
-{
-    printf("\tcall %s\n", symbol);
-}
-
-static void efc_log_gen_call_arg(struct Runtime *rt, VAL_LOC_T loc)
-{
-    printf("\t\t");
-    rt_val_print(rt, loc, false);
-    printf("\n");
-}
-
-static void efc_log_result(struct Runtime *rt, VAL_LOC_T loc)
-{
-    printf("\t>>");
-    rt_val_print(rt, loc, false);
-    printf("\n");
-}
-
-static void efc_log_bif_call(
-        struct Runtime *rt,
-        char *symbol,
-        VAL_LOC_T arg_locs[],
-        int arg_count,
-        VAL_LOC_T result_loc)
-{
-    int i;
-    efc_log_gen_call_sym(symbol);
-    for (i = 0; i < arg_count; ++i) {
-        efc_log_gen_call_arg(rt, arg_locs[i]);
-    }
-    efc_log_result(rt, result_loc);
-}
-#endif
-
 /**
  * Performs a lookup for the called function in the symbol map.
  * Then performs the lookup of the function value on the stack.

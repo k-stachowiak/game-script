@@ -12,7 +12,6 @@
 #include "runtime.h"
 #include "rt_val.h"
 
-/* NOTE: this is not static as it is shared in other modules. */
 void eval_error_not_found(char *symbol)
 {
 	err_push("EVAL", "Symbol \"%s\" not found", symbol);

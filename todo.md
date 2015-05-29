@@ -6,5 +6,5 @@ TODO
   [ ] runtime
      [ ] bif
      [ ] eval
-     [ ] rest
+     [v] rest
   [ ] common
