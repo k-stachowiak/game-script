@@ -22,6 +22,8 @@ static char *banner =
     "Moon language REPL\n"
     "Copyright (C) 2014-2015 Krzysztof Stachowiak\n";
 
+static struct MoonContext *ctx;
+
 static struct MoonValue *make_error(bool value, char *message)
 {
 	struct MoonValue *result = mem_malloc(sizeof(*result));
@@ -48,12 +50,12 @@ struct MoonValue *repl_clif_dbg(struct MoonValue *args)
 {
     if (debug_state) {
         debug_state = false;
-        mn_set_debugger(debug_state);
+        mn_set_debugger(ctx, debug_state);
         printf("Debugger disabled\n");
 
     } else {
         debug_state = true;
-        mn_set_debugger(debug_state);
+        mn_set_debugger(ctx, debug_state);
         printf("Debugger enabled\n");
     }
 
@@ -98,9 +100,9 @@ static char *repl_read(void)
 
 static struct MoonValue *repl_evaluate(char *line)
 {
-	struct MoonValue *result = mn_exec_command(line);
+	struct MoonValue *result = mn_exec_command(ctx, line);
 	if (file_to_load != NULL) {
-		if (!mn_exec_file(file_to_load)) {
+		if (!mn_exec_file(ctx, file_to_load)) {
 			mn_dispose(result);
 			result = make_error(false, "load: Failed loading file");
 		}
@@ -158,11 +160,11 @@ int main()
 {
     printf("%s", banner);
 
-    mn_init();
-    mn_exec_file(stdfilename);
-    mn_register_clif("debug", 0, repl_clif_dbg);
-    mn_register_clif("quit", 0, repl_clif_quit);
-	mn_register_clif("load", 1, repl_clif_load);
+    ctx = mn_init();
+    mn_exec_file(ctx, stdfilename);
+    mn_register_clif(ctx, "debug", 0, repl_clif_dbg);
+    mn_register_clif(ctx, "quit", 0, repl_clif_quit);
+	mn_register_clif(ctx, "load", 1, repl_clif_load);
 
     while (!quit_request) {
 
@@ -190,6 +192,8 @@ int main()
 
 		mem_free(line);
     }
+
+	mn_deinit(ctx);
 
     return 0;
 }

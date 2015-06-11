@@ -10,7 +10,7 @@
 #include "stack.h"
 #include "symmap.h"
 
-typedef void (*ClifIntraHandler)(char*, VAL_LOC_T*, int);
+typedef void (*ClifIntraHandler)(struct Runtime *rt, char*, VAL_LOC_T*, int);
 
 struct Runtime {
     struct Stack stack;

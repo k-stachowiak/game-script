@@ -5,78 +5,68 @@
 #include "mndetail.h"
 #include "rt_val.h"
 #include "runtime.h"
+#include "clif.h"
 
-struct ClifMapKvp {
-	char *key;
-	ClifHandler handler;
-	struct ClifMapKvp *next;
-};
-
-struct ClifMap {
-	struct ClifMapKvp *map;
-	struct ClifMapKvp *end;
-} clif_map;
-
-static struct MoonValue *clif_read_args(VAL_LOC_T *arg_locs, int arg_count)
+static struct MoonValue *clif_read_args(struct Runtime *rt, VAL_LOC_T *arg_locs, int arg_count)
 {
 	if (arg_count == 0) {
 		return NULL;
 	}
 
-	struct MoonValue *result = mn_make_api_value(*arg_locs);
-	result->next = clif_read_args(arg_locs + 1, arg_count - 1);
+	struct MoonValue *result = mn_make_api_value(rt, *arg_locs);
+	result->next = clif_read_args(rt, arg_locs + 1, arg_count - 1);
 	return result;
 }
 
-static void clif_push_result(struct MoonValue *value)
+static void clif_push_result(struct Runtime* rt, struct MoonValue *value)
 {
 	VAL_LOC_T size_loc, data_begin, data_end;
 	struct MoonValue *child = value->data.compound;
 
 	switch (value->type) {
     case MN_BOOL:
-		rt_val_push_bool(&runtime->stack, value->data.boolean);
+		rt_val_push_bool(&rt->stack, value->data.boolean);
 		break;
 
     case MN_CHAR:
-		rt_val_push_char(&runtime->stack, value->data.character);
+		rt_val_push_char(&rt->stack, value->data.character);
 		break;
 
     case MN_INT:
-		rt_val_push_int(&runtime->stack, value->data.integer);
+		rt_val_push_int(&rt->stack, value->data.integer);
 		break;
 
     case MN_REAL:
-		rt_val_push_real(&runtime->stack, value->data.real);
+		rt_val_push_real(&rt->stack, value->data.real);
 		break;
 
     case MN_STRING:
 		rt_val_push_string(
-			&runtime->stack,
+			&rt->stack,
 			value->data.string,
 			value->data.string + strlen(value->data.string));
 		break;
 
     case MN_ARRAY:
-		rt_val_push_array_init(&runtime->stack, &size_loc);
-		data_begin = runtime->stack.top;
+		rt_val_push_array_init(&rt->stack, &size_loc);
+		data_begin = rt->stack.top;
 		while (child) {
-			clif_push_result(child);
+			clif_push_result(rt, child);
 			child = child->next;
 		}
-		data_end = runtime->stack.top;
-		rt_val_push_cpd_final(&runtime->stack, size_loc, data_end - data_begin);
+		data_end = rt->stack.top;
+		rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
 		break;
 
     case MN_TUPLE:
-		rt_val_push_tuple_init(&runtime->stack, &size_loc);
-		data_begin = runtime->stack.top;
+		rt_val_push_tuple_init(&rt->stack, &size_loc);
+		data_begin = rt->stack.top;
 		while (child) {
-			clif_push_result(child);
+			clif_push_result(rt, child);
 			child = child->next;
 		}
-		data_end = runtime->stack.top;
-		rt_val_push_cpd_final(&runtime->stack, size_loc, data_end - data_begin);
+		data_end = rt->stack.top;
+		rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
 		break;
 
 	case MN_FUNCTION:
@@ -85,28 +75,31 @@ static void clif_push_result(struct MoonValue *value)
 	}
 }
 
-void clif_init(void)
+struct ClifMap *clif_make(void)
 {
-	clif_map.map = NULL;
-	clif_map.end = NULL;
+	struct ClifMap *result = mem_malloc(sizeof(*result));
+	result->map = NULL;
+	result->end = NULL;
+	return result;
 }
 
-void clif_deinit(void)
+void clif_free(struct ClifMap *clif_map)
 {
-	struct ClifMapKvp *temp, *kvp = clif_map.map;
+	struct ClifMapKvp *temp, *kvp = clif_map->map;
 	while (kvp) {
 		temp = kvp;
 		kvp = kvp->next;
 		mem_free(temp->key);
 		mem_free(temp);
 	}
-	clif_map.map = NULL;
-	clif_map.end = NULL;
+	clif_map->map = NULL;
+	clif_map->end = NULL;
+	mem_free(clif_map);
 }
 
-void clif_register(char *symbol, ClifHandler handler)
+void clif_register(struct ClifMap *clif_map, char *symbol, ClifHandler handler)
 {
-    struct ClifMapKvp *kvp = clif_map.map;
+    struct ClifMapKvp *kvp = clif_map->map;
     int len = strlen(symbol);
     char *symbol_copy = mem_malloc(len + 1);
     memcpy(symbol_copy, symbol, len + 1);
@@ -124,10 +117,10 @@ void clif_register(char *symbol, ClifHandler handler)
     kvp->handler = handler;
     kvp->next = NULL;
 
-    LIST_APPEND(kvp, &clif_map.map, &clif_map.end);
+    LIST_APPEND(kvp, &clif_map->map, &clif_map->end);
 }
 
-void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count)
+void clif_common_handler(struct Runtime *rt, char *symbol, VAL_LOC_T *arg_locs, int arg_count)
 {
 	struct ClifMapKvp *kvp = clif_map.map;
 
@@ -140,12 +133,12 @@ void clif_common_handler(char *symbol, VAL_LOC_T *arg_locs, int arg_count)
 			continue;
 		}
 
-		arg_list = clif_read_args(arg_locs, arg_count);
+		arg_list = clif_read_args(rt, arg_locs, arg_count);
 		result = kvp->handler(arg_list);
 		mn_dispose(arg_list);
 
 		if (result) {
-			clif_push_result(result);
+			clif_push_result(rt, result);
 			mn_dispose(result);
 		}
 		return;
