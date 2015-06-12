@@ -147,6 +147,21 @@
     )
 ))
 
+### Functional zip
+(bind zip (func (vx vy) (do
+	(bind zip_impl (func (vx vy result)
+		(if (or (empty vx) (empty vy))
+			result
+			(do
+				(bind { hdx tlx } (dcons vx))
+				(bind { hdy tly } (dcons vy))
+				(zip_impl tlx tly (push_back result { hdx hdy }))
+			)
+		)
+	))
+	(zip_impl vx vy [])
+)))
+
 ### Functional map for two input collections
 (bind zip_with (func (f va vb)
     (if (or (empty va) (empty vb))
@@ -267,6 +282,9 @@
         (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
         (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
         (test "Fold right" (eq (foldr - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -5))
+		(test "Zip normal" (eq (zip [ 1 2 3 ] [ 'a' 'b' 'c' ]) [ { 1 'a' } { 2 'b' } { 3 'c' } ]))
+		(test "Zip count mismatch" (eq (zip [ 1 2 3 ] [ 'a' 'b' ]) [ { 1 'a' } { 2 'b' } ]))
+		(test "Zip with empty" (eq (zip [ 1 2 3 ] []) []))
 
 		# Sequences
 		(test "Sequence empty" (eq (seq 0) []))

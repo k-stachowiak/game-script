@@ -21,7 +21,7 @@ syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions merge merge_cmp merge_sort merge_sort_cmp
 syn keyword stdFunctions sort sort_cmp
-syn keyword stdFunctions point map zip_with foldl foldr
+syn keyword stdFunctions point map zip_with foldl foldr zip
 syn keyword stdFunctions seq
 syn keyword stdFunctions printf
 syn keyword stdFunctions test
