@@ -12,34 +12,40 @@
 #include "mndetail.h"
 #include "clif.h"
 
-static void mn_deinit(void)
-{
-	clif_deinit();
-    if (runtime) {
-        rt_free(runtime);
-    }
-}
+struct MoonContext {
+	struct Runtime *rt;
+};
 
-void mn_init(void)
+struct MoonContext *mn_create(void)
 {
-    mn_deinit();
-    atexit(mn_deinit);
-    runtime = rt_make();
+	struct MoonContext *result = mem_malloc(sizeof(*result));
+    result->rt = rt_make();
 	clif_init();
+	return result;
 }
 
-void mn_set_debugger(bool state)
+void mn_destroy(struct MoonContext *ctx)
 {
-    runtime->debug = state;
+	rt_free(ctx->rt);
+	mem_free(ctx);
 }
 
-void mn_register_clif(const char *symbol, int arity, ClifHandler handler)
+void mn_set_debugger(struct MoonContext *ctx, bool state)
 {
-	clif_register((char*)symbol, handler);
-	rt_register_clif_handler(runtime, (char*)symbol, arity, clif_common_handler);
+    ctx->rt->debug = state;
 }
 
-bool mn_exec_file(const char *filename)
+bool mn_register_clif(struct MoonContext *ctx, const char *symbol, int arity, ClifHandler handler)
+{
+	if (!clif_register(ctx->rt, (char*)symbol, handler)) {
+		return false;
+	} else {
+		rt_register_clif_handler(ctx->rt, (char*)symbol, arity, clif_common_handler);
+		return true;
+	}
+}
+
+bool mn_exec_file(struct MoonContext *ctx, const char *filename)
 {
     char *source;
     struct AstNode *ast_list;
@@ -56,7 +62,7 @@ bool mn_exec_file(const char *filename)
         return false;
     }
 
-    if (!rt_consume_list(runtime, ast_list, NULL)) {
+    if (!rt_consume_list(ctx->rt, ast_list, NULL)) {
         mem_free(source);
         return false;
     }
@@ -65,7 +71,7 @@ bool mn_exec_file(const char *filename)
     return true;
 }
 
-struct MoonValue *mn_exec_command(const char *source)
+struct MoonValue *mn_exec_command(struct MoonContext *ctx, const char *source)
 {
     struct AstNode *expr;
     VAL_LOC_T result_loc;
@@ -78,14 +84,14 @@ struct MoonValue *mn_exec_command(const char *source)
         return NULL;
     }
 
-    rt_consume_one(runtime, expr, &result_loc, NULL);
+    rt_consume_one(ctx->rt, expr, &result_loc, NULL);
     if (err_state()) {
 		err_push("LIB", "Failed executing command: %s", source);
         return NULL;
     }
 
 	if (result_loc) {
-		return mn_make_api_value(result_loc);
+		return mn_make_api_value(ctx->rt, result_loc);
 	} else {
 		return NULL;
 	}
@@ -105,3 +111,4 @@ const char *mn_error_message(void)
 {
     return err_msg();
 }
+

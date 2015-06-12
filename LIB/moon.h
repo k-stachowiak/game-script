@@ -36,14 +36,15 @@ struct MoonValue {
 
 typedef struct MoonValue* (*ClifHandler)(struct MoonValue *args);
 
-void mn_init(void);
-void mn_set_debugger(bool state);
+struct MoonContext;
 
-void mn_register_clif(const char *symbol, int arity, ClifHandler handler);
+struct MoonContext *mn_create(void);
+void mn_destroy(struct MoonContext *ctx);
 
-bool mn_exec_file(const char *filename);
-struct MoonValue *mn_exec_command(const char *source);
-
+void mn_set_debugger(struct MoonContext *ctx, bool state);
+bool mn_register_clif(struct MoonContext *ctx, const char *symbol, int arity, ClifHandler handler);
+bool mn_exec_file(struct MoonContext *ctx, const char *filename);
+struct MoonValue *mn_exec_command(struct MoonContext *ctx, const char *source);
 void mn_dispose(struct MoonValue* value);
 
 bool mn_error_state(void);

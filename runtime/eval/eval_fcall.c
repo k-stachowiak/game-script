@@ -298,7 +298,7 @@ static void efc_evaluate_clif(
     }
     temp_end = rt->stack.top;
 
-	handler(symbol, arg_locs.data, arg_locs.size);
+	handler(rt, symbol, arg_locs.data, arg_locs.size);
 
     stack_collapse(&rt->stack, temp_begin, temp_end);
 	ARRAY_FREE(arg_locs);
