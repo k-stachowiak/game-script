@@ -7,6 +7,7 @@
 #include "mndetail.h"
 #include "rt_val.h"
 #include "runtime.h"
+#include "clif.h"
 
 struct ClifMapKvp {
 	struct Runtime* rt;
@@ -88,7 +89,7 @@ static void clif_push_result(struct Runtime *rt, struct MoonValue *value)
 	}
 }
 
-static void clif_deinit(void)
+void clif_deinit(void)
 {
 	struct ClifMapKvp *temp, *kvp = clif_map.map;
 	while (kvp) {
@@ -97,13 +98,13 @@ static void clif_deinit(void)
 		mem_free(temp->key);
 		mem_free(temp);
 	}
-	clif_map.map = NULL;
-	clif_map.end = NULL;
 }
 
 void clif_init(void)
 {
 	atexit(clif_deinit);
+	clif_map.map = NULL;
+	clif_map.end = NULL;
 }
 
 bool clif_register(struct Runtime *rt, char *key, ClifHandler handler)

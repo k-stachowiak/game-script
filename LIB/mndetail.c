@@ -4,19 +4,6 @@
 #include "mndetail.h"
 #include "rt_val.h"
 
-struct MoonValue *mn_make_api_value_compound(struct Runtime *rt, VAL_LOC_T loc)
-{
-    int i, len = rt_val_cpd_len(rt, loc);
-    VAL_LOC_T current_loc = rt_val_cpd_first_loc(loc);
-    struct MoonValue *result = NULL, *result_end = NULL;
-    for (i = 0; i < len; ++i) {
-        struct MoonValue *value = mn_make_api_value(rt, current_loc);
-        LIST_APPEND(value, &result, &result_end);
-        current_loc = rt_val_next_loc(rt, current_loc);
-    }
-    return result;
-}
-
 struct MoonValue *mn_make_api_value(struct Runtime *rt, VAL_LOC_T loc)
 {
     struct MoonValue *result = mem_malloc(sizeof(*result));
@@ -67,6 +54,20 @@ struct MoonValue *mn_make_api_value(struct Runtime *rt, VAL_LOC_T loc)
 
     return result;
 }
+
+struct MoonValue *mn_make_api_value_compound(struct Runtime *rt, VAL_LOC_T loc)
+{
+    int i, len = rt_val_cpd_len(rt, loc);
+    VAL_LOC_T current_loc = rt_val_cpd_first_loc(loc);
+    struct MoonValue *result = NULL, *result_end = NULL;
+    for (i = 0; i < len; ++i) {
+        struct MoonValue *value = mn_make_api_value(rt, current_loc);
+        LIST_APPEND(value, &result, &result_end);
+        current_loc = rt_val_next_loc(rt, current_loc);
+    }
+    return result;
+}
+
 
 void mn_api_value_free(struct MoonValue *value)
 {
