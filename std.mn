@@ -289,6 +289,9 @@
 		# Sequences
 		(test "Sequence empty" (eq (seq 0) []))
 		(test "Sequence non-empty" (eq (seq 5) [ 0 1 2 3 4 ]))
+		(test "Integer range empty" (eq (range_int 0 0) []))
+		(test "Integer range positive" (eq (range_int 0 4) [ 0 1 2 3 ]))
+		(test "Integer range not only positive" (eq (range_int -2 4) [ -2 -1 0 1 ]))
     ])
 ))
 
