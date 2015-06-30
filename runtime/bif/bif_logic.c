@@ -12,7 +12,7 @@
 #define BIF_LOGIC_UNARY_DEF(NAME) \
     void NAME(struct Runtime *rt, VAL_LOC_T x_loc) \
     { \
-        enum ValueType x_type = rt_val_peek_type(rt, x_loc); \
+        enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc); \
         if (x_type != VAL_BOOL) { \
 			err_push("BIF", "Arguments of logic BIF must be of boolean type"); \
             return; \
@@ -23,8 +23,8 @@
 #define BIF_LOGIC_BINARY_DEF(NAME) \
     void NAME(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc) \
     { \
-        enum ValueType x_type = rt_val_peek_type(rt, x_loc); \
-        enum ValueType y_type = rt_val_peek_type(rt, y_loc); \
+        enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc); \
+        enum ValueType y_type = rt_val_peek_type(&rt->stack, y_loc); \
         if (x_type != VAL_BOOL || y_type != VAL_BOOL) { \
 			err_push("BIF", "Arguments of logic BIF must be of boolean type"); \
             return; \

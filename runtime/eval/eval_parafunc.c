@@ -50,7 +50,7 @@ static void eval_parafunc_logic(
             return;
         }
 
-        if (rt_val_peek_type(rt, loc) != VAL_BOOL) {
+        if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
             para_error_arg_not_bool(func, i);
             return;
         }
@@ -91,7 +91,7 @@ static void eval_parafunc_if(
         return;
     }
 
-    if (rt_val_peek_type(rt, test_loc) != VAL_BOOL) {
+    if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
         para_error_arg_not_bool("if", 1);
         stack_collapse(&rt->stack, temp_begin, temp_end);
         return;
@@ -127,7 +127,7 @@ static bool eval_parafunc_switch_case(
         goto end;
     }
 
-    if (rt_val_peek_type(rt, case_loc) != VAL_TUPLE) {
+    if (rt_val_peek_type(&rt->stack, case_loc) != VAL_TUPLE) {
         para_error_case("must be tuple");
         goto end;
     }

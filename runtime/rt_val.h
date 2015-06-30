@@ -24,11 +24,13 @@
 #define VAL_CHAR_T char
 #define VAL_INT_T int64_t
 #define VAL_REAL_T double
+#define VAL_REF_T VAL_LOC_T
 
 #define VAL_BOOL_BYTES sizeof(VAL_BOOL_T)
 #define VAL_CHAR_BYTES sizeof(VAL_CHAR_T)
 #define VAL_INT_BYTES sizeof(VAL_INT_T)
 #define VAL_REAL_BYTES sizeof(VAL_REAL_T)
+#define VAL_REF_BYTES sizeof(VAL_REF_T)
 
 #define VAL_PTR_BYTES sizeof(void*)
 
@@ -38,6 +40,7 @@ extern VAL_HEAD_SIZE_T bool_size;
 extern VAL_HEAD_SIZE_T char_size;
 extern VAL_HEAD_SIZE_T int_size;
 extern VAL_HEAD_SIZE_T real_size;
+extern VAL_HEAD_SIZE_T ref_size;
 
 struct Runtime;
 struct Stack;
@@ -53,7 +56,8 @@ enum ValueType {
     VAL_REAL,
     VAL_ARRAY,
     VAL_TUPLE,
-    VAL_FUNCTION
+    VAL_FUNCTION,
+	VAL_REF
 };
 
 struct ValueHeader {
@@ -95,6 +99,7 @@ void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value);
 void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
+void rt_val_push_ref(struct Stack *stack, VAL_REF_T value);
 
 /* Compound values.
  * ----------------
@@ -146,6 +151,7 @@ void rt_val_push_func_final(
  */
 
 void rt_val_poke_bool(struct Stack *stack, VAL_LOC_T loc, VAL_BOOL_T value);
+void rt_val_poke_ref(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src);
 
 /* Reading (peeking) API.
  * ======================
@@ -182,10 +188,10 @@ VAL_LOC_T rt_val_next_loc(struct Runtime *rt, VAL_LOC_T loc);
  */
 
 /** Peek the type of the value at the given location. */
-enum ValueType rt_val_peek_type(struct Runtime *rt, VAL_LOC_T loc);
+enum ValueType rt_val_peek_type(struct Stack *stack, VAL_LOC_T loc);
 
 /** Peek the size of the value at the given location. */
-VAL_SIZE_T rt_val_peek_size(struct Runtime *rt, VAL_LOC_T loc);
+VAL_SIZE_T rt_val_peek_size(struct Stack *stack, VAL_LOC_T loc);
 
 /* Actual values reading.
  * ----------------------
@@ -202,6 +208,9 @@ VAL_INT_T rt_val_peek_int(struct Runtime *rt, VAL_LOC_T loc);
 
 /** Peek a real value at the given location. */
 VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc);
+
+/** Returns the location pointed by the reference. */
+VAL_LOC_T rt_val_peek_ref(struct Runtime *rt, VAL_LOC_T loc);
 
 /** Returns the location of the first element of the compound value. */
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc);

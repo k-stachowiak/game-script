@@ -44,6 +44,14 @@ void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
 	stack_push(stack, real_size, (char*)&value);
 }
 
+void rt_val_push_ref(struct Stack *stack, VAL_REF_T value)
+{
+	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_REF;
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&ref_size);
+	stack_push(stack, ref_size, (char*)&value);
+}
+
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_ARRAY;

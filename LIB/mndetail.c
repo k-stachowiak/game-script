@@ -3,6 +3,7 @@
 #include "collection.h"
 #include "mndetail.h"
 #include "rt_val.h"
+#include "runtime.h"
 
 struct MoonValue *mn_make_api_value(struct Runtime *rt, VAL_LOC_T loc)
 {
@@ -16,7 +17,7 @@ struct MoonValue *mn_make_api_value(struct Runtime *rt, VAL_LOC_T loc)
         return result;
     }
 
-    switch (rt_val_peek_type(rt, loc)) {
+    switch (rt_val_peek_type(&rt->stack, loc)) {
     case VAL_BOOL:
         result->type = MN_BOOL;
         result->data.boolean = rt_val_peek_bool(rt, loc);
@@ -50,6 +51,10 @@ struct MoonValue *mn_make_api_value(struct Runtime *rt, VAL_LOC_T loc)
     case VAL_FUNCTION:
         result->type = MN_FUNCTION;
         break;
+
+	case VAL_REF:
+		mem_free(result);
+		return mn_make_api_value(rt, rt_val_peek_ref(rt, loc));
     }
 
     return result;

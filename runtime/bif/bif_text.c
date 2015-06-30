@@ -47,7 +47,7 @@ static void bif_format_try_appending_arg(
         char wc,
         VAL_LOC_T loc)
 {
-    enum ValueType type = rt_val_peek_type(rt, loc);
+    enum ValueType type = rt_val_peek_type(&rt->stack, loc);
 
     switch (wc) {
     case 'b':
@@ -354,7 +354,7 @@ void bif_format(struct Runtime *rt, VAL_LOC_T fmt_loc, VAL_LOC_T args_loc)
         return;
     }
 
-    if (rt_val_peek_type(rt, args_loc) != VAL_TUPLE) {
+    if (rt_val_peek_type(&rt->stack, args_loc) != VAL_TUPLE) {
         bif_text_error_arg(2, "format", "must be a tuple");
         return;
     }

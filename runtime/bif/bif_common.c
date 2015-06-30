@@ -13,7 +13,7 @@ enum ValueType bif_match_un(
         VAL_INT_T *i,
         VAL_REAL_T *r)
 {
-    enum ValueType type = rt_val_peek_type(rt, x_loc);
+    enum ValueType type = rt_val_peek_type(&rt->stack, x_loc);
 
     if (type == VAL_INT) {
         *i = rt_val_peek_int(rt, x_loc);
@@ -34,8 +34,8 @@ enum BifBinaryMatch bif_match_bin(
         VAL_INT_T *ix, VAL_INT_T *iy,
         VAL_REAL_T *rx, VAL_REAL_T *ry)
 {
-    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-    enum ValueType y_type = rt_val_peek_type(rt, y_loc);
+    enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
+    enum ValueType y_type = rt_val_peek_type(&rt->stack, y_loc);
 
     if (x_type == VAL_INT) {
         *ix = rt_val_peek_int(rt, x_loc);

@@ -32,7 +32,7 @@ static void rt_val_to_string_compound(struct Runtime *rt, VAL_LOC_T x, char **st
 
 void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
 {
-	enum ValueType type = rt_val_peek_type(rt, x);
+	enum ValueType type = rt_val_peek_type(&rt->stack, x);
 
 	if (rt_val_is_string(rt, x)) {
 		char *string = rt_val_peek_cpd_as_string(rt, x);
@@ -78,6 +78,11 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
 	case VAL_FUNCTION:
 		str_append(*str, "function");
 		break;
+
+	case VAL_REF:
+		str_append(*str, "ref -> ");
+		rt_val_to_string(rt, rt_val_peek_ref(rt, x), str);
+		break;
 	}
 }
 
@@ -90,7 +95,7 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 			str_append(buffer, "string :: ");
 		}
 		else {
-			switch (rt_val_peek_type(rt, loc)) {
+			switch (rt_val_peek_type(&rt->stack, loc)) {
 			case VAL_BOOL:
 				str_append(buffer, "bool :: ");
 				break;
@@ -118,6 +123,9 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 			case VAL_FUNCTION:
 				str_append(buffer, "function :: ");
 				break;
+
+			case VAL_REF:
+				str_append(buffer, "reference :: ");
 			}
 		}
 	}
@@ -129,7 +137,7 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 
 bool rt_val_is_string(struct Runtime *rt, VAL_LOC_T loc)
 {
-	if (rt_val_peek_type(rt, loc) != VAL_ARRAY) {
+	if (rt_val_peek_type(&rt->stack, loc) != VAL_ARRAY) {
 		return false;
 	}
 
@@ -138,7 +146,7 @@ bool rt_val_is_string(struct Runtime *rt, VAL_LOC_T loc)
 	}
 
 	loc = rt_val_cpd_first_loc(loc);
-	if (rt_val_peek_type(rt, loc) != VAL_CHAR) {
+	if (rt_val_peek_type(&rt->stack, loc) != VAL_CHAR) {
 		return false;
 	}
 
@@ -151,7 +159,7 @@ int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location)
 	int len = 0;
 
 	current = location + VAL_HEAD_BYTES;
-	end = current + rt_val_peek_size(rt, location);
+	end = current + rt_val_peek_size(&rt->stack, location);
 
 	while (current != end) {
 		current = rt_val_next_loc(rt, current);
@@ -167,15 +175,15 @@ VAL_LOC_T rt_val_next_loc(struct Runtime *rt, VAL_LOC_T loc)
 	return loc + VAL_HEAD_BYTES + header.size;
 }
 
-enum ValueType rt_val_peek_type(struct Runtime *rt, VAL_LOC_T loc)
+enum ValueType rt_val_peek_type(struct Stack *stack, VAL_LOC_T loc)
 {
-	struct ValueHeader header = rt_val_peek_header(&rt->stack, loc);
+	struct ValueHeader header = rt_val_peek_header(stack, loc);
 	return (enum ValueType)header.type;
 }
 
-VAL_SIZE_T rt_val_peek_size(struct Runtime *rt, VAL_LOC_T loc)
+VAL_SIZE_T rt_val_peek_size(struct Stack *stack, VAL_LOC_T loc)
 {
-	struct ValueHeader header = rt_val_peek_header(&rt->stack, loc);
+	struct ValueHeader header = rt_val_peek_header(stack, loc);
 	return header.size;
 }
 
@@ -204,6 +212,13 @@ VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc)
 {
 	VAL_REAL_T result;
 	memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_REAL_BYTES);
+	return result;
+}
+
+VAL_LOC_T rt_val_peek_ref(struct Runtime *rt, VAL_LOC_T loc)
+{
+	VAL_REF_T result;
+	memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_REF_BYTES);
 	return result;
 }
 

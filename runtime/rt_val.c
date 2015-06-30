@@ -14,6 +14,7 @@ VAL_HEAD_SIZE_T bool_size = VAL_BOOL_BYTES;
 VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
 VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
 VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
+VAL_HEAD_SIZE_T ref_size = VAL_REF_BYTES;
 
 static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 
@@ -127,12 +128,12 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     enum ValueType xtype, ytype;
     int xlen, ylen;
 
-    if (rt_val_peek_size(rt, x) != rt_val_peek_size(rt, y)) {
+    if (rt_val_peek_size(&rt->stack, x) != rt_val_peek_size(&rt->stack, y)) {
         return false;
     }
 
-    xtype = rt_val_peek_type(rt, x);
-    ytype = rt_val_peek_type(rt, y);
+    xtype = rt_val_peek_type(&rt->stack, x);
+    ytype = rt_val_peek_type(&rt->stack, y);
 
     if (xtype != ytype) {
         return false;
@@ -172,6 +173,9 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 
     case VAL_FUNCTION:
         return false;
+
+	case VAL_REF:
+		return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));	
     }
 
     LOG_ERROR("Cannot get here");
@@ -180,8 +184,8 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 
 bool rt_val_eq_bin(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
-    VAL_SIZE_T x_size = rt_val_peek_size(rt, x);
-    VAL_SIZE_T y_size = rt_val_peek_size(rt, y);
+    VAL_SIZE_T x_size = rt_val_peek_size(&rt->stack, x);
+    VAL_SIZE_T y_size = rt_val_peek_size(&rt->stack, y);
 
     if (x_size != y_size) {
         return false;

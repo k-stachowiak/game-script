@@ -33,10 +33,10 @@ static void bif_cpd_error_mismatch(char *func)
 void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     int size, i;
-    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
+    enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
     VAL_LOC_T size_loc, loc, result_loc = rt->stack.top;
-    VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
-    VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
+    VAL_SIZE_T x_size = rt_val_peek_size(&rt->stack, x_loc);
+    VAL_SIZE_T y_size = rt_val_peek_size(&rt->stack, y_loc);
 
     if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
         bif_cpd_error_arg(1, "push-front", "must be compound");
@@ -69,10 +69,10 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     int size, i;
-    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
+    enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
     VAL_LOC_T size_loc, loc, result_loc = rt->stack.top;
-    VAL_SIZE_T x_size = rt_val_peek_size(rt, x_loc);
-    VAL_SIZE_T y_size = rt_val_peek_size(rt, y_loc);
+    VAL_SIZE_T x_size = rt_val_peek_size(&rt->stack, x_loc);
+    VAL_SIZE_T y_size = rt_val_peek_size(&rt->stack, y_loc);
 
     if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
         bif_cpd_error_arg(1, "push-back", "must be compound");
@@ -106,8 +106,8 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
     VAL_LOC_T size_loc, loc, end, result_loc = rt->stack.top;
     VAL_SIZE_T x_size, y_size;
-    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
-    enum ValueType y_type = rt_val_peek_type(rt, y_loc);
+    enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
+    enum ValueType y_type = rt_val_peek_type(&rt->stack, y_loc);
 
     /* Assert input. */
     if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
@@ -125,8 +125,8 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         return;
     }
 
-    x_size = rt_val_peek_size(rt, x_loc);
-    y_size = rt_val_peek_size(rt, y_loc);
+    x_size = rt_val_peek_size(&rt->stack, x_loc);
+    y_size = rt_val_peek_size(&rt->stack, y_loc);
 
     /* Build new header. */
     if (x_type == VAL_ARRAY) {
@@ -162,7 +162,7 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
 void bif_length(struct Runtime* rt, VAL_LOC_T location)
 {
-    enum ValueType type = rt_val_peek_type(rt, location);
+    enum ValueType type = rt_val_peek_type(&rt->stack, location);
     if (type != VAL_ARRAY && type != VAL_TUPLE) {
         bif_cpd_error_arg(1, "length", "must be compound");
         return;
@@ -179,14 +179,14 @@ void bif_at(
     VAL_INT_T index;
     VAL_LOC_T loc;
     int len, i;
-    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
+    enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
 
     if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
         bif_cpd_error_arg(1, "at", "must be compound");
         return;
     }
 
-    if (rt_val_peek_type(rt, y_loc) != VAL_INT) {
+    if (rt_val_peek_type(&rt->stack, y_loc) != VAL_INT) {
         bif_cpd_error_arg(2, "at", "must be an integer");
         return;
     }
@@ -216,7 +216,7 @@ void bif_slice(
     VAL_INT_T first, last;
     VAL_LOC_T size_loc, loc, end;
     VAL_SIZE_T index = 0, size = 0;
-    enum ValueType x_type = rt_val_peek_type(rt, x_loc);
+    enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
 
     /* Assert input. */
     if (x_type != VAL_ARRAY && x_type != VAL_TUPLE) {
@@ -224,12 +224,12 @@ void bif_slice(
         return;
     }
 
-    if (rt_val_peek_type(rt, y_loc) != VAL_INT) {
+    if (rt_val_peek_type(&rt->stack, y_loc) != VAL_INT) {
         bif_cpd_error_arg(2, "slice", "must be an integer");
         return;
     }
 
-    if (rt_val_peek_type(rt, z_loc) != VAL_INT) {
+    if (rt_val_peek_type(&rt->stack, z_loc) != VAL_INT) {
         bif_cpd_error_arg(3, "slice", "must be an integer");
         return;
     }
@@ -251,11 +251,11 @@ void bif_slice(
 
     /* Iterate over array */
     loc = rt_val_cpd_first_loc(x_loc);
-    end = loc + rt_val_peek_size(rt, x_loc);
+    end = loc + rt_val_peek_size(&rt->stack, x_loc);
     while (loc != end) {
         if (index >= first && index < last) {
             rt_val_push_copy(&rt->stack, loc);
-            size += rt_val_peek_size(rt, loc) + VAL_HEAD_BYTES;
+            size += rt_val_peek_size(&rt->stack, loc) + VAL_HEAD_BYTES;
         }
         loc = rt_val_next_loc(rt, loc);
         ++index;

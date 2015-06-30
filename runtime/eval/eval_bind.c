@@ -18,7 +18,7 @@ void eval_bind_pattern(
         VAL_LOC_T location,
         struct SourceLocation *source_loc)
 {
-    enum ValueType type = rt_val_peek_type(rt, location);
+    enum ValueType type = rt_val_peek_type(&rt->stack, location);
 
     VAL_LOC_T child_loc;
     struct Pattern *child_pat;

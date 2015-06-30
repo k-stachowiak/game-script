@@ -53,7 +53,7 @@
     void NAME(struct Runtime *rt, VAL_LOC_T x_loc) \
     { \
         VAL_REAL_T x; \
-        if (rt_val_peek_type(rt, x_loc) != VAL_REAL) { \
+        if (rt_val_peek_type(&rt->stack, x_loc) != VAL_REAL) { \
 			err_push("BIF", "Arguments of arythmetic BIF must be of equal numeric type"); \
             return; \
         } \
@@ -85,7 +85,7 @@ BIF_ARYTHM_UNARY_DEF(bif_sqrt)
 void bif_real(struct Runtime *rt, VAL_LOC_T x_loc)
 {
 	VAL_INT_T x;
-	if (rt_val_peek_type(rt, x_loc) != VAL_INT) {
+	if (rt_val_peek_type(&rt->stack, x_loc) != VAL_INT) {
 		err_push("BIF", "Arguments of expanding arythmetic BIF must be of integer type");
 		return;
 	}
