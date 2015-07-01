@@ -1,7 +1,9 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
+#include <inttypes.h>
 #include <string.h>
 
+#include "log.h"
 #include "rt_val.h"
 #include "stack.h"
 
@@ -30,6 +32,7 @@ void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value)
 
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value)
 {
+    LOG_DEBUG("pushing int %" PRIu64 " @ %" PRIu64, value, stack->top);
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_INT;
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&int_size);

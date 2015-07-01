@@ -36,10 +36,15 @@ enum AstLiteralType {
 };
 
 enum AstParafuncType {
+    AST_PARAFUNC_IF,
+    AST_PARAFUNC_SWITCH,
     AST_PARAFUNC_AND,
     AST_PARAFUNC_OR,
-    AST_PARAFUNC_IF,
-    AST_PARAFUNC_SWITCH
+    AST_PARAFUNC_REF,
+    AST_PARAFUNC_PEEK,
+    AST_PARAFUNC_POKE,
+    AST_PARAFUNC_SUCC,
+    AST_PARAFUNC_PRED
 };
 
 /* Partial types.

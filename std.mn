@@ -196,32 +196,32 @@
 ))
 
 ### Find reference in a compound object
-(bind find_ref (func (first last value)
-	(if (eq first last)
-	    first
-		(if (eq (src first) value)
-			first
-			(find_ref (succ first last value)))
-	)
-))
-
-(bind find_ref_test (func () (do
-	(bind strings [ "ene" "due" "rabe" ])
-	(and
-		(eq
-			(+ (begin strings) 1)
-			(find_ref (begin strings) (end strings) "due")
-		)
-		(eq
-			(find_ref (begin strings) (end strings) "rabe")
-			(- (end strings) 1)
-		)
-		(eq
-			(find_ref (+ (begin strings) 1) (end strings) "ene")
-			(end strings)
-		)
-	)
-)))
+# (bind find_ref (func (first last value)
+# 	(if (eq first last)
+# 	    first
+# 		(if (eq (src first) value)
+# 			first
+# 			(find_ref (succ first last value)))
+# 	)
+# ))
+# 
+# (bind find_ref_test (func () (do
+# 	(bind strings [ "ene" "due" "rabe" ])
+# 	(and
+# 		(eq
+# 			(+ (begin strings) 1)
+# 			(find_ref (begin strings) (end strings) "due")
+# 		)
+# 		(eq
+# 			(find_ref (begin strings) (end strings) "rabe")
+# 			(- (end strings) 1)
+# 		)
+# 		(eq
+# 			(find_ref (+ (begin strings) 1) (end strings) "ene")
+# 			(end strings)
+# 		)
+# 	)
+# )))
 
 # Compound generators
 # -------------------

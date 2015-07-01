@@ -61,4 +61,9 @@ void bif_rand_exp(struct Runtime *rt, VAL_LOC_T l_loc);
 void bif_rand_gauss(struct Runtime *rt, VAL_LOC_T u_loc, VAL_LOC_T s_loc);
 void bif_rand_distr(struct Runtime *rt, VAL_LOC_T d_loc);
 
+/* References */
+void bif_ref(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_peek(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_poke(struct Runtime *rt, VAL_LOC_T dst_loc, VAL_LOC_T src_loc);
+
 #endif

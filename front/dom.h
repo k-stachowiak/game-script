@@ -37,11 +37,16 @@ enum Reserved {
     DOM_RES_SWITCH,
     DOM_RES_AND,
     DOM_RES_OR,
+    DOM_RES_REF,
+    DOM_RES_PEEK,
+    DOM_RES_POKE,
+    DOM_RES_SUCC,
+    DOM_RES_PRED,
     DOM_RES_FUNC,
     DOM_RES_UNIT,
     DOM_RES_TRUE,
     DOM_RES_FALSE,
-    DOM_RES_DONTCARE
+    DOM_RES_DONTCARE,
 };
 
 /**

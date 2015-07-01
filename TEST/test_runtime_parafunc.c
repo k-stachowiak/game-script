@@ -34,11 +34,24 @@ static void test_parafunc_switch(struct TestContext *tc, struct Runtime *rt)
     rt_reset(rt);
 }
 
+static void test_parafunc_references_basic(struct TestContext *tc, struct Runtime *rt)
+{
+    test_eval_source_succeed(tc, rt,
+            "(bind x 1)\n"
+            "(bind x^ (ref x))\n"
+            "(bind y (peek x^))\n"
+            "(poke x^ 2)",
+            "Mutate atomic value through reference");
+    test_eval_source_expect(tc, rt, "x", "Value mutated through reference", INT, 2);
+    test_eval_source_expect(tc, rt, "y", "Copy through reference persisted", INT, 1);
+}
+
 void test_runtime_parafunc(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make();
     test_runtime_parafunc_logic(tc, rt);
     test_parafunc_if(tc, rt);
     test_parafunc_switch(tc, rt);
+    test_parafunc_references_basic(tc, rt);
     rt_free(rt);
 }

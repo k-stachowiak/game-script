@@ -197,6 +197,7 @@ static struct AstNode *parse_bind(struct DomNode *dom)
 static struct AstNode *parse_parafunc(struct DomNode *dom)
 {
     struct DomNode *child = NULL;
+    struct AstNode *args = NULL;
 
     /* 1. Is compound CORE */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -213,30 +214,53 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
     /* 3. Switch the first child. */
     if (!dom_node_is_atom(child)) {
         return NULL;
+    } else {
+        args = parse_list(child->next);
     }
 
     /* 3.1. Case &&: */
     if (dom_node_is_reserved_atom(child, DOM_RES_AND)) {
-        struct AstNode *args = parse_list(child->next);
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_AND, args);
     }
 
     /* 3.2. Case ||: */
     if (dom_node_is_reserved_atom(child, DOM_RES_OR)) {
-        struct AstNode *args = parse_list(child->next);
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_OR, args);
     }
 
     /* 3.3. Case if: */
     if (dom_node_is_reserved_atom(child, DOM_RES_IF)) {
-        struct AstNode *args = parse_list(child->next);
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_IF, args);
     }
 
     /* 3.4. Case switch: */
     if (dom_node_is_reserved_atom(child, DOM_RES_SWITCH)) {
-        struct AstNode *args = parse_list(child->next);
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SWITCH, args);
+    }
+
+    /* 3.5. Case ref: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_REF)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_REF, args);
+    }
+
+    /* 3.6. Case peek: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_PEEK)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_PEEK, args);
+    }
+
+    /* 3.7. Case poke: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_POKE)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_POKE, args);
+    }
+
+    /* 3.8. Case succ: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
+    }
+
+    /* 3.9. Case pred: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_PRED)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_PRED, args);
     }
 
     /* None of the reserved words were matched. */

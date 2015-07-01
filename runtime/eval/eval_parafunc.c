@@ -7,6 +7,11 @@
 #include "eval_detail.h"
 #include "rt_val.h"
 
+static void para_error_not_implemented_yet(char *func)
+{
+	err_push("EVAL", "Parafunc _%s_ not implemented yet", func);
+}
+
 static void para_error_invalid_argc(char *func, int count)
 {
 	err_push("EVAL",
@@ -24,48 +29,6 @@ static void para_error_arg_not_bool(char *func, int index)
 static void para_error_case(char *unmet)
 {
 	err_push("EVAL", "Case %s", unmet);
-}
-
-static void eval_parafunc_logic(
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct AstNode *args,
-        bool breaking_value,
-        char *func)
-{
-    int i = 0;
-    VAL_LOC_T temp_begin = rt->stack.top;
-    VAL_BOOL_T result = !breaking_value;
-
-    if (!args) {
-        para_error_invalid_argc(func, 0);
-        return;
-    }
-
-    while (args) {
-
-        VAL_LOC_T loc = eval_impl(args, rt, sym_map);
-        if (err_state()) {
-			err_push_src("EVAL", args->loc, "Failed evaluating logic parafunc element");
-            return;
-        }
-
-        if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
-            para_error_arg_not_bool(func, i);
-            return;
-        }
-
-        if (rt_val_peek_bool(rt, loc) == breaking_value) {
-            result = breaking_value;
-            break;
-        }
-
-        args = args->next;
-        ++i;
-    }
-
-    stack_collapse(&rt->stack, temp_begin, rt->stack.top);
-    rt_val_push_bool(&rt->stack, result);
 }
 
 static void eval_parafunc_if(
@@ -194,6 +157,97 @@ end:
     stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
+static void eval_parafunc_logic(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args,
+        bool breaking_value,
+        char *func)
+{
+    int i = 0;
+    VAL_LOC_T temp_begin = rt->stack.top;
+    VAL_BOOL_T result = !breaking_value;
+
+    if (!args) {
+        para_error_invalid_argc(func, 0);
+        return;
+    }
+
+    while (args) {
+
+        VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+        if (err_state()) {
+			err_push_src("EVAL", args->loc, "Failed evaluating logic parafunc element");
+            return;
+        }
+
+        if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
+            para_error_arg_not_bool(func, i);
+            return;
+        }
+
+        if (rt_val_peek_bool(rt, loc) == breaking_value) {
+            result = breaking_value;
+            break;
+        }
+
+        args = args->next;
+        ++i;
+    }
+
+    stack_collapse(&rt->stack, temp_begin, rt->stack.top);
+    rt_val_push_bool(&rt->stack, result);
+}
+
+static void eval_parafunc_ref(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
+    rt_val_push_ref(&rt->stack, ref);
+}
+
+static void eval_parafunc_peek(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
+    rt_val_push_copy(&rt->stack, ref);
+}
+
+static void eval_parafunc_poke(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
+    rt_val_push_copy(&rt->stack, ref);
+}
+
+static void eval_parafunc_succ(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
+    VAL_LOC_T ref_next = rt_val_next_loc(rt, ref);
+    rt_val_push_ref(&rt->stack, ref_next);
+}
+
+static void eval_parafunc_pred(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    para_error_not_implemented_yet("pred");
+}
+
 void eval_parafunc(
         struct AstNode *node,
         struct Runtime *rt,
@@ -203,6 +257,14 @@ void eval_parafunc(
     struct AstNode *args = node->data.parafunc.args;
 
     switch (type) {
+    case AST_PARAFUNC_IF:
+        eval_parafunc_if(rt, sym_map, args);
+        break;
+
+    case AST_PARAFUNC_SWITCH:
+        eval_parafunc_switch(rt, sym_map, args);
+        break;
+
     case AST_PARAFUNC_AND:
         eval_parafunc_logic(rt, sym_map, args, false, "and");
         break;
@@ -211,12 +273,24 @@ void eval_parafunc(
         eval_parafunc_logic(rt, sym_map, args, true, "or");
         break;
 
-    case AST_PARAFUNC_IF:
-        eval_parafunc_if(rt, sym_map, args);
-        break;
+    case AST_PARAFUNC_REF:
+        eval_parafunc_ref(rt, sym_map, args);
+		break;
 
-    case AST_PARAFUNC_SWITCH:
-        eval_parafunc_switch(rt, sym_map, args);
+    case AST_PARAFUNC_PEEK:
+        eval_parafunc_peek(rt, sym_map, args);
+		break;
+
+    case AST_PARAFUNC_POKE:
+        eval_parafunc_poke(rt, sym_map, args);
+		break;
+
+    case AST_PARAFUNC_SUCC:
+        eval_parafunc_succ(rt, sym_map, args);
+		break;
+
+    case AST_PARAFUNC_PRED:
+        eval_parafunc_pred(rt, sym_map, args);
         break;
     }
 }
