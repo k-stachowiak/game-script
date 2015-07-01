@@ -8,6 +8,16 @@
 #include "eval_detail.h"
 #include "rt_val.h"
 
+static void para_error_ref_of_nonref(void)
+{
+	err_push("EVAL", "Parafunc _ref_ used with a non-symbol argument");
+}
+
+static void para_error_peek_nonref(char *func)
+{
+	err_push("EVAL", "Parafunc _%s_ used with a non-reference argument", func);
+}
+
 static void para_error_not_implemented_yet(char *func)
 {
 	err_push("EVAL", "Parafunc _%s_ not implemented yet", func);
@@ -235,16 +245,34 @@ static void eval_parafunc_peek(
         struct SymMap *sym_map,
         struct AstNode *args)
 {
-    int len = ast_list_len(args);
+    int len;
+    VAL_LOC_T ref_loc, target_loc;
+    enum ValueType ref_type;
+
+    len = ast_list_len(args);
     if (len != 1) {
-        para_error_invalid_argc("ref", len);
+        para_error_invalid_argc("peek", len);
         return;
     }
 
-    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
-    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
-    LOG_DEBUG("Peeking refered value from %" PRIu64 " at %" PRIu64, ref, loc);
-    rt_val_push_copy(&rt->stack, ref);
+    ref_loc = eval_impl(args, rt, sym_map);
+    LOG_DEBUG("ref_loc = %" PRIu64, ref_loc);
+    if (err_state()) {
+		err_push_src("EVAL", args->loc, "Failed evaluating _peek_ reference argument");
+        return;
+    }
+
+    ref_type = rt_val_peek_type(&rt->stack, ref_loc);
+    if (ref_type != VAL_REF) {
+        para_error_peek_nonref("peek");
+        return;
+    }
+
+    target_loc = rt_val_peek_ref(rt, ref_loc);
+    LOG_DEBUG("target_loc = %" PRIu64, target_loc);
+
+    LOG_DEBUG("Peeking refered value from %" PRIu64 " towards %" PRIu64, ref_loc, target_loc);
+    rt_val_push_copy(&rt->stack, target_loc);
 }
 
 static void eval_parafunc_poke(
@@ -252,10 +280,38 @@ static void eval_parafunc_poke(
         struct SymMap *sym_map,
         struct AstNode *args)
 {
-    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
-    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
-    LOG_DEBUG("Peeking refered value at %" PRIu64 " stored at %" PRIu64, ref, loc);
-    rt_val_push_copy(&rt->stack, ref);
+    int len;
+    VAL_LOC_T ref_loc, source_loc, target_loc;
+    enum ValueType ref_type;
+
+    len = ast_list_len(args);
+    if (len != 2) {
+        para_error_invalid_argc("poke", len);
+        return;
+    }
+
+    ref_loc = eval_impl(args, rt, sym_map);
+    if (err_state()) {
+		err_push_src("EVAL", args->loc, "Failed evaluating _poke_ reference argument");
+        return;
+    }
+
+    ref_type = rt_val_peek_type(&rt->stack, ref_loc);
+    if (ref_type != VAL_REF) {
+        para_error_peek_nonref("poke");
+        return;
+    }
+
+    target_loc = rt_val_peek_ref(rt, ref_loc);
+
+    source_loc = eval_impl(args->next, rt, sym_map);
+    if (err_state()) {
+		err_push_src("EVAL", args->loc, "Failed evaluating _poke_ source argument");
+        return;
+    }
+
+    LOG_DEBUG("Poking refered value at %" PRIu64 " with value from %" PRIu64, target_loc, source_loc);
+    rt_val_poke_ref(&rt->stack, target_loc, source_loc);
 }
 
 static void eval_parafunc_succ(
@@ -263,10 +319,31 @@ static void eval_parafunc_succ(
         struct SymMap *sym_map,
         struct AstNode *args)
 {
-    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
-    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
-    VAL_LOC_T ref_next = rt_val_next_loc(rt, ref);
-    rt_val_push_ref(&rt->stack, ref_next);
+    int len;
+    VAL_LOC_T ref_loc, target_loc;
+    enum ValueType ref_type;
+
+    len = ast_list_len(args);
+    if (len != 1) {
+        para_error_invalid_argc("succ", len);
+        return;
+    }
+
+    ref_loc = eval_impl(args, rt, sym_map);
+    if (err_state()) {
+		err_push_src("EVAL", args->loc, "Failed evaluating _succ_ reference argument");
+        return;
+    }
+
+    ref_type = rt_val_peek_type(&rt->stack, ref_loc);
+    if (ref_type != VAL_REF) {
+        para_error_peek_nonref("succ");
+        return;
+    }
+
+    target_loc = rt_val_peek_ref(rt, ref_loc);
+    target_loc = rt_val_next_loc(rt, target_loc);
+    rt_val_poke_ref(&rt->stack, ref_loc, target_loc);
 }
 
 static void eval_parafunc_pred(

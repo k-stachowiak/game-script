@@ -13,10 +13,10 @@ include_directories(
     .
     )
 
-set(CMAKE_C_COMPILER "clang")
+set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c99")
 
-set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
 
 add_library(lang OBJECT
