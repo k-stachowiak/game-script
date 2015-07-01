@@ -1,6 +1,7 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <stdbool.h>
+#include <inttypes.h>
 
 #include "error.h"
 #include "eval.h"
@@ -204,9 +205,29 @@ static void eval_parafunc_ref(
         struct SymMap *sym_map,
         struct AstNode *args)
 {
-    VAL_LOC_T loc = eval_impl(args, rt, sym_map);
-    VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
-    rt_val_push_ref(&rt->stack, ref);
+    int len = ast_list_len(args);
+    char *symbol;
+    struct SymMapKvp *kvp;
+
+    if (len != 1) {
+        para_error_invalid_argc("ref", len);
+        return;
+    }
+
+    if (args->type != AST_REFERENCE) {
+        para_error_ref_of_nonref();
+        return;
+    }
+    symbol = args->data.reference.symbol;
+    kvp = sym_map_find(sym_map, symbol);
+
+    if (!kvp) {
+        eval_error_not_found(symbol);
+        return;
+    }
+
+    LOG_DEBUG("Storing reference to %" PRIu64 " at %" PRIu64, kvp->stack_loc, rt->stack.top);
+    rt_val_push_ref(&rt->stack, kvp->stack_loc);
 }
 
 static void eval_parafunc_peek(
@@ -214,8 +235,15 @@ static void eval_parafunc_peek(
         struct SymMap *sym_map,
         struct AstNode *args)
 {
+    int len = ast_list_len(args);
+    if (len != 1) {
+        para_error_invalid_argc("ref", len);
+        return;
+    }
+
     VAL_LOC_T loc = eval_impl(args, rt, sym_map);
     VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
+    LOG_DEBUG("Peeking refered value from %" PRIu64 " at %" PRIu64, ref, loc);
     rt_val_push_copy(&rt->stack, ref);
 }
 
@@ -226,6 +254,7 @@ static void eval_parafunc_poke(
 {
     VAL_LOC_T loc = eval_impl(args, rt, sym_map);
     VAL_LOC_T ref = rt_val_peek_ref(rt, loc);
+    LOG_DEBUG("Peeking refered value at %" PRIu64 " stored at %" PRIu64, ref, loc);
     rt_val_push_copy(&rt->stack, ref);
 }
 

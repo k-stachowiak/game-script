@@ -32,6 +32,21 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
     case AST_PARAFUNC_SWITCH:
         printf("switch()\n");
         break;
+    case AST_PARAFUNC_REF:
+        printf("ref()\n");
+        break;
+    case AST_PARAFUNC_PEEK:
+        printf("peek()\n");
+        break;
+    case AST_PARAFUNC_POKE:
+        printf("poke()\n");
+        break;
+    case AST_PARAFUNC_SUCC:
+        printf("succ()\n");
+        break;
+    case AST_PARAFUNC_PRED:
+        printf("pred()\n");
+        break;
     }
 }
 
