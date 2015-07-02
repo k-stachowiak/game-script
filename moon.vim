@@ -14,12 +14,13 @@ syn keyword biFunctions and or xor not
 syn keyword biFunctions push_front push_back cat length at slice
 syn keyword biFunctions print format to_string parse parse_bool parse_char parse_int parse_real
 syn keyword biFunctions rand_ui rand_ur rand_ber rand_exp rand_gauss, rand_distr
-syn keyword stdFunctions f_and f_or
+syn keyword stdFunctions f_and f_or f_not
 syn keyword stdFunctions ne gt ge le
 syn keyword stdFunctions succ_n distance swap
 syn keyword stdFunctions empty front back tail rtail dcons rdcons
 syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
+syn keyword stdFunctions find find_if find_if_not
 syn keyword stdFunctions merge merge_cmp merge_sort merge_sort_cmp
 syn keyword stdFunctions sort sort_cmp
 syn keyword stdFunctions point map zip_with foldl foldr zip

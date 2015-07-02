@@ -21,10 +21,10 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
 {
     switch (parafunc->type) {
     case AST_PARAFUNC_AND:
-        printf("(&& ...)\n");
+        printf("(and ...)\n");
         break;
     case AST_PARAFUNC_OR:
-        printf("(|| ...)\n");
+        printf("(or ...)\n");
         break;
     case AST_PARAFUNC_IF:
         printf("(if ...)\n");

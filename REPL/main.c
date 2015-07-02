@@ -46,6 +46,13 @@ static struct MoonValue *make_error(bool value, char *message)
 	return result;
 }
 
+static struct MoonValue *make_unit(void)
+{
+	struct MoonValue *result = mem_malloc(sizeof(*result));
+	result->type = MN_UNIT;
+	return result;
+}
+
 struct MoonValue *repl_clif_dbg(struct MoonValue *args)
 {
     if (debug_state) {
@@ -59,13 +66,13 @@ struct MoonValue *repl_clif_dbg(struct MoonValue *args)
         printf("Debugger enabled\n");
     }
 
-	return NULL;
+	return make_unit();
 }
 
 struct MoonValue *repl_clif_quit(struct MoonValue *args)
 {
 	quit_request = true;
-	return NULL;
+	return make_unit();
 }
 
 struct MoonValue *repl_clif_load(struct MoonValue *args)
