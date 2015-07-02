@@ -43,8 +43,8 @@ enum AstParafuncType {
     AST_PARAFUNC_REF,
     AST_PARAFUNC_PEEK,
     AST_PARAFUNC_POKE,
-    AST_PARAFUNC_SUCC,
-    AST_PARAFUNC_PRED
+    AST_PARAFUNC_BEGIN,
+    AST_PARAFUNC_SUCC
 };
 
 /* Partial types.

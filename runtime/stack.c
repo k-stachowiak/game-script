@@ -74,6 +74,5 @@ void stack_collapse(struct Stack *stack, VAL_LOC_T begin, VAL_LOC_T end)
     VAL_LOC_T remaining = stack->top - end;
     memmove(stack->buffer + begin, stack->buffer + end, remaining);
     stack->top -= removed;
-    LOG_DEBUG("Collapsing stack %" PRIu64 " - %" PRIu64 "(%" PRIu64 ")", begin, end, (end - begin));
 }
 

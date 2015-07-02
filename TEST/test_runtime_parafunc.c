@@ -44,6 +44,24 @@ static void test_parafunc_references_basic(struct TestContext *tc, struct Runtim
             "Mutate atomic value through reference");
     test_eval_source_expect(tc, rt, "x", "Value mutated through reference", INT, 2);
     test_eval_source_expect(tc, rt, "y", "Copy through reference persisted", INT, 1);
+    rt_reset(rt);
+}
+
+static void test_parafunc_references_iteration(struct TestContext *tc, struct Runtime *rt)
+{
+    test_eval_source_succeed(tc, rt,
+            "(bind vec [ 1 2 3 ])\n"
+            "(bind it^ (begin vec))\n"
+            "(bind x (peek it^))\n"
+            "(succ it^)\n"
+            "(bind y (peek it^))\n"
+            "(succ it^)\n"
+            "(bind z (peek it^))\n",
+            "Iterate over vector manually");
+    test_eval_source_expect(tc, rt, "x", "First value read correctly", INT, 1);
+    test_eval_source_expect(tc, rt, "y", "Second value read correctly", INT, 2);
+    test_eval_source_expect(tc, rt, "z", "Third value read correctly", INT, 3);
+    rt_reset(rt);
 }
 
 void test_runtime_parafunc(struct TestContext *tc)
@@ -53,5 +71,6 @@ void test_runtime_parafunc(struct TestContext *tc)
     test_parafunc_if(tc, rt);
     test_parafunc_switch(tc, rt);
     test_parafunc_references_basic(tc, rt);
+    test_parafunc_references_iteration(tc, rt);
     rt_free(rt);
 }

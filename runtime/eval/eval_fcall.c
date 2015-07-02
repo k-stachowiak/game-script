@@ -215,11 +215,8 @@ static void efc_evaluate_bif(
     VAL_LOC_T temp_begin, temp_end;
     VAL_LOC_T appl_loc = func_data->appl_start;
 
-    LOG_DEBUG("Evaluating BIF %s", symbol);
-
     /* Peal out already applied args. */
     for (i = 0; i < func_data->appl_count; ++i) {
-        LOG_DEBUG("Already applied arg loc: %" PRIu64, appl_loc);
         arg_locs[arg_count] = appl_loc;
         appl_loc = rt_val_next_loc(rt, appl_loc);
         ++arg_count;
@@ -235,7 +232,6 @@ static void efc_evaluate_bif(
         }
 
         temp_loc = eval_impl(actual_args, rt, sym_map);
-        LOG_DEBUG("Currently applied arg loc: %" PRIu64, temp_loc);
         arg_locs[arg_count] = temp_loc;
         ++arg_count;
 

@@ -253,14 +253,14 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_POKE, args);
     }
 
-    /* 3.8. Case succ: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
+    /* 3.8. Case begin: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_BEGIN)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_BEGIN, args);
     }
 
-    /* 3.9. Case pred: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_PRED)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_PRED, args);
+    /* 3.9. Case succ: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
     }
 
     /* None of the reserved words were matched. */

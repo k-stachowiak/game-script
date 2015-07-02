@@ -8,21 +8,6 @@
 #include "eval_detail.h"
 #include "rt_val.h"
 
-static void para_error_ref_of_nonref(void)
-{
-	err_push("EVAL", "Parafunc _ref_ used with a non-symbol argument");
-}
-
-static void para_error_peek_nonref(char *func)
-{
-	err_push("EVAL", "Parafunc _%s_ used with a non-reference argument", func);
-}
-
-static void para_error_not_implemented_yet(char *func)
-{
-	err_push("EVAL", "Parafunc _%s_ not implemented yet", func);
-}
-
 static void para_error_invalid_argc(char *func, int count)
 {
 	err_push("EVAL",
@@ -30,11 +15,11 @@ static void para_error_invalid_argc(char *func, int count)
         func, count);
 }
 
-static void para_error_arg_not_bool(char *func, int index)
+static void para_error_arg_expected(char *func, int index, char *expected)
 {
 	err_push("EVAL",
-        "argument %d of _%s_ is not of boolean type",
-        index, func);
+            "Argument %d of parafunc _%s_ must be %s",
+            index, func, expected);
 }
 
 static void para_error_case(char *unmet)
@@ -66,7 +51,7 @@ static void eval_parafunc_if(
     }
 
     if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-        para_error_arg_not_bool("if", 1);
+        para_error_arg_expected("if", 1, "boolean");
         stack_collapse(&rt->stack, temp_begin, temp_end);
         return;
     }
@@ -193,7 +178,7 @@ static void eval_parafunc_logic(
         }
 
         if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
-            para_error_arg_not_bool(func, i);
+            para_error_arg_expected(func, i, "boolean");
             return;
         }
 
@@ -225,11 +210,10 @@ static void eval_parafunc_ref(
     }
 
     if (args->type != AST_REFERENCE) {
-        para_error_ref_of_nonref();
+        para_error_arg_expected("ref", 1, "symbol");
         return;
     }
     symbol = args->data.reference.symbol;
-    LOG_DEBUG("(ref %s)", symbol);
     kvp = sym_map_find(sym_map, symbol);
 
     if (!kvp) {
@@ -237,7 +221,6 @@ static void eval_parafunc_ref(
         return;
     }
 
-    LOG_DEBUG("Storing reference to %" PRIu64 " at %" PRIu64, kvp->stack_loc, rt->stack.top);
     rt_val_push_ref(&rt->stack, kvp->stack_loc);
 }
 
@@ -267,15 +250,12 @@ static void eval_parafunc_peek(
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_peek_nonref("peek");
+        para_error_arg_expected("peek", 1, "reference");
         return;
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
-
-    LOG_DEBUG("Peeking refered value from %" PRIu64 " towards %" PRIu64, ref_loc, target_loc);
     rt_val_push_copy(&rt->stack, target_loc);
-
     stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
@@ -304,12 +284,11 @@ static void eval_parafunc_poke(
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_peek_nonref("poke");
+        para_error_arg_expected("poke", 1, "reference");
         return;
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
-    LOG_DEBUG("(poke %" PRIu64 ")", target_loc);
 
     source_loc = eval_impl(args->next, rt, sym_map);
     temp_end = rt->stack.top;
@@ -318,10 +297,46 @@ static void eval_parafunc_poke(
         return;
     }
 
-    LOG_DEBUG("Poking refered value at %" PRIu64 " with value from %" PRIu64, target_loc, source_loc);
     rt_val_poke_copy(&rt->stack, target_loc, source_loc);
-
     stack_collapse(&rt->stack, temp_begin, temp_end);
+}
+
+static void eval_parafunc_begin(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    int len = ast_list_len(args);
+    char *symbol;
+    struct SymMapKvp *kvp;
+    VAL_LOC_T cpd_loc;
+    enum ValueType ref_type;
+
+    if (len != 1) {
+        para_error_invalid_argc("begin", len);
+        return;
+    }
+
+    if (args->type != AST_REFERENCE) {
+        para_error_arg_expected("begin", 1, "symbol");
+        return;
+    }
+    symbol = args->data.reference.symbol;
+    kvp = sym_map_find(sym_map, symbol);
+
+    if (!kvp) {
+        eval_error_not_found(symbol);
+        return;
+    }
+
+    cpd_loc = kvp->stack_loc;
+    ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
+    if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
+        para_error_arg_expected("begin", 1, "reference to compound object");
+        return;
+    }
+
+    rt_val_push_ref(&rt->stack, rt_val_cpd_first_loc(cpd_loc));
 }
 
 static void eval_parafunc_succ(
@@ -330,8 +345,9 @@ static void eval_parafunc_succ(
         struct AstNode *args)
 {
     int len;
+    char *symbol;
+    struct SymMapKvp *kvp;
     VAL_LOC_T ref_loc, target_loc;
-    VAL_LOC_T temp_begin, temp_end;
     enum ValueType ref_type;
 
     len = ast_list_len(args);
@@ -340,33 +356,28 @@ static void eval_parafunc_succ(
         return;
     }
 
-    temp_begin = rt->stack.top;
-    ref_loc = eval_impl(args, rt, sym_map);
-    temp_end = rt->stack.top;
-    if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating _succ_ reference argument");
+    if (args->type != AST_REFERENCE) {
+        para_error_arg_expected("begin", 1, "symbol");
+        return;
+    }
+    symbol = args->data.reference.symbol;
+    kvp = sym_map_find(sym_map, symbol);
+
+    if (!kvp) {
+        eval_error_not_found(symbol);
         return;
     }
 
+    ref_loc = kvp->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_peek_nonref("succ");
+        para_error_arg_expected("succ", 1, "reference");
         return;
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
     target_loc = rt_val_next_loc(rt, target_loc);
     rt_val_poke_ref(&rt->stack, ref_loc, target_loc);
-
-    stack_collapse(&rt->stack, temp_begin, temp_end);
-}
-
-static void eval_parafunc_pred(
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct AstNode *args)
-{
-    para_error_not_implemented_yet("pred");
 }
 
 void eval_parafunc(
@@ -406,12 +417,12 @@ void eval_parafunc(
         eval_parafunc_poke(rt, sym_map, args);
 		break;
 
+    case AST_PARAFUNC_BEGIN:
+        eval_parafunc_begin(rt, sym_map, args);
+		break;
+
     case AST_PARAFUNC_SUCC:
         eval_parafunc_succ(rt, sym_map, args);
 		break;
-
-    case AST_PARAFUNC_PRED:
-        eval_parafunc_pred(rt, sym_map, args);
-        break;
     }
 }
