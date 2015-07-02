@@ -7,7 +7,7 @@ if exists("b:current_syntax")
     finish
 endif
 
-syn keyword basicKeywords do and or if switch try func bind ref begin peek poke succ
+syn keyword basicKeywords do and or if switch try func bind ref begin end peek poke succ
 syn keyword biFunctions sqrt floor ceil round
 syn keyword biFunctions eq lt
 syn keyword biFunctions and or xor not
@@ -16,8 +16,8 @@ syn keyword biFunctions print format to_string parse parse_bool parse_char parse
 syn keyword biFunctions rand_ui rand_ur rand_ber rand_exp rand_gauss, rand_distr
 syn keyword stdFunctions f_and f_or
 syn keyword stdFunctions ne gt ge le
-syn keyword stdFunctions succ_n
-syn keyword stdFunctions end empty head tail front back dcons rdcons
+syn keyword stdFunctions succ_n distance swap
+syn keyword stdFunctions empty front back tail rtail dcons rdcons
 syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions merge merge_cmp merge_sort merge_sort_cmp

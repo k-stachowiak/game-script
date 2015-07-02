@@ -28,7 +28,23 @@
 # Reference operations
 # --------------------
 
-(bind succ_n (func (r n) (if (eq n 0) r (succ_n (succ r) (- n 1)))))
+(bind succ_n (func (r^ n) (if (eq n 0) r^ (succ_n (succ r^) (- n 1)))))
+
+(bind distance (func (first^ last^) (do
+    (bind distance_impl (func (first^ last^ counter)
+        (if (eq first^ last^)
+            counter
+            (distance_impl (succ first^) last^ (+ counter 1))
+        )
+    ))
+    (distance_impl first^ last^ 0)
+)))
+
+(bind swap (func (x^ y^) (do
+    (bind temp (peek x^))
+    (poke x^ (peek y^))
+    (poke y^ temp)
+)))
 
 # Compound operations
 # -------------------
@@ -37,23 +53,24 @@
 (bind empty (func (x) (eq (length x) 0)))
 
 ### Returns the first element of a compound structure
-(bind car (func (x) (at x 0)))
-
-### Returns the compound structure sans the first element
-(bind cdr (func (x) (slice x 1 (length x))))
-
-### Returns the first element of a compound structure
 (bind front (func (x) (at x 0)))
 
 ### Returns the last element of a compound structure
 (bind back (func (x) (at x (- (length x) 1))))
 
-### Constructs a new compound value from an element and an existing compound
-(bind cons (func (x arr) (push_front arr x)))
+### Returns the compound structure sans the first element
+(bind tail (func (x) (slice x 1 (length x))))
+
+### Returns the compound structure sans the last element
+(bind rtail (func (x) (slice x 0 (- (length x) 1))))
 
 ### Deconstructs compound structure into a tuple containing
 ### the head and the tail of the input compound structure
-(bind dcons (func (x) { (car x) (cdr x) }))
+(bind dcons (func (x) { (front x) (tail x) }))
+
+### Deconstructs compound structure into a tuple containing
+### the tail and the reverse tail of the input compound structure
+(bind rdcons (func (x) { (back x) (rtail x) }))
 
 # Algorithms
 # ----------
@@ -71,19 +88,23 @@
 (bind max (max_cmp lt))
 
 ### Finds the minimum element in a compound structure with a custom comparator
-(bind min_element_cmp (func (cmp x) (do
-    (bind min_element_impl (func (element x)
-        (if (empty x)
-            element
-            (if (cmp element (car x))
-                (min_element_impl element (cdr x))
-                (min_element_impl (car x) (cdr x))
+(bind min_element_cmp (func (cmp first^ last^) (do
+    (bind min_element_impl (func (current_min^ first^ last^)
+        (if (eq first^ last^)
+            current_min^
+            (if (cmp (peek current_min^) (peek first^))
+                (min_element_impl current_min^ (succ first^) last^)
+                (min_element_impl first^ (succ first^) last^)
             )
         )
     ))
-    (if (eq (length x) 1)
-        (car x)
-        (min_element_impl (car x) (cdr x))
+    (bind len (distance first^ last^))
+    (if (eq len 0)
+        last^
+        (if (eq len 1)
+            first^
+            (min_element_impl first^ (succ first^) last^)
+        )
     )
 )))
 
@@ -101,9 +122,9 @@
             (if y_empty result (cat result y))
             (if y_empty
                 (cat result x)
-                (if (cmp (car x) (car y))
-                    (merge_impl (cdr x) y (push_back result (car x)))
-                    (merge_impl x (cdr y) (push_back result (car y)))
+                (if (cmp (front x) (front y))
+                    (merge_impl (tail x) y (push_back result (front x)))
+                    (merge_impl x (tail y) (push_back result (front y)))
                 )
             )
         )
@@ -148,7 +169,7 @@
 (bind map (func (f v)
     (if (empty v)
         v
-        (cons (f (car v)) (map f (cdr v)))
+        (push_front (map f (tail v)) (f (front v)))
     )
 ))
 
@@ -171,9 +192,9 @@
 (bind zip_with (func (f va vb)
     (if (or (empty va) (empty vb))
         (slice va 0 0)
-        (cons
-            (f (car va) (car vb))
-            (zip_with f (cdr va) (cdr vb))
+        (push_front
+            (zip_with f (tail va) (tail vb))
+            (f (front va) (front vb))
         )
     )
 ))
@@ -255,25 +276,43 @@
             (and (eq tedious easy) (eq (peek tedious) (peek easy)))
         ))
 
+        (test "Reference distance" (do
+            (bind v [ 1 2 3 ])
+            (eq (distance (begin v) (end v)) (length v))
+        ))
+
+        (test "Swap test" (do
+            (bind x [ 1.0 2.0 3.0 ])
+            (bind y [ 3.0 2.0 1.0 ])
+            (swap (ref x) (ref y))
+            (and (eq x [ 3.0 2.0 1.0 ]) (eq y [ 1.0 2.0 3.0 ]))
+        ))
+
         # Compound clunky
         (test "String = array" (eq "string" [ 's' 't' 'r' 'i' 'n' 'g' ]))
         (test "Empty 1" (eq (empty []) true))
         (test "Empty 2" (eq (empty { 'a' }) false))
         (test "Empty 3" (eq (empty "") true))
-        (test "Car 1" (eq (car [ 'a' ]) 'a'))
-        (test "Car 2" (eq (car [ 1.0 2.0 3.0 ]) 1.0))
-        (test "Cdr 1" (eq (cdr { 'a' }) {}))
-        (test "Cdr 2" (eq (cdr [ 1.0 2.0 3.0 ]) [ 2.0 3.0 ]))
-        (test "Cdr 3" (eq (cdr "asd") "sd"))
         (test "Front 1" (eq (front [ 'a' ]) 'a'))
         (test "Front 2" (eq (front { 1.0 2.0 3.0 }) 1.0))
         (test "Back 1" (eq (back [ 'a' ]) 'a'))
         (test "Back 2" (eq (back [ 1.0 2.0 3.0 ]) 3.0))
-        (test "Cons 1" (eq (cons 'a' []) [ 'a' ]))
-        (test "Cons 2" (eq (cons "ene" [ "due" "rabe" ]) [ "ene" "due" "rabe" ]))
-        (test "Cons 3" (eq (cons 'a' "sd") "asd"))
-        (test "DCons 1" (eq (dcons [ 1 2 3 ]) { 1 [ 2 3 ] }))
-        (test "DCons 2" (eq (dcons [ true ]) { true [] }))
+        (test "Tail 1" (eq (tail { 'a' }) {}))
+        (test "Tail 2" (eq (tail [ 1.0 2.0 3.0 ]) [ 2.0 3.0 ]))
+        (test "Tail 3" (eq (tail "asd") "sd"))
+        (test "Reverse tail 1" (eq (rtail { 'a' }) {}))
+        (test "Reverse tail 2" (eq (rtail [ 1.0 2.0 3.0 ]) [ 1.0 2.0 ]))
+        (test "Reverse tail 3" (eq (rtail "asd") "as"))
+        (test "Deconstruct 1" (eq (dcons [ 1 2 3 ]) { 1 [ 2 3 ] }))
+        (test "Deconstruct 2" (eq (dcons [ true ]) { true [] }))
+        (test "Reverse deconstruct 1" (eq (rdcons [ 1 2 3 ]) { 3 [ 1 2 ] }))
+        (test "Reverse deconstruct 2" (eq (rdcons [ true ]) { true [] }))
+        (test "Push front 1" (eq (push_front [] 'a') [ 'a' ]))
+        (test "Push front 2" (eq (push_front [ "due" "rabe" ] "ene") [ "ene" "due" "rabe" ]))
+        (test "Push front 3" (eq (push_front "sd" 'a') "asd"))
+        (test "Push back 1" (eq (push_back [] 'a') [ 'a' ]))
+        (test "Push back 2" (eq (push_back [ "due" "rabe" ] "ene") [ "due" "rabe" "ene" ]))
+        (test "Push back 3" (eq (push_back "sd" 'a') "sda"))
 
         # Compound reference based
         (test "End reference" (do
@@ -283,22 +322,33 @@
             (eq tedious easy)
         ))
 
-        # Algorithms
+        # Algorithms simple
         (test "Min 1" (eq (min_cmp gt 1 2) 2))
         (test "Min 2" (eq (min_cmp lt 1 2) 1))
         (test "Min 3" (eq (min 5.0 500.0) 5.0))
         (test "Max 1" (eq (max_cmp gt 1 2) 1))
         (test "Max 2" (eq (max_cmp lt 1 2) 2))
         (test "Max 3" (eq (max 5.0 500.0) 500.0))
-        (test "Min element 1" (eq (min_element_cmp gt [ 1 2 3 ]) 3))
-        (test "Min element 2" (eq (min_element [ 1.0 2.0 3.0 ]) 1.0))
+
+        # Algorithms compound reference
+        (test "Min element 1" (do
+            (bind v [ 1 2 3])
+            (bind result_gt^ (min_element_cmp gt (begin v) (end v)))
+            (eq (peek result_gt^) 3)
+        ))
+        (test "Min element 2" (do
+            (bind v [ 1 2 3])
+            (bind result_lt^ (min_element (begin v) (end v)))
+            (eq (peek result_lt^) 1)
+        ))
+
         (test "Merge 1" (eq (merge_cmp gt [ 5 3 1 ] [ 6 4 2 ]) [ 6 5 4 3 2 1 ]))
         (test "Merge 2" (eq (merge [ 1 3 5 ] [ 2 4 6 ]) [ 1 2 3 4 5 6 ]))
         (test "Sort 1" (eq (merge_sort_cmp gt [ 5 1 4 2 3 ]) [ 5 4 3 2 1 ]))
         (test "Sort 2" (eq (merge_sort [ 5 1 4 2 3 ]) [ 1 2 3 4 5 ]))
 
         # Functional
-        (test "Point" (do (bind cadr (point cdr car)) (eq (cadr [ 1 2 3 ]) 2)))
+        (test "Point" (do (bind cadr (point tail front)) (eq (cadr [ 1 2 3 ]) 2)))
         (test "Map" (eq (map not [ true false true ]) [ false true false ]))
         (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
         (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
