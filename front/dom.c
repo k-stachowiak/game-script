@@ -25,7 +25,7 @@ static char *reserved[] = {
     "peek",
     "poke",
     "begin",
-    "succ",
+    "adv",
     "func",
     "unit",
     "true",

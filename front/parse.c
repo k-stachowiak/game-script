@@ -258,9 +258,9 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_BEGIN, args);
     }
 
-    /* 3.9. Case succ: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
+    /* 3.9. Case adv: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_ADV)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_ADV, args);
     }
 
     /* None of the reserved words were matched. */

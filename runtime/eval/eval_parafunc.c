@@ -339,7 +339,7 @@ static void eval_parafunc_begin(
     rt_val_push_ref(&rt->stack, rt_val_cpd_first_loc(cpd_loc));
 }
 
-static void eval_parafunc_succ(
+static void eval_parafunc_adv(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -352,12 +352,12 @@ static void eval_parafunc_succ(
 
     len = ast_list_len(args);
     if (len != 1) {
-        para_error_invalid_argc("succ", len);
+        para_error_invalid_argc("adv", len);
         return;
     }
 
     if (args->type != AST_REFERENCE) {
-        para_error_arg_expected("begin", 1, "symbol");
+        para_error_arg_expected("adv", 1, "symbol");
         return;
     }
     symbol = args->data.reference.symbol;
@@ -371,7 +371,7 @@ static void eval_parafunc_succ(
     ref_loc = kvp->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_arg_expected("succ", 1, "reference");
+        para_error_arg_expected("adv", 1, "reference");
         return;
     }
 
@@ -421,8 +421,8 @@ void eval_parafunc(
         eval_parafunc_begin(rt, sym_map, args);
 		break;
 
-    case AST_PARAFUNC_SUCC:
-        eval_parafunc_succ(rt, sym_map, args);
+    case AST_PARAFUNC_ADV:
+        eval_parafunc_adv(rt, sym_map, args);
 		break;
     }
 }

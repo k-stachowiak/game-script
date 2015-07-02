@@ -53,9 +53,9 @@ static void test_parafunc_references_iteration(struct TestContext *tc, struct Ru
             "(bind vec [ 1 2 3 ])\n"
             "(bind it^ (begin vec))\n"
             "(bind x (peek it^))\n"
-            "(succ it^)\n"
+            "(adv it^)\n"
             "(bind y (peek it^))\n"
-            "(succ it^)\n"
+            "(adv it^)\n"
             "(bind z (peek it^))\n",
             "Iterate over vector manually");
     test_eval_source_expect(tc, rt, "x", "First value read correctly", INT, 1);
