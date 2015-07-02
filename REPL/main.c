@@ -50,6 +50,7 @@ static struct MoonValue *make_unit(void)
 {
 	struct MoonValue *result = mem_malloc(sizeof(*result));
 	result->type = MN_UNIT;
+	result->next = NULL;
 	return result;
 }
 

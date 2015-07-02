@@ -31,8 +31,10 @@
 # Reference operations
 # --------------------
 
+### Returns a given reference advanced by n steps
 (bind succ_n (func (r^ n) (if (eq n 0) r^ (succ_n (succ r^) (- n 1)))))
 
+### Returns distance between two references
 (bind distance (func (first^ last^) (do
     (bind distance_impl (func (first^ last^ counter)
         (if (eq first^ last^)
@@ -43,6 +45,7 @@
     (distance_impl first^ last^ 0)
 )))
 
+### Swaps values pointed by two references using a temporary object.
 (bind swap (func (x^ y^) (do
     (bind temp (peek x^))
     (poke x^ (peek y^))
@@ -158,9 +161,10 @@
     (bind min_element_impl (func (current_min^ first^ last^)
         (if (eq first^ last^)
             current_min^
-            (if (cmp (peek current_min^) (peek first^))
-                (min_element_impl current_min^ (succ first^) last^)
-                (min_element_impl first^ (succ first^) last^)
+            (min_element_impl
+                (min_cmp cmp (peek current_min^) (peek first^))
+                (succ first^)
+                last^
             )
         )
     ))
@@ -198,10 +202,46 @@
 
 ### Rearranges elements that all of them that fulfill the predicate end up
 ### between first and the returned references, and all others end up between
-### the returned and the last references.
-#(bind partition (func (first^ last^ pred) (do
-#    (bind pivot^ (find_if_not first^ last^ pred))
-#)))
+### the returned and the last references. Accepts custom comparator.
+(bind partition_cmp (func (cmp first^ last^) (do
+    (bind mismatch^ (find_if_not first^ last^ cmp))
+    (if (eq mismatch^ last^)
+        first^
+        (do
+            (bind match^ (find_if mismatch^ last^ cmp))
+            (if (eq match^ last^)
+                mismatch^
+                (do
+                    (swap mismatch^ match^)
+                    (partition cmp (succ mismatch^) last^)
+                )
+            )
+        )
+    )
+)))
+
+### Partition algorithm variant for the default less than comparator
+(bind partition (partition_cmp lt))
+
+### Inplace quicksort implementation accepting custom comparator
+(bind quicksort_cmp (func (cmp first^ last^)
+    (if (eq first^ last^)
+        unit
+        (do
+            (bind pivot^ (succ_n first^ (/ (distance first^ last^) 2)))
+            (bind lt_pivot (point (cmp (peek pivot^)) not))
+            (bind ge_pivot (cmp (peek pivot^)))
+            (bind middle_a^ (partition_cmp lt_pivot first^ last^))
+            (bind middle_b^ (partition_cmp ge_pivot first^ last^))
+            (quicksort_cmp cmp first^ middle_a^)
+            (quicksort_cmp cmp middle_b^ last^)
+            unit
+        )
+    )
+))
+
+### Quicksort algorithm variant for the default less than comparator
+(bind quicksort (quicksort_cmp lt))
 
 ### Merges two sorted compound structures into a sorted one
 ### with a custom comparator
@@ -352,7 +392,13 @@
         ))
 
         # Functional
-        (test "Point" (do (bind cadr (point tail front)) (eq (cadr [ 1 2 3 ]) 2)))
+        (test "Point 1" (do (bind cadr (point tail front)) (eq (cadr [ 1 2 3 ]) 2)))
+        (test "Point 2" (do
+            (bind times2 (* 2))
+            (bind times4 (point times2 times2))
+            (bind times6 (point times2 times4))
+            (eq (times6 3) (* 3 6))
+        ))
         (test "Map" (eq (map not [ true false true ]) [ false true false ]))
         (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
         (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
@@ -370,6 +416,7 @@
         (test "Max 3" (eq (max 5.0 500.0) 500.0))
 
         # Algorithms compound reference
+
         (test "Min element 1" (do
             (bind v [ 1 2 3])
             (bind result_gt^ (min_element_cmp gt (begin v) (end v)))
@@ -380,6 +427,7 @@
             (bind result_lt^ (min_element (begin v) (end v)))
             (eq (peek result_lt^) 1)
         ))
+
         (test "Find 1" (do
             (bind v "asdf")
             (bind result^ (find (begin v) (end v) 'd'))
@@ -390,6 +438,7 @@
             (bind result^ (find (begin v) (end v) 'z'))
             (eq result^ (end v))
         ))
+
         (test "Find if 1" (do
             (bind v "asdf")
             (bind result^ (find_if (begin v) (end v) (eq 'd')))
@@ -400,6 +449,7 @@
             (bind result^ (find_if (begin v) (end v) (eq 'z')))
             (eq result^ (end v))
         ))
+
         (test "Find if not 1" (do
             (bind v [ 2 4 6 8 ])
             (bind result^ (find_if_not (begin v) (end v) (ge 5)))
@@ -409,6 +459,12 @@
             (bind v { 1.0 2.0 3.0 4.0 })
             (bind result^ (find_if_not (begin v) (end v) (ge 5.0)))
             (eq result^ (end v))
+        ))
+
+        (test "Partition mixed" (do
+            (bind v [ 1 4 5 3 2 6 ])
+            (bind result^ (partition_cmp (begin v) (end v) (ge 3)))
+            (eq (peek result^) 4)
         ))
 
         (test "Merge 1" (eq (merge_cmp gt [ 5 3 1 ] [ 6 4 2 ]) [ 6 5 4 3 2 1 ]))

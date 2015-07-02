@@ -21,6 +21,8 @@ syn keyword stdFunctions empty front back tail rtail dcons rdcons
 syn keyword stdFunctions min min_cmp max max_cmp
 syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions find find_if find_if_not
+syn keyword stdFunctions partition partition_cmp
+syn keyword stdFunctions quicksort quicksort_cmp
 syn keyword stdFunctions merge merge_cmp merge_sort merge_sort_cmp
 syn keyword stdFunctions sort sort_cmp
 syn keyword stdFunctions point map zip_with foldl foldr zip
