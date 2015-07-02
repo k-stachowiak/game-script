@@ -152,6 +152,7 @@ void rt_val_push_func_final(
 
 void rt_val_poke_bool(struct Stack *stack, VAL_LOC_T loc, VAL_BOOL_T value);
 void rt_val_poke_ref(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src);
+void rt_val_poke_copy(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src);
 
 /* Reading (peeking) API.
  * ======================

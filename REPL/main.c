@@ -148,6 +148,9 @@ static void repl_print(struct MoonValue *value)
 		case MN_FUNCTION:
 			printf("function");
 			break;
+        case MN_REFERENCE:
+            printf("reference");
+            break;
 		}
 
 		if ((value = value->next)) {

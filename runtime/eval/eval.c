@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "log.h"
 #include "collection.h"
@@ -63,6 +64,7 @@ static void eval_reference(
         return;
     }
 
+    LOG_DEBUG("Copying value due to reference evaluation @ %" PRIu64, kvp->stack_loc);
     rt_val_push_copy(stack, kvp->stack_loc);
 }
 

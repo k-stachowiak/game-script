@@ -18,7 +18,8 @@ enum MoonValueType {
     MN_STRING,
     MN_ARRAY,
     MN_TUPLE,
-	MN_FUNCTION
+	MN_FUNCTION,
+    MN_REFERENCE
 };
 
 struct MoonValue {
@@ -30,6 +31,7 @@ struct MoonValue {
         double real;
         char *string;
         struct MoonValue *compound;
+        int64_t reference;
     } data;
     struct MoonValue *next;
 };

@@ -36,7 +36,6 @@ static void test_parafunc_switch(struct TestContext *tc, struct Runtime *rt)
 
 static void test_parafunc_references_basic(struct TestContext *tc, struct Runtime *rt)
 {
-    LOG_DEBUG("References test begin ~~~~~~~~~~~~~~~~~");
     test_eval_source_succeed(tc, rt,
             "(bind x 1)\n"
             "(bind x^ (ref x))\n"

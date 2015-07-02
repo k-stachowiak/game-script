@@ -19,3 +19,11 @@ void rt_val_poke_ref(struct Stack *stack, VAL_LOC_T loc, VAL_LOC_T value)
 		(char*)&value,
         VAL_REF_BYTES);
 }
+
+void rt_val_poke_copy(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src)
+{
+    memcpy(
+        stack->buffer + dst,
+        stack->buffer + src,
+        rt_val_peek_size(stack, src));
+}

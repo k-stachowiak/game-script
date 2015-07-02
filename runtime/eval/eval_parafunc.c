@@ -229,6 +229,7 @@ static void eval_parafunc_ref(
         return;
     }
     symbol = args->data.reference.symbol;
+    LOG_DEBUG("(ref %s)", symbol);
     kvp = sym_map_find(sym_map, symbol);
 
     if (!kvp) {
@@ -247,6 +248,7 @@ static void eval_parafunc_peek(
 {
     int len;
     VAL_LOC_T ref_loc, target_loc;
+    VAL_LOC_T temp_begin, temp_end;
     enum ValueType ref_type;
 
     len = ast_list_len(args);
@@ -255,8 +257,9 @@ static void eval_parafunc_peek(
         return;
     }
 
+    temp_begin = rt->stack.top;
     ref_loc = eval_impl(args, rt, sym_map);
-    LOG_DEBUG("ref_loc = %" PRIu64, ref_loc);
+    temp_end = rt->stack.top;
     if (err_state()) {
 		err_push_src("EVAL", args->loc, "Failed evaluating _peek_ reference argument");
         return;
@@ -269,10 +272,11 @@ static void eval_parafunc_peek(
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
-    LOG_DEBUG("target_loc = %" PRIu64, target_loc);
 
     LOG_DEBUG("Peeking refered value from %" PRIu64 " towards %" PRIu64, ref_loc, target_loc);
     rt_val_push_copy(&rt->stack, target_loc);
+
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 static void eval_parafunc_poke(
@@ -282,6 +286,7 @@ static void eval_parafunc_poke(
 {
     int len;
     VAL_LOC_T ref_loc, source_loc, target_loc;
+    VAL_LOC_T temp_begin, temp_end;
     enum ValueType ref_type;
 
     len = ast_list_len(args);
@@ -290,6 +295,7 @@ static void eval_parafunc_poke(
         return;
     }
 
+    temp_begin = rt->stack.top;
     ref_loc = eval_impl(args, rt, sym_map);
     if (err_state()) {
 		err_push_src("EVAL", args->loc, "Failed evaluating _poke_ reference argument");
@@ -303,15 +309,19 @@ static void eval_parafunc_poke(
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
+    LOG_DEBUG("(poke %" PRIu64 ")", target_loc);
 
     source_loc = eval_impl(args->next, rt, sym_map);
+    temp_end = rt->stack.top;
     if (err_state()) {
 		err_push_src("EVAL", args->loc, "Failed evaluating _poke_ source argument");
         return;
     }
 
     LOG_DEBUG("Poking refered value at %" PRIu64 " with value from %" PRIu64, target_loc, source_loc);
-    rt_val_poke_ref(&rt->stack, target_loc, source_loc);
+    rt_val_poke_copy(&rt->stack, target_loc, source_loc);
+
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 static void eval_parafunc_succ(
@@ -321,6 +331,7 @@ static void eval_parafunc_succ(
 {
     int len;
     VAL_LOC_T ref_loc, target_loc;
+    VAL_LOC_T temp_begin, temp_end;
     enum ValueType ref_type;
 
     len = ast_list_len(args);
@@ -329,7 +340,9 @@ static void eval_parafunc_succ(
         return;
     }
 
+    temp_begin = rt->stack.top;
     ref_loc = eval_impl(args, rt, sym_map);
+    temp_end = rt->stack.top;
     if (err_state()) {
 		err_push_src("EVAL", args->loc, "Failed evaluating _succ_ reference argument");
         return;
@@ -344,6 +357,8 @@ static void eval_parafunc_succ(
     target_loc = rt_val_peek_ref(rt, ref_loc);
     target_loc = rt_val_next_loc(rt, target_loc);
     rt_val_poke_ref(&rt->stack, ref_loc, target_loc);
+
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 static void eval_parafunc_pred(
@@ -400,4 +415,3 @@ void eval_parafunc(
         break;
     }
 }
-

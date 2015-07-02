@@ -86,6 +86,10 @@ static void clif_push_result(struct Runtime *rt, struct MoonValue *value)
 	case MN_FUNCTION:
 		LOG_ERROR("Function manipulation not yet handled in the library.");
 		exit(1);
+
+	case MN_REFERENCE:
+		LOG_ERROR("Reference manipulation not yet handled in the library.");
+		exit(1);
 	}
 }
 

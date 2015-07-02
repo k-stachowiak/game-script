@@ -49,6 +49,7 @@ void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
 
 void rt_val_push_ref(struct Stack *stack, VAL_REF_T value)
 {
+    LOG_DEBUG("pushing ref %" PRIu64 " @ %" PRIu64, value, stack->top);
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_REF;
 	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
 	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&ref_size);
