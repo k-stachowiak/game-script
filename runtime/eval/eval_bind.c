@@ -80,11 +80,8 @@ void eval_bind(
         return;
     }
 
-    if (location == 0) {
-		err_push("EVAL", "Tried to bind void expression");
-        return;
-    }
-
     eval_bind_pattern(rt, sym_map, pattern, location, &expr->loc);
+
+    /* NOTE implicitly returning the bound value since there's no collapse. */
 }
 

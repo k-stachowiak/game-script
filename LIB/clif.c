@@ -83,6 +83,10 @@ static void clif_push_result(struct Runtime *rt, struct MoonValue *value)
 		rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
 		break;
 
+    case MN_UNIT:
+        rt_val_push_unit(&rt->stack);
+        break;
+
 	case MN_FUNCTION:
 		LOG_ERROR("Function manipulation not yet handled in the library.");
 		exit(1);

@@ -31,6 +31,7 @@
 #define VAL_INT_BYTES sizeof(VAL_INT_T)
 #define VAL_REAL_BYTES sizeof(VAL_REAL_T)
 #define VAL_REF_BYTES sizeof(VAL_REF_T)
+#define VAL_UNIT_BYTES 0
 
 #define VAL_PTR_BYTES sizeof(void*)
 
@@ -41,6 +42,7 @@ extern VAL_HEAD_SIZE_T char_size;
 extern VAL_HEAD_SIZE_T int_size;
 extern VAL_HEAD_SIZE_T real_size;
 extern VAL_HEAD_SIZE_T ref_size;
+extern VAL_HEAD_SIZE_T unit_size;
 
 struct Runtime;
 struct Stack;
@@ -57,7 +59,8 @@ enum ValueType {
     VAL_ARRAY,
     VAL_TUPLE,
     VAL_FUNCTION,
-	VAL_REF
+	VAL_REF,
+    VAL_UNIT
 };
 
 struct ValueHeader {
@@ -100,6 +103,7 @@ void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
 void rt_val_push_ref(struct Stack *stack, VAL_REF_T value);
+void rt_val_push_unit(struct Stack *stack);
 
 /* Compound values.
  * ----------------

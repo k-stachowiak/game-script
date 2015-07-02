@@ -44,6 +44,7 @@
     (bind temp (peek x^))
     (poke x^ (peek y^))
     (poke y^ temp)
+    unit
 )))
 
 # Compound operations

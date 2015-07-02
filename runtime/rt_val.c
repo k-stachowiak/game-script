@@ -17,6 +17,7 @@ VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
 VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
 VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
 VAL_HEAD_SIZE_T ref_size = VAL_REF_BYTES;
+VAL_HEAD_SIZE_T unit_size = VAL_UNIT_BYTES;
 
 static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
@@ -211,6 +212,9 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 
 	case VAL_REF:
 		return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));
+
+    case VAL_UNIT:
+        return true;
     }
 
     LOG_ERROR("Cannot get here");

@@ -341,6 +341,7 @@ void bif_print(struct Runtime *rt, VAL_LOC_T str_loc)
         char *string = rt_val_peek_cpd_as_string(rt, str_loc);
         printf("%s", string);
         mem_free(string);
+        rt_val_push_unit(&rt->stack);
     }
 }
 
@@ -373,7 +374,7 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     rt_val_to_string(rt, arg_loc, &buffer);
 
     if (!buffer) {
-		err_push("BIF",  "Failed rendering value as string");
+		err_push("BIF", "Failed rendering value as string");
     } else {
         rt_val_push_string(&rt->stack, buffer, buffer + strlen(buffer));
         mem_free(buffer);

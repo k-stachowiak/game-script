@@ -30,7 +30,7 @@ void tc_report(struct TestContext *tc)
         }
     }
 
-    printf("\n%d/%d tests passed.\n", successes, i);
+    printf("%d/%d tests passed.\n", successes, i);
 }
 
 void tc_record(struct TestContext *tc, char *name, bool result)

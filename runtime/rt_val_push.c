@@ -54,6 +54,13 @@ void rt_val_push_ref(struct Stack *stack, VAL_REF_T value)
 	stack_push(stack, ref_size, (char*)&value);
 }
 
+void rt_val_push_unit(struct Stack *stack)
+{
+	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_UNIT;
+	stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+	stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&unit_size);
+}
+
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
 {
 	VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_ARRAY;

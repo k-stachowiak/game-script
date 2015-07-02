@@ -151,6 +151,9 @@ static void repl_print(struct MoonValue *value)
         case MN_REFERENCE:
             printf("reference");
             break;
+        case MN_UNIT:
+            printf("unit");
+            break;
 		}
 
 		if ((value = value->next)) {

@@ -83,6 +83,10 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
 		str_append(*str, "ref -> ");
 		rt_val_to_string(rt, rt_val_peek_ref(rt, x), str);
 		break;
+
+    case VAL_UNIT:
+        str_append(*str, "unit");
+        break;
 	}
 }
 
@@ -126,6 +130,11 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
 
 			case VAL_REF:
 				str_append(buffer, "reference :: ");
+                break;
+
+            case VAL_UNIT:
+                str_append(buffer, "unit :: ");
+                break;
 			}
 		}
 	}

@@ -25,6 +25,7 @@ static void eval_literal(struct AstNode *node, struct Stack *stack)
 
     switch (node->data.literal.type) {
     case AST_LIT_UNIT:
+        rt_val_push_unit(stack);
         break;
 
     case AST_LIT_BOOL:
@@ -129,13 +130,7 @@ VAL_LOC_T eval_impl(
             dbg_call_end(&rt->debugger, rt, begin);
         }
 
-        if (begin == rt->stack.top) {
-            return 0;
-
-        } else {
-            return begin;
-
-        }
+        return begin;
     }
 }
 
