@@ -344,25 +344,24 @@ static void eval_parafunc_begin(
     rt_val_push_ref(&rt->stack, rt_val_cpd_first_loc(cpd_loc));
 }
 
-static void eval_parafunc_adv(
+static void eval_parafunc_end(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
 {
-    int len;
+    int i, cpd_len, len = ast_list_len(args);
     char *symbol;
     struct SymMapKvp *kvp;
-    VAL_LOC_T ref_loc, target_loc;
+    VAL_LOC_T cpd_loc;
     enum ValueType ref_type;
 
-    len = ast_list_len(args);
     if (len != 1) {
-        para_error_invalid_argc("adv", len);
+        para_error_invalid_argc("end", len);
         return;
     }
 
     if (args->type != AST_REFERENCE) {
-        para_error_arg_expected("adv", 1, "symbol");
+        para_error_arg_expected("end", 1, "symbol");
         return;
     }
     symbol = args->data.reference.symbol;
@@ -373,16 +372,56 @@ static void eval_parafunc_adv(
         return;
     }
 
-    ref_loc = kvp->stack_loc;
+    cpd_loc = kvp->stack_loc;
+    ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
+    if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
+        para_error_arg_expected("end", 1, "reference to compound object");
+        return;
+    }
+
+    cpd_len = rt_val_cpd_len(rt, cpd_loc);
+    cpd_loc = rt_val_cpd_first_loc(cpd_loc);
+    for (i = 0; i < cpd_len; ++i) {
+        cpd_loc = rt_val_next_loc(rt, cpd_loc);
+    }
+
+    rt_val_push_ref(&rt->stack, cpd_loc);
+}
+
+static void eval_parafunc_succ(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    int len;
+    VAL_LOC_T temp_begin, temp_end;
+    VAL_LOC_T ref_loc, target_loc;
+    enum ValueType ref_type;
+
+    len = ast_list_len(args);
+    if (len != 1) {
+        para_error_invalid_argc("succ", len);
+        return;
+    }
+
+    temp_begin = rt->stack.top;
+    ref_loc = eval_impl(args, rt, sym_map);
+    temp_end = rt->stack.top;
+    if (err_state()) {
+		err_push_src("EVAL", args->loc, "Failed evaluating _succ_ reference argument");
+        return;
+    }
+
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_arg_expected("adv", 1, "reference");
+        para_error_arg_expected("succ", 1, "reference");
         return;
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
     target_loc = rt_val_next_loc(rt, target_loc);
-    rt_val_poke_ref(&rt->stack, ref_loc, target_loc);
+    rt_val_push_ref(&rt->stack, target_loc);
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 void eval_parafunc(
@@ -426,8 +465,12 @@ void eval_parafunc(
         eval_parafunc_begin(rt, sym_map, args);
 		break;
 
-    case AST_PARAFUNC_ADV:
-        eval_parafunc_adv(rt, sym_map, args);
+    case AST_PARAFUNC_END:
+        eval_parafunc_end(rt, sym_map, args);
+		break;
+
+    case AST_PARAFUNC_SUCC:
+        eval_parafunc_succ(rt, sym_map, args);
 		break;
     }
 }

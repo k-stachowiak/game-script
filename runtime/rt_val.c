@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "log.h"
 #include "memory.h"

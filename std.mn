@@ -25,6 +25,11 @@
 ### Less or equal implemented in terms of greater than
 (bind le (func (x y) (not (gt x y))))
 
+# Reference operations
+# --------------------
+
+(bind succ_n (func (r n) (if (eq n 0) r (succ_n (succ r) (- n 1)))))
+
 # Compound operations
 # -------------------
 
@@ -195,34 +200,6 @@
     )
 ))
 
-### Find reference in a compound object
-# (bind find_ref (func (first last value)
-# 	(if (eq first last)
-# 	    first
-# 		(if (eq (src first) value)
-# 			first
-# 			(find_ref (succ first last value)))
-# 	)
-# ))
-# 
-# (bind find_ref_test (func () (do
-# 	(bind strings [ "ene" "due" "rabe" ])
-# 	(and
-# 		(eq
-# 			(+ (begin strings) 1)
-# 			(find_ref (begin strings) (end strings) "due")
-# 		)
-# 		(eq
-# 			(find_ref (begin strings) (end strings) "rabe")
-# 			(- (end strings) 1)
-# 		)
-# 		(eq
-# 			(find_ref (+ (begin strings) 1) (end strings) "ene")
-# 			(end strings)
-# 		)
-# 	)
-# )))
-
 # Compound generators
 # -------------------
 
@@ -270,7 +247,15 @@
         (test "Less than or equal 2" (eq (le 3 3) true))
         (test "Less than or equal 3" (eq (le 4 3) false))
 
-        # Compound
+        # References
+        (test "Nth successor" (do
+            (bind v [ 1 2 3 ])
+            (bind tedious (succ (succ (begin v))))
+            (bind easy (succ_n (begin v) 2))
+            (and (eq tedious easy) (eq (peek tedious) (peek easy)))
+        ))
+
+        # Compound clunky
         (test "String = array" (eq "string" [ 's' 't' 'r' 'i' 'n' 'g' ]))
         (test "Empty 1" (eq (empty []) true))
         (test "Empty 2" (eq (empty { 'a' }) false))
@@ -289,6 +274,14 @@
         (test "Cons 3" (eq (cons 'a' "sd") "asd"))
         (test "DCons 1" (eq (dcons [ 1 2 3 ]) { 1 [ 2 3 ] }))
         (test "DCons 2" (eq (dcons [ true ]) { true [] }))
+
+        # Compound reference based
+        (test "End reference" (do
+            (bind v [ 1 2 3 ])
+            (bind tedious (succ (succ (succ (begin v)))))
+            (bind easy (end v))
+            (eq tedious easy)
+        ))
 
         # Algorithms
         (test "Min 1" (eq (min_cmp gt 1 2) 2))

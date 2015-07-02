@@ -44,8 +44,11 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
     case AST_PARAFUNC_BEGIN:
         printf("(begin ...)\n");
         break;
-    case AST_PARAFUNC_ADV:
-        printf("(adv ...)\n");
+    case AST_PARAFUNC_END:
+        printf("(end ...)\n");
+        break;
+    case AST_PARAFUNC_SUCC:
+        printf("(succ ...)\n");
         break;
     }
 }
