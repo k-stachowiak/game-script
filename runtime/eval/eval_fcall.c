@@ -321,6 +321,11 @@ void eval_func_call(
         return;
     }
 
+    if (rt_val_peek_type(&rt->stack, val_loc) != VAL_FUNCTION) {
+        err_push("EVAL", "Symbol \"%s\" doesn't refer to a function object", symbol);
+        return;
+    }
+
     func_data = rt_val_function_data(rt, val_loc);
     applied = func_data.appl_count + ast_list_len(actual_args);
 

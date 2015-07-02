@@ -47,11 +47,24 @@ static void test_runtime_func_simple_capture(
     rt_reset(rt);
 }
 
+static void test_runtime_func_call_non_function(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_succeed(tc, rt,
+        "(bind x 1.0)\n"
+        "(bind x^ (ref x))\n",
+        "Definition of a functions that depend on a capture of a local value");
+    test_eval_source_fail(tc, rt, "(x)", "Fail on calling a non-funcion object as function");
+    rt_reset(rt);
+}
+
 void test_runtime_func(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make();
     test_runtime_func_simple(tc, rt);
     test_runtime_func_recursive(tc, rt);
     test_runtime_func_simple_capture(tc, rt);
+    test_runtime_func_call_non_function(tc, rt);
     rt_free(rt);
 }
