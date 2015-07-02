@@ -1,5 +1,4 @@
 TODO
 ----
-	- expand all test to include references if necessary
 	- change all the collection algorithms to operate in terms of references
-    - include a type match test for poking
+    - move the doc comments from the declarations to the definitions

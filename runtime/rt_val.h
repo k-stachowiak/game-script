@@ -241,7 +241,9 @@ VAL_LOC_T rt_val_fun_next_appl_loc(struct Runtime *rt, VAL_LOC_T loc);
  * ====================
  */
 
+bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc);
+bool rt_val_pair_equal_mempattern(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 
 /* Utility functions.
  * ==================

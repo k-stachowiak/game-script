@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "log.h"
 #include "memory.h"
 #include "strbuild.h"
 #include "log.h"
@@ -15,8 +16,6 @@ VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
 VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
 VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
 VAL_HEAD_SIZE_T ref_size = VAL_REF_BYTES;
-
-static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y);
 
 static bool rt_val_pair_homo_simple(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
@@ -95,7 +94,7 @@ static bool rt_val_pair_homo_complex(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T 
     }
 }
 
-static bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
     return rt_val_pair_homo_simple(rt, x, y) ||
            rt_val_pair_homo_complex(rt, x, y);
@@ -121,6 +120,41 @@ bool rt_val_compound_homo(struct Runtime *rt, VAL_LOC_T val_loc)
     }
 
     return true;
+}
+
+bool rt_val_pair_equal_mempattern(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
+{
+    VAL_LOC_T current_x, current_y;
+    int i, len_x, len_y;
+    struct ValueHeader
+        header_x = rt_val_peek_header(&rt->stack, x),
+        header_y = rt_val_peek_header(&rt->stack, y);
+
+    if ((header_x.type == VAL_ARRAY && header_y.type == VAL_ARRAY) ||
+        (header_x.type == VAL_TUPLE && header_y.type == VAL_TUPLE)) {
+
+        len_x = rt_val_cpd_len(rt, x);
+        len_y = rt_val_cpd_len(rt, y);
+        if (len_x != len_y) {
+            return false;
+        }
+
+        current_x = rt_val_cpd_first_loc(x);
+        current_y = rt_val_cpd_first_loc(y);
+        for (i = 0; i < len_x; ++i) {
+            if (!rt_val_pair_equal_mempattern(rt, current_x, current_y)) {
+                return false;
+            }
+            current_x = rt_val_next_loc(rt, current_x);
+            current_y = rt_val_next_loc(rt, current_y);
+        }
+
+        return true;
+
+    } else {
+        return header_x.type == header_y.type;
+
+    }
 }
 
 bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
@@ -175,7 +209,7 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
         return false;
 
 	case VAL_REF:
-		return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));	
+		return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));
     }
 
     LOG_ERROR("Cannot get here");

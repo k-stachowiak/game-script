@@ -1,7 +1,9 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <string.h>
+#include <inttypes.h>
 
+#include "log.h"
 #include "rt_val.h"
 #include "stack.h"
 
@@ -23,7 +25,7 @@ void rt_val_poke_ref(struct Stack *stack, VAL_LOC_T loc, VAL_LOC_T value)
 void rt_val_poke_copy(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src)
 {
     memcpy(
-        stack->buffer + dst,
-        stack->buffer + src,
+        stack->buffer + dst + VAL_HEAD_BYTES,
+        stack->buffer + src + VAL_HEAD_BYTES,
         rt_val_peek_size(stack, src));
 }

@@ -297,6 +297,11 @@ static void eval_parafunc_poke(
         return;
     }
 
+    if (!rt_val_pair_equal_mempattern(rt, source_loc, target_loc)) {
+		err_push_src("EVAL", args->loc, "Attempted to _poke_ value of mismatched type");
+        return;
+    }
+
     rt_val_poke_copy(&rt->stack, target_loc, source_loc);
     stack_collapse(&rt->stack, temp_begin, temp_end);
 }

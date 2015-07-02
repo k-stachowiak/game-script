@@ -4,11 +4,11 @@
 
 static void test_cci_impl(struct TestContext *tc, struct Runtime *rt)
 {
-    /*
-    test_eval_source_succeed(tc, rt,
-        "(bind point (func (f g) (func (x) (g (f x)))))",
-        "Current critical issue");
-    */
+    test_eval_source_fail(tc, rt,
+        "(bind x 1.0)\n"
+        "(bind x^ (ref x))\n"
+        "(x)\n",
+        "Fail on calling a value as a function after binding something else");
 }
 
 void test_cci(struct TestContext *tc)

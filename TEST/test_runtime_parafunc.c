@@ -64,6 +64,31 @@ static void test_parafunc_references_iteration(struct TestContext *tc, struct Ru
     rt_reset(rt);
 }
 
+static void test_parafunc_references_poke_type(struct TestContext *tc, struct Runtime *rt)
+{
+    test_eval_source_succeed(tc, rt,
+            "(bind v [ 1 2 3 ])\n"
+            "(bind v^ (ref v))\n"
+            "(bind x 4.0)\n"
+            "(bind x^ (ref x))",
+            "Mutate different types of objects");
+
+    test_eval_source_fail(tc, rt, "(poke v^ [ 1 2 ])", "Fail on poking array with size mismatch");
+    test_eval_source_fail(tc, rt, "(poke v^ [ 'a' 'b' 'c' ])", "Fail on poking array of mismatched type elements");
+    test_eval_source_fail(tc, rt, "(poke v^ 1.0)", "Fail on poking array with an atomic value");
+    test_eval_source_succeed(tc, rt, "(poke v^ [ 3 2 1 ])", "Succeed with poking an array");
+    test_eval_source_expect(tc, rt, "(at v 0)", "Array poke successful", INT, 3);
+    test_eval_source_expect(tc, rt, "(at v 1)", "Array poke successful", INT, 2);
+    test_eval_source_expect(tc, rt, "(at v 2)", "Array poke successful", INT, 1);
+
+    test_eval_source_fail(tc, rt, "(poke x^ [ 1 2 3 ])", "Fail on poking atomic value with an array");
+    test_eval_source_fail(tc, rt, "(poke x^ [])", "Fail on poking atomic value with an empty array");
+    test_eval_source_fail(tc, rt, "(poke x^ 1)", "Fail on poking atomic value with mistmatched type");
+    test_eval_source_succeed(tc, rt, "(poke x^ 2.0)", "Succeed with poking an atomic value");
+    test_eval_source_expect(tc, rt, "x", "Value poke successful", REAL, 2.0);
+
+    rt_reset(rt);
+}
 void test_runtime_parafunc(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make();
@@ -72,5 +97,6 @@ void test_runtime_parafunc(struct TestContext *tc)
     test_parafunc_switch(tc, rt);
     test_parafunc_references_basic(tc, rt);
     test_parafunc_references_iteration(tc, rt);
+    test_parafunc_references_poke_type(tc, rt);
     rt_free(rt);
 }
