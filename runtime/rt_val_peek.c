@@ -80,8 +80,7 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
 		break;
 
 	case VAL_REF:
-		str_append(*str, "ref -> ");
-		rt_val_to_string(rt, rt_val_peek_ref(rt, x), str);
+		str_append(*str, "reference");
 		break;
 
     case VAL_UNIT:
