@@ -146,15 +146,19 @@
 
 ### Returns the lesser of the two arguments based on the provided less than operator
 (bind min_cmp (func (cmp x y) (if (cmp x y) x y)))
+(bind min_ref_cmp (func (cmp x^ y^) (if (cmp (peek x^) (peek y^)) x^ y^)))
 
 ### Returns the lesser of the two arguments based on the less than operator
 (bind min (min_cmp lt))
+(bind min_ref (min_ref_cmp lt))
 
 ### Returns the greager of the two arguments based on the provided less than operator
 (bind max_cmp (func (cmp x y) (if (cmp x y) y x)))
+(bind max_ref_cmp (func (cmp x^ y^) (if (cmp (peek x^) (peek y^)) y^ x^)))
 
 ### Returns the greater of the two arguments based on the less than operator
 (bind max (max_cmp lt))
+(bind max_ref (max_ref_cmp lt))
 
 ### Finds the minimum element in a compound structure with a custom comparator
 (bind min_element_cmp (func (cmp first^ last^) (do
@@ -162,7 +166,7 @@
         (if (eq first^ last^)
             current_min^
             (min_element_impl
-                (min_cmp cmp (peek current_min^) (peek first^))
+                (min_ref_cmp cmp current_min^ first^)
                 (succ first^)
                 last^
             )
@@ -203,25 +207,22 @@
 ### Rearranges elements that all of them that fulfill the predicate end up
 ### between first and the returned references, and all others end up between
 ### the returned and the last references. Accepts custom comparator.
-(bind partition_cmp (func (cmp first^ last^) (do
-    (bind mismatch^ (find_if_not first^ last^ cmp))
+(bind partition (func (pred first^ last^) (do
+    (bind mismatch^ (find_if_not first^ last^ pred))
     (if (eq mismatch^ last^)
         first^
         (do
-            (bind match^ (find_if mismatch^ last^ cmp))
+            (bind match^ (find_if mismatch^ last^ pred))
             (if (eq match^ last^)
                 mismatch^
                 (do
                     (swap mismatch^ match^)
-                    (partition cmp (succ mismatch^) last^)
+                    (partition pred (succ mismatch^) last^)
                 )
             )
         )
     )
 )))
-
-### Partition algorithm variant for the default less than comparator
-(bind partition (partition_cmp lt))
 
 ### Inplace quicksort implementation accepting custom comparator
 (bind quicksort_cmp (func (cmp first^ last^)
@@ -231,8 +232,8 @@
             (bind pivot^ (succ_n first^ (/ (distance first^ last^) 2)))
             (bind lt_pivot (point (cmp (peek pivot^)) not))
             (bind ge_pivot (cmp (peek pivot^)))
-            (bind middle_a^ (partition_cmp lt_pivot first^ last^))
-            (bind middle_b^ (partition_cmp ge_pivot first^ last^))
+            (bind middle_a^ (partition lt_pivot first^ last^))
+            (bind middle_b^ (partition ge_pivot first^ last^))
             (quicksort_cmp cmp first^ middle_a^)
             (quicksort_cmp cmp middle_b^ last^)
             unit
@@ -396,8 +397,8 @@
         (test "Point 2" (do
             (bind times2 (* 2))
             (bind times4 (point times2 times2))
-            (bind times6 (point times2 times4))
-            (eq (times6 3) (* 3 6))
+            (bind times8 (point times2 times4))
+            (eq (times8 3) (* 3 8))
         ))
         (test "Map" (eq (map not [ true false true ]) [ false true false ]))
         (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
@@ -463,7 +464,7 @@
 
         (test "Partition mixed" (do
             (bind v [ 1 4 5 3 2 6 ])
-            (bind result^ (partition_cmp (begin v) (end v) (ge 3)))
+            (bind result^ (partition (ge 3) (begin v) (end v)))
             (eq (peek result^) 4)
         ))
 

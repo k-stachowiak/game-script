@@ -48,6 +48,7 @@ static void efc_curry_on(
     VAL_LOC_T current_loc, size_loc, data_begin;
     VAL_SIZE_T i, arg_count;
 
+	/* Initialize push */
     rt_val_push_func_init(
         &rt->stack,
         &size_loc,
@@ -56,7 +57,7 @@ static void efc_curry_on(
         func_data->func_type,
         func_data->impl);
 
-    /* Captures. */
+    /* Captures */
     rt_val_push_func_cap_init(&rt->stack, func_data->cap_count);
     current_loc = func_data->cap_start;
     for (i = 0; i < func_data->cap_count; ++i) {
@@ -64,10 +65,10 @@ static void efc_curry_on(
         current_loc += rt_val_fun_next_cap_loc(rt, current_loc);
     }
 
-    /* Applied arguments. */
+    /* Applied... */
     arg_count = func_data->appl_count + ast_list_len(actual_args);
 
-    /* ...already applied, */
+    /* ...already, ... */
     rt_val_push_func_appl_init(&rt->stack, arg_count);
     current_loc = func_data->appl_start;
     for (i = 0; i < func_data->appl_count; ++i) {
@@ -75,7 +76,7 @@ static void efc_curry_on(
         current_loc += rt_val_fun_next_appl_loc(rt, current_loc);
     }
 
-    /* ...currently applied. */
+    /* ...currently. */
     for (; actual_args; actual_args = actual_args->next) {
         eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
@@ -84,7 +85,7 @@ static void efc_curry_on(
         }
     }
 
-    /* Finalize. */
+    /* Finalize push */
     rt_val_push_func_final(&rt->stack, size_loc, data_begin);
 }
 
@@ -152,7 +153,7 @@ static void efc_evaluate_ast(
 
     /* Initialize local scope. */
     efc_evaluate_ast_init_local_sym_map(sym_map, symbol, &local_sym_map);
-    sym_map_insert(&local_sym_map, symbol, func_loc, ast_def->loc);
+    //sym_map_insert(&local_sym_map, symbol, func_loc, ast_def->loc);
 
     /* Insert captures into the scope. */
     for (i = 0; i < func_data->cap_count; ++i) {
@@ -171,6 +172,7 @@ static void efc_evaluate_ast(
         eval_bind_pattern(rt, &local_sym_map, formal_args, appl_loc, &cont_loc);
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
+
         if (err_state()) {
 			err_push("EVAL", "Failed re-evaluating funtcion applied arguments");
             goto cleanup;
