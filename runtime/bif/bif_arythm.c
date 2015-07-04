@@ -15,9 +15,11 @@
 #define BIF_ARYTHM_UNARY_DEF(NAME) \
     void NAME(struct Runtime *rt, VAL_LOC_T x_loc) \
     { \
-        VAL_REAL_T r; \
+        VAL_BOOL_T b; \
         VAL_INT_T i; \
-        switch (bif_match_un(rt, x_loc, &i, &r)) { \
+        VAL_REAL_T r; \
+        VAL_CHAR_T c; \
+        switch (bif_match_un(rt, x_loc, &b, &i, &r, &c)) { \
         case VAL_INT: \
             rt_val_push_int(&rt->stack, NAME##_impl_int(i)); \
             break; \
@@ -25,7 +27,7 @@
             rt_val_push_real(&rt->stack, NAME##_impl_real(r)); \
             break; \
         default: \
-			err_push("BIF", "Arguments of arythmetic BIF must be of equal numeric type"); \
+			err_push("BIF", "Arguments of arythmetic BIF must be of numeric type"); \
             break; \
         } \
     }
@@ -33,18 +35,22 @@
 #define BIF_ARYTHM_BINARY_DEF(NAME) \
     void NAME(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc) \
     { \
-        VAL_REAL_T rx, ry; \
+        VAL_BOOL_T bx, by; \
         VAL_INT_T ix, iy; \
-        switch (bif_match_bin(rt, x_loc, y_loc, &ix, &iy, &rx, &ry)) { \
+        VAL_REAL_T rx, ry; \
+        VAL_CHAR_T cx, cy; \
+        switch (bif_match_bin(rt, x_loc, y_loc, &bx, &by, &ix, &iy, &rx, &ry, &cx, &cy)) { \
         case BBM_BOTH_INT: \
             rt_val_push_int(&rt->stack, NAME##_impl_int(ix, iy)); \
             break; \
         case BBM_BOTH_REAL: \
-        case BBM_HETERO: \
+        case BBM_BOTH_NUMERIC: \
             rt_val_push_real(&rt->stack, NAME##_impl_real(rx, ry)); \
             break; \
+        case BBM_BOTH_BOOL: \
+        case BBM_BOTH_CHAR: \
         case BBM_MISMATCH: \
-			err_push("BIF", "Arguments of arythmetic BIF must be of equal numeric type"); \
+			err_push("BIF", "Arguments of arythmetic BIF must be of matching numeric type"); \
             break; \
         } \
     }
@@ -54,7 +60,7 @@
     { \
         VAL_REAL_T x; \
         if (rt_val_peek_type(&rt->stack, x_loc) != VAL_REAL) { \
-			err_push("BIF", "Arguments of arythmetic BIF must be of equal numeric type"); \
+			err_push("BIF", "Arguments of truncating BIF must be of real type"); \
             return; \
         } \
         x = rt_val_peek_real(rt, x_loc); \

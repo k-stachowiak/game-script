@@ -1,5 +1,7 @@
 TODO
 ----
+    - fix less than operator to work on all primitive types
+    - add lexicographical compare to standard library
 	- consider extracting the function arguments evaluation before the decision ast/bif/clif once all tests pass
     - upon error the debugger indentation counter doesn't reset
 	- the runtime register of the bound symbols should be realized in terms of a global symbol map
