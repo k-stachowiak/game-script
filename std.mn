@@ -16,6 +16,9 @@
 # Comparison operators
 # --------------------
 
+### Basic not equal implementation
+(bind ne (func (x y) (not (eq x y))))
+
 ### Equal in terms of a custom comparator
 (bind eq_cmp (func (cmp x y) (and (not (cmp x y)) (not (cmp y x)))))
 
@@ -30,9 +33,6 @@
 
 ### Greater than or equal in terms of a custom comparator
 (bind ge_cmp (func (cmp x y) (not (cmp x y))))
-
-### Not equal based on the built-in less than comparator
-(bind ne (ne_cmp lt))
 
 ### Greater than based on the built-in less than comparator
 (bind gt (gt_cmp lt))
@@ -270,8 +270,8 @@
             (if (cmp_ref first2^ first1^)
                 false
                 (lexicographical_compare_cmp cmp
-                    (succ first1^) (succ first2^)
-                    last1^ last2^)
+                    (succ first1^) last1^
+                    (succ first2^) last2^)
             )
         )
     )
@@ -545,9 +545,18 @@
 			)
         ))
 
-        (test "Lexicographical compare" (do
+        (test "Lexicographical compare 1" (do
             (bind x "Adam")
             (bind y "Beata")
+            (and
+                (lexicographical_compare (begin x) (end x) (begin y) (end y))
+                (not (lexicographical_compare (begin y) (end y) (begin x) (end x)))
+            )
+        ))
+
+        (test "Lexicographical compare 2" (do
+            (bind x "Ada")
+            (bind y "Adam")
             (and
                 (lexicographical_compare (begin x) (end x) (begin y) (end y))
                 (not (lexicographical_compare (begin y) (end y) (begin x) (end x)))
