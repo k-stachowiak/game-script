@@ -18,15 +18,15 @@ void si_init(struct SourceIter *si, char *first, char *last)
     si->current = first;
     si->last = last;
     si->loc.type = SRC_LOC_NORMAL;
-    si->loc.line = 0;
-    si->loc.column = 0;
+    si->loc.line = 1;
+    si->loc.column = 1;
 }
 
 void si_adv(struct SourceIter *si)
 {
     if (*(si->current) == '\n') {
         ++si->loc.line;
-        si->loc.column = 0;
+        si->loc.column = 1;
     } else {
         ++si->loc.column;
     }
@@ -46,7 +46,7 @@ void si_back(struct SourceIter *si)
 {
     if (*(si->current) == '\n') {
         --si->loc.line;
-        si->loc.column = 0;
+        si->loc.column = 1;
     } else {
         --si->loc.column;
     }

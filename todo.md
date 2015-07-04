@@ -1,6 +1,5 @@
 TODO
 ----
-    - fix source iterator indexing to be 1 based instead of 0
     - add type analytical BIFs (is_array, is_tuple, etc.)
     - have distinction between range algorithms and value algorithms
     - separate sorting functions into reference sorting and value sorting (value sorting by mergesort)
