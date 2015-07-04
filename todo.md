@@ -1,7 +1,10 @@
 TODO
 ----
-    - fix less than operator to work on all primitive types
-    - add lexicographical compare to standard library
+    - fix source iterator indexing to be 1 based instead of 0
+    - add type analytical BIFs (is_array, is_tuple, etc.)
+    - have distinction between range algorithms and value algorithms
+    - separate sorting functions into reference sorting and value sorting (value sorting by mergesort)
+    - add compound functions like cpd_lt and cpd_sort (if sorting array, use quicksort, if tuple then use mergesort)
 	- consider extracting the function arguments evaluation before the decision ast/bif/clif once all tests pass
     - upon error the debugger indentation counter doesn't reset
 	- the runtime register of the bound symbols should be realized in terms of a global symbol map

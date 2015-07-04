@@ -31,17 +31,17 @@
 ### Greater than or equal in terms of a custom comparator
 (bind ge_cmp (func (cmp x y) (not (cmp x y))))
 
-### Not equal in terms of built-in equality
-(bind ne (func (x y) (not (eq x y))))
+### Not equal based on the built-in less than comparator
+(bind ne (ne_cmp lt))
 
-### Greater than implemented in terms of built-in less than and non-equality
-(bind gt (func (x y) (lt y x)))
+### Greater than based on the built-in less than comparator
+(bind gt (gt_cmp lt))
 
-### Greater or equal implemented in terms of less than
-(bind ge (func (x y) (not (lt x y))))
+### Greater than or equal based on the built-in less than comparator
+(bind ge (ge_cmp lt))
 
-### Less or equal implemented in terms of greater than
-(bind le (func (x y) (not (gt x y))))
+### Less than or equal based on the built-in less than comparator
+(bind le (le_cmp lt))
 
 # Reference operations
 # --------------------
@@ -67,6 +67,14 @@
     (poke y^ temp)
     unit
 )))
+
+### Wraps a function operating on a value argument and accepts reference
+### instead.
+(bind un_ref (func (un x^) (un (peek x^))))
+
+### Wraps a function operating on two value arguments and accepts references
+### instead.
+(bind bin_ref (func (bin x^ y^) (bin (peek x^) (peek y^))))
 
 # Compound operations
 # -------------------
@@ -252,6 +260,27 @@
 ### Attempts to find a value in the given range
 (bind find (func (first^ last^ value) (find_if first^ last^ (eq value))))
 
+### Lexicographical compare for compound types with a custom compare operation
+(bind lexicographical_compare_cmp(func (cmp first1^ last1^ first2^ last2^) (do
+    (bind cmp_ref (bin_ref cmp))
+    (if (or (eq first1^ last1^) (eq first2^ last2^))
+        (and (eq first1^ last1^) (ne first2^ last2^))
+        (if (cmp_ref first1^ first2^)
+            true
+            (if (cmp_ref first2^ first1^)
+                false
+                (lexicographical_compare_cmp cmp
+                    (succ first1^) (succ first2^)
+                    last1^ last2^)
+            )
+        )
+    )
+)))
+
+### Lexicographical compare for compound types with a less than operator used
+### for comparison
+(bind lexicographical_compare (lexicographical_compare_cmp lt))
+
 ### Rearranges elements that all of them that fulfill the predicate end up
 ### between first and the returned references, and all others end up between
 ### the returned and the last references. Accepts custom comparator.
@@ -282,11 +311,11 @@
             (bind lt_pivot (gt_cmp cmp pivot))
             (bind eq_pivot (eq_cmp cmp pivot))
 
-            (bind middle_a^ (partition lt_pivot first^ last^))
-            (bind middle_b^ (partition eq_pivot middle_a^ last^))
+            (bind middle1^ (partition lt_pivot first^ last^))
+            (bind middle2^ (partition eq_pivot middle1^ last^))
 
-            (quicksort_cmp cmp first^ middle_a^)
-            (quicksort_cmp cmp middle_b^ last^)
+            (quicksort_cmp cmp first^ middle1^)
+            (quicksort_cmp cmp middle2^ last^)
 
             unit
         )
@@ -369,6 +398,26 @@
             (and (eq x [ 3.0 2.0 1.0 ]) (eq y [ 1.0 2.0 3.0 ]))
         ))
 
+        (test "Unary reference" (do
+            (bind x 2)
+            (bind v [ x ])
+            (bind sqr (func (x) (* x x)))
+            (bind sqr_ref (un_ref sqr))
+            (bind x_sqr (sqr x))
+            (bind x_ref_sqr (sqr_ref (begin v)))
+            (eq x_sqr x_ref_sqr)
+        ))
+
+        (test "Binary reference" (do
+            (bind x 2)
+            (bind y 3)
+            (bind v [ x y ])
+            (bind plus_ref (bin_ref +))
+            (bind sum (+ x y))
+            (bind ref_sum (plus_ref (begin v) (succ (begin v))))
+            (eq sum ref_sum)
+        ))
+
         # Compound clunky
         (test "String = array" (eq "string" [ 's' 't' 'r' 'i' 'n' 'g' ]))
         (test "Empty 1" (eq (empty []) true))
@@ -388,20 +437,6 @@
         (test "Deconstruct 2" (eq (dcons [ true ]) { true [] }))
         (test "Reverse deconstruct 1" (eq (rdcons [ 1 2 3 ]) { 3 [ 1 2 ] }))
         (test "Reverse deconstruct 2" (eq (rdcons [ true ]) { true [] }))
-        (test "Push front 1" (eq (push_front [] 'a') [ 'a' ]))
-        (test "Push front 2" (eq (push_front [ "due" "rabe" ] "ene") [ "ene" "due" "rabe" ]))
-        (test "Push front 3" (eq (push_front "sd" 'a') "asd"))
-        (test "Push back 1" (eq (push_back [] 'a') [ 'a' ]))
-        (test "Push back 2" (eq (push_back [ "due" "rabe" ] "ene") [ "due" "rabe" "ene" ]))
-        (test "Push back 3" (eq (push_back "sd" 'a') "sda"))
-
-        # Compound reference based
-        (test "End reference" (do
-            (bind v [ 1 2 3 ])
-            (bind tedious (succ (succ (succ (begin v)))))
-            (bind easy (end v))
-            (eq tedious easy)
-        ))
 
         # Functional
         (test "Point 1" (do (bind cadr (point tail front)) (eq (cadr [ 1 2 3 ]) 2)))
@@ -412,12 +447,12 @@
             (eq (times8 3) (* 3 8))
         ))
         (test "Map" (eq (map not [ true false true ]) [ false true false ]))
-        (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
-        (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
-        (test "Fold right" (eq (foldr - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -5))
 		(test "Zip normal" (eq (zip [ 1 2 3 ] [ 'a' 'b' 'c' ]) [ { 1 'a' } { 2 'b' } { 3 'c' } ]))
 		(test "Zip count mismatch" (eq (zip [ 1 2 3 ] [ 'a' 'b' ]) [ { 1 'a' } { 2 'b' } ]))
 		(test "Zip with empty" (eq (zip [ 1 2 3 ] []) []))
+        (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
+        (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
+        (test "Fold right" (eq (foldr - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -5))
 
         # Algorithms simple
         (test "Min 1" (eq (min_cmp gt 1 2) 2))
@@ -459,17 +494,6 @@
             (eq (peek result_lt^) 1)
         ))
 
-        (test "Find 1" (do
-            (bind v "asdf")
-            (bind result^ (find (begin v) (end v) 'd'))
-            (eq (peek result^) 'd')
-        ))
-        (test "Find 2" (do
-            (bind v "asdf")
-            (bind result^ (find (begin v) (end v) 'z'))
-            (eq result^ (end v))
-        ))
-
         (test "Find if 1" (do
             (bind v "asdf")
             (bind result^ (find_if (begin v) (end v) (eq 'd')))
@@ -492,6 +516,17 @@
             (eq result^ (end v))
         ))
 
+        (test "Find 1" (do
+            (bind v "asdf")
+            (bind result^ (find (begin v) (end v) 'd'))
+            (eq (peek result^) 'd')
+        ))
+        (test "Find 2" (do
+            (bind v "asdf")
+            (bind result^ (find (begin v) (end v) 'z'))
+            (eq result^ (end v))
+        ))
+
 		(test "Partition empty" (do
 			(bind v [ 1 ])
 			(bind pred (eq 1))
@@ -508,6 +543,15 @@
 				(all_of pred first^ result^)
 				(none_of pred result^ last^)
 			)
+        ))
+
+        (test "Lexicographical compare" (do
+            (bind x "Adam")
+            (bind y "Beata")
+            (and
+                (lexicographical_compare (begin x) (end x) (begin y) (end y))
+                (not (lexicographical_compare (begin y) (end y) (begin x) (end x)))
+            )
         ))
 
         (test "Quicksort 1" (do

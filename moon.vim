@@ -16,12 +16,13 @@ syn keyword biFunctions print format to_string parse parse_bool parse_char parse
 syn keyword biFunctions rand_ui rand_ur rand_ber rand_exp rand_gauss, rand_distr
 syn keyword stdFunctions f_and f_or f_not
 syn keyword stdFunctions eq_cmp ne_cmp le_cmp gt_cmp ge_cmp ne gt ge le
-syn keyword stdFunctions succ_n distance swap
+syn keyword stdFunctions succ_n distance swap un_ref bin_ref
 syn keyword stdFunctions empty front back tail rtail dcons rdcons
 syn keyword stdFunctions min min_cmp max max_cmp min_ref min_ref_cmp max_ref max_ref_cmp
 syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions all_of any_of none_of
 syn keyword stdFunctions find find_if find_if_not
+syn keyword stdFunctions lexicographical_compare lexicographical_compare_cmp
 syn keyword stdFunctions partition partition_cmp
 syn keyword stdFunctions quicksort quicksort_cmp
 syn keyword stdFunctions sort sort_cmp
