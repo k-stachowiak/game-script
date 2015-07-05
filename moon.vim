@@ -14,6 +14,7 @@ syn keyword biFunctions and or xor not
 syn keyword biFunctions push_front push_back cat length at slice
 syn keyword biFunctions print format to_string parse parse_bool parse_char parse_int parse_real
 syn keyword biFunctions rand_ui rand_ur rand_ber rand_exp rand_gauss, rand_distr
+syn keyword biFunctions is_bool is_int is_real is_char is_array is_tuple is_reference is_function
 syn keyword stdFunctions f_and f_or f_not
 syn keyword stdFunctions eq_cmp ne_cmp le_cmp gt_cmp ge_cmp ne gt ge le
 syn keyword stdFunctions succ_n distance swap un_ref bin_ref
@@ -23,8 +24,13 @@ syn keyword stdFunctions min_element min_element_cmp
 syn keyword stdFunctions all_of any_of none_of
 syn keyword stdFunctions find find_if find_if_not
 syn keyword stdFunctions lexicographical_compare lexicographical_compare_cmp
+syn keyword stdFunctions cpd_lt_cmp cpd_lt
 syn keyword stdFunctions partition partition_cmp
 syn keyword stdFunctions quicksort quicksort_cmp
+syn keyword stdFunctions sort_inplace sort_inplace_cmp
+syn keyword stdFunctions merge merge_cmp
+syn keyword stdFunctions mergesort mergesort_cmp
+syn keyword stdFunctions sort_copy sort_copy_cmp
 syn keyword stdFunctions sort sort_cmp
 syn keyword stdFunctions point map zip_with foldl foldr zip
 syn keyword stdFunctions seq range_int

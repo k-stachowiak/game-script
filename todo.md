@@ -1,9 +1,8 @@
 TODO
 ----
-    - add type analytical BIFs (is\_array, is\_tuple, etc.)
+    - reduce homo check to only pair of objects and implement the loop in the BIF module
+    - inscrease constraints on array. Homogenous means equal binary footprint, e.g. arrays of equal lengths
     - make function call parser accept any expression in the first position and in the runtime check if it evaluates to function object
-    - have distinction between range algorithms and value algorithms
-    - separate sorting functions into reference sorting and value sorting (value sorting by mergesort)
     - add compound functions like cpd\_lt and cpd\_sort (if sorting array, use quicksort, if tuple then use mergesort)
 	- consider extracting the function arguments evaluation before the decision ast/bif/clif once all tests pass
     - upon error the debugger indentation counter doesn't reset

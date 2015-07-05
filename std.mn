@@ -1,8 +1,8 @@
-# The standard library
-# ====================
+### The M.O.O.N. standard library
+### =============================
 
-# Functions filling in for parafunctions
-# --------------------------------------
+### Functions filling in for parafunctions
+### --------------------------------------
 
 ### Binary function realizing the logic of the and parafunc.
 (bind f_and (func (x y) (and x y)))
@@ -13,8 +13,8 @@
 ### Unary function realizing the logical negation.
 (bind f_not (func (x) (not x)))
 
-# Comparison operators
-# --------------------
+### Comparison operators
+### --------------------
 
 ### Basic not equal implementation
 (bind ne (func (x y) (not (eq x y))))
@@ -43,8 +43,8 @@
 ### Less than or equal based on the built-in less than comparator
 (bind le (le_cmp lt))
 
-# Reference operations
-# --------------------
+### Reference operations
+### --------------------
 
 ### Returns a given reference advanced by n steps
 (bind succ_n (func (r^ n) (if (eq n 0) r^ (succ_n (succ r^) (- n 1)))))
@@ -60,14 +60,6 @@
     (distance_impl first^ last^ 0)
 )))
 
-### Swaps values pointed by two references using a temporary object.
-(bind swap (func (x^ y^) (do
-    (bind temp (peek x^))
-    (poke x^ (peek y^))
-    (poke y^ temp)
-    unit
-)))
-
 ### Wraps a function operating on a value argument and accepts reference
 ### instead.
 (bind un_ref (func (un x^) (un (peek x^))))
@@ -76,8 +68,16 @@
 ### instead.
 (bind bin_ref (func (bin x^ y^) (bin (peek x^) (peek y^))))
 
-# Compound operations
-# -------------------
+### Swaps values pointed by two references using a temporary object.
+(bind swap (func (x^ y^) (do
+    (bind temp (peek x^))
+    (poke x^ (peek y^))
+    (poke y^ temp)
+    unit
+)))
+
+### Compound operations
+### -------------------
 
 ### Checks whether a compound structure is empty
 (bind empty (func (x) (eq (length x) 0)))
@@ -102,8 +102,8 @@
 ### the tail and the reverse tail of the input compound structure
 (bind rdcons (func (x) { (back x) (rtail x) }))
 
-# Functional helpers
-# ------------------
+### Functional helpers
+### ------------------
 
 ### Function composition
 (bind point (func (f g x) (g (f x))))
@@ -164,8 +164,8 @@
     )
 ))
 
-# Algorithms
-# ----------
+### Algorithms
+### ----------
 
 ### Returns the lesser of the two arguments based on the provided less than operator
 (bind min_cmp (func (cmp x y) (if (cmp x y) x y)))
@@ -281,6 +281,39 @@
 ### for comparison
 (bind lexicographical_compare (lexicographical_compare_cmp lt))
 
+### Less than operator for compound objects implemented in terms of the
+### lexicographical compare.
+(bind cpd_lt_cmp (func (cmp x y)
+    (lexicographical_compare_cmp cmp (begin x) (end x) (begin y) (end y))
+))
+
+### Compound less than with the default less than operator
+(bind cpd_lt (cpd_lt_cmp lt))
+
+### Merges two sorted compound structures into a sorted one
+### with a custom comparator
+(bind merge_cmp (func (cmp x y) (do
+    (bind merge_impl (func (x y result) (do
+        (bind x_empty (empty x))
+        (bind y_empty (empty y))
+        (if x_empty
+            (if y_empty result (cat result y))
+            (if y_empty
+                (cat result x)
+                (if (cmp (front x) (front y))
+                    (merge_impl (tail x) y (push_back result (front x)))
+                    (merge_impl x (tail y) (push_back result (front y)))
+                )
+            )
+        )
+    )))
+    (merge_impl x y (slice x 0 0)) # This slice creates empty array or tuple.
+)))
+
+### Merges two sorted compound structures into a sorted one.
+### A default comparator less than assumed.
+(bind merge (merge_cmp lt))
+
 ### Rearranges elements that all of them that fulfill the predicate end up
 ### between first and the returned references, and all others end up between
 ### the returned and the last references. Accepts custom comparator.
@@ -325,14 +358,52 @@
 ### Quicksort algorithm variant for the default less than comparator
 (bind quicksort (quicksort_cmp lt))
 
-### Default sorting function accepting a comparison function as an argument.
-(bind sort_cmp quicksort_cmp)
+### Default sorting function performing inplace sort -- won't work for tuples
+(bind sort_inplace_cmp quicksort_cmp)
 
-### Default sorting function with the comparison defaulted to less than.
+### Default sorting function performing inplace sort using less than comparator
+(bind sort_inplace (sort_inplace_cmp lt))
+
+### Merge-sorts a compound structure with a custom comparator.
+(bind mergesort_cmp (func (cmp x) (do
+    (bind len (length x))
+    (bind half_len (/ len 2))
+    (if (le len 1)
+        x
+        (merge_cmp
+            cmp
+            (mergesort_cmp cmp (slice x 0 half_len))
+            (mergesort_cmp cmp (slice x half_len len))
+        )
+    )
+)))
+
+### Merge-sorts a compound structure with a default comparator: less than.
+(bind mergesort (mergesort_cmp lt))
+
+### Default sorting function copying elements around -- will work for tuples
+(bind sort_copy_cmp mergesort_cmp)
+
+### Default sorting function copying elements around using less than comparator
+(bind sort_copy (sort_copy_cmp lt))
+
+### Common sorting function selecting algorithm appropriate to the provided
+### structure
+(bind sort_cmp (func (cmp x)
+    (if (is_array x)
+        (do
+            (sort_inplace_cmp cmp (begin x) (end x))
+            x
+        )
+        (sort_copy_cmp cmp x) # Assuming tuple here, otherwise an error occurs
+    )
+))
+
+### Common sorting function with default less than operator
 (bind sort (sort_cmp lt))
 
-# Compound generators
-# -------------------
+### Compound generators
+### -------------------
 
 ### Produce sequence of first n natural numbers (including 0).
 (bind seq (func (n) (do
@@ -350,14 +421,14 @@
 	(map (+ init) (seq count))
 )))
 
-# Text related
-# ------------
+### Text related
+### ------------
 
 ### Prints a formatted string
 (bind printf (func (fmt args) (print (format fmt args))))
 
-# Automatic testing
-# -----------------
+### Automatic testing
+### -----------------
 
 (bind test (func (case result)
     (if result true (do (printf "Test \"%s\" failed\n" { case }) false))
@@ -563,6 +634,9 @@
             )
         ))
 
+        (test "Merge 1" (eq (merge_cmp gt [ 5 3 1 ] [ 6 4 2 ]) [ 6 5 4 3 2 1 ]))
+        (test "Merge 2" (eq (merge [ 1 3 5 ] [ 2 4 6 ]) [ 1 2 3 4 5 6 ]))
+
         (test "Quicksort 1" (do
 			(bind unsorted [ 5 1 4 2 3 ])
 			(bind sorted [ 5 4 3 2 1 ])
@@ -575,6 +649,16 @@
 			(quicksort (begin unsorted) (end unsorted))
 			(eq sorted unsorted)
 		))
+
+        (test "Mergesort 1" (eq (mergesort_cmp gt [ 5 1 4 2 3 ]) [ 5 4 3 2 1 ]))
+        (test "Mergesort 2" (eq (mergesort [ 5 1 4 2 3 ]) [ 1 2 3 4 5 ]))
+
+        (test "Compound sort" (do
+            (bind unsorted [ "Adam" "Ada" "Dagmara" "Beata" ])
+            (bind sorted [ "Ada" "Adam" "Beata" "Dagmara" ])
+            (bind maybe_sorted (mergesort_cmp cpd_lt unsorted))
+            (eq sorted maybe_sorted)
+        ))
 
 		# Sequences
 		(test "Sequence empty" (eq (seq 0) []))
