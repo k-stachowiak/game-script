@@ -53,9 +53,9 @@ struct Stack;
 
 enum ValueType {
     VAL_BOOL,
-    VAL_CHAR,
     VAL_INT,
     VAL_REAL,
+    VAL_CHAR,
     VAL_ARRAY,
     VAL_TUPLE,
     VAL_FUNCTION,

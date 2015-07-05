@@ -582,6 +582,64 @@
 		(test "Integer range empty" (eq (range_int 0 0) []))
 		(test "Integer range positive" (eq (range_int 0 4) [ 0 1 2 3 ]))
 		(test "Integer range not only positive" (eq (range_int -2 4) [ -2 -1 0 1 ]))
+
+        # Type inspection
+        (test "Is boolean" (do
+            (bind array [])
+            (eq
+                (map is_bool { true 1 1.0 'a' [] {} + (end array) })
+                { true false false false false false false false }
+            )
+        ))
+        (test "Is integer" (do
+            (bind array [])
+            (eq
+                (map is_int { true 1 1.0 'a' [] {} + (end array) })
+                { false true false false false false false false }
+            )
+        ))
+        (test "Is real" (do
+            (bind array [])
+            (eq
+                (map is_real { true 1 1.0 'a' [] {} + (end array) })
+                { false false true false false false false false }
+            )
+        ))
+        (test "Is character" (do
+            (bind array [])
+            (eq
+                (map is_char { true 1 1.0 'a' [] {} + (end array) })
+                { false false false true false false false false }
+            )
+        ))
+        (test "Is array" (do
+            (bind array [])
+            (eq
+                (map is_array { true 1 1.0 'a' [] {} + (end array) })
+                { false false false false true false false false }
+            )
+        ))
+        (test "Is tuple" (do
+            (bind array [])
+            (eq
+                (map is_tuple { true 1 1.0 'a' [] {} + (end array) })
+                { false false false false false true false false }
+            )
+        ))
+        (test "Is function" (do
+            (bind array [])
+            (eq
+                (map is_function { true 1 1.0 'a' [] {} + (end array) })
+                { false false false false false false true false }
+            )
+        ))
+        (test "Is reference" (do
+            (bind array [])
+            (eq
+                (map is_reference { true 1 1.0 'a' [] {} + (end array) })
+                { false false false false false false false true }
+            )
+        ))
     ])
 ))
 

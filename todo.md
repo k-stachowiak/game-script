@@ -1,9 +1,10 @@
 TODO
 ----
-    - add type analytical BIFs (is_array, is_tuple, etc.)
+    - add type analytical BIFs (is\_array, is\_tuple, etc.)
+    - make function call parser accept any expression in the first position and in the runtime check if it evaluates to function object
     - have distinction between range algorithms and value algorithms
     - separate sorting functions into reference sorting and value sorting (value sorting by mergesort)
-    - add compound functions like cpd_lt and cpd_sort (if sorting array, use quicksort, if tuple then use mergesort)
+    - add compound functions like cpd\_lt and cpd\_sort (if sorting array, use quicksort, if tuple then use mergesort)
 	- consider extracting the function arguments evaluation before the decision ast/bif/clif once all tests pass
     - upon error the debugger indentation counter doesn't reset
 	- the runtime register of the bound symbols should be realized in terms of a global symbol map

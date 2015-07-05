@@ -422,11 +422,6 @@ void bif_parse_bool(struct Runtime *rt, VAL_LOC_T arg_loc)
     bif_parse_atom(rt, arg_loc, "parse-bool", AST_LIT_BOOL);
 }
 
-void bif_parse_char(struct Runtime *rt, VAL_LOC_T arg_loc)
-{
-    bif_parse_atom(rt, arg_loc, "parse-char", AST_LIT_CHAR);
-}
-
 void bif_parse_int(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
     bif_parse_atom(rt, arg_loc, "parse-int", AST_LIT_INT);
@@ -435,5 +430,10 @@ void bif_parse_int(struct Runtime *rt, VAL_LOC_T arg_loc)
 void bif_parse_real(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
     bif_parse_atom(rt, arg_loc, "parse-real", AST_LIT_REAL);
+}
+
+void bif_parse_char(struct Runtime *rt, VAL_LOC_T arg_loc)
+{
+    bif_parse_atom(rt, arg_loc, "parse-char", AST_LIT_CHAR);
 }
 

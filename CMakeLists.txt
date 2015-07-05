@@ -29,8 +29,9 @@ add_library(lang OBJECT
     ./runtime/bif/bif_compound.c
     ./runtime/bif/bif_compare.c
     ./runtime/bif/bif_common.c
-    ./runtime/bif/bif_text.c
     ./runtime/bif/bif_random.c
+    ./runtime/bif/bif_text.c
+    ./runtime/bif/bif_type.c
     ./runtime/eval/eval.c
     ./runtime/eval/eval_fdef.c
     ./runtime/eval/eval_do.c

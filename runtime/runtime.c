@@ -56,6 +56,14 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "rand_exp", eval_bif(rt, bif_rand_exp, 1), bif_location);
     sym_map_insert(sm, "rand_gauss", eval_bif(rt, bif_rand_gauss, 2), bif_location);
     sym_map_insert(sm, "rand_distr", eval_bif(rt, bif_rand_distr, 1), bif_location);
+    sym_map_insert(sm, "is_bool", eval_bif(rt, bif_is_bool, 1), bif_location);
+    sym_map_insert(sm, "is_int", eval_bif(rt, bif_is_int, 1), bif_location);
+    sym_map_insert(sm, "is_real", eval_bif(rt, bif_is_real, 1), bif_location);
+    sym_map_insert(sm, "is_char", eval_bif(rt, bif_is_char, 1), bif_location);
+    sym_map_insert(sm, "is_array", eval_bif(rt, bif_is_array, 1), bif_location);
+    sym_map_insert(sm, "is_tuple", eval_bif(rt, bif_is_tuple, 1), bif_location);
+    sym_map_insert(sm, "is_function", eval_bif(rt, bif_is_function, 1), bif_location);
+    sym_map_insert(sm, "is_reference", eval_bif(rt, bif_is_reference, 1), bif_location);
 }
 
 static void rt_init(struct Runtime *rt)
