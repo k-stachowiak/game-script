@@ -14,7 +14,7 @@ include_directories(
     )
 
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c99")
+set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
 
 set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
@@ -54,6 +54,7 @@ add_library(lang OBJECT
     ./common/term.c
     ./common/memory.c
     ./common/src_iter.c
+    ./common/timer_stack.c
     )
 
 add_executable(mntest $<TARGET_OBJECTS:lang>

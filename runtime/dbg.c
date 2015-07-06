@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 
+#include "collection.h"
 #include "rt_val.h"
+#include "timer_stack.h"
 #include "dbg.h"
 
 static void dbg_print_node_bind(struct AstBind *bind)
@@ -155,13 +157,23 @@ void dbg_call_begin(void *dbg_void, struct AstNode* node)
     ++dbg->lvl;
 }
 
-void dbg_call_end(void *dbg_void, struct Runtime* rt, VAL_LOC_T val_loc)
+void dbg_call_end(
+		void *dbg_void,
+		struct Runtime* rt,
+		VAL_LOC_T val_loc,
+		bool error)
 {
     struct Debugger *dbg = (struct Debugger*)dbg_void;
-    --dbg->lvl;
-    dbg_print_indent(dbg);
-    printf("`~~~~~> ");
-    rt_val_print(rt, val_loc, false);
-    printf("\n");
+
+	if (error) {
+		dbg->lvl = 0;
+	} else {
+		--dbg->lvl;
+		dbg_print_indent(dbg);
+		printf("`~~~~~> ");
+		rt_val_print(rt, val_loc, false);
+		printf("\n");
+
+	}
 }
 

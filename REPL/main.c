@@ -10,6 +10,7 @@
 #include "term.h"
 #include "memory.h"
 #include "moon.h"
+#include "timer_stack.h"
 
 static bool quit_request = false;
 static bool debug_state = false;
@@ -196,6 +197,7 @@ int main()
 			break;
         }
 
+		ts_start();
         value = repl_evaluate(line);
 
 		if (mn_error_state()) {
@@ -206,7 +208,7 @@ int main()
         } else {
 			printf("%s", response_prefix);
 			repl_print(value);
-			printf("\n\n");
+			printf("\n...%ldms\n\n", ts_ustop());
 			mn_dispose(value);
 		}
 

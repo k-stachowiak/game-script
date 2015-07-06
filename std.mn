@@ -421,16 +421,19 @@
 	(map (+ init) (seq count))
 )))
 
-### Generates an array of copies of the provided argument
-(bind array_of (func (x n) (do
-	(bind array_of_impl (func (x n acc)
+### Generates an array of elements generated with a function
+(bind array_gen (func (f n) (do
+	(bind array_gen_impl (func (f n acc)
 		(if (eq n 0)
 			acc
-			(array_of_impl x (- n 1) (push_back acc x))
+			(array_gen_impl f (- n 1) (push_back acc (f)))
 		)
 	))
-	(array_of_impl x n [])
+	(array_gen_impl f n [])
 )))
+
+### Generates an array of copies of the provided argument
+(bind array_of (func (x n) (array_gen (func () x) n)))
 
 ### Text related
 ### ------------

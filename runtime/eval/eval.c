@@ -77,9 +77,12 @@ VAL_LOC_T eval_impl(
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
+	/* It is possible that the debugger flag will change during evaluation. */
+	bool debug_begin_called = false;
     VAL_LOC_T begin = rt->stack.top;
     if (rt->debug) {
         dbg_call_begin(&rt->debugger, node);
+		debug_begin_called = true;
     }
 
     switch (node->type) {
@@ -121,13 +124,19 @@ VAL_LOC_T eval_impl(
     }
 
     if (err_state()) {
+
+		VAL_LOC_T ret_val = -1;
+        if (debug_begin_called) {
+            dbg_call_end(&rt->debugger, rt, ret_val, true);
+        }
+
 		err_push_src("EVAL", node->loc, "Failed evaluating expression");
-        return -1;
+        return ret_val;
 
     } else {
 
-        if (rt->debug) {
-            dbg_call_end(&rt->debugger, rt, begin);
+        if (debug_begin_called) {
+            dbg_call_end(&rt->debugger, rt, begin, false);
         }
 
         return begin;
