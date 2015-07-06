@@ -43,6 +43,15 @@
 ### Less than or equal based on the built-in less than comparator
 (bind le (le_cmp lt))
 
+### Less than operator for compound objects implemented in terms of the
+### lexicographical compare.
+(bind cpd_lt_cmp (func (cmp x y)
+    (lexicographical_compare_cmp cmp (begin x) (end x) (begin y) (end y))
+))
+
+### Compound less than with the default less than operator
+(bind cpd_lt (cpd_lt_cmp lt))
+
 ### Reference operations
 ### --------------------
 
@@ -101,69 +110,6 @@
 ### Deconstructs compound structure into a tuple containing
 ### the tail and the reverse tail of the input compound structure
 (bind rdcons (func (x) { (back x) (rtail x) }))
-
-
-### Functional helpers
-### ------------------
-
-### Function composition
-(bind point (func (f g x) (g (f x))))
-
-### Functional map
-(bind map (func (f v)
-    (if (empty v)
-        v
-        (push_front (map f (tail v)) (f (front v)))
-    )
-))
-
-### Functional zip
-(bind zip (func (vx vy) (do
-	(bind zip_impl (func (vx vy result)
-		(if (or (empty vx) (empty vy))
-			result
-			(do
-				(bind { hdx tlx } (dcons vx))
-				(bind { hdy tly } (dcons vy))
-				(zip_impl tlx tly (push_back result { hdx hdy }))
-			)
-		)
-	))
-	(zip_impl vx vy [])
-)))
-
-### Functional map for two input collections
-(bind zip_with (func (f va vb)
-    (if (or (empty va) (empty vb))
-        (slice va 0 0)
-        (push_front
-            (zip_with f (tail va) (tail vb))
-            (f (front va) (front vb))
-        )
-    )
-))
-
-### Fold left
-(bind foldl (func (f z v)
-    (if (empty v)
-        z
-        (do
-            (bind { hd tl } (dcons v))
-            (foldl f (f z hd) tl)
-        )
-    )
-))
-
-### Fold right
-(bind foldr (func (f z v)
-    (if (empty v)
-        z
-        (do
-            (bind { hd tl } (dcons v))
-            (f hd (foldr f z tl))
-        )
-    )
-))
 
 ### Algorithms
 ### ----------
@@ -282,15 +228,6 @@
 ### for comparison
 (bind lexicographical_compare (lexicographical_compare_cmp lt))
 
-### Less than operator for compound objects implemented in terms of the
-### lexicographical compare.
-(bind cpd_lt_cmp (func (cmp x y)
-    (lexicographical_compare_cmp cmp (begin x) (end x) (begin y) (end y))
-))
-
-### Compound less than with the default less than operator
-(bind cpd_lt (cpd_lt_cmp lt))
-
 ### Merges two sorted compound structures into a sorted one
 ### with a custom comparator
 (bind merge_cmp (func (cmp x y) (do
@@ -403,6 +340,68 @@
 ### Common sorting function with default less than operator
 (bind sort (sort_cmp lt))
 
+### Functional helpers
+### ------------------
+
+### Function composition
+(bind point (func (f g x) (g (f x))))
+
+### Functional map
+(bind map (func (f v)
+    (if (empty v)
+        v
+        (push_front (map f (tail v)) (f (front v)))
+    )
+))
+
+### Functional zip
+(bind zip (func (vx vy) (do
+	(bind zip_impl (func (vx vy result)
+		(if (or (empty vx) (empty vy))
+			result
+			(do
+				(bind { hdx tlx } (dcons vx))
+				(bind { hdy tly } (dcons vy))
+				(zip_impl tlx tly (push_back result { hdx hdy }))
+			)
+		)
+	))
+	(zip_impl vx vy [])
+)))
+
+### Functional map for two input collections
+(bind zip_with (func (f va vb)
+    (if (or (empty va) (empty vb))
+        (slice va 0 0)
+        (push_front
+            (zip_with f (tail va) (tail vb))
+            (f (front va) (front vb))
+        )
+    )
+))
+
+### Fold left
+(bind foldl (func (f z v)
+    (if (empty v)
+        z
+        (do
+            (bind { hd tl } (dcons v))
+            (foldl f (f z hd) tl)
+        )
+    )
+))
+
+### Fold right
+(bind foldr (func (f z v)
+    (if (empty v)
+        z
+        (do
+            (bind { hd tl } (dcons v))
+            (f hd (foldr f z tl))
+        )
+    )
+))
+
 ### Compound generators
 ### -------------------
 
@@ -420,6 +419,17 @@
 ### Returns an array containing a range of integer values
 (bind range_int (func (init count) (do
 	(map (+ init) (seq count))
+)))
+
+### Generates an array of copies of the provided argument
+(bind array_of (func (x n) (do
+	(bind array_of_impl (func (x n acc)
+		(if (eq n 0)
+			acc
+			(array_of_impl x (- n 1) (push_back acc x))
+		)
+	))
+	(array_of_impl x n [])
 )))
 
 ### Text related
@@ -667,6 +677,16 @@
 		(test "Integer range empty" (eq (range_int 0 0) []))
 		(test "Integer range positive" (eq (range_int 0 4) [ 0 1 2 3 ]))
 		(test "Integer range not only positive" (eq (range_int -2 4) [ -2 -1 0 1 ]))
+		(test "Array of"
+			(eq
+				(array_of { 1 2.0 "three" } 3)
+				[
+					{ 1 2.0 "three" }
+					{ 1 2.0 "three" }
+					{ 1 2.0 "three" }
+				]
+			)
+		)
 
         # Type inspection
         (test "Is boolean" (do

@@ -33,7 +33,7 @@ syn keyword stdFunctions mergesort mergesort_cmp
 syn keyword stdFunctions sort_copy sort_copy_cmp
 syn keyword stdFunctions sort sort_cmp
 syn keyword stdFunctions point map zip_with foldl foldr zip
-syn keyword stdFunctions seq range_int
+syn keyword stdFunctions seq range_int array_of
 syn keyword stdFunctions printf
 syn keyword stdFunctions test
 syn keyword literalKeywords unit true false _
