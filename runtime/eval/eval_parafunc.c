@@ -297,7 +297,7 @@ static void eval_parafunc_poke(
         return;
     }
 
-    if (!rt_val_pair_equal_mempattern(rt, source_loc, target_loc)) {
+    if (!rt_val_pair_homo(rt, source_loc, target_loc)) {
 		err_push_src("EVAL", args->loc, "Attempted to _poke_ value of mismatched type");
         return;
     }

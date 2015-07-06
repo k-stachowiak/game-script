@@ -26,6 +26,11 @@ static void bif_text_error_parse(void)
 	err_push("BIF", "Failed parsing string literal");
 }
 
+static void bif_text_error_parse_homo(void)
+{
+	err_push("BIF", "Failed parsing non-homogenous array");
+}
+
 static char *bif_text_find_format(char *str)
 {
     while (*str != '\0') {
@@ -166,9 +171,11 @@ static void bif_parse_any_ast_compound(
         struct Runtime *rt,
         struct AstCompound *cpd)
 {
+
     VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = cpd->exprs;
-    VAL_LOC_T result_loc = rt->stack.top;
+	bool has_first_elem = false;
+    VAL_LOC_T first_elem_loc, elem_loc;
 
     /* Header. */
     switch (cpd->type) {
@@ -184,23 +191,33 @@ static void bif_parse_any_ast_compound(
     /* Data. */
     data_begin = rt->stack.top;
     while (current) {
+
+		elem_loc = rt->stack.top;
         bif_parse_any_ast(rt, current);
         if (err_state()) {
 			err_push("BIF", "Failed parsing compound AST node");
             return;
-        }
-        current = current->next;
+        } else {
+			current = current->next;
+		}
+
+		if (cpd->type != AST_CPD_ARRAY) {
+			continue;
+		}
+
+		/* Homogenity check */
+		if (!has_first_elem) {
+			has_first_elem = true;
+			first_elem_loc = elem_loc;
+		} else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
+			bif_text_error_parse_homo();
+			return;
+		}
     }
 
     /* Fix the header with the written size. */
     data_size = rt->stack.top - data_begin;
     rt_val_push_cpd_final(&rt->stack, size_loc, data_size);
-
-    /* Assert array homogenity. */
-    if (cpd->type == AST_CPD_ARRAY &&
-        rt_val_compound_homo(rt, result_loc) == false) {
-        bif_text_error_parse();
-    }
 }
 
 static void bif_parse_any_ast_literal(

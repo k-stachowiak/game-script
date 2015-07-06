@@ -102,6 +102,7 @@
 ### the tail and the reverse tail of the input compound structure
 (bind rdcons (func (x) { (back x) (rtail x) }))
 
+
 ### Functional helpers
 ### ------------------
 
@@ -654,8 +655,8 @@
         (test "Mergesort 2" (eq (mergesort [ 5 1 4 2 3 ]) [ 1 2 3 4 5 ]))
 
         (test "Compound sort" (do
-            (bind unsorted [ "Adam" "Ada" "Dagmara" "Beata" ])
-            (bind sorted [ "Ada" "Adam" "Beata" "Dagmara" ])
+            (bind unsorted { "Adam" "Ada" "Dagmara" "Beata" })
+            (bind sorted { "Ada" "Adam" "Beata" "Dagmara" })
             (bind maybe_sorted (mergesort_cmp cpd_lt unsorted))
             (eq sorted maybe_sorted)
         ))
