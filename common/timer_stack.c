@@ -26,7 +26,7 @@ void ts_start(void)
 	ARRAY_APPEND(starts, start);
 }
 
-long ts_ustop(void)
+long long ts_ustop(void)
 {
 	LARGE_INTEGER start, end, freq, elapsed;
 
@@ -40,7 +40,7 @@ long ts_ustop(void)
 	elapsed.QuadPart = end.QuadPart - start.QuadPart;
 	elapsed.QuadPart *= 1000000 / freq.QuadPart;
 
-	return elased.QuadPart;
+	return elapsed.QuadPart;
 }
 
 #elif defined(__unix__) || defined(linux)
@@ -59,7 +59,7 @@ void ts_start(void)
 	ARRAY_APPEND(starts, start);
 }
 
-long ts_ustop(void)
+long long ts_ustop(void)
 {
 	struct timespec start, end;
 
