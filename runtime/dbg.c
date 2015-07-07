@@ -57,7 +57,15 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
 
 static void dbg_print_node_func_call(struct AstFuncCall *func_call)
 {
-    printf("%s()\n", func_call->symbol);
+	char *symbol;
+
+	if (func_call->func->type == AST_REFERENCE) {
+		symbol = func_call->func->data.reference.symbol;
+	} else {
+		symbol = "<function expression>";
+	}
+
+    printf("%s()\n", symbol);
 }
 
 static void dbg_print_node_literal(struct AstLiteral *literal)

@@ -10,7 +10,6 @@
 #include "rt_val.h"
 #include "parse.h"
 #include "mndetail.h"
-#include "clif.h"
 
 struct MoonContext {
 	struct Runtime *rt;
@@ -20,7 +19,6 @@ struct MoonContext *mn_create(void)
 {
 	struct MoonContext *result = mem_malloc(sizeof(*result));
     result->rt = rt_make();
-	clif_init();
 	return result;
 }
 
@@ -37,12 +35,8 @@ void mn_set_debugger(struct MoonContext *ctx, bool state)
 
 bool mn_register_clif(struct MoonContext *ctx, const char *symbol, int arity, ClifHandler handler)
 {
-	if (!clif_register(ctx->rt, (char*)symbol, handler)) {
-		return false;
-	} else {
-		rt_register_clif_handler(ctx->rt, (char*)symbol, arity, clif_common_handler);
-		return true;
-	}
+	rt_register_clif_handler(ctx->rt, (char*)symbol, arity, handler);
+	return !err_state();
 }
 
 bool mn_exec_file(struct MoonContext *ctx, const char *filename)

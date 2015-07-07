@@ -34,7 +34,8 @@ static struct AstNode *efd_get_children(struct AstNode* node)
         return node->data.func_def.expr;
 
     case AST_FUNC_CALL:
-        return node->data.func_call.actual_args;
+		/* NOTE tha the func expression is artifically chained with the args list. */
+        return node->data.func_call.func;
 
     case AST_PARAFUNC:
         return node->data.parafunc.args;
@@ -54,14 +55,11 @@ static bool efd_refers_to_symbol(struct AstNode *node, char **symbol)
     if (node->type == AST_REFERENCE) {
         *symbol = node->data.reference.symbol;
         return true;
-    }
 
-    if (node->type == AST_FUNC_CALL) {
-        *symbol = node->data.func_call.symbol;
-        return true;
-    }
+    } else {
+		return false;
 
-    return false;
+	}
 }
 
 /**

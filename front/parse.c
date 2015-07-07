@@ -310,7 +310,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
 
 static struct AstNode *parse_func_call(struct DomNode *dom)
 {
-    char *symbol = NULL;
+    struct AstNode *func = NULL;
     struct AstNode *args = NULL;
     struct DomNode *child = NULL;
 
@@ -328,19 +328,23 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
 
     child = dom->cpd_children;
 
-    /* 3.1. 1st child is symbol. */
-    if (!(symbol = dom_node_parse_symbol(child))) {
+    /* 3.1. 1st child is an expression. */
+	func = parse_one(child);
+    if (err_state()) {
         return NULL;
-    }
+	}
     child = child->next;
 
     /* 3.2. Has 0 or more further children being any expression. */
     args = parse_list(child);
     if (err_state()) {
         return NULL;
-    } else {
-        return ast_make_func_call(&dom->loc, symbol, args);
     }
+
+	/* The helper link thank's to which all the espressions are in one list. */
+	func->next = args;
+
+	return ast_make_func_call(&dom->loc, func, args);
 }
 
 static struct AstNode *parse_func_def(struct DomNode *dom)

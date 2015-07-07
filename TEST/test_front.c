@@ -74,7 +74,6 @@ static void test_parse_bind(struct TestContext *tc)
 static void test_parse_compound(struct TestContext *tc)
 {
     test_parse(tc, "()", "Fail on empty core compound", false);
-    test_parse(tc, "(1 2 3)", "Fail on non-empty core compound", false);
     test_parse(tc, "[]", "Succeed on empty array", true);
     test_parse(tc, "[1 2 3]", "Succeed on simple array", true);
     test_parse(tc, "[1 [2 3]]", "Succeed on non-trivial array", true);

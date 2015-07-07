@@ -71,7 +71,7 @@ struct AstCompound {
 };
 
 struct AstFuncCall {
-    char *symbol;
+	struct AstNode *func;
     struct AstNode *actual_args;
 };
 
@@ -147,7 +147,7 @@ struct AstNode *ast_make_compound(
 
 struct AstNode *ast_make_func_call(
     struct SourceLocation *loc,
-    char *symbol, struct AstNode *args);
+    struct AstNode *func, struct AstNode *args);
 
 struct AstNode *ast_make_func_def(
         struct SourceLocation *loc,

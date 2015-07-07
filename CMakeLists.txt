@@ -20,6 +20,7 @@ set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
 
 add_library(lang OBJECT
+	./LIB/mndetail.c
     ./front/dom.c
     ./front/lex.c
     ./front/parse.c
@@ -71,7 +72,6 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
 target_link_libraries(mntest m stdc++)
 
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
-	./LIB/clif.c
 	./LIB/mndetail.c
     ./LIB/moon.c
     )

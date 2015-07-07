@@ -130,7 +130,7 @@ void rt_register_clif_handler(
 		struct Runtime *rt,
 		char *symbol,
 		int arity,
-		ClifIntraHandler handler)
+		ClifHandler handler)
 {
     sym_map_insert(
 		&rt->global_sym_map,

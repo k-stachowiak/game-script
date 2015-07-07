@@ -9,8 +9,7 @@
 #include "ast.h"
 #include "stack.h"
 #include "symmap.h"
-
-typedef void (*ClifIntraHandler)(struct Runtime *rt, char*, VAL_LOC_T*, int);
+#include "moon.h"
 
 struct Runtime {
     struct Stack stack;
@@ -36,7 +35,7 @@ void rt_register_clif_handler(
 		struct Runtime *rt,
 		char *symbol,
 		int arity,
-		ClifIntraHandler handler);
+		ClifHandler handler);
 
 bool rt_consume_one(
         struct Runtime *rt,

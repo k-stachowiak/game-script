@@ -48,13 +48,13 @@ struct AstNode *ast_make_compound(
 
 struct AstNode *ast_make_func_call(
     struct SourceLocation *loc,
-    char *symbol, struct AstNode *args)
+    struct AstNode *func, struct AstNode *args)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_FUNC_CALL;
     result->loc = *loc;
-    result->data.func_call.symbol = symbol;
+    result->data.func_call.func = func;
     result->data.func_call.actual_args = args;
     return result;
 }
@@ -184,8 +184,11 @@ static void ast_compound_free(struct AstCompound *acpd)
 
 static void ast_func_call_free(struct AstFuncCall *afcall)
 {
-    mem_free(afcall->symbol);
-    ast_node_free(afcall->actual_args);
+	/*
+     * Note: The func node is linked forward with the function arguments,
+     * therefore they will be released here as well.
+     */
+    ast_node_free(afcall->func);
 }
 
 static void ast_func_def_free(struct AstFuncDef *afdef)
