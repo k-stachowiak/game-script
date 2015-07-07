@@ -208,7 +208,7 @@ int main()
         } else {
 			printf("%s", response_prefix);
 			repl_print(value);
-			printf("\n...%ldms\n\n", ts_ustop());
+			printf("\n...%lldms\n\n", ts_ustop());
 			mn_dispose(value);
 		}
 

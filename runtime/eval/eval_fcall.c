@@ -35,6 +35,79 @@ static bool efc_lookup_value(
     return true;
 }
 
+struct LocArray { VAL_LOC_T *data; int size, cap; };
+
+static void efc_get_already_applied_locs(
+		struct Runtime *rt,
+		struct ValueFuncData *func_data,
+		struct LocArray *result)
+{
+	VAL_SIZE_T i;
+    VAL_LOC_T appl_loc = func_data->appl_start;
+    for (i = 0; i < func_data->appl_count; ++i) {
+		ARRAY_APPEND(*result, appl_loc);
+        appl_loc = rt_val_next_loc(rt, appl_loc);
+    }
+}
+
+static bool efc_evaluate_currently_applied(
+		struct Runtime *rt,
+		struct SymMap *sym_map,
+		struct AstNode *args,
+		struct LocArray *result)
+{
+	while (args) {
+        VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+        if (err_state()) {
+			err_push("EVAL", "Failed evaluating new funtcion arguments");
+            return false;
+        }
+		ARRAY_APPEND(*result, loc);
+		args = args->next;
+	}
+	return true;
+}
+
+/** Evaluates an expression and inserts into a provided symbol map. */
+static bool efc_insert_expression(
+        struct Runtime *rt,
+        struct SymMap *caller_sym_map,
+        struct SymMap *new_sym_map,
+        struct AstNode *arg_node,
+        struct SourceLocation *arg_loc,
+        struct Pattern *pattern,
+        VAL_LOC_T *location)
+{
+    *location = eval_impl(arg_node, rt, caller_sym_map);
+    if (err_state()) {
+		err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
+        return false;
+    }
+
+    eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
+    if (err_state()) {
+		err_push("EVAL", "Failed registering function argument in the local scope");
+        return false;
+    }
+
+    return true;
+}
+
+static void efc_evaluate_ast_init_local_sym_map(
+        struct SymMap *current_sym_map,
+        char *current_symbol,
+        struct SymMap *local_sym_map)
+{
+    struct SymMapKvp *found = sym_map_find_not_global(
+            current_sym_map, current_symbol);
+
+    if (found || !current_sym_map->global) {
+        sym_map_init_local(local_sym_map, current_sym_map);
+    } else {
+        sym_map_init_local(local_sym_map, current_sym_map->global);
+    }
+}
+
 /**
  * Creates a new function value based on and existing function value,
  * Its captures, already evaluated arguments and the newly applied ones.
@@ -89,46 +162,6 @@ static void efc_curry_on(
     rt_val_push_func_final(&rt->stack, size_loc, data_begin);
 }
 
-/** Evaluates an expression and inserts into a provided symbol map. */
-static bool efc_insert_expression(
-        struct Runtime *rt,
-        struct SymMap *caller_sym_map,
-        struct SymMap *new_sym_map,
-        struct AstNode *arg_node,
-        struct SourceLocation *arg_loc,
-        struct Pattern *pattern,
-        VAL_LOC_T *location)
-{
-    *location = eval_impl(arg_node, rt, caller_sym_map);
-    if (err_state()) {
-		err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
-        return false;
-    }
-
-    eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
-    if (err_state()) {
-		err_push("EVAL", "Failed registering function argument in the local scope");
-        return false;
-    }
-
-    return true;
-}
-
-static void efc_evaluate_ast_init_local_sym_map(
-        struct SymMap *current_sym_map,
-        char *current_symbol,
-        struct SymMap *local_sym_map)
-{
-    struct SymMapKvp *found = sym_map_find_not_global(
-            current_sym_map, current_symbol);
-
-    if (found || !current_sym_map->global) {
-        sym_map_init_local(local_sym_map, current_sym_map);
-    } else {
-        sym_map_init_local(local_sym_map, current_sym_map->global);
-    }
-}
-
 /** Evaluates a general function implementation i.e. not BIF. */
 static void efc_evaluate_ast(
         struct Runtime *rt,
@@ -153,7 +186,6 @@ static void efc_evaluate_ast(
 
     /* Initialize local scope. */
     efc_evaluate_ast_init_local_sym_map(sym_map, symbol, &local_sym_map);
-    //sym_map_insert(&local_sym_map, symbol, func_loc, ast_def->loc);
 
     /* Insert captures into the scope. */
     for (i = 0; i < func_data->cap_count; ++i) {
@@ -172,7 +204,6 @@ static void efc_evaluate_ast(
         eval_bind_pattern(rt, &local_sym_map, formal_args, appl_loc, &cont_loc);
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
-
         if (err_state()) {
 			err_push("EVAL", "Failed re-evaluating funtcion applied arguments");
             goto cleanup;
@@ -212,40 +243,22 @@ static void efc_evaluate_bif(
         struct AstNode *actual_args,
         struct ValueFuncData *func_data)
 {
-    VAL_LOC_T arg_locs[BIF_MAX_ARITY] = { 0 };
-    VAL_SIZE_T arg_count = 0, i;
+	struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
-    VAL_LOC_T appl_loc = func_data->appl_start;
 
-    /* Peal out already applied args. */
-    for (i = 0; i < func_data->appl_count; ++i) {
-        arg_locs[arg_count] = appl_loc;
-        appl_loc = rt_val_next_loc(rt, appl_loc);
-        ++arg_count;
-    }
+	efc_get_already_applied_locs(rt, func_data, &arg_locs);
 
-    /* Evaluate the missing args. */
     temp_begin = rt->stack.top;
-    for (; actual_args; actual_args = actual_args->next) {
-        VAL_LOC_T temp_loc;
-        if (arg_count >= BIF_MAX_ARITY) {
-            LOG_ERROR("Argument count mismatch.\n");
-            exit(1);
-        }
-
-        temp_loc = eval_impl(actual_args, rt, sym_map);
-        arg_locs[arg_count] = temp_loc;
-        ++arg_count;
-
-        if (err_state()) {
-			err_push("EVAL", "Failed evaluating new funtcion arguments");
-            return;
-        }
-    }
+	if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
+		return;
+	}
     temp_end = rt->stack.top;
 
-    /* Assert arguments count. */
-    if (func_data->arity != arg_count) {
+	if (arg_locs.size > BIF_MAX_ARITY) {
+		LOG_ERROR("Argument count mismatch.\n");
+		exit(1);
+	}
+    if (func_data->arity != arg_locs.size) {
         LOG_ERROR("Invalid argument count passed to BIF.");
         exit(1);
     }
@@ -253,15 +266,15 @@ static void efc_evaluate_bif(
     /* Evaluate the function implementation. */
     switch (func_data->arity) {
     case 1:
-        ((bif_unary_func)func_data->impl)(rt, arg_locs[0]);
+        ((bif_unary_func)func_data->impl)(rt, arg_locs.data[0]);
         break;
 
     case 2:
-        ((bif_binary_func)func_data->impl)(rt, arg_locs[0], arg_locs[1]);
+        ((bif_binary_func)func_data->impl)(rt, arg_locs.data[0], arg_locs.data[1]);
         break;
 
     case 3:
-        ((bif_ternary_func)func_data->impl)(rt, arg_locs[0], arg_locs[1], arg_locs[2]);
+        ((bif_ternary_func)func_data->impl)(rt, arg_locs.data[0], arg_locs.data[1], arg_locs.data[2]);
         break;
     }
 
@@ -277,28 +290,16 @@ static void efc_evaluate_clif(
         struct AstNode *actual_args,
         struct ValueFuncData *func_data)
 {
-	VAL_SIZE_T i;
-    struct { VAL_LOC_T *data; int size, cap; } arg_locs = { 0 };
     VAL_LOC_T temp_begin, temp_end;
-    VAL_LOC_T appl_loc = func_data->appl_start;
+	struct LocArray arg_locs = { NULL, 0, 0 };
 	ClifIntraHandler handler = (ClifIntraHandler)func_data->impl;
 
-    /* Peal out already applied args. */
-    for (i = 0; i < func_data->appl_count; ++i) {
-		ARRAY_APPEND(arg_locs, appl_loc);
-        appl_loc = rt_val_next_loc(rt, appl_loc);
-    }
+	efc_get_already_applied_locs(rt, func_data, &arg_locs);
 
-    /* Evaluate the missing args. */
     temp_begin = rt->stack.top;
-    for (; actual_args; actual_args = actual_args->next) {
-        VAL_LOC_T temp_loc = eval_impl(actual_args, rt, sym_map);
-        if (err_state()) {
-			err_push("EVAL", "Failed evaluating new funtcion arguments");
-            return;
-        }
-		ARRAY_APPEND(arg_locs, temp_loc);
-    }
+	if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
+		return;
+	}
     temp_end = rt->stack.top;
 
 	handler(rt, symbol, arg_locs.data, arg_locs.size);
