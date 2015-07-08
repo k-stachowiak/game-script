@@ -3,62 +3,61 @@ cmake_minimum_required(VERSION 2.8)
 project(moon-lang)
 
 include_directories(
-    ./ast
     ./common
     ./front
+    ./LIB
     ./runtime
     ./runtime/bif
     ./runtime/eval
-    ./LIB
-	./SHARE
+	./util
     .
     )
 
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_C_COMPILER "clang")
+set(CMAKE_CXX_COMPILER "clang++")
 
-set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
-set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
-# set(CMAKE_C_FLAGS "-Wall -O2 -std=c11")
-# set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11")
+#set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
+#set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
+set(CMAKE_C_FLAGS "-Wall -O2 -std=c11")
+set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11")
 
 add_library(lang OBJECT
-	./SHARE/api_value.c
-    ./front/dom.c
-    ./front/lex.c
-    ./front/parse.c
-    ./front/tok.c
-    ./runtime/bif/bif_logic.c
-    ./runtime/bif/bif_arythm.c
-    ./runtime/bif/bif_compound.c
-    ./runtime/bif/bif_compare.c
-    ./runtime/bif/bif_common.c
-    ./runtime/bif/bif_random.c
-    ./runtime/bif/bif_text.c
-    ./runtime/bif/bif_type.c
-    ./runtime/eval/eval.c
-    ./runtime/eval/eval_fdef.c
-    ./runtime/eval/eval_do.c
-    ./runtime/eval/eval_parafunc.c
-    ./runtime/eval/eval_cpd.c
-    ./runtime/eval/eval_fcall.c
-    ./runtime/eval/eval_bind.c
-	./runtime/cpprand.cpp
-    ./runtime/dbg.c
-    ./runtime/symmap.c
-    ./runtime/stack.c
-    ./runtime/runtime.c
-    ./runtime/rt_val.c
-    ./runtime/rt_val_peek.c
-    ./runtime/rt_val_poke.c
-    ./runtime/rt_val_push.c
-    ./ast/ast.c
-    ./ast/pattern.c
-    ./common/error.c
-    ./common/term.c
-    ./common/memory.c
-    ./common/src_iter.c
-    ./common/timer_stack.c
+		./common/pattern.c
+		./common/ast.c
+		./common/src_iter.c
+		./common/error.c
+		./common/api_value.c
+		./front/lex.c
+		./front/parse.c
+		./front/tok.c
+		./front/dom.c
+		./util/term.c
+		./util/timer_stack.c
+		./util/memory.c
+		./runtime/cpprand.cpp
+		./runtime/symmap.c
+		./runtime/stack.c
+		./runtime/rt_val.c
+		./runtime/rt_val_poke.c
+		./runtime/eval/eval.c
+		./runtime/eval/eval_parafunc.c
+		./runtime/eval/eval_fcall.c
+		./runtime/eval/eval_cpd.c
+		./runtime/eval/eval_do.c
+		./runtime/eval/eval_fdef.c
+		./runtime/eval/eval_bind.c
+		./runtime/bif/bif_compound.c
+		./runtime/bif/bif_type.c
+		./runtime/bif/bif_random.c
+		./runtime/bif/bif_compare.c
+		./runtime/bif/bif_arythm.c
+		./runtime/bif/bif_text.c
+		./runtime/bif/bif_common.c
+		./runtime/bif/bif_logic.c
+		./runtime/dbg.c
+		./runtime/runtime.c
+		./runtime/rt_val_peek.c
+		./runtime/rt_val_push.c
     )
 
 add_executable(mntest $<TARGET_OBJECTS:lang>
@@ -74,8 +73,13 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     )
 target_link_libraries(mntest m stdc++)
 
+add_executable(mnvm $<TARGET_OBJECTS:lang>
+    ./VM/main.c
+    )
+target_link_libraries(mnvm m stdc++)
+
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
-	./SHARE/api_value.c
+	./common/api_value.c
     ./LIB/moon.c
     )
 target_link_libraries(moon m stdc++)
