@@ -43,6 +43,11 @@ long long ts_ustop(void)
 	return elapsed.QuadPart;
 }
 
+void ts_deinit(void)
+{
+	array_free(starts);
+}
+
 #elif defined(__unix__) || defined(linux)
 
 #include <time.h>
@@ -71,6 +76,11 @@ long long ts_ustop(void)
 	return
 		((end.tv_sec * 1000) + (end.tv_nsec / 1000000)) -
 		((start.tv_sec * 1000) + (start.tv_nsec / 1000000));
+}
+
+void ts_deinit(void)
+{
+	ARRAY_FREE(starts);
 }
 
 #endif

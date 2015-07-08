@@ -178,7 +178,6 @@ int main()
 
     ctx = mn_create();
 
-	/*
 	if (!mn_exec_file(ctx, stdfilename)) {
 		char *error_message = (char*)mn_error_message();
 		printf("Error while reading standart library\n");
@@ -198,7 +197,6 @@ int main()
 			mn_destroy(ctx);
 			return 1;
 	}
-	*/
 
     while (!quit_request) {
 
@@ -228,6 +226,7 @@ int main()
 		mem_free(line);
     }
 
+	ts_deinit();
 	mn_destroy(ctx);
     return 0;
 }

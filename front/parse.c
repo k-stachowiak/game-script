@@ -269,6 +269,7 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
     }
 
     /* None of the reserved words were matched. */
+	ast_node_free(args);
     return NULL;
 }
 
@@ -328,26 +329,18 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
 
     child = dom->cpd_children;
 
-	LOG_DEBUG("Parsing function call");
-
     /* 3.1. 1st child is an expression. */
 	func = parse_one(child);
     if (err_state()) {
-		LOG_DEBUG("NOT A FUNCTION");
         return NULL;
 	}
     child = child->next;
 
-	LOG_DEBUG("Successfully parsed func");
-
     /* 3.2. Has 0 or more further children being any expression. */
     args = parse_list(child);
     if (err_state()) {
-		LOG_DEBUG("NOT A FUNCTION");
         return NULL;
     }
-
-	LOG_DEBUG("Successfully parsed args");
 
 	return ast_make_func_call(&dom->loc, func, args);
 }
@@ -620,7 +613,6 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
 
         if (all_of(first, last, isdigit)) {
             long value = atol(atom);
-			LOG_DEBUG("parsing int");
             return ast_make_literal_int(&dom->loc, value);
         }
     }
