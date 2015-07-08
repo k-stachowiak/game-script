@@ -1,7 +1,7 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include "collection.h"
-#include "mndetail.h"
+#include "api_value.h"
 #include "rt_val.h"
 #include "runtime.h"
 

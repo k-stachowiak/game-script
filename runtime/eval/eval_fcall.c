@@ -12,7 +12,7 @@
 #include "bif.h"
 #include "runtime.h"
 #include "rt_val.h"
-#include "mndetail.h"
+#include "api_value.h"
 
 struct LocArray { VAL_LOC_T *data; int size, cap; };
 

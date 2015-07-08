@@ -1,7 +1,7 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
-#ifndef MNDETAIL_H
-#define MNDETAIL_H
+#ifndef API_VALUE_H
+#define API_VALUE_H
 
 #include "moon.h"
 #include "rt_val.h"

@@ -9,7 +9,7 @@
 #include "runtime.h"
 #include "rt_val.h"
 #include "parse.h"
-#include "mndetail.h"
+#include "api_value.h"
 
 struct MoonContext {
 	struct Runtime *rt;
