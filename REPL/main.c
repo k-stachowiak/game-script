@@ -217,9 +217,10 @@ int main()
 			mem_free(error_message);
 
         } else {
+			long long time = ts_ustop();
 			printf("%s", response_prefix);
 			repl_print(value);
-			printf("\n%s%lldms\n\n", time_prefix, ts_ustop());
+			printf("\n%s%lld.%lldms\n\n", time_prefix, time / 1000, time % 1000);
 			mn_dispose(value);
 		}
 

@@ -15,10 +15,12 @@ include_directories(
     )
 
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
-
 set(CMAKE_CXX_COMPILER "g++")
+
+set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
 set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
+# set(CMAKE_C_FLAGS "-Wall -O2 -std=c11")
+# set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11")
 
 add_library(lang OBJECT
 	./SHARE/api_value.c
