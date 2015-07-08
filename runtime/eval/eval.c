@@ -60,6 +60,8 @@ static void eval_reference(
     struct SymMapKvp *kvp;
     char *symbol = node->data.reference.symbol;
 
+	LOG_TRACE_FUNC;
+
     if (!(kvp = sym_map_find(sym_map, symbol))) {
         eval_error_not_found(symbol);
         return;

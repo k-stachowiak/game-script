@@ -6,11 +6,20 @@
 #include "log.h"
 #include "rt_val.h"
 #include "stack.h"
+#include "memory.h"
 
 void rt_val_push_copy(struct Stack *stack, VAL_LOC_T location)
 {
 	struct ValueHeader header = rt_val_peek_header(stack, location);
-	stack_push(stack, header.size + VAL_HEAD_BYTES, stack->buffer + location);
+
+	VAL_LOC_T size = header.size + VAL_HEAD_BYTES;
+
+	char *temp_buffer = mem_malloc(size);
+	memcpy(temp_buffer, stack->buffer + location, size);
+
+	stack_push(stack, size, temp_buffer);
+
+	mem_free(temp_buffer);
 }
 
 void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value)

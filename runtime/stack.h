@@ -17,6 +17,8 @@ struct Stack {
 void stack_init(struct Stack *stack);
 void stack_deinit(struct Stack *stack);
 
+/* This function may reallocate stack buffer,
+   therefore data may not point to stack. */
 VAL_LOC_T stack_push(struct Stack *stack, VAL_LOC_T size, char *data);
 
 VAL_SIZE_T stack_peek_size(struct Stack *stack, VAL_LOC_T loc);

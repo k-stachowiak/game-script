@@ -19,6 +19,7 @@ static char *file_to_load = NULL;
 static char *stdfilename = "std.mn";
 static char *prompt = ": ";
 static char *response_prefix = "> ";
+static char *time_prefix = ". ";
 static char *banner =
     "Moon language REPL\n"
     "Copyright (C) 2014-2015 Krzysztof Stachowiak\n";
@@ -177,15 +178,27 @@ int main()
 
     ctx = mn_create();
 
-    mn_exec_file(ctx, stdfilename);
+	/*
+	if (!mn_exec_file(ctx, stdfilename)) {
+		char *error_message = (char*)mn_error_message();
+		printf("Error while reading standart library\n");
+		printf("%s", error_message);
+		mem_free(error_message);
+		mn_destroy(ctx);
+		return 1;
+	}
+
 	if (!mn_register_clif(ctx, "debug", 0, repl_clif_dbg) ||
 		!mn_register_clif(ctx, "quit", 0, repl_clif_quit) ||
 		!mn_register_clif(ctx, "load", 1, repl_clif_load)) {
 			char *error_message = (char*)mn_error_message();
+			printf("Error while setting up REPL environment\n");
 			printf("%s", error_message);
 			mem_free(error_message);
+			mn_destroy(ctx);
 			return 1;
 	}
+	*/
 
     while (!quit_request) {
 
@@ -208,7 +221,7 @@ int main()
         } else {
 			printf("%s", response_prefix);
 			repl_print(value);
-			printf("\n...%lldms\n\n", ts_ustop());
+			printf("\n%s%lldms\n\n", time_prefix, ts_ustop());
 			mn_dispose(value);
 		}
 

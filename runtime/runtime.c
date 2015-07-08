@@ -169,7 +169,7 @@ bool rt_consume_one(
 
     } else {
         rt->stack.top = begin; /* Discard result value to save the stack. */
-        ast_node_free_one(ast);
+        ast_node_free(ast);
     }
 
     return true;

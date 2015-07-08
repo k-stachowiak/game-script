@@ -213,7 +213,7 @@ static void efc_evaluate_bif(
 
     temp_begin = rt->stack.top;
 	if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
-		return;
+		goto cleanup;
 	}
     temp_end = rt->stack.top;
 
@@ -243,6 +243,9 @@ static void efc_evaluate_bif(
 
     /* Collapse the temporaries. */
     stack_collapse(&rt->stack, temp_begin, temp_end);
+
+cleanup:
+	ARRAY_FREE(arg_locs);
 }
 
 static struct MoonValue *efc_eval_client_args(struct Runtime *rt, VAL_LOC_T *arg_locs, int arg_count)
@@ -338,7 +341,7 @@ static void efc_evaluate_clif(
 
     temp_begin = rt->stack.top;
 	if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
-		return;
+		goto cleanup;
 	}
     temp_end = rt->stack.top;
 
@@ -352,6 +355,8 @@ static void efc_evaluate_clif(
 	}
 
     stack_collapse(&rt->stack, temp_begin, temp_end);
+
+cleanup:
 	ARRAY_FREE(arg_locs);
 }
 

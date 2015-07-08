@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "log.h"
 #include "memory.h"
 #include "ast.h"
 
@@ -56,6 +57,12 @@ struct AstNode *ast_make_func_call(
     result->loc = *loc;
     result->data.func_call.func = func;
     result->data.func_call.actual_args = args;
+
+	LOG_DEBUG("Making function call");
+
+	/* The helper link thank's to which all the espressions are in one list. */
+	result->data.func_call.func->next = result->data.func_call.actual_args;
+
     return result;
 }
 
@@ -142,6 +149,7 @@ struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value)
     result->loc = *loc;
     result->data.literal.type = AST_LIT_INT;
     result->data.literal.data.integer = value;
+	LOG_DEBUG("Making literal int");
     return result;
 }
 
@@ -188,6 +196,7 @@ static void ast_func_call_free(struct AstFuncCall *afcall)
      * Note: The func node is linked forward with the function arguments,
      * therefore they will be released here as well.
      */
+	LOG_DEBUG("Freeing function call");
     ast_node_free(afcall->func);
 }
 
@@ -200,6 +209,7 @@ static void ast_func_def_free(struct AstFuncDef *afdef)
 
 static void ast_literal_free(struct AstLiteral *alit)
 {
+	LOG_DEBUG("Freeing literal");
     if (alit->type == AST_LIT_STRING) {
         mem_free(alit->data.string);
     }
