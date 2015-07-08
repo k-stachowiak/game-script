@@ -74,8 +74,8 @@ long long ts_ustop(void)
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
 	return
-		((end.tv_sec * 1000) + (end.tv_nsec / 1000000)) -
-		((start.tv_sec * 1000) + (start.tv_nsec / 1000000));
+		((end.tv_sec * 1000000) + (end.tv_nsec / 1000)) -
+		((start.tv_sec * 1000000) + (start.tv_nsec / 1000));
 }
 
 void ts_deinit(void)
