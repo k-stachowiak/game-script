@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "error.h"
 #include "vm.h"
 
 #define MIN(x, y) ((x > y) ? y : x)
@@ -16,7 +17,8 @@ static bool vm_op_put(struct MoonVm *vm)
 	char *dst, *src;
 
 	if (!(vm_next_named_resource(vm, &dst, &dst_size) &&
-		vm_next_resource(vm, &src, &src_size))) {
+          vm_next_resource(vm, &src, &src_size))) {
+		err_push("VM", "Failed reading resource for put operation");
 		return false;
 	}
 
@@ -34,6 +36,7 @@ static bool vm_op_push(struct MoonVm *vm)
 	char *src, *dst;
 
 	if (!vm_next_resource(vm, &src, &src_size)) {
+		err_push("VM", "Failed reading resource for push operation");
 		return false;
 	}
 
@@ -53,6 +56,7 @@ static bool vm_op_pop(struct MoonVm *vm)
 	char *src, *dst;
 
 	if (!vm_next_named_resource(vm, &dst, &dst_size)) {
+		err_push("VM", "Failed reading resource for pop operation");
 		return false;
 	}
 
@@ -76,7 +80,7 @@ static bool vm_step(struct MoonVm *vm)
 		return vm_op_pop(vm);
 
 	default:
-		fprintf(stderr, "Invalid operation encountered");
+		err_push("VM", "Unknown operation code encountered");
 		return false;
 	}
 
@@ -85,8 +89,11 @@ static bool vm_step(struct MoonVm *vm)
 
 bool vm_run(struct MoonVm *vm)
 {
+	err_reset();
+
 	while (vm->stack.data[vm->instruction_pointer] != MOP_TERMINATE) {
 		if (!vm_step(vm)) {
+			err_push("VM", "Failed executing operation");
 			return false;
 		}
 	}

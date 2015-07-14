@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "error.h"
 #include "vm.h"
 
 CELL_T vm_next(struct MoonVm *vm)
@@ -61,10 +62,10 @@ static bool vm_next_resource_local(
 }
 
 static bool vm_next_resource_nonlocal(
-struct MoonVm *vm,
-	CELL_T resource_id,
-	char **addr,
-	int *size)
+		struct MoonVm *vm,
+		CELL_T resource_id,
+		char **addr,
+		int *size)
 {
 	ADDRESS_T address;
 	CELL_T size_id = vm_next(vm);
@@ -87,7 +88,7 @@ struct MoonVm *vm,
 		break;
 
 	default:
-		fprintf(stderr, "Expected size specifier");
+		err_push("VM", "Expected size specifier while reading resource");
 		return false;
 	}
 
@@ -103,7 +104,7 @@ struct MoonVm *vm,
 		break;
 
 	default:
-		fprintf(stderr, "Expected type specifier");
+		err_push("VM", "Expected type specifier while reading resource");
 		return false;
 	}
 
@@ -130,7 +131,7 @@ bool vm_next_named_resource(struct MoonVm *vm, char **addr, int *size)
 {
 	CELL_T resource_id = vm_next(vm);
 	if (resource_id == MR_LITRL) {
-		fprintf(stderr, "putting value to a literal");
+		err_push("VM", "Expected named resource but literal encountered");
 		return false;
 	}
 	else {
