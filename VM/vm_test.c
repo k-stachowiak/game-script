@@ -1,5 +1,6 @@
 /* Copytight (C) 2015 Krzysztof Stachowiak */
 
+#include "error.h"
 #include "vm_test.h"
 #include "test.h"
 
@@ -21,6 +22,9 @@ void vm_test_program(
 void vm_test(void)
 {
 	struct TestContext tc;
+
+	atexit(err_reset);
+
 	tc_init(&tc);	
 	vm_test_put(&tc);
 	vm_test_push_pop(&tc);

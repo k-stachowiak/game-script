@@ -56,7 +56,7 @@ static bool vm_op_pop(struct MoonVm *vm)
 		return false;
 	}
 
-	src = vm->stack.data + vm->stack_pointer;
+	src = vm->stack.data + vm->stack_pointer - dst_size;
 	memcpy(dst, src, dst_size);
 	vm->stack_pointer -= dst_size;
 
