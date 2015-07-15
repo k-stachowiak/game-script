@@ -1,6 +1,5 @@
 /* Copytight (C) 2015 Krzysztof Stachowiak */
 
-#include <stdio.h>
 #include "vm_test.h"
 
 static void push_r0_pre(struct MoonVm *vm)
@@ -33,7 +32,7 @@ static void push_r0_post(struct TestContext *tc, struct MoonVm *vm)
 static void push_pop_swap_pre(struct MoonVm *vm)
 {
 	vm->registers[3] = ac;
-	vm->registers[14] = ca;
+	vm->registers[14] = deadcode;
 }
 
 static CELL_T push_pop_swap[] = {
@@ -52,7 +51,7 @@ static void push_pop_swap_post(struct TestContext *tc, struct MoonVm *vm)
 {
 	tc_record(tc,
 		"Push pop stack based swap",
-		vm->registers[3] == ca &&
+		vm->registers[3] == deadcode &&
 		vm->registers[14] == ac);
 }
 

@@ -82,12 +82,17 @@ enum MoonOpCode {
 	/* Data processing */
 	MOP_INCR,                /* Rx++ */
 	MOP_DECR,                /* Rx-- */
-	MOP_NOT,                 /* Rx = -Rx */
 	MOP_ADD,                 /* R0 += R1 */
 	MOP_SUB,                 /* R0 -= R1 */
 	MOP_MUL,                 /* R0 *= R1 */
 	MOP_DIV,                 /* R0 /= R1 */
 	MOP_MOD,                 /* R0 %= R1 */
+	MOP_FADD,                /* R0 +=. R1 */
+	MOP_FSUB,                /* R0 -=. R1 */
+	MOP_FMUL,                /* R0 *=. R1 */
+	MOP_FDIV,                /* R0 /=. R1 */
+	MOP_FMOD,                /* R0 %=. R1 */
+	MOP_NOT,                 /* Rx ~= Rx */
 	MOP_AND,                 /* R0 &= R1 */
 	MOP_OR,                  /* R0 |= R1 */
 	MOP_XOR,                 /* R0 ^= R1 */

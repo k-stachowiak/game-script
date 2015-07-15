@@ -67,6 +67,41 @@ static bool vm_op_pop(struct MoonVm *vm)
 	return true;
 }
 
+static bool mv_op_incr_decr(struct MoonVm *vm, int increment)
+{
+	CELL_T resource_id = vm_next(vm);
+
+	if (resource_id > 0 && resource_id < REG_COUNT) {
+		vm->registers[resource_id] += increment;
+		return true;
+	}
+
+	switch (resource_id) {
+	case MR_IP:
+		vm->instruction_pointer += increment;
+		return true;
+
+	case MR_SP:
+		vm->stack_pointer += increment;
+		return true;
+
+	default:
+		err_push("VM",
+			"Increment and decrement operation requires register or pointer argument");
+		return false;
+	}
+}
+
+static bool vm_op_incr(struct MoonVm *vm)
+{
+	return mv_op_incr_decr(vm, 1);
+}
+
+static bool vm_op_decr(struct MoonVm *vm)
+{
+	return mv_op_incr_decr(vm, -1);
+}
+
 static bool vm_step(struct MoonVm *vm)
 {
 	switch (vm_next(vm)) {
@@ -78,6 +113,12 @@ static bool vm_step(struct MoonVm *vm)
 
 	case MOP_POP:
 		return vm_op_pop(vm);
+
+	case MOP_INCR:
+		return vm_op_incr(vm);
+
+	case MOP_DECR:
+		return vm_op_decr(vm);
 
 	default:
 		err_push("VM", "Unknown operation code encountered");
