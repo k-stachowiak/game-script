@@ -73,6 +73,25 @@ static void div_mod_post(struct TestContext *tc, struct MoonVm *vm)
 
 /* ----- */
 
+static void sqr_reg_pre(struct MoonVm *vm)
+{
+	vm->registers[11] = 5;
+}
+
+static CELL_T sqr_reg[] = {
+	MOP_MUL, MR_R11, MR_R11,
+	MOP_TERMINATE
+};
+
+static void sqr_reg_post(struct TestContext *tc, struct MoonVm *vm)
+{
+	tc_record(tc,
+		"Square a register",
+		vm->registers[11] == 25);
+}
+
+/* ----- */
+
 static void and_or_registers_pre(struct MoonVm *vm)
 {
 	vm->registers[0] = deadcode;
@@ -123,6 +142,7 @@ void vm_test_arythmetic(struct TestContext *tc)
 	vm_test_program(tc, &vm, add_sub, LEN(add_sub), add_sub_pre, add_sub_post);
 	vm_test_program(tc, &vm, mul_div, LEN(mul_div), mul_div_pre, mul_div_post);
 	vm_test_program(tc, &vm, div_mod, LEN(div_mod), div_mod_pre, div_mod_post);
+	vm_test_program(tc, &vm, sqr_reg, LEN(sqr_reg), sqr_reg_pre, sqr_reg_post);
 	vm_test_program(tc, &vm, and_or_registers, LEN(and_or_registers), and_or_registers_pre, and_or_registers_post);
 	vm_test_program(tc, &vm, xor_flag, LEN(xor_flag), xor_flag_pre, xor_flag_post);
 	vm_deinit(&vm);
