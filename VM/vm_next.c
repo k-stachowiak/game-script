@@ -5,90 +5,6 @@
 #include "error.h"
 #include "vm.h"
 
-CELL_T vm_next(struct MoonVm *vm)
-{
-	return vm->stack.data[vm->instruction_pointer++];
-}
-
-void vm_next_n(struct MoonVm *vm, CELL_T* dst, int n)
-{
-	while (n--) *dst++ = vm_next(vm);
-}
-
-static bool vm_next_resource_register(
-		struct MoonVm *vm,
-		CELL_T resource_id,
-		char **addr,
-		int *size)
-{
-	if (resource_id >= 0 && resource_id < REG_COUNT) {
-		*addr = (char*)(vm->registers + resource_id);
-		*size = sizeof(REG_T);
-		return true;
-	} else {
-		return false;
-	}
-}
-
-static bool vm_next_resource_flag(
-		struct MoonVm *vm,
-		CELL_T resource_id,
-		char **addr,
-		int *size)
-{
-	switch (resource_id) {
-	case REG_COUNT + 0:
-		*addr = (char*)(&vm->zero_flag);
-		*size = sizeof(FLAG_T);
-		return true;
-
-	case REG_COUNT + 1:
-		*addr = (char*)(&vm->sign_flag);
-		*size = sizeof(FLAG_T);
-		return true;
-
-	case REG_COUNT + 2:
-		*addr = (char*)(&vm->overflow_flag);
-		*size = sizeof(FLAG_T);
-		return true;
-	}
-
-	return false;
-}
-
-static bool vm_next_resource_pointer(
-		struct MoonVm *vm,
-		CELL_T resource_id,
-		char **addr,
-		int *size)
-{
-	switch (resource_id) {
-	case REG_COUNT + FLAG_COUNT + 0:
-		*addr = (char*)(&vm->instruction_pointer);
-		*size = sizeof(ADDRESS_T);
-		return true;
-
-	case REG_COUNT + FLAG_COUNT + 1:
-		*addr = (char*)(&vm->stack_pointer);
-		*size = sizeof(ADDRESS_T);
-		return true;
-	}
-
-	return false;
-}
-
-static bool vm_next_resource_local(
-		struct MoonVm *vm,
-		CELL_T resource_id,
-		char **addr,
-		int *size)
-{
-	return
-		vm_next_resource_register(vm, resource_id, addr, size) ||
-		vm_next_resource_flag(vm, resource_id, addr, size) ||
-		vm_next_resource_pointer(vm, resource_id, addr, size);
-}
-
 static bool vm_next_size_descriptor(
 		struct MoonVm *vm,
 		int *size)
@@ -117,13 +33,97 @@ static bool vm_next_size_descriptor(
 	}
 }
 
-static bool vm_next_resource_literal(
+CELL_T vm_next(struct MoonVm *vm)
+{
+	return vm->stack.data[vm->instruction_pointer++];
+}
+
+void vm_next_n(struct MoonVm *vm, CELL_T* dst, int n)
+{
+	while (n--) *dst++ = vm_next(vm);
+}
+
+bool vm_next_resource_register(
 		struct MoonVm *vm,
-		CELL_T resource_id,
+		CELL_T res,
 		char **addr,
 		int *size)
 {
-	if (resource_id == MR_LITRL && vm_next_size_descriptor(vm, size)) {
+	if (res >= 0 && res < REG_COUNT) {
+		*addr = (char*)(vm->registers + res);
+		*size = sizeof(REG_T);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool vm_next_resource_flag(
+		struct MoonVm *vm,
+		CELL_T res,
+		char **addr,
+		int *size)
+{
+	switch (res) {
+	case REG_COUNT + 0:
+		*addr = (char*)(&vm->zero_flag);
+		*size = sizeof(FLAG_T);
+		return true;
+
+	case REG_COUNT + 1:
+		*addr = (char*)(&vm->sign_flag);
+		*size = sizeof(FLAG_T);
+		return true;
+
+	case REG_COUNT + 2:
+		*addr = (char*)(&vm->overflow_flag);
+		*size = sizeof(FLAG_T);
+		return true;
+	}
+
+	return false;
+}
+
+bool vm_next_resource_pointer(
+		struct MoonVm *vm,
+		CELL_T res,
+		char **addr,
+		int *size)
+{
+	switch (res) {
+	case REG_COUNT + FLAG_COUNT + 0:
+		*addr = (char*)(&vm->instruction_pointer);
+		*size = sizeof(ADDRESS_T);
+		return true;
+
+	case REG_COUNT + FLAG_COUNT + 1:
+		*addr = (char*)(&vm->stack_pointer);
+		*size = sizeof(ADDRESS_T);
+		return true;
+	}
+
+	return false;
+}
+
+bool vm_next_resource_local(
+		struct MoonVm *vm,
+		CELL_T res,
+		char **addr,
+		int *size)
+{
+	return
+		vm_next_resource_register(vm, res, addr, size) ||
+		vm_next_resource_flag(vm, res, addr, size) ||
+		vm_next_resource_pointer(vm, res, addr, size);
+}
+
+bool vm_next_resource_literal(
+		struct MoonVm *vm,
+		CELL_T res,
+		char **addr,
+		int *size)
+{
+	if (res == MR_LITRL && vm_next_size_descriptor(vm, size)) {
 		*addr = vm->stack.data + vm->instruction_pointer;
 		vm->instruction_pointer += *size;
 		return true;
@@ -132,14 +132,14 @@ static bool vm_next_resource_literal(
 	}
 }
 
-static bool vm_next_resource_dereference(
+bool vm_next_resource_dereference(
 		struct MoonVm *vm,
-		CELL_T resource_id,
+		CELL_T res,
 		char **addr,
 		int *size)
 {
 	ADDRESS_T address;
-	if (resource_id == MR_DEREF && vm_next_size_descriptor(vm, size)) {
+	if (res == MR_DEREF && vm_next_size_descriptor(vm, size)) {
 		vm_next_n(vm, (char*)(&address), sizeof(address));
 		*addr = vm->stack.data + address;
 		return true;
@@ -148,19 +148,17 @@ static bool vm_next_resource_dereference(
 	}
 }
 
-bool vm_next_resource(struct MoonVm *vm, char **addr, int *size)
+bool vm_next_resource(struct MoonVm *vm, CELL_T res, char **addr, int *size)
 {
-	CELL_T resource_id = vm_next(vm);
 	return
-		vm_next_resource_local(vm, resource_id, addr, size) ||
-		vm_next_resource_literal(vm, resource_id, addr, size) ||
-		vm_next_resource_dereference(vm, resource_id, addr, size);
+		vm_next_resource_local(vm, res, addr, size) ||
+		vm_next_resource_literal(vm, res, addr, size) ||
+		vm_next_resource_dereference(vm, res, addr, size);
 }
 
-bool vm_next_named_resource(struct MoonVm *vm, char **addr, int *size)
+bool vm_next_named_resource(struct MoonVm *vm, CELL_T res, char **addr, int *size)
 {
-	CELL_T resource_id = vm_next(vm);
 	return
-		vm_next_resource_local(vm, resource_id, addr, size) ||
-		vm_next_resource_dereference(vm, resource_id, addr, size);
+		vm_next_resource_local(vm, res, addr, size) ||
+		vm_next_resource_dereference(vm, res, addr, size);
 }

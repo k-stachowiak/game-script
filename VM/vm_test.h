@@ -9,6 +9,7 @@
 #define ca 0xca
 #define deadcode 0xdeadc0de
 #define decoadde 0xdec0adde
+#define deededde 0xdeededde
 
 void vm_test_program(
 		struct TestContext *tc,
@@ -21,4 +22,5 @@ void vm_test_program(
 void vm_test_put(struct TestContext *tc);
 void vm_test_push_pop(struct TestContext *tc);
 void vm_test_incr_decr(struct TestContext *tc);
+void vm_test_arythmetic(struct TestContext *tc);
 void vm_test(void);

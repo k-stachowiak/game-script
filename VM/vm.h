@@ -22,13 +22,13 @@
 
 /* Resources
  *
- * register ::= r0 | r1 | r2 | ... | rREG_COUNT
+ * register ::= r0 | r1 | r2 | ... | REG_COUNT - 1
  * flag ::= zero flag | sign flag | overflow flag
  * pointer ::= instruction pointer | stack pointer
  *
  * local ::= register | flag | pointer
  * literal ::= 1B | 2B | 4B | 8B | IEEE
- * named_resource ::= local | "@" address
+ * named_resource ::= local | derefered
  * resource ::= named_resource | literal
  */
 
@@ -58,7 +58,6 @@ enum MoonResCode {
 	MR_2B,						/* 2 bytes */
 	MR_4B,						/* 4 bytes */
 	MR_8B,						/* 8 bytes */
-	MR_IEEE,					/* IEEE floating point */
 	MR_ADDR,					/* address */
 
 	MR_MAX
@@ -80,26 +79,23 @@ enum MoonOpCode {
 	MOP_POP,                 /* named_resource <- stack */
 
 	/* Data processing */
-	MOP_INCR,                /* Rx++ */
-	MOP_DECR,                /* Rx-- */
-	MOP_ADD,                 /* R0 += R1 */
-	MOP_SUB,                 /* R0 -= R1 */
-	MOP_MUL,                 /* R0 *= R1 */
-	MOP_DIV,                 /* R0 /= R1 */
-	MOP_MOD,                 /* R0 %= R1 */
-	MOP_FADD,                /* R0 +=. R1 */
-	MOP_FSUB,                /* R0 -=. R1 */
-	MOP_FMUL,                /* R0 *=. R1 */
-	MOP_FDIV,                /* R0 /=. R1 */
-	MOP_FMOD,                /* R0 %=. R1 */
-	MOP_NOT,                 /* Rx ~= Rx */
-	MOP_AND,                 /* R0 &= R1 */
-	MOP_OR,                  /* R0 |= R1 */
-	MOP_XOR,                 /* R0 ^= R1 */
+	MOP_INCR,                /* (register | pointer)++ */
+	MOP_DECR,                /* (register | pointer)-- */
+
+	MOP_ADD,                 /* (register | pointer) += (register | pointer) */
+	MOP_SUB,                 /* (register | pointer) -= (register | pointer) */
+	MOP_MUL,                 /* (register | pointer) *= (register | pointer) */
+	MOP_DIV,                 /* (register | pointer) /= (register | pointer) */
+	MOP_MOD,                 /* (register | pointer) %= (register | pointer) */
+
+	MOP_AND,                 /* (register | flag) &= (register | flag) */
+	MOP_OR,                  /* (register | flag) |= (register | flag) */
+	MOP_XOR,                 /* (register | flag) ^= (register | flag) */
+	MOP_NOT,                 /* (register | flag) = ~(register | flag) */
 
 	/* Execution control */
-	MOP_JUMP,                /* IP = R0 */
-	MOP_JUMP_EQUAL,          /* if ZF then R0 -> IP */
+	MOP_JUMP,                /* IP = literal */
+	MOP_JUMP_EQUAL,          /* if ZF then literal -> IP */
 	MOP_JUMP_NOT_EQUAL,      /* if !ZF then R0 -> IP */
 	MOP_JUMP_GREATER,        /* if !ZF or SF = OF then R0 -> IP */
 	MOP_JUMP_GREATER_EQUAL,  /* if SF = OF then R0 -> IP */
@@ -143,8 +139,15 @@ void vm_expand_stack(struct MoonVm *vm, int size);
 
 CELL_T vm_next(struct MoonVm *vm);
 void vm_next_n(struct MoonVm *vm, CELL_T* dst, int n);
-bool vm_next_resource(struct MoonVm *vm, char **addr, int *size);
-bool vm_next_named_resource(struct MoonVm *vm, char **addr, int *size);
+
+bool vm_next_resource_register(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource_flag(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource_pointer(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource_local(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource_literal(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource_dereference(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_named_resource(struct MoonVm *vm, CELL_T res, char **addr, int *size);
 
 bool vm_run(struct MoonVm *vm);
 void vm_test(void);

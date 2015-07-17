@@ -29,6 +29,7 @@ void vm_test(void)
 	vm_test_put(&tc);
 	vm_test_push_pop(&tc);
 	vm_test_incr_decr(&tc);
+	vm_test_arythmetic(&tc);
 	tc_report(&tc);
 	tc_deinit(&tc);
 }
