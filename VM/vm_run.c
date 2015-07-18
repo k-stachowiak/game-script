@@ -175,6 +175,11 @@ static bool vm_op_un_arythmetic(struct MoonVm *vm, void(*op)(REG_T*))
 	}
 }
 
+static bool vm_op_test(struct MoonVm *vm)
+{
+
+}
+
 static bool vm_step(struct MoonVm *vm)
 {
 	switch (vm_next(vm)) {
@@ -219,6 +224,9 @@ static bool vm_step(struct MoonVm *vm)
 
 	case MOP_NOT:
 		return vm_op_un_arythmetic(vm, reg_ptr_not);
+
+	case MOP_TEST:
+		return vm_op_test(vm);
 
 	default:
 		err_push("VM", "Unknown operation code encountered");

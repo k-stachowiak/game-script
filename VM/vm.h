@@ -86,7 +86,7 @@ enum MoonOpCode {
 	MOP_SUB,                 /* (register | pointer) -= (register | pointer) */
 	MOP_MUL,                 /* (register | pointer) *= (register | pointer) */
 	MOP_DIV,                 /* (register | pointer) /= (register | pointer) */
-	MOP_MOD,                 /* (register | pointer) %= (register | pointer) */
+	 MOP_MOD,                 /* (register | pointer) %= (register | pointer) */
 
 	MOP_AND,                 /* (register | flag) &= (register | flag) */
 	MOP_OR,                  /* (register | flag) |= (register | flag) */
@@ -94,6 +94,7 @@ enum MoonOpCode {
 	MOP_NOT,                 /* (register | flag) = ~(register | flag) */
 
 	/* Execution control */
+	MOP_TEST,				 /* test (register | pointer) (register | pointer) */
 	MOP_JUMP,                /* IP = literal */
 	MOP_JUMP_EQUAL,          /* if ZF then literal -> IP */
 	MOP_JUMP_NOT_EQUAL,      /* if !ZF then R0 -> IP */
