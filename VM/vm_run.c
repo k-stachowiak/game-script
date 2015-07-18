@@ -175,9 +175,65 @@ static bool vm_op_un_arythmetic(struct MoonVm *vm, void(*op)(REG_T*))
 	}
 }
 
+static void vm_op_test_impl(struct MoonVm *vm, char *x, char *y, int size)
+{
+	/* Set unconditionally */
+	vm->overflow_flag = 0;
+	vm->carry_flag = 0;
+
+	/* Set loop initial */
+	vm->zero_flag = 1;
+	vm->parity_flag = 0;
+
+	/* For each byte */
+	for (; size--; ++x, ++y) {
+
+		/* For each bit */
+		for (int mask = 1; mask != (1 << 9); mask <<= 1) {
+
+			/* Bitwise AND normalized to 0/1 value */
+			char result = !!((*x & mask) & (*y & mask));
+
+			/* Per bit analysis */
+			if (result) {
+				vm->zero_flag = 0;
+				++vm->parity_flag;
+			}
+
+			/* Only check the last bit for sign */
+			if (size == 0 && mask == 1 << 8) {
+				vm->sign_flag = result;
+			}
+
+		}
+	}
+
+	/* Correction of the parity flag accumulated throughout operation. */
+	vm->parity_flag %= 2;
+}
+
 static bool vm_op_test(struct MoonVm *vm)
 {
+	int x_size, y_size;
+	char *x, *y;
+	CELL_T x_res = vm_next(vm);
+	CELL_T y_res = vm_next(vm);
 
+	if (vm_next_resource(vm, x_res, &x, &x_size) &&
+		vm_next_resource(vm, y_res, &y, &y_size)) {
+		if (x_size != y_size) {
+			err_push("VM", "Test operands must be of equal sizes");
+			return false;
+		} else {
+			vm_op_test_impl(vm, x, y, x_size);
+			return true;
+		}
+	}
+	else {
+		err_push("VM",
+			"Test operation expects two resource operands");
+		return false;
+	}
 }
 
 static bool vm_step(struct MoonVm *vm)

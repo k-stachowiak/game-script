@@ -35,3 +35,4 @@ build/
 /libtest.cpp
 
 *.tlog
+*.xml

@@ -23,4 +23,5 @@ void vm_test_put(struct TestContext *tc);
 void vm_test_push_pop(struct TestContext *tc);
 void vm_test_incr_decr(struct TestContext *tc);
 void vm_test_arythmetic(struct TestContext *tc);
+void vm_test_flow(struct TestContext *tc);
 void vm_test(void);

@@ -7,9 +7,6 @@
 #include <stdint.h>
 
 #define REG_COUNT 16
-#define FLAG_COUNT 3
-#define PTR_COUNT 2
-#define LOCAL_RES_COUNT (REG_COUNT + FLAG_COUNT + PTR_COUNT)
 
 #define REG_T int64_t
 #define ADDRESS_T uint64_t
@@ -19,6 +16,10 @@
 #define CHARACTER_T uint8_t
 #define CELL_T uint8_t
 #define FLAG_T uint8_t
+
+/* TODO:
+ * - replace char pointers with uint8_t pointers
+ */
 
 /* Resources
  *
@@ -49,27 +50,19 @@ enum MoonResCode {
 	MR_R8, MR_R9, MR_R10, MR_R11,
 	MR_R12, MR_R13, MR_R14, MR_R15,
 
-	MR_ZF, MR_SF, MR_OF,
+	MR_ZF, MR_SF, MR_OF, MR_PF, MR_CF,
 	MR_IP, MR_SP,
 
-	MR_DEREF = LOCAL_RES_COUNT,	/* dereference of a given address */
-	MR_LITRL,					/* literal */
-	MR_1B,						/* 1 byte */
-	MR_2B,						/* 2 bytes */
-	MR_4B,						/* 4 bytes */
-	MR_8B,						/* 8 bytes */
-	MR_ADDR,					/* address */
+	MR_DEREF,	/* dereference of a given address */
+	MR_LITRL,	/* literal */
+	MR_1B,		/* 1 byte */
+	MR_2B,		/* 2 bytes */
+	MR_4B,		/* 4 bytes */
+	MR_8B,		/* 8 bytes */
+	MR_ADDR,	/* address */
 
 	MR_MAX
 };
-
-#if MR_SP >= LOCAL_RES_COUNT
-#   error Corrupt enum settings
-#endif
-
-#if MR_MAX >= 256
-#   error Too many op codes to fit in a single byte
-#endif
 
 enum MoonOpCode {
 
@@ -86,7 +79,7 @@ enum MoonOpCode {
 	MOP_SUB,                 /* (register | pointer) -= (register | pointer) */
 	MOP_MUL,                 /* (register | pointer) *= (register | pointer) */
 	MOP_DIV,                 /* (register | pointer) /= (register | pointer) */
-	 MOP_MOD,                 /* (register | pointer) %= (register | pointer) */
+	MOP_MOD,                 /* (register | pointer) %= (register | pointer) */
 
 	MOP_AND,                 /* (register | flag) &= (register | flag) */
 	MOP_OR,                  /* (register | flag) |= (register | flag) */
@@ -111,10 +104,6 @@ enum MoonOpCode {
 	MOP_MAX
 };
 
-#if MOP_MAX >= 256
-#   error Too many op codes to fit in a single byte
-#endif
-
 struct MoonVm {
 
 	REG_T registers[REG_COUNT];
@@ -122,6 +111,8 @@ struct MoonVm {
 	FLAG_T zero_flag;
 	FLAG_T sign_flag;
 	FLAG_T overflow_flag;
+	FLAG_T parity_flag;
+	FLAG_T carry_flag;
 
 	ADDRESS_T instruction_pointer;
 	ADDRESS_T stack_pointer;

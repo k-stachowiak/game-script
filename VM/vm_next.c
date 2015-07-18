@@ -65,18 +65,28 @@ bool vm_next_resource_flag(
 		int *size)
 {
 	switch (res) {
-	case REG_COUNT + 0:
+	case MR_ZF:
 		*addr = (char*)(&vm->zero_flag);
 		*size = sizeof(FLAG_T);
 		return true;
 
-	case REG_COUNT + 1:
+	case MR_SF:
 		*addr = (char*)(&vm->sign_flag);
 		*size = sizeof(FLAG_T);
 		return true;
 
-	case REG_COUNT + 2:
+	case MR_OF:
 		*addr = (char*)(&vm->overflow_flag);
+		*size = sizeof(FLAG_T);
+		return true;
+
+	case MR_PF:
+		*addr = (char*)(&vm->parity_flag);
+		*size = sizeof(FLAG_T);
+		return true;
+
+	case MR_CF:
+		*addr = (char*)(&vm->carry_flag);
 		*size = sizeof(FLAG_T);
 		return true;
 	}
@@ -91,12 +101,12 @@ bool vm_next_resource_pointer(
 		int *size)
 {
 	switch (res) {
-	case REG_COUNT + FLAG_COUNT + 0:
+	case MR_IP:
 		*addr = (char*)(&vm->instruction_pointer);
 		*size = sizeof(ADDRESS_T);
 		return true;
 
-	case REG_COUNT + FLAG_COUNT + 1:
+	case MR_SP:
 		*addr = (char*)(&vm->stack_pointer);
 		*size = sizeof(ADDRESS_T);
 		return true;
