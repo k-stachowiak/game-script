@@ -17,10 +17,6 @@
 #define CELL_T uint8_t
 #define FLAG_T uint8_t
 
-/* TODO:
- * - replace char pointers with uint8_t pointers
- */
-
 /* Resources
  *
  * register ::= r0 | r1 | r2 | ... | REG_COUNT - 1
@@ -132,14 +128,14 @@ void vm_expand_stack(struct MoonVm *vm, int size);
 CELL_T vm_next(struct MoonVm *vm);
 void vm_next_n(struct MoonVm *vm, CELL_T* dst, int n);
 
-bool vm_next_resource_register(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_resource_flag(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_resource_pointer(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_resource_local(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_resource_literal(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_resource_dereference(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_resource(struct MoonVm *vm, CELL_T res, char **addr, int *size);
-bool vm_next_named_resource(struct MoonVm *vm, CELL_T res, char **addr, int *size);
+bool vm_next_resource_register(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_resource_flag(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_resource_pointer(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_resource_local(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_resource_literal(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_resource_dereference(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_resource(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
+bool vm_next_named_resource(struct MoonVm *vm, CELL_T res, CELL_T **addr, int *size);
 
 bool vm_run(struct MoonVm *vm);
 void vm_test(void);

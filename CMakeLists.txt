@@ -16,10 +16,10 @@ include_directories(
 set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
 
-#set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
-#set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
-set(CMAKE_C_FLAGS "-Wall -O2 -std=c11")
-set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11")
+set(CMAKE_C_FLAGS "-Wall -g -O0 -std=c11")
+set(CMAKE_CXX_FLAGS "-Wall -g -O0 -std=c++11")
+#set(CMAKE_C_FLAGS "-Wall -O2 -std=c11")
+#set(CMAKE_CXX_FLAGS "-Wall -O2 -std=c++11")
 
 add_library(lang OBJECT
 		./common/pattern.c
@@ -27,6 +27,7 @@ add_library(lang OBJECT
 		./common/src_iter.c
 		./common/error.c
 		./common/api_value.c
+        ./common/test.c
 		./front/lex.c
 		./front/parse.c
 		./front/tok.c
@@ -61,7 +62,7 @@ add_library(lang OBJECT
     )
 
 add_executable(mntest $<TARGET_OBJECTS:lang>
-    ./TEST/test.c
+    ./TEST/test_app.c
     ./TEST/test_front.c
     ./TEST/test_helpers.c
     ./TEST/test_runtime_basic.c
@@ -75,6 +76,15 @@ target_link_libraries(mntest m stdc++)
 
 add_executable(mnvm $<TARGET_OBJECTS:lang>
     ./VM/main.c
+    ./VM/vm.c
+    ./VM/vm_next.c
+    ./VM/vm_run.c
+    ./VM/vm_test.c
+    ./VM/vm_test_arythmetic.c
+    ./VM/vm_test_flow.c
+    ./VM/vm_test_incr_decr.c
+    ./VM/vm_test_push_pop.c
+    ./VM/vm_test_put.c
     )
 target_link_libraries(mnvm m stdc++)
 

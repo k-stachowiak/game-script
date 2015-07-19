@@ -5,6 +5,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "log.h"
 #include "error.h"
 #include "vm.h"
 
@@ -27,7 +28,7 @@ static bool vm_op_put(struct MoonVm *vm)
 	/* put ::= "put" named_resource resource */
 
 	int dst_size, src_size;
-	char *dst, *src;
+	CELL_T *dst, *src;
 
 	if (!(vm_next_named_resource(vm, vm_next(vm), &dst, &dst_size) &&
           vm_next_resource(vm, vm_next(vm), &src, &src_size))) {
@@ -46,7 +47,7 @@ static bool vm_op_push(struct MoonVm *vm)
 	/* push ::= "push" resource */
 
 	int src_size;
-	char *src, *dst;
+	CELL_T *src, *dst;
 
 	if (!vm_next_resource(vm, vm_next(vm), &src, &src_size)) {
 		err_push("VM", "Failed reading resource for push operation");
@@ -66,7 +67,7 @@ static bool vm_op_pop(struct MoonVm *vm)
 	/* pop ::= "pop" named_resource */
 
 	int dst_size;
-	char *src, *dst;
+	CELL_T *src, *dst;
 
 	if (!vm_next_named_resource(vm, vm_next(vm), &dst, &dst_size)) {
 		err_push("VM", "Failed reading resource for pop operation");
@@ -83,7 +84,7 @@ static bool vm_op_pop(struct MoonVm *vm)
 static bool mv_op_incr_decr(struct MoonVm *vm, int increment)
 {
 	int arg_size;
-	char *arg;
+	CELL_T *arg;
 	CELL_T resource_id = vm_next(vm);
 
 	if (vm_next_resource_register(vm, resource_id, &arg, &arg_size) ||
@@ -104,7 +105,7 @@ static bool mv_op_incr_decr(struct MoonVm *vm, int increment)
 static bool vm_op_bin_arythmetic(struct MoonVm *vm, void(*op)(REG_T*, REG_T*))
 {
 	int x_size, y_size;
-	char *x, *y;
+	CELL_T *x, *y;
 	CELL_T x_res = vm_next(vm);
 	CELL_T y_res = vm_next(vm);
 
@@ -125,7 +126,7 @@ static bool vm_op_bin_arythmetic(struct MoonVm *vm, void(*op)(REG_T*, REG_T*))
 static bool vm_op_bin_logic(struct MoonVm *vm, void(*op)(REG_T*, REG_T*))
 {
 	int x_size, y_size;
-	char *x, *y;
+	CELL_T *x, *y;
 	CELL_T x_res = vm_next(vm);
 	CELL_T y_res = vm_next(vm);
 
@@ -163,7 +164,7 @@ static bool vm_op_bin_logic(struct MoonVm *vm, void(*op)(REG_T*, REG_T*))
 static bool vm_op_un_arythmetic(struct MoonVm *vm, void(*op)(REG_T*))
 {
 	int x_size;
-	char *x;
+	CELL_T *x;
 
 	if (vm_next_resource_register(vm, vm_next(vm), &x, &x_size)) {
 		op((REG_T*)x);
@@ -175,7 +176,7 @@ static bool vm_op_un_arythmetic(struct MoonVm *vm, void(*op)(REG_T*))
 	}
 }
 
-static void vm_op_test_impl(struct MoonVm *vm, char *x, char *y, int size)
+static void vm_op_test_impl(struct MoonVm *vm, CELL_T *x, CELL_T *y, int size)
 {
 	/* Set unconditionally */
 	vm->overflow_flag = 0;
@@ -189,10 +190,10 @@ static void vm_op_test_impl(struct MoonVm *vm, char *x, char *y, int size)
 	for (; size--; ++x, ++y) {
 
 		/* For each bit */
-		for (int mask = 1; mask != (1 << 9); mask <<= 1) {
+		for (int mask = 1; mask != 1 << 8; mask <<= 1) {
 
 			/* Bitwise AND normalized to 0/1 value */
-			char result = !!((*x & mask) & (*y & mask));
+			CELL_T result = !!((*x & mask) & (*y & mask));
 
 			/* Per bit analysis */
 			if (result) {
@@ -201,7 +202,7 @@ static void vm_op_test_impl(struct MoonVm *vm, char *x, char *y, int size)
 			}
 
 			/* Only check the last bit for sign */
-			if (size == 0 && mask == 1 << 8) {
+			if (size == 0 && mask == 1 << 7) {
 				vm->sign_flag = result;
 			}
 
@@ -215,7 +216,7 @@ static void vm_op_test_impl(struct MoonVm *vm, char *x, char *y, int size)
 static bool vm_op_test(struct MoonVm *vm)
 {
 	int x_size, y_size;
-	char *x, *y;
+	CELL_T *x, *y;
 	CELL_T x_res = vm_next(vm);
 	CELL_T y_res = vm_next(vm);
 
@@ -303,3 +304,4 @@ bool vm_run(struct MoonVm *vm)
 
 	return true;
 };
+
