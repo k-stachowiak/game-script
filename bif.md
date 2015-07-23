@@ -49,19 +49,13 @@ Also note that only the less than operator has been provided as a BIF since the 
 
 Logic (boolean) functions
 -------------------------
- * and  : ... -> _boolean_ -> _boolean_ -> _boolean_
- * or   : ... -> _boolean_ -> _boolean_ -> _boolean_
  * xor  : _boolean_ -> _boolean_ -> _boolean_
  * not  : _boolean_ -> _boolean_ -> _boolean_
 
-**Note**
-The _&&_ and _||_ functions handle so called short circuit evaluation; e.g. if any argument of the _&&_ turns out false no further arguments are evaluated.
-Additionally they will accept an arbitrary number of arguments.
-
 Compound functions
 ------------------
- * push-front   : _compound_ -> _?_ -> _compound_
- * push-back    : _compound_ -> _?_ -> _compound_
+ * push\_front  : _compound_ -> _?_ -> _compound_
+ * push\_back   : _compound_ -> _?_ -> _compound_
  * cat          : _compound_ -> _compound_ -> _compound_
  * length       : _compound_ -> _integer_
  * at           : _compound_ -> _integer_ -> _?_
@@ -84,12 +78,12 @@ Text functions
 --------------
  * print        : _string_ -> _void_
  * format       : _string_ -> _tuple_ -> _string_
- * to\_string    : _?_ -> _string_
+ * to\_string   : _?_ -> _string_
  * parse        : _string_ -> { _boolean_ _?_ }
- * parse\_bool   : _string_ -> { _boolean_ _boolean_ }
- * parse\_char   : _string_ -> { _boolean_ _character_ }
- * parse\_int    : _string_ -> { _boolean_ _integer_ }
- * parse\_real   : _string_ -> { _boolean_ _real_ }
+ * parse\_bool  : _string_ -> { _boolean_ _boolean_ }
+ * parse\_char  : _string_ -> { _boolean_ _character_ }
+ * parse\_int   : _string_ -> { _boolean_ _integer_ }
+ * parse\_real  : _string_ -> { _boolean_ _real_ }
 
 **Note**
 
@@ -118,3 +112,13 @@ Random functions
 These functions are implemented in terms of the C++ standard random library (since C++11).
 _ui_ stands for "uniform integer", _ur_ stands for "uniform real" and the rest should be self-explanatory.
 
+Type inference functions
+------------------------
+ * is\_bool         : _?_ -> _boolean_
+ * is\_int          : _?_ -> _boolean_
+ * is\_real         : _?_ -> _boolean_
+ * is\_char         : _?_ -> _boolean_
+ * is\_array        : _?_ -> _boolean_
+ * is\_tuple        : _?_ -> _boolean_
+ * is\_function     : _?_ -> _boolean_
+ * is\_reference    : _?_ -> _boolean_
