@@ -74,20 +74,6 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     )
 target_link_libraries(mntest m stdc++)
 
-add_executable(mnvm $<TARGET_OBJECTS:lang>
-    ./VM/main.c
-    ./VM/vm.c
-    ./VM/vm_next.c
-    ./VM/vm_run.c
-    ./VM/vm_test.c
-    ./VM/vm_test_arythmetic.c
-    ./VM/vm_test_flow.c
-    ./VM/vm_test_incr_decr.c
-    ./VM/vm_test_push_pop.c
-    ./VM/vm_test_put.c
-    )
-target_link_libraries(mnvm m stdc++)
-
 add_library(moon STATIC $<TARGET_OBJECTS:lang>
 	./common/api_value.c
     ./LIB/moon.c
