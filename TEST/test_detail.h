@@ -13,27 +13,7 @@
 #include "parse.h"
 #include "runtime.h"
 #include "rt_val.h"
-
-/* Test context API.
- * =================
- */
-
-struct TestEntry {
-    char *name;
-    bool result;
-};
-
-struct TestContext {
-    struct {
-        struct TestEntry *data;
-        int cap, size;
-    } entries;
-};
-
-void tc_init(struct TestContext *tc);
-void tc_deinit(struct TestContext *tc);
-void tc_report(struct TestContext *tc);
-void tc_record(struct TestContext *tc, char *name, bool result);
+#include "test.h"
 
 /* Main test procedures.
  * =====================

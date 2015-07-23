@@ -18,6 +18,7 @@ struct MoonContext {
 struct MoonContext *mn_create(void)
 {
 	struct MoonContext *result = mem_malloc(sizeof(*result));
+	atexit(err_reset);
     result->rt = rt_make();
 	return result;
 }

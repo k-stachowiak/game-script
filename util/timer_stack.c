@@ -45,7 +45,7 @@ long long ts_ustop(void)
 
 void ts_deinit(void)
 {
-	array_free(starts);
+	ARRAY_FREE(starts);
 }
 
 #elif defined(__unix__) || defined(linux)
