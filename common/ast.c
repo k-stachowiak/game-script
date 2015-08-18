@@ -82,20 +82,6 @@ struct AstNode *ast_make_func_def(
     return result;
 }
 
-struct AstNode *ast_make_parafunc(
-    struct SourceLocation *loc,
-    enum AstParafuncType type,
-    struct AstNode *args)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-    result->next = NULL;
-    result->type = AST_PARAFUNC;
-    result->loc = *loc;
-    result->data.parafunc.type = type;
-    result->data.parafunc.args = args;
-    return result;
-}
-
 struct AstNode *ast_make_literal_unit(struct SourceLocation *loc)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -158,6 +144,20 @@ struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
     result->loc = *loc;
     result->data.literal.type = AST_LIT_REAL;
     result->data.literal.data.real = value;
+    return result;
+}
+
+struct AstNode *ast_make_parafunc(
+    struct SourceLocation *loc,
+    enum AstParafuncType type,
+    struct AstNode *args)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+    result->next = NULL;
+    result->type = AST_PARAFUNC;
+    result->loc = *loc;
+    result->data.parafunc.type = type;
+    result->data.parafunc.args = args;
     return result;
 }
 
