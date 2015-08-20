@@ -1,11 +1,11 @@
 # Prototype for overloaded type matched add implementations
 # =========================================================
 
-# (bind + (func ((: int x) (: int y))
+# (bind + (func ((! int x) (! int y))
 #     (__add_int x y)
 # ))
-# 
-# (bind + (func ((: real x) (: real y))
+#
+# (bind + (func ((! real x) (! real y))
 #     (__add_real x y)
 # ))
 
