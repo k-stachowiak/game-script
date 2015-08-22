@@ -47,7 +47,13 @@ enum Reserved {
     DOM_RES_UNIT,
     DOM_RES_TRUE,
     DOM_RES_FALSE,
+    DOM_RES_MATCH,
     DOM_RES_DONTCARE,
+    DOM_RES_BOOL,
+    DOM_RES_INTEGER,
+    DOM_RES_REAL,
+    DOM_RES_CHARACTER,
+    DOM_RES_REFERENCE
 };
 
 /**

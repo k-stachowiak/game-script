@@ -31,7 +31,13 @@ static char *reserved[] = {
     "unit",
     "true",
     "false",
-    "_"
+    "!",
+    "_",
+    "Bool",
+    "Int",
+    "Real",
+    "Char",
+    "Ref"
 };
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);

@@ -69,6 +69,14 @@ static void test_parse_bind(struct TestContext *tc)
     test_parse(tc, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal", false);
     test_parse(tc, "(bind { x y } { 2 3 })", "Succeed on compound bind", true);
     test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
+
+    /* Typed binds */
+    test_parse(tc, "(bind (! int x) 1)", "Succeed on binding to a simple typed pattern", true);
+    test_parse(tc, "(bind (! double y) 3.0)", "Fail on binding to a simple typed pattern", false);
+    test_parse(tc, "(bind (! [ char ] z) \"asd\")", "Succeed on binding to an array", true); 
+    test_parse(tc, "(bind (! [ double ] s) 1)", "Fail on binding to an array", false);
+    test_parse(tc, "(bind (! { int double [ char ] } v) { 1 2.0 \"three\" })", "Succeed binding to a tuple", true);
+    test_parse(tc, "(bind (! { double int } w) { 1 2 })", "Fail binding to a tuple", false);
 }
 
 static void test_parse_compound(struct TestContext *tc)
