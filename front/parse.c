@@ -64,43 +64,58 @@ static struct Pattern *parse_pattern_list(struct DomNode *dom)
     return result;
 }
 
+static struct Pattern *parse_pattern_atom(struct DomNode *dom)
+{
+	char *symbol;
+	if ((symbol = dom_node_parse_symbol(dom))) {
+		return pattern_make_symbol(symbol);
+
+	} else if (dom_node_is_reserved_atom(dom, DOM_RES_DONTCARE)) {
+		return pattern_make_dontcare();
+
+	} else {
+		err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
+		return NULL;
+	}
+}
+
+static struct Pattern *parse_pattern_compound(
+	    struct DomNode *dom,
+	    struct Pattern *children)
+{
+	return pattern_make_compound(children,
+        (dom->type == DOM_CPD_ARRAY) ?
+		PATTERN_ARRAY : PATTERN_TUPLE);
+}
+
+static struct Pattern *parse_pattern_matched(
+    	struct DomNode *dom,
+	    struct Pattern *children)
+{
+	err_push_src("PARSE", dom->loc, "Core compound encountered where a pattern was expected");
+	return NULL;
+}
+
 static struct Pattern *parse_pattern(struct DomNode *dom)
 {
     if (dom_node_is_atom(dom)) {
-
-        char *symbol;
-        if ((symbol = dom_node_parse_symbol(dom))) {
-            return pattern_make_symbol(symbol);
-
-        } else if (dom_node_is_reserved_atom(dom, DOM_RES_DONTCARE)) {
-            return pattern_make_dontcare();
-
-        } else {
-            err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
-            return NULL;
-        }
+		return parse_pattern_atom(dom);
 
     } else {
+		struct Pattern *children = parse_pattern_list(dom->cpd_children);
 
-        struct Pattern *children;
+		if (!children && err_state()) {
+			err_push_src("PARSE", dom->loc, "Failed parsing compound pattern children");
+			return NULL;
+		}
+		
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
-			err_push_src("PARSE", dom->loc, "Core compound encountered where a pattern was expected");
-            return NULL;
+			return parse_pattern_matched(dom, children);
 
         case DOM_CPD_ARRAY:
         case DOM_CPD_TUPLE:
-            if ((children = parse_pattern_list(dom->cpd_children))) {
-                return pattern_make_compound(children,
-                    (dom->cpd_type == DOM_CPD_ARRAY) ?
-                        PATTERN_ARRAY : PATTERN_TUPLE);
-            } else {
-                if (!err_state()) {
-					err_push_src("PARSE", dom->loc, "Empty compound pattern encountered");
-                }
-                return NULL;
-
-            }
+			return parse_pattern_compound(dom, children);
         }
     }
 
