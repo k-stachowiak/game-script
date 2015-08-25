@@ -63,20 +63,19 @@ static void test_parse_bind(struct TestContext *tc)
     test_parse(tc, "(bind x 1)", "Succeed on simplistic bind", true);
     test_parse(tc, "(bind x (+ 2 2))", "Succeed on non-trivial bind", true);
 
-    /* Matching binds */
-    test_parse(tc, "(bind {} 1.0)", "Fail on binding to empty tuple", false);
-    test_parse(tc, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array", false);
-    test_parse(tc, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal", false);
+    /* Compound binds */
     test_parse(tc, "(bind { x y } { 2 3 })", "Succeed on compound bind", true);
     test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
 
     /* Typed binds */
+	test_parse(tc, "(bind () 1)", "Fail on binding to an empty compound", false);
+	test_parse(tc, "(bind (a) 1)", "Fail on binding to a non-matching compound", false);
+	test_parse(tc, "(bind (!) 1)", "Fail on bindtin to an incomplete typed compound 1", false);
+	test_parse(tc, "(bind (! int) 1)", "Fail on bindtin to an incomplete typed compound 2", false);
+	test_parse(tc, "(bind (! int x y) 1)", "Fail on binding to typed compound with extra elements", false);
     test_parse(tc, "(bind (! int x) 1)", "Succeed on binding to a simple typed pattern", true);
-    test_parse(tc, "(bind (! double y) 3.0)", "Fail on binding to a simple typed pattern", false);
-    test_parse(tc, "(bind (! [ char ] z) \"asd\")", "Succeed on binding to an array", true); 
-    test_parse(tc, "(bind (! [ double ] s) 1)", "Fail on binding to an array", false);
-    test_parse(tc, "(bind (! { int double [ char ] } v) { 1 2.0 \"three\" })", "Succeed binding to a tuple", true);
-    test_parse(tc, "(bind (! { double int } w) { 1 2 })", "Fail binding to a tuple", false);
+    test_parse(tc, "(bind (! [ char ] z) \"asd\")", "Succeed on binding to a typed array", true); 
+    test_parse(tc, "(bind (! { int double [ char ] } v) { 1 2.0 \"three\" })", "Succeed binding to a typed tuple", true);
 }
 
 static void test_parse_compound(struct TestContext *tc)

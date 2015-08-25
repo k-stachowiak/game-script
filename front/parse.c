@@ -84,11 +84,11 @@ static struct Pattern *parse_pattern_compound(
 	    struct Pattern *children)
 {
 	return pattern_make_compound(children,
-        (dom->type == DOM_CPD_ARRAY) ?
+        (dom->cpd_type == DOM_CPD_ARRAY) ?
 		PATTERN_ARRAY : PATTERN_TUPLE);
 }
 
-static struct Pattern *parse_pattern_matched(
+static struct Pattern *parse_pattern_typed(
     	struct DomNode *dom,
 	    struct Pattern *children)
 {
@@ -111,7 +111,7 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
 		
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
-			return parse_pattern_matched(dom, children);
+			return parse_pattern_typed(dom, children);
 
         case DOM_CPD_ARRAY:
         case DOM_CPD_TUPLE:
