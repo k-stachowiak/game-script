@@ -92,8 +92,28 @@ static struct Pattern *parse_pattern_typed(
     	struct DomNode *dom,
 	    struct Pattern *children)
 {
-	err_push_src("PARSE", dom->loc, "Core compound encountered where a pattern was expected");
-	return NULL;
+    struct DomNode *child = NULL;
+    
+    /* 1. Is core compound. */
+    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+        return NULL;
+    }
+
+    /* 2. Has 3 children. */
+    if (!dom_node_is_cpd_of_size(dom, 3)) {
+        return NULL;
+    }
+
+    child = dom->cpd_children;
+
+    /* 3.1. 1st child is match keyword. */
+    if (!dom_node_is_reserved_atom(child, DOM_RES_MATCH)) {
+        return NULL;
+    }
+    child = child->next;
+
+    /* 3.2. 2nd keyword is a non-type-matching pattern. */
+    exit(1);
 }
 
 static struct Pattern *parse_pattern(struct DomNode *dom)

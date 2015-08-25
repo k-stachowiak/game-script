@@ -1,5 +1,6 @@
 TODO
 ----
+- Rework the pattern module (header already in place; implementation
 - allow type checking in the pattern matching
   - add typed matching bind tests to e.g. "(bind (! [char] [ 'a' x ]))"
   - Add typed variant of the pattern AST node
