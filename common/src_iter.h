@@ -6,8 +6,8 @@
 #include <stdbool.h>
 
 enum SourceLocationType {
-	SRC_LOC_NORMAL,
-	SRC_LOC_VIRTUAL
+    SRC_LOC_NORMAL,
+    SRC_LOC_VIRTUAL
 };
 
 struct SourceLocation {
@@ -33,13 +33,13 @@ void si_back(struct SourceIter *si);
 bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs);
 
 struct SourceIter si_find(
-		struct SourceIter *begin,
-		struct SourceIter *end,
-		int value);
+        struct SourceIter *begin,
+        struct SourceIter *end,
+        int value);
 
 struct SourceIter si_find_if_not(struct SourceIter *begin,
-		struct SourceIter *end,
-		int (*pred)(int));
+        struct SourceIter *end,
+        int (*pred)(int));
 
 
 

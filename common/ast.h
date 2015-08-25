@@ -71,7 +71,7 @@ struct AstCompound {
 };
 
 struct AstFuncCall {
-	struct AstNode *func;
+    struct AstNode *func;
     struct AstNode *actual_args;
 };
 

@@ -32,10 +32,10 @@ void rt_save(struct Runtime *rt);
 void rt_restore(struct Runtime *rt);
 
 void rt_register_clif_handler(
-		struct Runtime *rt,
-		char *symbol,
-		int arity,
-		ClifHandler handler);
+        struct Runtime *rt,
+        char *symbol,
+        int arity,
+        ClifHandler handler);
 
 bool rt_consume_one(
         struct Runtime *rt,

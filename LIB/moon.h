@@ -18,7 +18,7 @@ enum MoonValueType {
     MN_STRING,
     MN_ARRAY,
     MN_TUPLE,
-	MN_FUNCTION,
+    MN_FUNCTION,
     MN_REFERENCE,
     MN_UNIT
 };

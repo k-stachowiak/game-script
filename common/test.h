@@ -6,15 +6,15 @@
 #include <stdbool.h>
 
 struct TestEntry {
-	char *name;
-	bool result;
+    char *name;
+    bool result;
 };
 
 struct TestContext {
-	struct {
-		struct TestEntry *data;
-		int cap, size;
-	} entries;
+    struct {
+        struct TestEntry *data;
+        int cap, size;
+    } entries;
 };
 
 void tc_init(struct TestContext *tc);

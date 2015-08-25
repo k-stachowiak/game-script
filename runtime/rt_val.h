@@ -59,7 +59,7 @@ enum ValueType {
     VAL_ARRAY,
     VAL_TUPLE,
     VAL_FUNCTION,
-	VAL_REF,
+    VAL_REF,
     VAL_UNIT
 };
 
@@ -69,9 +69,9 @@ struct ValueHeader {
 };
 
 enum ValueFuncType {
-	VAL_FUNC_AST,
-	VAL_FUNC_BIF,
-	VAL_FUNC_CLIF
+    VAL_FUNC_AST,
+    VAL_FUNC_BIF,
+    VAL_FUNC_CLIF
 };
 
 struct ValueFuncData {
@@ -84,8 +84,8 @@ struct ValueFuncData {
     VAL_SIZE_T arity;
     VAL_SIZE_T appl_count;
     VAL_SIZE_T cap_count;
-	VAL_TYPE_T func_type;
-	void *impl;
+    VAL_TYPE_T func_type;
+    void *impl;
 };
 
 /* Writing (pushing) API.
@@ -127,7 +127,7 @@ void rt_val_push_func_init(
         VAL_LOC_T *size_loc,
         VAL_LOC_T *data_begin,
         VAL_SIZE_T arity,
-		enum ValueFuncType type,
+        enum ValueFuncType type,
         void *impl);
 
 void rt_val_push_func_cap_init_deferred(

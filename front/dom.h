@@ -11,8 +11,8 @@
  * Type of the symbolic expression node.
  */
 enum DomNodeType {
-	DOM_ATOM,
-	DOM_COMPOUND
+    DOM_ATOM,
+    DOM_COMPOUND
 };
 
 /**
@@ -22,9 +22,9 @@ enum DomNodeType {
  * additional list types are defined.
  */
 enum DomCpdType {
-	DOM_CPD_CORE,
-	DOM_CPD_ARRAY,
-	DOM_CPD_TUPLE
+    DOM_CPD_CORE,
+    DOM_CPD_ARRAY,
+    DOM_CPD_TUPLE
 };
 
 /**
@@ -62,14 +62,14 @@ enum Reserved {
 struct DomNode {
 
     /* Data */
-    struct SourceLocation loc;		/** < Location in the input source */
-    enum DomNodeType type;			/** < Node type */
-    char *atom;						/** < Atom string in case of atomic node */
-    enum DomCpdType cpd_type;		/** < Type of compound node if is compound */
-    struct DomNode *cpd_children;	/** < List of children if is compound */
+    struct SourceLocation loc;        /** < Location in the input source */
+    enum DomNodeType type;            /** < Node type */
+    char *atom;                        /** < Atom string in case of atomic node */
+    enum DomCpdType cpd_type;        /** < Type of compound node if is compound */
+    struct DomNode *cpd_children;    /** < List of children if is compound */
 
     /* Intrusive list */
-    struct DomNode *next;			/** < Next pointer facility for lists */
+    struct DomNode *next;            /** < Next pointer facility for lists */
 };
 
 /* Creation.
