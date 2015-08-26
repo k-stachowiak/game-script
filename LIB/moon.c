@@ -12,21 +12,21 @@
 #include "api_value.h"
 
 struct MoonContext {
-	struct Runtime *rt;
+    struct Runtime *rt;
 };
 
 struct MoonContext *mn_create(void)
 {
-	struct MoonContext *result = mem_malloc(sizeof(*result));
-	atexit(err_reset);
+    struct MoonContext *result = mem_malloc(sizeof(*result));
+    atexit(err_reset);
     result->rt = rt_make();
-	return result;
+    return result;
 }
 
 void mn_destroy(struct MoonContext *ctx)
 {
-	rt_free(ctx->rt);
-	mem_free(ctx);
+    rt_free(ctx->rt);
+    mem_free(ctx);
 }
 
 void mn_set_debugger(struct MoonContext *ctx, bool state)
@@ -36,8 +36,8 @@ void mn_set_debugger(struct MoonContext *ctx, bool state)
 
 bool mn_register_clif(struct MoonContext *ctx, const char *symbol, int arity, ClifHandler handler)
 {
-	rt_register_clif_handler(ctx->rt, (char*)symbol, arity, handler);
-	return !err_state();
+    rt_register_clif_handler(ctx->rt, (char*)symbol, arity, handler);
+    return !err_state();
 }
 
 bool mn_exec_file(struct MoonContext *ctx, const char *filename)
@@ -45,10 +45,10 @@ bool mn_exec_file(struct MoonContext *ctx, const char *filename)
     char *source;
     struct AstNode *ast_list;
 
-	err_reset();
+    err_reset();
 
     if (!(source = my_getfile((char*)filename))) {
-		err_push("LIB", "Failed loading a file");
+        err_push("LIB", "Failed loading a file");
         return false;
     }
 
@@ -71,25 +71,25 @@ struct MoonValue *mn_exec_command(struct MoonContext *ctx, const char *source)
     struct AstNode *expr;
     VAL_LOC_T result_loc;
 
-	err_reset();
+    err_reset();
 
     expr = parse_source((char*)source);
     if (err_state()) {
-		err_push("LIB", "Failed executing command: %s", source);
+        err_push("LIB", "Failed executing command: %s", source);
         return NULL;
     }
 
     rt_consume_one(ctx->rt, expr, &result_loc, NULL);
     if (err_state()) {
-		err_push("LIB", "Failed executing command: %s", source);
+        err_push("LIB", "Failed executing command: %s", source);
         return NULL;
     }
 
-	if (result_loc) {
-		return mn_make_api_value(ctx->rt, result_loc);
-	} else {
-		return NULL;
-	}
+    if (result_loc) {
+        return mn_make_api_value(ctx->rt, result_loc);
+    } else {
+        return NULL;
+    }
 }
 
 void mn_dispose(struct MoonValue* value)
@@ -99,7 +99,7 @@ void mn_dispose(struct MoonValue* value)
 
 bool mn_error_state(void)
 {
-	return err_state();
+    return err_state();
 }
 
 const char *mn_error_message(void)

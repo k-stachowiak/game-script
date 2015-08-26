@@ -20,7 +20,7 @@ static void rt_free_stored(struct Runtime *rt)
 
 static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
 {
-	struct SourceLocation bif_location = src_loc_virtual();
+    struct SourceLocation bif_location = src_loc_virtual();
 
     sym_map_insert(sm, "+", eval_bif(rt, bif_add, 2), bif_location);
     sym_map_insert(sm, "-", eval_bif(rt, bif_sub, 2), bif_location);
@@ -127,16 +127,16 @@ void rt_restore(struct Runtime *rt)
 }
 
 void rt_register_clif_handler(
-		struct Runtime *rt,
-		char *symbol,
-		int arity,
-		ClifHandler handler)
+        struct Runtime *rt,
+        char *symbol,
+        int arity,
+        ClifHandler handler)
 {
     sym_map_insert(
-		&rt->global_sym_map,
-		symbol,
-		eval_clif(rt, handler, arity),
-		src_loc_virtual());
+        &rt->global_sym_map,
+        symbol,
+        eval_clif(rt, handler, arity),
+        src_loc_virtual());
 }
 
 bool rt_consume_one(
@@ -159,7 +159,7 @@ bool rt_consume_one(
     }
 
     if (err_state()) {
-		err_push_src("RUNTIME", ast->loc, "Failed consuming AST node");
+        err_push_src("RUNTIME", ast->loc, "Failed consuming AST node");
         ast_node_free_one(ast);
         return false;
 

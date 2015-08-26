@@ -40,12 +40,12 @@ static void test_runtime_do(struct TestContext *tc, struct Runtime *rt)
 
 static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
 {
-	/* Alias binds */
+    /* Alias binds */
     test_eval_source_fail(tc, rt, "(bind \"x\" 1)", "Fail on binding to literal");
     test_eval_source_expect(tc, rt, "(bind x 1.0)", "Succeed on simple bind", REAL, 1.0);
     test_eval_source_expect(tc, rt, "(bind y (+ 2 3))", "Succeed on non-trivial bind", INT, 5);
 
-	/* Compound binds */
+    /* Compound binds */
     test_eval_source_fail(tc, rt, "(bind {} 1.0)", "Fail on binding to empty tuple");
     test_eval_source_fail(tc, rt, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array");
     test_eval_source_fail(tc, rt, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal");
@@ -57,7 +57,7 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_expect(tc, rt, "(do (bind { s _ } { 1.0 2.0 }) s)", "Bind tuple 1st dontcare 2nd", REAL, 1.0);
     test_eval_source_expect(tc, rt, "(do (bind { _ t } { 1.0 2.0 }) t)", "Bind tuple 2nd dontcare 1st", REAL, 2.0);
 
-	/* Typed binds */
+    /* Typed binds */
     test_eval_source_fail(tc, rt, "(bind (! int x) 3.0)", "Fail on binding to a simple typed pattern");
     test_eval_source_expect(tc, rt, "(bind (! double x) 3.0)", "Succeed on binding to a simple typed pattern", REAL, 3.0);
 

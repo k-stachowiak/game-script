@@ -34,7 +34,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
         return node->data.func_def.expr;
 
     case AST_FUNC_CALL:
-		/* NOTE tha the func expression is artifically chained with the args list. */
+        /* NOTE tha the func expression is artifically chained with the args list. */
         return node->data.func_call.func;
 
     case AST_PARAFUNC:
@@ -57,9 +57,9 @@ static bool efd_refers_to_symbol(struct AstNode *node, char **symbol)
         return true;
 
     } else {
-		return false;
+        return false;
 
-	}
+    }
 }
 
 /**
@@ -132,7 +132,7 @@ void eval_func_def(
     rt_val_push_func_init(stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)node);
     efd_push_captures(stack, sym_map, &node->data.func_def);
     if (err_state()) {
-		err_push_src("EVAL", node->loc, "Failed evaluating function definition expression");
+        err_push_src("EVAL", node->loc, "Failed evaluating function definition expression");
         return;
     }
     rt_val_push_func_appl_init(stack, 0);

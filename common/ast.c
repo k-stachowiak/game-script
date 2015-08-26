@@ -58,8 +58,8 @@ struct AstNode *ast_make_func_call(
     result->data.func_call.func = func;
     result->data.func_call.actual_args = args;
 
-	/* The helper link thank's to which all the espressions are in one list. */
-	result->data.func_call.func->next = result->data.func_call.actual_args;
+    /* The helper link thank's to which all the espressions are in one list. */
+    result->data.func_call.func->next = result->data.func_call.actual_args;
 
     return result;
 }
@@ -189,7 +189,7 @@ static void ast_compound_free(struct AstCompound *acpd)
 
 static void ast_func_call_free(struct AstFuncCall *afcall)
 {
-	/*
+    /*
      * Note: The func node is linked forward with the function arguments,
      * therefore they will be released here as well.
      */

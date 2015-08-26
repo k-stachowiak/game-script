@@ -60,31 +60,31 @@ static void test_runtime_func_call_non_function(
 }
 
 static void test_runtime_func_call_nested_currying(
-		struct TestContext *tc,
-		struct Runtime *rt)
+        struct TestContext *tc,
+        struct Runtime *rt)
 {
-	test_eval_source_succeed(tc, rt,
-		"(bind point (func (f g x) (g (f x))))\n"
-		"(bind times2 (* 2))\n"
-		"(bind times4 (point times2 times2))\n"
-		"(bind times8 (point times2 times4))\n",
-		"Nested capture");
-	test_eval_source_expect(tc, rt, "(times8 3)", "Call nested multiplier", INT, 8 * 3);
-	rt_reset(rt);
+    test_eval_source_succeed(tc, rt,
+        "(bind point (func (f g x) (g (f x))))\n"
+        "(bind times2 (* 2))\n"
+        "(bind times4 (point times2 times2))\n"
+        "(bind times8 (point times2 times4))\n",
+        "Nested capture");
+    test_eval_source_expect(tc, rt, "(times8 3)", "Call nested multiplier", INT, 8 * 3);
+    rt_reset(rt);
 }
 
 static void test_runtime_func_call_nontrivial_call_expression(
-		struct TestContext *tc,
-		struct Runtime *rt)
+        struct TestContext *tc,
+        struct Runtime *rt)
 {
-	test_eval_source_succeed(tc, rt,
-		"(bind x ((+ 2) 2))\n"
-		"(bind custom_mul (func (x y z) (* (* x y) z)))\n"
-		"(bind y (((custom_mul 1.0) 2.0 ) 3.0))\n",
-		"Chained calls");
-	test_eval_source_expect(tc, rt, "x", "Chained BIF call", INT, 4);
-	test_eval_source_expect(tc, rt, "y", "Chained AST function call", REAL, 6.0);
-	rt_reset(rt);
+    test_eval_source_succeed(tc, rt,
+        "(bind x ((+ 2) 2))\n"
+        "(bind custom_mul (func (x y z) (* (* x y) z)))\n"
+        "(bind y (((custom_mul 1.0) 2.0 ) 3.0))\n",
+        "Chained calls");
+    test_eval_source_expect(tc, rt, "x", "Chained BIF call", INT, 4);
+    test_eval_source_expect(tc, rt, "y", "Chained AST function call", REAL, 6.0);
+    rt_reset(rt);
 }
 
 void test_runtime_func(struct TestContext *tc)
@@ -94,7 +94,7 @@ void test_runtime_func(struct TestContext *tc)
     test_runtime_func_recursive(tc, rt);
     test_runtime_func_simple_capture(tc, rt);
     test_runtime_func_call_non_function(tc, rt);
-	test_runtime_func_call_nested_currying(tc, rt);
-	test_runtime_func_call_nontrivial_call_expression(tc, rt);
+    test_runtime_func_call_nested_currying(tc, rt);
+    test_runtime_func_call_nontrivial_call_expression(tc, rt);
     rt_free(rt);
 }

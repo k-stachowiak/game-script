@@ -10,21 +10,21 @@
 
 static void para_error_invalid_argc(char *func, int count)
 {
-	err_push("EVAL",
+    err_push("EVAL",
         "Incorrect arguments count passed to _%s_: %d",
         func, count);
 }
 
 static void para_error_arg_expected(char *func, int index, char *expected)
 {
-	err_push("EVAL",
+    err_push("EVAL",
             "Argument %d of parafunc _%s_ must be %s",
             index, func, expected);
 }
 
 static void para_error_case(char *unmet)
 {
-	err_push("EVAL", "Case %s", unmet);
+    err_push("EVAL", "Case %s", unmet);
 }
 
 static void eval_parafunc_if(
@@ -46,7 +46,7 @@ static void eval_parafunc_if(
     temp_end = rt->stack.top;
 
     if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating if test");
+        err_push_src("EVAL", args->loc, "Failed evaluating if test");
         return;
     }
 
@@ -82,7 +82,7 @@ static bool eval_parafunc_switch_case(
     temp_end = rt->stack.top;
 
     if (err_state()) {
-		err_push_src("EVAL", case_node->loc, "Failed evaluating case expression");
+        err_push_src("EVAL", case_node->loc, "Failed evaluating case expression");
         goto end;
     }
 
@@ -129,7 +129,7 @@ static void eval_parafunc_switch(
     temp_end = rt->stack.top;
 
     if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating switch expression");
+        err_push_src("EVAL", args->loc, "Failed evaluating switch expression");
         goto end;
     }
 
@@ -140,14 +140,14 @@ static void eval_parafunc_switch(
             goto end;
         } else {
             if (err_state()) {
-				err_push("EVAL", "Failed evaluating switch case");
+                err_push("EVAL", "Failed evaluating switch case");
                 goto end;
             }
             args = args->next;
         }
     }
 
-	err_push("EVAL", "Unmached case in a swithc");
+    err_push("EVAL", "Unmached case in a swithc");
 
 end:
     stack_collapse(&rt->stack, temp_begin, temp_end);
@@ -173,7 +173,7 @@ static void eval_parafunc_logic(
 
         VAL_LOC_T loc = eval_impl(args, rt, sym_map);
         if (err_state()) {
-			err_push_src("EVAL", args->loc, "Failed evaluating logic parafunc element");
+            err_push_src("EVAL", args->loc, "Failed evaluating logic parafunc element");
             return;
         }
 
@@ -244,7 +244,7 @@ static void eval_parafunc_peek(
     ref_loc = eval_impl(args, rt, sym_map);
     temp_end = rt->stack.top;
     if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating _peek_ reference argument");
+        err_push_src("EVAL", args->loc, "Failed evaluating _peek_ reference argument");
         return;
     }
 
@@ -278,7 +278,7 @@ static void eval_parafunc_poke(
     temp_begin = rt->stack.top;
     ref_loc = eval_impl(args, rt, sym_map);
     if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating _poke_ reference argument");
+        err_push_src("EVAL", args->loc, "Failed evaluating _poke_ reference argument");
         return;
     }
 
@@ -293,12 +293,12 @@ static void eval_parafunc_poke(
     source_loc = eval_impl(args->next, rt, sym_map);
     temp_end = rt->stack.top;
     if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating _poke_ source argument");
+        err_push_src("EVAL", args->loc, "Failed evaluating _poke_ source argument");
         return;
     }
 
     if (!rt_val_pair_homo(rt, source_loc, target_loc)) {
-		err_push_src("EVAL", args->loc, "Attempted to _poke_ value of mismatched type");
+        err_push_src("EVAL", args->loc, "Attempted to _poke_ value of mismatched type");
         return;
     }
 
@@ -408,7 +408,7 @@ static void eval_parafunc_succ(
     ref_loc = eval_impl(args, rt, sym_map);
     temp_end = rt->stack.top;
     if (err_state()) {
-		err_push_src("EVAL", args->loc, "Failed evaluating _succ_ reference argument");
+        err_push_src("EVAL", args->loc, "Failed evaluating _succ_ reference argument");
         return;
     }
 
@@ -451,26 +451,26 @@ void eval_parafunc(
 
     case AST_PARAFUNC_REF:
         eval_parafunc_ref(rt, sym_map, args);
-		break;
+        break;
 
     case AST_PARAFUNC_PEEK:
         eval_parafunc_peek(rt, sym_map, args);
-		break;
+        break;
 
     case AST_PARAFUNC_POKE:
         eval_parafunc_poke(rt, sym_map, args);
-		break;
+        break;
 
     case AST_PARAFUNC_BEGIN:
         eval_parafunc_begin(rt, sym_map, args);
-		break;
+        break;
 
     case AST_PARAFUNC_END:
         eval_parafunc_end(rt, sym_map, args);
-		break;
+        break;
 
     case AST_PARAFUNC_SUCC:
         eval_parafunc_succ(rt, sym_map, args);
-		break;
+        break;
     }
 }

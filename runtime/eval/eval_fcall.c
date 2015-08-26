@@ -17,34 +17,34 @@
 struct LocArray { VAL_LOC_T *data; int size, cap; };
 
 static void efc_get_already_applied_locs(
-		struct Runtime *rt,
-		struct ValueFuncData *func_data,
-		struct LocArray *result)
+        struct Runtime *rt,
+        struct ValueFuncData *func_data,
+        struct LocArray *result)
 {
-	VAL_SIZE_T i;
+    VAL_SIZE_T i;
     VAL_LOC_T appl_loc = func_data->appl_start;
     for (i = 0; i < func_data->appl_count; ++i) {
-		ARRAY_APPEND(*result, appl_loc);
+        ARRAY_APPEND(*result, appl_loc);
         appl_loc = rt_val_next_loc(rt, appl_loc);
     }
 }
 
 static bool efc_evaluate_currently_applied(
-		struct Runtime *rt,
-		struct SymMap *sym_map,
-		struct AstNode *args,
-		struct LocArray *result)
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args,
+        struct LocArray *result)
 {
-	while (args) {
+    while (args) {
         VAL_LOC_T loc = eval_impl(args, rt, sym_map);
         if (err_state()) {
-			err_push("EVAL", "Failed evaluating new funtcion arguments");
+            err_push("EVAL", "Failed evaluating new funtcion arguments");
             return false;
         }
-		ARRAY_APPEND(*result, loc);
-		args = args->next;
-	}
-	return true;
+        ARRAY_APPEND(*result, loc);
+        args = args->next;
+    }
+    return true;
 }
 
 /** Evaluates an expression and inserts into a provided symbol map. */
@@ -59,13 +59,13 @@ static bool efc_insert_expression(
 {
     *location = eval_impl(arg_node, rt, caller_sym_map);
     if (err_state()) {
-		err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
+        err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
         return false;
     }
 
     eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
     if (err_state()) {
-		err_push("EVAL", "Failed registering function argument in the local scope");
+        err_push("EVAL", "Failed registering function argument in the local scope");
         return false;
     }
 
@@ -85,7 +85,7 @@ static void efc_curry_on(
     VAL_LOC_T current_loc, size_loc, data_begin;
     VAL_SIZE_T i, arg_count;
 
-	/* Initialize push */
+    /* Initialize push */
     rt_val_push_func_init(
         &rt->stack,
         &size_loc,
@@ -117,7 +117,7 @@ static void efc_curry_on(
     for (; actual_args; actual_args = actual_args->next) {
         eval_impl(actual_args, rt, sym_map);
         if (err_state()) {
-			err_push_src("EVAL", actual_args->loc, "Failed evaluating function argument");
+            err_push_src("EVAL", actual_args->loc, "Failed evaluating function argument");
             break;
         }
     }
@@ -130,7 +130,6 @@ static void efc_curry_on(
 static void efc_evaluate_ast(
         struct Runtime *rt,
         struct SymMap *sym_map,
-        VAL_LOC_T func_loc,
         struct AstNode *actual_args,
         struct ValueFuncData *func_data)
 {
@@ -142,14 +141,14 @@ static void efc_evaluate_ast(
 
     struct SymMap local_sym_map;
 
-	struct AstNode *ast_def = (struct AstNode *)func_data->impl;
+    struct AstNode *ast_def = (struct AstNode *)func_data->impl;
     struct Pattern *formal_args = ast_def->data.func_def.formal_args;
 
     struct SourceLocation *arg_locs = ast_def->data.func_def.arg_locs;
     struct SourceLocation cont_loc = src_loc_virtual();
 
     /* Initialize local scope. */
-	sym_map_init_local(&local_sym_map, sym_map);
+    sym_map_init_local(&local_sym_map, sym_map);
 
     /* Insert captures into the scope. */
     for (i = 0; i < func_data->cap_count; ++i) {
@@ -158,7 +157,7 @@ static void efc_evaluate_ast(
         sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, cont_loc);
         cap_loc = rt_val_fun_next_cap_loc(rt, cap_loc);
         if (err_state()) {
-			err_push_src("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
+            err_push_src("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
             goto cleanup;
         }
     }
@@ -169,7 +168,7 @@ static void efc_evaluate_ast(
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
         if (err_state()) {
-			err_push("EVAL", "Failed re-evaluating funtcion applied arguments");
+            err_push("EVAL", "Failed re-evaluating funtcion applied arguments");
             goto cleanup;
         }
     }
@@ -206,21 +205,21 @@ static void efc_evaluate_bif(
         struct AstNode *actual_args,
         struct ValueFuncData *func_data)
 {
-	struct LocArray arg_locs = { NULL, 0, 0 };
+    struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
 
-	efc_get_already_applied_locs(rt, func_data, &arg_locs);
+    efc_get_already_applied_locs(rt, func_data, &arg_locs);
 
     temp_begin = rt->stack.top;
-	if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
-		goto cleanup;
-	}
+    if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
+        goto cleanup;
+    }
     temp_end = rt->stack.top;
 
-	if (arg_locs.size > BIF_MAX_ARITY) {
-		LOG_ERROR("Argument count mismatch.\n");
-		exit(1);
-	}
+    if (arg_locs.size > BIF_MAX_ARITY) {
+        LOG_ERROR("Argument count mismatch.\n");
+        exit(1);
+    }
     if (func_data->arity != arg_locs.size) {
         LOG_ERROR("Invalid argument count passed to BIF.");
         exit(1);
@@ -245,119 +244,118 @@ static void efc_evaluate_bif(
     stack_collapse(&rt->stack, temp_begin, temp_end);
 
 cleanup:
-	ARRAY_FREE(arg_locs);
+    ARRAY_FREE(arg_locs);
 }
 
 static struct MoonValue *efc_eval_client_args(struct Runtime *rt, VAL_LOC_T *arg_locs, int arg_count)
 {
-	if (arg_count == 0) {
-		return NULL;
-	}
+    if (arg_count == 0) {
+        return NULL;
+    }
 
-	struct MoonValue *result = mn_make_api_value(rt, *arg_locs);
-	result->next = efc_eval_client_args(rt, arg_locs + 1, arg_count - 1);
-	return result;
+    struct MoonValue *result = mn_make_api_value(rt, *arg_locs);
+    result->next = efc_eval_client_args(rt, arg_locs + 1, arg_count - 1);
+    return result;
 }
 
 static void efc_push_client_result(struct Runtime *rt, struct MoonValue *value)
 {
-	VAL_LOC_T size_loc, data_begin, data_end;
-	struct MoonValue *child = value->data.compound;
+    VAL_LOC_T size_loc, data_begin, data_end;
+    struct MoonValue *child = value->data.compound;
 
-	switch (value->type) {
+    switch (value->type) {
     case MN_BOOL:
-		rt_val_push_bool(&rt->stack, value->data.boolean);
-		break;
+        rt_val_push_bool(&rt->stack, value->data.boolean);
+        break;
 
     case MN_CHAR:
-		rt_val_push_char(&rt->stack, value->data.character);
-		break;
+        rt_val_push_char(&rt->stack, value->data.character);
+        break;
 
     case MN_INT:
-		rt_val_push_int(&rt->stack, value->data.integer);
-		break;
+        rt_val_push_int(&rt->stack, value->data.integer);
+        break;
 
     case MN_REAL:
-		rt_val_push_real(&rt->stack, value->data.real);
-		break;
+        rt_val_push_real(&rt->stack, value->data.real);
+        break;
 
     case MN_STRING:
-		rt_val_push_string(
-			&rt->stack,
-			value->data.string,
-			value->data.string + strlen(value->data.string));
-		break;
+        rt_val_push_string(
+            &rt->stack,
+            value->data.string,
+            value->data.string + strlen(value->data.string));
+        break;
 
     case MN_ARRAY:
-		rt_val_push_array_init(&rt->stack, &size_loc);
-		data_begin = rt->stack.top;
-		while (child) {
-			efc_push_client_result(rt, child);
-			child = child->next;
-		}
-		data_end = rt->stack.top;
-		rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
-		break;
+        rt_val_push_array_init(&rt->stack, &size_loc);
+        data_begin = rt->stack.top;
+        while (child) {
+            efc_push_client_result(rt, child);
+            child = child->next;
+        }
+        data_end = rt->stack.top;
+        rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
+        break;
 
     case MN_TUPLE:
-		rt_val_push_tuple_init(&rt->stack, &size_loc);
-		data_begin = rt->stack.top;
-		while (child) {
-			efc_push_client_result(rt, child);
-			child = child->next;
-		}
-		data_end = rt->stack.top;
-		rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
-		break;
+        rt_val_push_tuple_init(&rt->stack, &size_loc);
+        data_begin = rt->stack.top;
+        while (child) {
+            efc_push_client_result(rt, child);
+            child = child->next;
+        }
+        data_end = rt->stack.top;
+        rt_val_push_cpd_final(&rt->stack, size_loc, data_end - data_begin);
+        break;
 
     case MN_UNIT:
         rt_val_push_unit(&rt->stack);
         break;
 
-	case MN_FUNCTION:
-		err_push("EVAL", "CLIF returned a function");
-		break;
+    case MN_FUNCTION:
+        err_push("EVAL", "CLIF returned a function");
+        break;
 
-	case MN_REFERENCE:
-		err_push("EVAL", "CLIF returned a reference");
-		break;
-	}
+    case MN_REFERENCE:
+        err_push("EVAL", "CLIF returned a reference");
+        break;
+    }
 }
 
 /** Evaluates a CLIF. */
 static void efc_evaluate_clif(
         struct Runtime *rt,
         struct SymMap *sym_map,
-		VAL_LOC_T func_loc,
         struct AstNode *actual_args,
         struct ValueFuncData *func_data)
 {
-	struct LocArray arg_locs = { NULL, 0, 0 };
+    struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
-	struct MoonValue *client_args, *client_result;
-	ClifHandler handler = (ClifHandler)func_data->impl;
+    struct MoonValue *client_args, *client_result;
+    ClifHandler handler = (ClifHandler)func_data->impl;
 
-	efc_get_already_applied_locs(rt, func_data, &arg_locs);
+    efc_get_already_applied_locs(rt, func_data, &arg_locs);
 
     temp_begin = rt->stack.top;
-	if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
-		goto cleanup;
-	}
+    if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
+        goto cleanup;
+    }
     temp_end = rt->stack.top;
 
-	client_args = efc_eval_client_args(rt, arg_locs.data, arg_locs.size);
-	client_result = handler(client_args);
-	mn_api_value_free(client_args);
+    client_args = efc_eval_client_args(rt, arg_locs.data, arg_locs.size);
+    client_result = handler(client_args);
+    mn_api_value_free(client_args);
 
-	if (client_result) {
-		efc_push_client_result(rt, client_result);
-		mn_api_value_free(client_result);
-	}
+    if (client_result) {
+        efc_push_client_result(rt, client_result);
+        mn_api_value_free(client_result);
+    }
 
     stack_collapse(&rt->stack, temp_begin, temp_end);
 
 cleanup:
-	ARRAY_FREE(arg_locs);
+    ARRAY_FREE(arg_locs);
 }
 
 void eval_func_call(
@@ -374,12 +372,12 @@ void eval_func_call(
     VAL_SIZE_T applied;
 
     temp_begin = rt->stack.top;
-	func_loc = eval_impl(func, rt, sym_map);
+    func_loc = eval_impl(func, rt, sym_map);
     temp_end = rt->stack.top;
-	if (err_state()) {
-		err_push("EVAL", "Failed evaluating function identity");
-		return;
-	}
+    if (err_state()) {
+        err_push("EVAL", "Failed evaluating function identity");
+        return;
+    }
 
     if (rt_val_peek_type(&rt->stack, func_loc) != VAL_FUNCTION) {
         err_push("EVAL", "Function call key doesn't evaluate to a function");
@@ -393,22 +391,22 @@ void eval_func_call(
         efc_curry_on(rt, sym_map, actual_args, &func_data);
 
     } else if (func_data.arity == applied) {
-		switch (func_data.func_type) {
-		case VAL_FUNC_AST:
-            efc_evaluate_ast(rt, sym_map, func_loc, actual_args, &func_data);
-			break;
+        switch (func_data.func_type) {
+        case VAL_FUNC_AST:
+            efc_evaluate_ast(rt, sym_map, actual_args, &func_data);
+            break;
 
-		case VAL_FUNC_BIF:
+        case VAL_FUNC_BIF:
             efc_evaluate_bif(rt, sym_map, actual_args, &func_data);
-			break;
+            break;
 
-		case VAL_FUNC_CLIF:
-            efc_evaluate_clif(rt, sym_map, func_loc, actual_args, &func_data);
-			break;
-		}
+        case VAL_FUNC_CLIF:
+            efc_evaluate_clif(rt, sym_map, actual_args, &func_data);
+            break;
+        }
 
     } else {
-		err_push("EVAL", "Passed too many arguments to a function");
+        err_push("EVAL", "Passed too many arguments to a function");
 
     }
 

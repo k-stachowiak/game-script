@@ -152,24 +152,24 @@
 
 ### Asserts if all of elements in range fulfill a given predicate
 (bind all_of (func (pred first^ last^)
-	(if (eq first^ last^)
-		true
-		(if (pred (peek first^))
-			(all_of pred (succ first^) last^)
-			false
-		)
-	)
+    (if (eq first^ last^)
+        true
+        (if (pred (peek first^))
+            (all_of pred (succ first^) last^)
+            false
+        )
+    )
 ))
 
 ### Asserts if any of elements in range fulfills a given predicate
 (bind any_of (func (pred first^ last^)
-	(if (eq first^ last^)
-		false
-		(if (pred (peek first^))
-			true
-			(any_of pred (succ first^) last^)
-		)
-	)
+    (if (eq first^ last^)
+        false
+        (if (pred (peek first^))
+            true
+            (any_of pred (succ first^) last^)
+        )
+    )
 ))
 
 ### Asserts if none of elements in range don't fulfill a given predicate
@@ -287,7 +287,7 @@
 ### Inplace quicksort implementation accepting custom comparator
 (bind quicksort_cmp (func (cmp first^ last^)
     (if (eq first^ last^)
-		unit
+        unit
         (do
             (bind pivot (peek (succ_n first^ (/ (distance first^ last^) 2))))
 
@@ -368,17 +368,17 @@
 
 ### Functional zip
 (bind zip (func (vx vy) (do
-	(bind zip_impl (func (vx vy result)
-		(if (or (empty vx) (empty vy))
-			result
-			(do
-				(bind { hdx tlx } (dcons vx))
-				(bind { hdy tly } (dcons vy))
-				(zip_impl tlx tly (push_back result { hdx hdy }))
-			)
-		)
-	))
-	(zip_impl vx vy [])
+    (bind zip_impl (func (vx vy result)
+        (if (or (empty vx) (empty vy))
+            result
+            (do
+                (bind { hdx tlx } (dcons vx))
+                (bind { hdy tly } (dcons vy))
+                (zip_impl tlx tly (push_back result { hdx hdy }))
+            )
+        )
+    ))
+    (zip_impl vx vy [])
 )))
 
 ### Functional map for two input collections
@@ -419,29 +419,29 @@
 
 ### Produce sequence of first n natural numbers (including 0).
 (bind seq (func (n) (do
-	(bind seq_impl (func (current last acc)
-		(if (eq current last)
-			acc
-			(seq_impl (+ current 1) last (push_back acc current))
-		)
-	))
-	(seq_impl 0 n [])
+    (bind seq_impl (func (current last acc)
+        (if (eq current last)
+            acc
+            (seq_impl (+ current 1) last (push_back acc current))
+        )
+    ))
+    (seq_impl 0 n [])
 )))
 
 ### Returns an array containing a range of integer values
 (bind range_int (func (init count) (do
-	(map (+ init) (seq count))
+    (map (+ init) (seq count))
 )))
 
 ### Generates an array of elements generated with a function
 (bind array_gen (func (f n) (do
-	(bind array_gen_impl (func (f n acc)
-		(if (eq n 0)
-			acc
-			(array_gen_impl f (- n 1) (push_back acc (f)))
-		)
-	))
-	(array_gen_impl f n [])
+    (bind array_gen_impl (func (f n acc)
+        (if (eq n 0)
+            acc
+            (array_gen_impl f (- n 1) (push_back acc (f)))
+        )
+    ))
+    (array_gen_impl f n [])
 )))
 
 ### Generates an array of copies of the provided argument
@@ -544,9 +544,9 @@
             (eq (times8 3) (* 3 8))
         ))
         (test "Map" (eq (map not [ true false true ]) [ false true false ]))
-		(test "Zip normal" (eq (zip [ 1 2 3 ] [ 'a' 'b' 'c' ]) [ { 1 'a' } { 2 'b' } { 3 'c' } ]))
-		(test "Zip count mismatch" (eq (zip [ 1 2 3 ] [ 'a' 'b' ]) [ { 1 'a' } { 2 'b' } ]))
-		(test "Zip with empty" (eq (zip [ 1 2 3 ] []) []))
+        (test "Zip normal" (eq (zip [ 1 2 3 ] [ 'a' 'b' 'c' ]) [ { 1 'a' } { 2 'b' } { 3 'c' } ]))
+        (test "Zip count mismatch" (eq (zip [ 1 2 3 ] [ 'a' 'b' ]) [ { 1 'a' } { 2 'b' } ]))
+        (test "Zip with empty" (eq (zip [ 1 2 3 ] []) []))
         (test "Zip with" (eq (zip_with * [ 1 2 3 ] [ 4 5 6 ]) [ 4 10 18 ]))
         (test "Fold left" (eq (foldl - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -55))
         (test "Fold right" (eq (foldr - 0 [ 1 2 3 4 5 6 7 8 9 10 ]) -5))
@@ -561,24 +561,24 @@
 
         # Algorithms compound reference
 
-		(test "All of" (do
-			(bind v [ 1 2 3 ])
-			(all_of (ge 3) (begin v) (end v))
-		))
+        (test "All of" (do
+            (bind v [ 1 2 3 ])
+            (all_of (ge 3) (begin v) (end v))
+        ))
 
-		(test "Any of 1" (do
-			(bind v [ 1 2 3 ])
-			(any_of (eq 2) (begin v) (end v))
-		))
-		(test "Any of 2" (do
-			(bind v [ 1 2 3 ])
-			(not (any_of (eq 5) (begin v) (end v)))
-		))
+        (test "Any of 1" (do
+            (bind v [ 1 2 3 ])
+            (any_of (eq 2) (begin v) (end v))
+        ))
+        (test "Any of 2" (do
+            (bind v [ 1 2 3 ])
+            (not (any_of (eq 5) (begin v) (end v)))
+        ))
 
-		(test "None of" (do
-			(bind v [ 1 2 3 ])
-			(none_of (lt 3) (begin v) (end v))
-		))
+        (test "None of" (do
+            (bind v [ 1 2 3 ])
+            (none_of (lt 3) (begin v) (end v))
+        ))
 
         (test "Min element 1" (do
             (bind v [ 1 2 3])
@@ -624,22 +624,22 @@
             (eq result^ (end v))
         ))
 
-		(test "Partition empty" (do
-			(bind v [ 1 ])
-			(bind pred (eq 1))
-			(bind result^ (partition pred (begin v) (end v)))
-			(eq result^ (end v))
-		))
+        (test "Partition empty" (do
+            (bind v [ 1 ])
+            (bind pred (eq 1))
+            (bind result^ (partition pred (begin v) (end v)))
+            (eq result^ (end v))
+        ))
         (test "Partition mixed" (do
             (bind v [ 1 4 5 3 2 6 ])
-			(bind pred (ge 3))
-			(bind first^ (begin v))
-			(bind last^ (end v))
+            (bind pred (ge 3))
+            (bind first^ (begin v))
+            (bind last^ (end v))
             (bind result^ (partition pred first^ last^))
-			(and
-				(all_of pred first^ result^)
-				(none_of pred result^ last^)
-			)
+            (and
+                (all_of pred first^ result^)
+                (none_of pred result^ last^)
+            )
         ))
 
         (test "Lexicographical compare 1" (do
@@ -664,17 +664,17 @@
         (test "Merge 2" (eq (merge [ 1 3 5 ] [ 2 4 6 ]) [ 1 2 3 4 5 6 ]))
 
         (test "Quicksort 1" (do
-			(bind unsorted [ 5 1 4 2 3 ])
-			(bind sorted [ 5 4 3 2 1 ])
-			(quicksort_cmp gt (begin unsorted) (end unsorted))
-			(eq sorted unsorted)
-		))
-		(test "Quicksort 2" (do
-			(bind unsorted [ 5 1 4 2 3 ])
-			(bind sorted [ 1 2 3 4 5 ])
-			(quicksort (begin unsorted) (end unsorted))
-			(eq sorted unsorted)
-		))
+            (bind unsorted [ 5 1 4 2 3 ])
+            (bind sorted [ 5 4 3 2 1 ])
+            (quicksort_cmp gt (begin unsorted) (end unsorted))
+            (eq sorted unsorted)
+        ))
+        (test "Quicksort 2" (do
+            (bind unsorted [ 5 1 4 2 3 ])
+            (bind sorted [ 1 2 3 4 5 ])
+            (quicksort (begin unsorted) (end unsorted))
+            (eq sorted unsorted)
+        ))
 
         (test "Mergesort 1" (eq (mergesort_cmp gt [ 5 1 4 2 3 ]) [ 5 4 3 2 1 ]))
         (test "Mergesort 2" (eq (mergesort [ 5 1 4 2 3 ]) [ 1 2 3 4 5 ]))
@@ -686,22 +686,22 @@
             (eq sorted maybe_sorted)
         ))
 
-		# Sequences
-		(test "Sequence empty" (eq (seq 0) []))
-		(test "Sequence non-empty" (eq (seq 5) [ 0 1 2 3 4 ]))
-		(test "Integer range empty" (eq (range_int 0 0) []))
-		(test "Integer range positive" (eq (range_int 0 4) [ 0 1 2 3 ]))
-		(test "Integer range not only positive" (eq (range_int -2 4) [ -2 -1 0 1 ]))
-		(test "Array of"
-			(eq
-				(array_of { 1 2.0 "three" } 3)
-				[
-					{ 1 2.0 "three" }
-					{ 1 2.0 "three" }
-					{ 1 2.0 "three" }
-				]
-			)
-		)
+        # Sequences
+        (test "Sequence empty" (eq (seq 0) []))
+        (test "Sequence non-empty" (eq (seq 5) [ 0 1 2 3 4 ]))
+        (test "Integer range empty" (eq (range_int 0 0) []))
+        (test "Integer range positive" (eq (range_int 0 4) [ 0 1 2 3 ]))
+        (test "Integer range not only positive" (eq (range_int -2 4) [ -2 -1 0 1 ]))
+        (test "Array of"
+            (eq
+                (array_of { 1 2.0 "three" } 3)
+                [
+                    { 1 2.0 "three" }
+                    { 1 2.0 "three" }
+                    { 1 2.0 "three" }
+                ]
+            )
+        )
 
         # Type inspection
         (test "Is boolean" (do

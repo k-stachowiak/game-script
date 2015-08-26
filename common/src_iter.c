@@ -2,14 +2,14 @@
 
 struct SourceLocation src_loc_normal(int line, int column)
 {
-	struct SourceLocation result = { SRC_LOC_NORMAL, line, column };
-	return result;
+    struct SourceLocation result = { SRC_LOC_NORMAL, line, column };
+    return result;
 }
 
 struct SourceLocation src_loc_virtual(void)
 {
-	struct SourceLocation result = { SRC_LOC_VIRTUAL, -1, -1 };
-	return result;
+    struct SourceLocation result = { SRC_LOC_VIRTUAL, -1, -1 };
+    return result;
 }
 
 void si_init(struct SourceIter *si, char *first, char *last)
@@ -60,9 +60,9 @@ bool si_eq(struct SourceIter *lhs, struct SourceIter *rhs)
 }
 
 struct SourceIter si_find(
-		struct SourceIter *begin,
-		struct SourceIter *end,
-		int value)
+        struct SourceIter *begin,
+        struct SourceIter *end,
+        int value)
 {
     struct SourceIter result = *begin;
 
@@ -74,8 +74,8 @@ struct SourceIter si_find(
 }
 
 struct SourceIter si_find_if_not(struct SourceIter *begin,
-		struct SourceIter *end,
-		int (*pred)(int))
+        struct SourceIter *end,
+        int (*pred)(int))
 {
     struct SourceIter result = *begin;
 

@@ -8,7 +8,7 @@
 
 static void bind_error_incorrect_type(void)
 {
-	err_push("EVAL", "Compound type mismatched");
+    err_push("EVAL", "Compound type mismatched");
 }
 
 void eval_bind_pattern(
@@ -25,13 +25,22 @@ void eval_bind_pattern(
     int i, cpd_len, pattern_len, len;
 
     if (pattern->type == PATTERN_SYMBOL) {
-        sym_map_insert(sym_map, pattern->symbol, location, *source_loc);
+        sym_map_insert(
+            sym_map,
+            pattern->data.symbol.symbol,
+            location,
+            *source_loc);
         return;
     }
 
     if (pattern->type == PATTERN_DONTCARE) {
         return;
     }
+
+    /* TODO: evaluate correctness of this bind since there is the new case
+     * of the matching pattern which will rather complicate the bind
+     * algorithm. Currently it depends on some vague if-ology...
+     */
 
     if (pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) {
         bind_error_incorrect_type();
@@ -44,21 +53,21 @@ void eval_bind_pattern(
     }
 
     cpd_len = rt_val_cpd_len(rt, location);
-    pattern_len = pattern_list_len(pattern->children);
+    pattern_len = pattern_list_len(pattern->data.compound.children);
     if (cpd_len != pattern_len) {
-		err_push("EVAL", "Compound bind length mismatched");
+        err_push("EVAL", "Compound bind length mismatched");
         return;
     } else {
         len = pattern_len;
     }
 
     child_loc = rt_val_cpd_first_loc(location);
-    child_pat = pattern->children;
+    child_pat = pattern->data.compound.children;
 
     for (i = 0; i < len; ++i) {
         eval_bind_pattern(rt, sym_map, child_pat, child_loc, source_loc);
         if (err_state()) {
-			err_push("EVAL", "Failed evaluating bind pattern");
+            err_push("EVAL", "Failed evaluating bind pattern");
             return;
         }
         child_loc = rt_val_next_loc(rt, child_loc);
@@ -76,7 +85,7 @@ void eval_bind(
 
     VAL_LOC_T location = eval_impl(expr, rt, sym_map);
     if (err_state()) {
-		err_push_src("EVAL", expr->loc, "Failed evaluating bind expression");
+        err_push_src("EVAL", expr->loc, "Failed evaluating bind expression");
         return;
     }
 

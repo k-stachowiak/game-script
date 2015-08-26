@@ -47,7 +47,7 @@ void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         break;
 
     case BBM_MISMATCH:
-		err_push("BIF", "Arguments of comparison BIF must be of matching primitive type");
+        err_push("BIF", "Arguments of comparison BIF must be of matching primitive type");
         return;
     }
 }

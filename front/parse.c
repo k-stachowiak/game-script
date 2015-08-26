@@ -47,6 +47,82 @@ static bool all_of(char *current, char *last, int (*f)(int))
  * ================
  */
 
+/* Type pattern.
+ * -------------
+ */
+
+static struct TypePattern *parse_type_pattern(struct DomNode *dom);
+
+static struct TypePattern *parse_type_pattern_list(struct DomNode *dom)
+{
+    struct TypePattern *result = NULL, *result_end = NULL;
+    while (dom) {
+        struct TypePattern *item = parse_type_pattern(dom);
+        if (!item) {
+            type_pattern_free(result);
+            return NULL;
+        }
+        LIST_APPEND(item, &result, &result_end);
+        dom = dom->next;
+    }
+    return result;
+}
+
+static struct TypePattern *parse_type_pattern_atom(struct DomNode *dom)
+{
+    if (dom_node_is_reserved_atom(dom, DOM_RES_BOOL)) {
+        return type_pattern_make_bool();
+
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_INTEGER)) {
+        return type_pattern_make_integer();
+
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_REAL)) {
+        return type_pattern_make_real();
+
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_CHARACTER)) {
+        return type_pattern_make_character();
+
+    } else {
+        err_push_src("PARSE", dom->loc, "Illegal reserved word in type pattern");
+        return NULL;
+    }
+}
+
+static struct TypePattern *parse_type_pattern(struct DomNode *dom)
+{
+    if (dom_node_is_atom(dom)) {
+        return parse_type_pattern_atom(dom);
+
+    } else {
+        struct TypePattern *children =
+            parse_type_pattern_list(dom->cpd_children);
+
+        if (!children && err_state()) {
+            err_push_src("PARSE", dom->loc, "Failed parsing compound type pattern children");
+            return NULL;
+        }
+
+        switch (dom->cpd_type) {
+        case DOM_CPD_CORE:
+            err_push_src("PARSE", dom->loc, "Core compound encountered when parsing type pattern");
+            return NULL;
+
+        case DOM_CPD_ARRAY:
+            return type_pattern_make_array(children);
+
+        case DOM_CPD_TUPLE:
+            return type_pattern_make_tuple(children);
+        }
+    }
+
+    LOG_ERROR("Impossible to get here.");
+    exit(1);
+}
+
+/* Regular pattern.
+ * ----------------
+ */
+
 static struct Pattern *parse_pattern(struct DomNode *dom);
 
 static struct Pattern *parse_pattern_list(struct DomNode *dom)
@@ -66,34 +142,25 @@ static struct Pattern *parse_pattern_list(struct DomNode *dom)
 
 static struct Pattern *parse_pattern_atom(struct DomNode *dom)
 {
-	char *symbol;
-	if ((symbol = dom_node_parse_symbol(dom))) {
-		return pattern_make_symbol(symbol);
+    char *symbol;
+    if ((symbol = dom_node_parse_symbol(dom))) {
+        return pattern_make_symbol(symbol);
 
-	} else if (dom_node_is_reserved_atom(dom, DOM_RES_DONTCARE)) {
-		return pattern_make_dontcare();
+    } else if (dom_node_is_reserved_atom(dom, DOM_RES_DONTCARE)) {
+        return pattern_make_dontcare();
 
-	} else {
-		err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
-		return NULL;
-	}
+    } else {
+        err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
+        return NULL;
+    }
 }
 
-static struct Pattern *parse_pattern_compound(
-	    struct DomNode *dom,
-	    struct Pattern *children)
-{
-	return pattern_make_compound(children,
-        (dom->cpd_type == DOM_CPD_ARRAY) ?
-		PATTERN_ARRAY : PATTERN_TUPLE);
-}
-
-static struct Pattern *parse_pattern_typed(
-    	struct DomNode *dom,
-	    struct Pattern *children)
+static struct Pattern *parse_pattern_matching(struct DomNode *dom)
 {
     struct DomNode *child = NULL;
-    
+    struct TypePattern *type_pattern = NULL;
+    struct Pattern *pattern = NULL;
+
     /* 1. Is core compound. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
         return NULL;
@@ -112,30 +179,43 @@ static struct Pattern *parse_pattern_typed(
     }
     child = child->next;
 
-    /* 3.2. 2nd keyword is a non-type-matching pattern. */
-    exit(1);
+    /* 3.2. 2nd child is a type pattern. */
+    if (!(type_pattern = parse_type_pattern(child))) {
+        return NULL;
+    }
+    child = child->next;
+
+    /* 3.3. 3rd child is a regular pattern. */
+    if (!(pattern = parse_pattern(child))) {
+        type_pattern_free(type_pattern);
+        return NULL;
+    }
+
+    return pattern_make_matching(type_pattern, pattern);
 }
 
 static struct Pattern *parse_pattern(struct DomNode *dom)
 {
     if (dom_node_is_atom(dom)) {
-		return parse_pattern_atom(dom);
+        return parse_pattern_atom(dom);
 
     } else {
-		struct Pattern *children = parse_pattern_list(dom->cpd_children);
+        struct Pattern *children = parse_pattern_list(dom->cpd_children);
 
-		if (!children && err_state()) {
-			err_push_src("PARSE", dom->loc, "Failed parsing compound pattern children");
-			return NULL;
-		}
-		
+        if (!children && err_state()) {
+            err_push_src("PARSE", dom->loc, "Failed parsing compound pattern children");
+            return NULL;
+        }
+
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
-			return parse_pattern_typed(dom, children);
+            return parse_pattern_matching(dom);
 
         case DOM_CPD_ARRAY:
+            return pattern_make_array(children);
+
         case DOM_CPD_TUPLE:
-			return parse_pattern_compound(dom, children);
+            return pattern_make_tuple(children);
         }
     }
 
@@ -299,7 +379,7 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
     }
 
     /* None of the reserved words were matched. */
-	ast_node_free(args);
+    ast_node_free(args);
     return NULL;
 }
 
@@ -360,10 +440,10 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is an expression. */
-	func = parse_one(child);
+    func = parse_one(child);
     if (err_state()) {
         return NULL;
-	}
+    }
     child = child->next;
 
     /* 3.2. Has 0 or more further children being any expression. */
@@ -372,7 +452,7 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
         return NULL;
     }
 
-	return ast_make_func_call(&dom->loc, func, args);
+    return ast_make_func_call(&dom->loc, func, args);
 }
 
 static struct AstNode *parse_func_def(struct DomNode *dom)
@@ -612,7 +692,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         }
 
     } else {
-		err_push_src("PARSE", dom->loc, "Incorrect character length (%d)", len);
+        err_push_src("PARSE", dom->loc, "Incorrect character length (%d)", len);
         return NULL;
     }
 }
@@ -638,7 +718,7 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
         }
 
         if (first == last) {
-			return NULL;
+            return NULL;
         }
 
         if (all_of(first, last, isdigit)) {
@@ -674,7 +754,7 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
     }
 
     if (first == last) {
-		return NULL;
+        return NULL;
     }
 
     if (period == last ||
@@ -735,7 +815,7 @@ static struct AstNode *parse_one(struct DomNode *dom)
         return node;
 
     } else {
-		err_push_src("PARSE", dom->loc, "Failed parsing DOM node");
+        err_push_src("PARSE", dom->loc, "Failed parsing DOM node");
         return NULL;
     }
 }
@@ -767,13 +847,13 @@ struct AstNode *parse_source(char *source)
 
     dom = lex(source);
     if (err_state()) {
-		err_push("PARSE", "Failed parsing source");
+        err_push("PARSE", "Failed parsing source");
         return NULL;
     }
 
     ast = parse_list(dom);
     if (err_state()) {
-		err_push("PARSE", "Failed parsing DOM list");
+        err_push("PARSE", "Failed parsing DOM list");
         dom_free(dom);
         return NULL;
     }

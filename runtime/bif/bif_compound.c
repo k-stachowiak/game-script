@@ -12,17 +12,17 @@
 
 static void bif_cpd_error_arg(int arg, char *func, char *condition)
 {
-	err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
+    err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 static void bif_cpd_error_range(char *condition)
 {
-	err_push("BIF", "In _slice_ : %s", condition);
+    err_push("BIF", "In _slice_ : %s", condition);
 }
 
 static void bif_cpd_error_mismatch(char *func)
 {
-	err_push("BIF", "Arguments of _%s_ must be of matching types", func);
+    err_push("BIF", "Arguments of _%s_ must be of matching types", func);
 }
 
 void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
@@ -38,17 +38,17 @@ void bif_push_front(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         return;
     }
 
-	len = rt_val_cpd_len(rt, x_loc);
+    len = rt_val_cpd_len(rt, x_loc);
     x_elem_loc = rt_val_cpd_first_loc(x_loc);
 
     if (x_type == VAL_ARRAY) {
-		if (len > 0 && !rt_val_pair_homo(rt, x_elem_loc, y_loc)) {
-			bif_cpd_error_arg(1, "push-front",
-				"must be homogenous with the rest of the array");
-			return;
-		} else {
-			rt_val_push_array_init(&rt->stack, &size_loc);
-		}
+        if (len > 0 && !rt_val_pair_homo(rt, x_elem_loc, y_loc)) {
+            bif_cpd_error_arg(1, "push-front",
+                "must be homogenous with the rest of the array");
+            return;
+        } else {
+            rt_val_push_array_init(&rt->stack, &size_loc);
+        }
     } else {
         rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
@@ -79,13 +79,13 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
     len = rt_val_cpd_len(rt, x_loc);
 
     if (x_type == VAL_ARRAY) {
-		if (len > 0 && !rt_val_pair_homo(rt, x_elem_loc, y_loc)) {
-			bif_cpd_error_arg(1, "push-back",
-				"must be homogenous with the rest of the array");
-			return;
-		} else {
-			rt_val_push_array_init(&rt->stack, &size_loc);
-		}
+        if (len > 0 && !rt_val_pair_homo(rt, x_elem_loc, y_loc)) {
+            bif_cpd_error_arg(1, "push-back",
+                "must be homogenous with the rest of the array");
+            return;
+        } else {
+            rt_val_push_array_init(&rt->stack, &size_loc);
+        }
     } else {
         rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
@@ -101,7 +101,7 @@ void bif_push_back(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 
 void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
 {
-	int i, x_len, y_len;
+    int i, x_len, y_len;
     VAL_LOC_T size_loc, x_elem_loc, y_elem_loc;
     enum ValueType x_type = rt_val_peek_type(&rt->stack, x_loc);
     enum ValueType y_type = rt_val_peek_type(&rt->stack, y_loc);
@@ -121,31 +121,31 @@ void bif_cat(struct Runtime* rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc)
         return;
     }
 
-	x_len = rt_val_cpd_len(rt, x_loc);
-	y_len = rt_val_cpd_len(rt, y_loc);
-	x_elem_loc = rt_val_cpd_first_loc(x_loc);
-	y_elem_loc = rt_val_cpd_first_loc(y_loc);
+    x_len = rt_val_cpd_len(rt, x_loc);
+    y_len = rt_val_cpd_len(rt, y_loc);
+    x_elem_loc = rt_val_cpd_first_loc(x_loc);
+    y_elem_loc = rt_val_cpd_first_loc(y_loc);
 
     if (x_type == VAL_ARRAY) {
-		if (x_len > 0 && y_len > 0 && !rt_val_pair_homo(rt, x_elem_loc, y_elem_loc)) {
-			bif_cpd_error_arg(1, "cat",
-				"must be homogenous with the rest of the array");
-			return;
-		} else {
-			rt_val_push_array_init(&rt->stack, &size_loc);
-		}
+        if (x_len > 0 && y_len > 0 && !rt_val_pair_homo(rt, x_elem_loc, y_elem_loc)) {
+            bif_cpd_error_arg(1, "cat",
+                "must be homogenous with the rest of the array");
+            return;
+        } else {
+            rt_val_push_array_init(&rt->stack, &size_loc);
+        }
     } else {
         rt_val_push_tuple_init(&rt->stack, &size_loc);
     }
 
-	for (i = 0; i < x_len; ++i) {
+    for (i = 0; i < x_len; ++i) {
         rt_val_push_copy(&rt->stack, x_elem_loc);
         x_elem_loc = rt_val_next_loc(rt, x_elem_loc);
-	}
-	for (i = 0; i < y_len; ++i) {
+    }
+    for (i = 0; i < y_len; ++i) {
         rt_val_push_copy(&rt->stack, y_elem_loc);
         y_elem_loc = rt_val_next_loc(rt, y_elem_loc);
-	}
+    }
 
     rt_val_push_cpd_final(&rt->stack, size_loc, x_size + y_size);
 }

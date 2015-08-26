@@ -13,7 +13,7 @@ void eval_compound(
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = node->data.compound.exprs;
-	bool has_first_elem = false;
+    bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
 
     /* Header. */
@@ -32,24 +32,24 @@ void eval_compound(
     while (current) {
         elem_loc = eval_impl(current, rt, sym_map);
         if (err_state()) {
-			err_push_src("EVAL", current->loc, "Failed evaluating compound expression element");
+            err_push_src("EVAL", current->loc, "Failed evaluating compound expression element");
             return;
         } else {
-			current = current->next;
-		}
+            current = current->next;
+        }
 
-		if (node->data.compound.type != AST_CPD_ARRAY) {
-			continue;
-		}
+        if (node->data.compound.type != AST_CPD_ARRAY) {
+            continue;
+        }
 
-		/* Homogenity check */
-		if (!has_first_elem) {
-			has_first_elem = true;
-			first_elem_loc = elem_loc;
-		} else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
-			err_push("EVAL", "Heterogenous array literal evaluated");
-			return;
-		}
+        /* Homogenity check */
+        if (!has_first_elem) {
+            has_first_elem = true;
+            first_elem_loc = elem_loc;
+        } else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
+            err_push("EVAL", "Heterogenous array literal evaluated");
+            return;
+        }
     }
 
     /* Hack value size to correct value. */

@@ -4,6 +4,8 @@
 
 static void test_cci_impl(struct TestContext *tc, struct Runtime *rt)
 {
+    (void)tc;
+    (void)rt;
 }
 
 void test_cci(struct TestContext *tc)

@@ -13,22 +13,22 @@
 
 static void bif_text_error_arg(int arg, char *func, char *condition)
 {
-	err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
+    err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 static void bif_text_error_wc_mismatch(void)
 {
-	err_push("BIF", "Wildcard type mismatched argument");
+    err_push("BIF", "Wildcard type mismatched argument");
 }
 
 static void bif_text_error_parse(void)
 {
-	err_push("BIF", "Failed parsing string literal");
+    err_push("BIF", "Failed parsing string literal");
 }
 
 static void bif_text_error_parse_homo(void)
 {
-	err_push("BIF", "Failed parsing non-homogenous array");
+    err_push("BIF", "Failed parsing non-homogenous array");
 }
 
 static char *bif_text_find_format(char *str)
@@ -75,9 +75,9 @@ static void bif_format_try_appending_arg(
         if (type != VAL_INT) {
             bif_text_error_wc_mismatch();
         } else {
-			str_append(*result, "%" PRIu64, rt_val_peek_int(rt, loc));
+            str_append(*result, "%" PRIu64, rt_val_peek_int(rt, loc));
         }
-		break;
+        break;
 
     case 'f':
         if (type != VAL_REAL) {
@@ -98,7 +98,7 @@ static void bif_format_try_appending_arg(
         break;
 
     default:
-		err_push("BIF", "Wildcard '%c' unknown", wc);
+        err_push("BIF", "Wildcard '%c' unknown", wc);
     }
 }
 
@@ -136,13 +136,13 @@ static void bif_format_impl(
 
         begin = end + 1; /* skip '%' */
 
-		if (args_left == 0) {
-			err_push("BIF", "Not enough arguments passed");
-			goto end;
-		}
+        if (args_left == 0) {
+            err_push("BIF", "Not enough arguments passed");
+            goto end;
+        }
         bif_format_try_appending_arg(rt, &result, *begin, arg_loc);
         if (err_state()) {
-			err_push("BIF", "Failed parsing DOM list");
+            err_push("BIF", "Failed parsing DOM list");
             goto end;
         }
 
@@ -153,7 +153,7 @@ static void bif_format_impl(
     }
 
     if (args_left) {
-		err_push("BIF", "%d arguments left after format", args_left);
+        err_push("BIF", "%d arguments left after format", args_left);
     } else {
         rt_val_push_string(&rt->stack, result, result + strlen(result));
     }
@@ -174,7 +174,7 @@ static void bif_parse_any_ast_compound(
 
     VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = cpd->exprs;
-	bool has_first_elem = false;
+    bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
 
     /* Header. */
@@ -192,27 +192,27 @@ static void bif_parse_any_ast_compound(
     data_begin = rt->stack.top;
     while (current) {
 
-		elem_loc = rt->stack.top;
+        elem_loc = rt->stack.top;
         bif_parse_any_ast(rt, current);
         if (err_state()) {
-			err_push("BIF", "Failed parsing compound AST node");
+            err_push("BIF", "Failed parsing compound AST node");
             return;
         } else {
-			current = current->next;
-		}
+            current = current->next;
+        }
 
-		if (cpd->type != AST_CPD_ARRAY) {
-			continue;
-		}
+        if (cpd->type != AST_CPD_ARRAY) {
+            continue;
+        }
 
-		/* Homogenity check */
-		if (!has_first_elem) {
-			has_first_elem = true;
-			first_elem_loc = elem_loc;
-		} else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
-			bif_text_error_parse_homo();
-			return;
-		}
+        /* Homogenity check */
+        if (!has_first_elem) {
+            has_first_elem = true;
+            first_elem_loc = elem_loc;
+        } else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
+            bif_text_error_parse_homo();
+            return;
+        }
     }
 
     /* Fix the header with the written size. */
@@ -391,7 +391,7 @@ void bif_to_string(struct Runtime *rt, VAL_LOC_T arg_loc)
     rt_val_to_string(rt, arg_loc, &buffer);
 
     if (!buffer) {
-		err_push("BIF", "Failed rendering value as string");
+        err_push("BIF", "Failed rendering value as string");
     } else {
         rt_val_push_string(&rt->stack, buffer, buffer + strlen(buffer));
         mem_free(buffer);
@@ -419,15 +419,15 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
     mem_free(string);
 
     if (err_state()) {
-		char *message = err_msg();
+        char *message = err_msg();
 
-		/* NOTE: the error here is intentionally sweeped under the carpet. */
+        /* NOTE: the error here is intentionally sweeped under the carpet. */
         stack_collapse(&rt->stack, result_begin, rt->stack.top);
         rt_val_poke_bool(&rt->stack, data_begin, false);
         rt_val_push_string(&rt->stack, message, message + strlen(message));
         err_reset();
 
-		mem_free(message);
+        mem_free(message);
     }
 
     data_size = rt->stack.top - data_begin;

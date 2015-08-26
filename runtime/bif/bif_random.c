@@ -7,7 +7,7 @@
 
 static void bif_rand_error_arg(int arg, char *func, char *condition)
 {
-	err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
+    err_push("BIF", "Argument %d of _%s_ %s", arg, func, condition);
 }
 
 void bif_rand_ui(struct Runtime *rt, VAL_LOC_T lo_loc, VAL_LOC_T hi_loc)
@@ -107,9 +107,9 @@ void bif_rand_distr(struct Runtime *rt, VAL_LOC_T d_loc)
 {
     enum ValueType d_type = rt_val_peek_type(&rt->stack, d_loc);
     enum ValueType first_type;
-	VAL_SIZE_T len, i;
-	VAL_LOC_T loc;
-	VAL_REAL_T *density;
+    VAL_SIZE_T len, i;
+    VAL_LOC_T loc;
+    VAL_REAL_T *density;
     VAL_INT_T result;
 
     if (d_type != VAL_ARRAY) {
@@ -130,13 +130,13 @@ void bif_rand_distr(struct Runtime *rt, VAL_LOC_T d_loc)
         return;
     }
 
-	density = mem_malloc(len * sizeof(*density));
+    density = mem_malloc(len * sizeof(*density));
     for (i = 0; i < len; ++i) {
         density[i] = rt_val_peek_real(rt, loc);
         loc = rt_val_next_loc(rt, loc);
     }
     result = cpprand_distr(density, len);
-	mem_free(density);
+    mem_free(density);
 
     rt_val_push_int(&rt->stack, result);
 }

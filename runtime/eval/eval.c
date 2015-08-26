@@ -15,7 +15,7 @@
 
 void eval_error_not_found(char *symbol)
 {
-	err_push("EVAL", "Symbol \"%s\" not found", symbol);
+    err_push("EVAL", "Symbol \"%s\" not found", symbol);
 }
 
 static void eval_literal(struct AstNode *node, struct Stack *stack)
@@ -60,7 +60,7 @@ static void eval_reference(
     struct SymMapKvp *kvp;
     char *symbol = node->data.reference.symbol;
 
-	LOG_TRACE_FUNC;
+    LOG_TRACE_FUNC;
 
     if (!(kvp = sym_map_find(sym_map, symbol))) {
         eval_error_not_found(symbol);
@@ -79,12 +79,12 @@ VAL_LOC_T eval_impl(
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
-	/* It is possible that the debugger flag will change during evaluation. */
-	bool debug_begin_called = false;
+    /* It is possible that the debugger flag will change during evaluation. */
+    bool debug_begin_called = false;
     VAL_LOC_T begin = rt->stack.top;
     if (rt->debug) {
         dbg_call_begin(&rt->debugger, node);
-		debug_begin_called = true;
+        debug_begin_called = true;
     }
 
     switch (node->type) {
@@ -127,12 +127,12 @@ VAL_LOC_T eval_impl(
 
     if (err_state()) {
 
-		VAL_LOC_T ret_val = -1;
+        VAL_LOC_T ret_val = -1;
         if (debug_begin_called) {
             dbg_call_end(&rt->debugger, rt, ret_val, true);
         }
 
-		err_push_src("EVAL", node->loc, "Failed evaluating expression");
+        err_push_src("EVAL", node->loc, "Failed evaluating expression");
         return ret_val;
 
     } else {
@@ -156,7 +156,7 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
     end = rt->stack.top;
 
     if (err_state()) {
-		err_push_src("EVAL", node->loc, "Failed evaluating expression");
+        err_push_src("EVAL", node->loc, "Failed evaluating expression");
         stack_collapse(&rt->stack, begin, end);
         return -1;
     } else {

@@ -53,7 +53,7 @@ struct PatternCompound {
 struct PatternMatching {
     struct TypePattern *type_pattern;
     struct Pattern *pattern;
-}
+};
 
 struct Pattern {
     enum PatternType type;

@@ -10,7 +10,7 @@
 static void dbg_print_node_bind(struct AstBind *bind)
 {
     if (bind->pattern->type == PATTERN_SYMBOL) {
-        printf("bind \"%s\"\n", bind->pattern->symbol);
+        printf("bind \"%s\"\n", bind->pattern->data.symbol.symbol);
     }
 }
 
@@ -57,13 +57,13 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
 
 static void dbg_print_node_func_call(struct AstFuncCall *func_call)
 {
-	char *symbol;
+    char *symbol;
 
-	if (func_call->func->type == AST_REFERENCE) {
-		symbol = func_call->func->data.reference.symbol;
-	} else {
-		symbol = "<function expression>";
-	}
+    if (func_call->func->type == AST_REFERENCE) {
+        symbol = func_call->func->data.reference.symbol;
+    } else {
+        symbol = "<function expression>";
+    }
 
     printf("%s()\n", symbol);
 }
@@ -155,6 +155,7 @@ void dbg_init(struct Debugger *dbg)
 
 void dbg_deinit(struct Debugger *dbg)
 {
+    (void)dbg;
 }
 
 void dbg_call_begin(void *dbg_void, struct AstNode* node)
@@ -166,22 +167,22 @@ void dbg_call_begin(void *dbg_void, struct AstNode* node)
 }
 
 void dbg_call_end(
-		void *dbg_void,
-		struct Runtime* rt,
-		VAL_LOC_T val_loc,
-		bool error)
+        void *dbg_void,
+        struct Runtime* rt,
+        VAL_LOC_T val_loc,
+        bool error)
 {
     struct Debugger *dbg = (struct Debugger*)dbg_void;
 
-	if (error) {
-		dbg->lvl = 0;
-	} else {
-		--dbg->lvl;
-		dbg_print_indent(dbg);
-		printf("`~~~~~> ");
-		rt_val_print(rt, val_loc, false);
-		printf("\n");
+    if (error) {
+        dbg->lvl = 0;
+    } else {
+        --dbg->lvl;
+        dbg_print_indent(dbg);
+        printf("`~~~~~> ");
+        rt_val_print(rt, val_loc, false);
+        printf("\n");
 
-	}
+    }
 }
 

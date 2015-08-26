@@ -29,8 +29,8 @@ bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     if ((header_x.type == VAL_ARRAY && header_y.type == VAL_ARRAY) ||
         (header_x.type == VAL_TUPLE && header_y.type == VAL_TUPLE)) {
 
-		VAL_LOC_T current_x, current_y;
-		int i, len_x, len_y;
+        VAL_LOC_T current_x, current_y;
+        int i, len_x, len_y;
 
         len_x = rt_val_cpd_len(rt, x);
         len_y = rt_val_cpd_len(rt, y);
@@ -107,8 +107,8 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     case VAL_FUNCTION:
         return false;
 
-	case VAL_REF:
-		return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));
+    case VAL_REF:
+        return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));
 
     case VAL_UNIT:
         return true;

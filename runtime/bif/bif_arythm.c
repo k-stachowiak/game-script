@@ -27,7 +27,7 @@
             rt_val_push_real(&rt->stack, NAME##_impl_real(r)); \
             break; \
         default: \
-			err_push("BIF", "Arguments of arythmetic BIF must be of numeric type"); \
+            err_push("BIF", "Arguments of arythmetic BIF must be of numeric type"); \
             break; \
         } \
     }
@@ -50,7 +50,7 @@
         case BBM_BOTH_BOOL: \
         case BBM_BOTH_CHAR: \
         case BBM_MISMATCH: \
-			err_push("BIF", "Arguments of arythmetic BIF must be of matching numeric type"); \
+            err_push("BIF", "Arguments of arythmetic BIF must be of matching numeric type"); \
             break; \
         } \
     }
@@ -60,7 +60,7 @@
     { \
         VAL_REAL_T x; \
         if (rt_val_peek_type(&rt->stack, x_loc) != VAL_REAL) { \
-			err_push("BIF", "Arguments of truncating BIF must be of real type"); \
+            err_push("BIF", "Arguments of truncating BIF must be of real type"); \
             return; \
         } \
         x = rt_val_peek_real(rt, x_loc); \
@@ -90,13 +90,13 @@ BIF_ARYTHM_UNARY_DEF(bif_sqrt)
 
 void bif_real(struct Runtime *rt, VAL_LOC_T x_loc)
 {
-	VAL_INT_T x;
-	if (rt_val_peek_type(&rt->stack, x_loc) != VAL_INT) {
-		err_push("BIF", "Arguments of expanding arythmetic BIF must be of integer type");
-		return;
-	}
-	x = rt_val_peek_int(rt, x_loc);
-	rt_val_push_real(&rt->stack, (VAL_REAL_T)x);
+    VAL_INT_T x;
+    if (rt_val_peek_type(&rt->stack, x_loc) != VAL_INT) {
+        err_push("BIF", "Arguments of expanding arythmetic BIF must be of integer type");
+        return;
+    }
+    x = rt_val_peek_int(rt, x_loc);
+    rt_val_push_real(&rt->stack, (VAL_REAL_T)x);
 }
 
 static VAL_INT_T bif_floor_impl(VAL_REAL_T x) { return (VAL_INT_T)floor(x); }
