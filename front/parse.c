@@ -104,6 +104,7 @@ static struct TypePattern *parse_type_pattern(struct DomNode *dom)
 
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
+            type_pattern_free(children);
             err_push_src("PARSE", dom->loc, "Core compound encountered when parsing type pattern");
             return NULL;
 
@@ -209,6 +210,7 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
 
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
+            pattern_free(children);
             return parse_pattern_matching(dom);
 
         case DOM_CPD_ARRAY:

@@ -149,4 +149,3 @@ void test_front(struct TestContext *tc)
     test_parse_func_def(tc);
     test_parse_literals(tc);
 }
-

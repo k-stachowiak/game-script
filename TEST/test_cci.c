@@ -4,8 +4,15 @@
 
 static void test_cci_impl(struct TestContext *tc, struct Runtime *rt)
 {
-    (void)tc;
+    struct AstNode *node;
+
     (void)rt;
+    (void)tc;
+
+    node = parse_source("(bind (a) 1)");
+    if (node) {
+        ast_node_free(node);
+    }
 }
 
 void test_cci(struct TestContext *tc)
