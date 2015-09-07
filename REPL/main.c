@@ -184,7 +184,7 @@ int main()
 
     if (!mn_exec_file(ctx, stdfilename)) {
         char *error_message = (char*)mn_error_message();
-        printf("Error while reading standart library\n");
+        printf("Error while reading standard library\n");
         printf("%s", error_message);
         mem_free(error_message);
         mn_destroy(ctx);

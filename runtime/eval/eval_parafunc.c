@@ -66,6 +66,61 @@ static void eval_parafunc_if(
     }
 }
 
+static void eval_parafunc_while(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    int argc = ast_list_len(args);
+    bool done = false;
+
+    if (argc != 2) {
+        para_error_invalid_argc("while", argc);
+        return;
+    }
+
+    while (!done) {
+
+        VAL_LOC_T test_loc, temp_begin, temp_end;
+        VAL_BOOL_T test_val;
+
+        temp_begin = rt->stack.top;
+        test_loc = eval_impl(args, rt, sym_map);
+        temp_end = rt->stack.top;
+
+        if (err_state()) {
+            err_push_src("EVAL", args->loc, "Failed evaluating while test");
+            return;
+        }
+
+        if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
+            para_error_arg_expected("while", 1, "boolean");
+            stack_collapse(&rt->stack, temp_begin, temp_end);
+            return;
+        }
+
+        test_val = rt_val_peek_bool(rt, test_loc);
+        if (test_val) {
+            eval_impl(args->next, rt, sym_map);
+            if (err_state()) {
+                err_push_src("EVAL", args->loc, "Failed evaluating while expression");
+                stack_collapse(&rt->stack, temp_begin, temp_end);
+                return;
+            } else {
+                /* While in the loop also collapse the expression,
+                 * therefre update temp end only in this case.
+                 */
+                temp_end = rt->stack.top;
+            }
+        } else {
+            /* If we exit loop we leave last expresion uncollapsed */
+            done = true;
+        }
+
+        stack_collapse(&rt->stack, temp_begin, temp_end);
+    }
+}
+
 static bool eval_parafunc_switch_case(
         VAL_LOC_T switch_loc,
         struct Runtime *rt,
@@ -435,6 +490,10 @@ void eval_parafunc(
     switch (type) {
     case AST_PARAFUNC_IF:
         eval_parafunc_if(rt, sym_map, args);
+        break;
+
+    case AST_PARAFUNC_WHILE:
+        eval_parafunc_while(rt, sym_map, args);
         break;
 
     case AST_PARAFUNC_SWITCH:

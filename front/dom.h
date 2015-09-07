@@ -34,6 +34,7 @@ enum Reserved {
     DOM_RES_DO,
     DOM_RES_BIND,
     DOM_RES_IF,
+    DOM_RES_WHILE,
     DOM_RES_SWITCH,
     DOM_RES_AND,
     DOM_RES_OR,

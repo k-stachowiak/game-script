@@ -229,37 +229,42 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_IF, args);
     }
 
-    /* 3.4. Case switch: */
+    /* 3.4. Case while: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_WHILE)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_WHILE, args);
+    }
+
+    /* 3.5. Case switch: */
     if (dom_node_is_reserved_atom(child, DOM_RES_SWITCH)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SWITCH, args);
     }
 
-    /* 3.5. Case ref: */
+    /* 3.6. Case ref: */
     if (dom_node_is_reserved_atom(child, DOM_RES_REF)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_REF, args);
     }
 
-    /* 3.6. Case peek: */
+    /* 3.7. Case peek: */
     if (dom_node_is_reserved_atom(child, DOM_RES_PEEK)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_PEEK, args);
     }
 
-    /* 3.7. Case poke: */
+    /* 3.8. Case poke: */
     if (dom_node_is_reserved_atom(child, DOM_RES_POKE)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_POKE, args);
     }
 
-    /* 3.8. Case begin: */
+    /* 3.9. Case begin: */
     if (dom_node_is_reserved_atom(child, DOM_RES_BEGIN)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_BEGIN, args);
     }
 
-    /* 3.9. Case end: */
+    /* 3.10. Case end: */
     if (dom_node_is_reserved_atom(child, DOM_RES_END)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_END, args);
     }
 
-    /* 3.10. Case succ: */
+    /* 3.11. Case succ: */
     if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
     }

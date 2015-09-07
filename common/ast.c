@@ -34,9 +34,9 @@ struct AstNode *ast_make_bind(
 }
 
 struct AstNode *ast_make_compound(
-    struct SourceLocation *loc,
-    enum AstCompoundType type,
-    struct AstNode *exprs)
+        struct SourceLocation *loc,
+        enum AstCompoundType type,
+        struct AstNode *exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
@@ -148,9 +148,9 @@ struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
 }
 
 struct AstNode *ast_make_parafunc(
-    struct SourceLocation *loc,
-    enum AstParafuncType type,
-    struct AstNode *args)
+        struct SourceLocation *loc,
+        enum AstParafuncType type,
+        struct AstNode *args)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;

@@ -748,6 +748,22 @@
                 { false false false false false false false true }
             )
         ))
+
     ])
 ))
 
+(bind sort_test (func (sort-limit) (do
+    (bind array (array_gen (func () (rand_ur 0.0 100.0)) sort-limit))
+    (bind mergesorted (mergesort array))
+    (quicksort (begin array) (end array))
+    (test "sorted arrays equality" (eq mergesorted array))
+)))
+
+(bind while_test (func (while-count) (do
+    (bind i 0)
+    (bind i^ (ref i))
+    (while (lt (peek i^) while-count) (do
+        (printf "%d\n" { (rand_ui 0 100) })
+        (poke i^ (+ (peek i^) 1))
+    ))
+)))

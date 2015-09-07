@@ -37,6 +37,7 @@ enum AstLiteralType {
 
 enum AstParafuncType {
     AST_PARAFUNC_IF,
+    AST_PARAFUNC_WHILE,
     AST_PARAFUNC_SWITCH,
     AST_PARAFUNC_AND,
     AST_PARAFUNC_OR,
