@@ -44,7 +44,6 @@ add_library(lang OBJECT
         ./runtime/eval/eval_parafunc.c
         ./runtime/eval/eval_fcall.c
         ./runtime/eval/eval_cpd.c
-        ./runtime/eval/eval_do.c
         ./runtime/eval/eval_fdef.c
         ./runtime/eval/eval_bind.c
         ./runtime/bif/bif_compound.c
