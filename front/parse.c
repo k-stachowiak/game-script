@@ -47,83 +47,6 @@ static bool all_of(char *current, char *last, int (*f)(int))
  * ================
  */
 
-/* Type pattern.
- * -------------
- */
-
-static struct TypePattern *parse_type_pattern(struct DomNode *dom);
-
-static struct TypePattern *parse_type_pattern_list(struct DomNode *dom)
-{
-    struct TypePattern *result = NULL, *result_end = NULL;
-    while (dom) {
-        struct TypePattern *item = parse_type_pattern(dom);
-        if (!item) {
-            type_pattern_free(result);
-            return NULL;
-        }
-        LIST_APPEND(item, &result, &result_end);
-        dom = dom->next;
-    }
-    return result;
-}
-
-static struct TypePattern *parse_type_pattern_atom(struct DomNode *dom)
-{
-    if (dom_node_is_reserved_atom(dom, DOM_RES_BOOL)) {
-        return type_pattern_make_bool();
-
-    } else if (dom_node_is_reserved_atom(dom, DOM_RES_INTEGER)) {
-        return type_pattern_make_integer();
-
-    } else if (dom_node_is_reserved_atom(dom, DOM_RES_REAL)) {
-        return type_pattern_make_real();
-
-    } else if (dom_node_is_reserved_atom(dom, DOM_RES_CHARACTER)) {
-        return type_pattern_make_character();
-
-    } else {
-        err_push_src("PARSE", dom->loc, "Illegal reserved word in type pattern");
-        return NULL;
-    }
-}
-
-static struct TypePattern *parse_type_pattern(struct DomNode *dom)
-{
-    if (dom_node_is_atom(dom)) {
-        return parse_type_pattern_atom(dom);
-
-    } else {
-        struct TypePattern *children =
-            parse_type_pattern_list(dom->cpd_children);
-
-        if (!children && err_state()) {
-            err_push_src("PARSE", dom->loc, "Failed parsing compound type pattern children");
-            return NULL;
-        }
-
-        switch (dom->cpd_type) {
-        case DOM_CPD_CORE:
-            type_pattern_free(children);
-            err_push_src("PARSE", dom->loc, "Core compound encountered when parsing type pattern");
-            return NULL;
-
-        case DOM_CPD_ARRAY:
-            return type_pattern_make_array(children);
-
-        case DOM_CPD_TUPLE:
-            return type_pattern_make_tuple(children);
-        }
-    }
-
-    LOG_ERROR("Impossible to get here.");
-    exit(1);
-}
-
-/* Regular pattern.
- * ----------------
- */
-
 static struct Pattern *parse_pattern(struct DomNode *dom);
 
 static struct Pattern *parse_pattern_list(struct DomNode *dom)
@@ -156,45 +79,6 @@ static struct Pattern *parse_pattern_atom(struct DomNode *dom)
     }
 }
 
-static struct Pattern *parse_pattern_matching(struct DomNode *dom)
-{
-    struct DomNode *child = NULL;
-    struct TypePattern *type_pattern = NULL;
-    struct Pattern *pattern = NULL;
-
-    /* 1. Is core compound. */
-    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
-        return NULL;
-    }
-
-    /* 2. Has 3 children. */
-    if (!dom_node_is_cpd_of_size(dom, 3)) {
-        return NULL;
-    }
-
-    child = dom->cpd_children;
-
-    /* 3.1. 1st child is match keyword. */
-    if (!dom_node_is_reserved_atom(child, DOM_RES_MATCH)) {
-        return NULL;
-    }
-    child = child->next;
-
-    /* 3.2. 2nd child is a type pattern. */
-    if (!(type_pattern = parse_type_pattern(child))) {
-        return NULL;
-    }
-    child = child->next;
-
-    /* 3.3. 3rd child is a regular pattern. */
-    if (!(pattern = parse_pattern(child))) {
-        type_pattern_free(type_pattern);
-        return NULL;
-    }
-
-    return pattern_make_matching(type_pattern, pattern);
-}
-
 static struct Pattern *parse_pattern(struct DomNode *dom)
 {
     if (dom_node_is_atom(dom)) {
@@ -210,8 +94,8 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
 
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
-            pattern_free(children);
-            return parse_pattern_matching(dom);
+            err_push_src("PARSE", dom->loc, "Pattern cannot be core compound");
+            return NULL;
 
         case DOM_CPD_ARRAY:
             return pattern_make_array(children);

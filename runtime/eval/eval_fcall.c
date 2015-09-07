@@ -48,7 +48,7 @@ static bool efc_evaluate_currently_applied(
 }
 
 /** Evaluates an expression and inserts into a provided symbol map. */
-static bool efc_insert_expression(
+static bool efc_evaluate_arg(
         struct Runtime *rt,
         struct SymMap *caller_sym_map,
         struct SymMap *new_sym_map,
@@ -177,7 +177,7 @@ static void efc_evaluate_ast(
     temp_begin = rt->stack.top;
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T actual_loc;
-        if (efc_insert_expression(rt, sym_map, &local_sym_map,
+        if (efc_evaluate_arg(rt, sym_map, &local_sym_map,
             actual_args, arg_locs++, formal_args, &actual_loc)) {
             formal_args = formal_args->next;
         } else {

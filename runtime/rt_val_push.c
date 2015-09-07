@@ -108,7 +108,7 @@ struct Stack *stack,
     VAL_LOC_T *size_loc,
     VAL_LOC_T *data_begin,
     VAL_SIZE_T arity,
-enum ValueFuncType func_type,
+    enum ValueFuncType func_type,
     void *impl)
 {
     static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;

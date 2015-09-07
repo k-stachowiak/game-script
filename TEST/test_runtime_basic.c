@@ -1,3 +1,4 @@
+
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include "test_helpers.h"
@@ -56,16 +57,6 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_succeed(tc, rt, "(bind [ g ] [ 1.0 ])", "Succeed on array bind");
     test_eval_source_expect(tc, rt, "(do (bind { s _ } { 1.0 2.0 }) s)", "Bind tuple 1st dontcare 2nd", REAL, 1.0);
     test_eval_source_expect(tc, rt, "(do (bind { _ t } { 1.0 2.0 }) t)", "Bind tuple 2nd dontcare 1st", REAL, 2.0);
-
-    /* Typed binds */
-    test_eval_source_fail(tc, rt, "(bind (! int x) 3.0)", "Fail on binding to a simple typed pattern");
-    test_eval_source_expect(tc, rt, "(bind (! double x) 3.0)", "Succeed on binding to a simple typed pattern", REAL, 3.0);
-
-    test_eval_source_fail(tc, rt, "(bind (! [ double ] y) 1)", "Fail on binding to a typed array");
-    test_eval_source_expect(tc, rt, "(bind (! [ double ] y) [ 2.0 ])", "Succeed on binding to a typed array", REAL, 2.0);
-
-    test_eval_source_fail(tc, rt, "(bind (! { bool char } y) { 1 2 })", "Fail binding to a typed tuple");
-    test_eval_source_succeed(tc, rt, "(bind (! { bool char } y) { true 'z' })", "Succeed binding to a typed tuple");
 
     rt_reset(rt);
 }

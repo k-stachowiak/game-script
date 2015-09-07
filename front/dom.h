@@ -47,13 +47,7 @@ enum Reserved {
     DOM_RES_UNIT,
     DOM_RES_TRUE,
     DOM_RES_FALSE,
-    DOM_RES_MATCH,
     DOM_RES_DONTCARE,
-    DOM_RES_BOOL,
-    DOM_RES_INTEGER,
-    DOM_RES_REAL,
-    DOM_RES_CHARACTER,
-    DOM_RES_REFERENCE
 };
 
 /**
@@ -62,14 +56,14 @@ enum Reserved {
 struct DomNode {
 
     /* Data */
-    struct SourceLocation loc;        /** < Location in the input source */
-    enum DomNodeType type;            /** < Node type */
-    char *atom;                        /** < Atom string in case of atomic node */
-    enum DomCpdType cpd_type;        /** < Type of compound node if is compound */
-    struct DomNode *cpd_children;    /** < List of children if is compound */
+    struct SourceLocation loc;
+    enum DomNodeType type;
+    char *atom;
+    enum DomCpdType cpd_type;
+    struct DomNode *cpd_children;
 
     /* Intrusive list */
-    struct DomNode *next;            /** < Next pointer facility for lists */
+    struct DomNode *next;
 };
 
 /* Creation.
