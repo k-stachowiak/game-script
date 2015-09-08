@@ -443,6 +443,46 @@ static void eval_parafunc_end(
     rt_val_push_ref(&rt->stack, cpd_loc);
 }
 
+static void eval_parafunc_inc(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstNode *args)
+{
+    int len;
+    struct SymMapKvp *kvp;
+    VAL_LOC_T ref_loc, temp_loc;
+    enum ValueType ref_type;
+
+    len = ast_list_len(args);
+    if (len != 1) {
+        para_error_invalid_argc("inc", len);
+    }
+
+    if (args->type != AST_REFERENCE) {
+        para_error_arg_expected("inc", 1, "plain reference");
+        return;
+    }
+
+    kvp = sym_map_find(sym_map, args->data.reference.symbol);
+    if (!kvp) {
+        eval_error_not_found(args->data.reference.symbol);
+        return;
+    }
+    ref_loc = kvp->stack_loc;
+
+    ref_type = rt_val_peek_type(&rt->stack, ref_loc);
+    if (ref_type != VAL_REF) {
+        para_error_arg_expected("inc", 1, "reference to reference");
+        return;
+    }
+
+    temp_loc = rt_val_peek_ref(rt, ref_loc);
+    temp_loc = rt_val_next_loc(rt, temp_loc);
+    rt_val_poke_ref(&rt->stack, ref_loc, temp_loc);
+
+    rt_val_push_unit(&rt->stack);
+}
+
 static void eval_parafunc_succ(
         struct Runtime *rt,
         struct SymMap *sym_map,
@@ -526,6 +566,10 @@ void eval_parafunc(
 
     case AST_PARAFUNC_END:
         eval_parafunc_end(rt, sym_map, args);
+        break;
+
+    case AST_PARAFUNC_INC:
+        eval_parafunc_inc(rt, sym_map, args);
         break;
 
     case AST_PARAFUNC_SUCC:

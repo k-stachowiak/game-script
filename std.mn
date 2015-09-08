@@ -69,6 +69,16 @@
     (distance_impl first^ last^ 0)
 )))
 
+(bind distance` (func (first^ last^) (do
+    (bind i 0)
+    (bind i^ (ref i))
+    (while (not (eq first^ last^)) (do
+        (poke i^ (+ (peek i^) 1))
+        (inc first^)
+    ))
+    (peek i^)
+)))
+
 ### Wraps a function operating on a value argument and accepts reference
 ### instead.
 (bind un_ref (func (un x^) (un (peek x^))))

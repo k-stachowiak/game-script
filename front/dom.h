@@ -43,6 +43,7 @@ enum Reserved {
     DOM_RES_POKE,
     DOM_RES_BEGIN,
     DOM_RES_END,
+    DOM_RES_INC,
     DOM_RES_SUCC,
     DOM_RES_FUNC,
     DOM_RES_UNIT,

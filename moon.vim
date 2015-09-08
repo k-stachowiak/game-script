@@ -7,7 +7,7 @@ if exists("b:current_syntax")
     finish
 endif
 
-syn keyword basicKeywords do and or if switch try func bind ref begin end peek poke succ
+syn keyword basicKeywords do and or if while switch try func bind ref begin end peek poke inc succ
 syn keyword biFunctions sqrt floor ceil round
 syn keyword biFunctions eq lt
 syn keyword biFunctions and or xor not

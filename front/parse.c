@@ -94,6 +94,7 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
 
         switch (dom->cpd_type) {
         case DOM_CPD_CORE:
+            pattern_free(children);
             err_push_src("PARSE", dom->loc, "Pattern cannot be core compound");
             return NULL;
 
@@ -264,7 +265,12 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_END, args);
     }
 
-    /* 3.11. Case succ: */
+    /* 3.11. Case inc: */
+    if (dom_node_is_reserved_atom(child, DOM_RES_INC)) {
+        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_INC, args);
+    }
+
+    /* 3.12. Case succ: */
     if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
     }
