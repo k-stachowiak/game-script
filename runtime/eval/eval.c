@@ -85,17 +85,17 @@ static void eval_reference(
         struct Stack *stack,
         struct SymMap *sym_map)
 {
-    struct SymMapKvp *kvp;
+    struct SymMapNode *smn;
     char *symbol = node->data.reference.symbol;
 
     LOG_TRACE_FUNC;
 
-    if (!(kvp = sym_map_find(sym_map, symbol))) {
+    if (!(smn = sym_map_find(sym_map, symbol))) {
         eval_error_not_found(symbol);
         return;
     }
 
-    rt_val_push_copy(stack, kvp->stack_loc);
+    rt_val_push_copy(stack, smn->stack_loc);
 }
 
 /* Main evaluation dispatch.

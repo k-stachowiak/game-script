@@ -7,17 +7,17 @@
 #ifndef SYMMAP_H
 #define SYMMAP_H
 
-struct SymMapKvp {
-    char *key;
+struct SymMapNode {
+    char key;
+    struct { struct SymMapNode *data; int cap, size; } children;
+    bool is_set;
     VAL_LOC_T stack_loc;
     struct SourceLocation source_loc;
-    struct SymMapKvp *next;
 };
 
 struct SymMap {
     struct SymMap *global;
-    struct SymMapKvp *map;
-    struct SymMapKvp *end;
+    struct SymMapNode root;
 };
 
 void sym_map_init_global(struct SymMap *sym_map);
@@ -30,8 +30,8 @@ void sym_map_insert(
         VAL_LOC_T stack_loc,
         struct SourceLocation source_loc);
 
-struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key);
-struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key);
-struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key);
+struct SymMapNode *sym_map_find(struct SymMap *sym_map, char *key);
+struct SymMapNode *sym_map_find_shallow(struct SymMap *sym_map, char *key);
+struct SymMapNode *sym_map_find_not_global(struct SymMap *sym_map, char *key);
 
 #endif

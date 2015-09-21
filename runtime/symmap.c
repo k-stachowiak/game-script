@@ -13,8 +13,7 @@
 void sym_map_init_global(struct SymMap *sym_map)
 {
     sym_map->global = NULL;
-    sym_map->map = NULL;
-    sym_map->end = NULL;
+    memset(&sym_map->root, 0, sizeof(sym_map->root));
 }
 
 void sym_map_init_local(
@@ -22,22 +21,21 @@ void sym_map_init_local(
         struct SymMap *global)
 {
     sym_map->global = global;
-    sym_map->map = NULL;
-    sym_map->end = NULL;
+    memset(&sym_map->root, 0, sizeof(sym_map->root));
+}
+
+static void sym_map_node_free(struct SymMapNode *node)
+{
+    int i;
+    for (i = 0; i < node->children.size; ++i) {
+        sym_map_node_free(node->children.data + i);
+    }
+    mem_free(node->children.data);
 }
 
 void sym_map_deinit(struct SymMap *sym_map)
 {
-    struct SymMapKvp *temp, *kvp;
-    kvp = sym_map->map;
-    while (kvp) {
-        temp = kvp;
-        kvp = kvp->next;
-        mem_free(temp->key);
-        mem_free(temp);
-    }
-    sym_map->map = NULL;
-    sym_map->end = NULL;
+    sym_map_node_free(&sym_map->root);
 }
 
 void sym_map_insert(
@@ -46,32 +44,40 @@ void sym_map_insert(
         VAL_LOC_T stack_loc,
         struct SourceLocation source_loc)
 {
-    struct SymMapKvp *kvp;
-    int len = strlen(key);
-    char *key_copy = mem_malloc(len + 1);
-    memcpy(key_copy, key, len + 1);
-
-    kvp = sym_map_find_shallow(sym_map, key);
-    if (kvp) {
-        err_push("RUNTIME", "Symbol \"%s\" already inserted", key);
-        return;
+    struct SymMapNode *node = &sym_map->root;
+    while (*key) {
+        int i;
+        bool found = false;
+        for (i = 0; i < node->children.size; ++i) {
+            if (node->children.data[i].key == *key) {
+                node = node->children.data + i;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            struct SymMapNode new_node = { 0, };
+            new_node.key = *key;
+            ARRAY_APPEND(node->children, new_node);
+            node = node->children.data + i;
+        }
+        ++key;
     }
-
-    kvp = mem_malloc(sizeof(*kvp));
-    kvp->key = key_copy;
-    kvp->stack_loc = stack_loc;
-    kvp->source_loc = source_loc;
-    kvp->next = NULL;
-
-    LIST_APPEND(kvp, &sym_map->map, &sym_map->end);
+    if (node->is_set) {
+        err_push("RUNTIME", "Symbol \"%s\" already inserted", key);
+    } else {
+        node->is_set = true;
+        node->stack_loc = stack_loc;
+        node->source_loc = source_loc;
+    }
 }
 
-struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key)
+struct SymMapNode *sym_map_find(struct SymMap *sym_map, char *key)
 {
-    struct SymMapKvp *kvp;
+    struct SymMapNode *node;
 
-    if ((kvp = sym_map_find_shallow(sym_map, key))) {
-        return kvp;
+    if ((node = sym_map_find_shallow(sym_map, key))) {
+        return node;
     }
 
     if (sym_map->global) {
@@ -81,28 +87,41 @@ struct SymMapKvp *sym_map_find(struct SymMap *sym_map, char *key)
     }
 }
 
-struct SymMapKvp *sym_map_find_shallow(struct SymMap *sym_map, char *key)
+struct SymMapNode *sym_map_find_shallow(struct SymMap *sym_map, char *key)
 {
-    struct SymMapKvp *kvp = sym_map->map;
-    while (kvp) {
-        if (strcmp(kvp->key, key) == 0) {
-            return kvp;
+    struct SymMapNode *node = &sym_map->root;
+    while (*key) {
+        int i;
+        bool found = false;
+        for (i = 0; i < node->children.size; ++i) {
+            if (node->children.data[i].key == *key) {
+                node = node->children.data + i;
+                ++key;
+                found = true;
+                break;
+            }
         }
-        kvp = kvp->next;
+        if (!found) {
+            return NULL;
+        }
     }
-    return NULL;
+    if (node->is_set) {
+        return node;
+    } else {
+        return NULL;
+    }
 }
 
-struct SymMapKvp *sym_map_find_not_global(struct SymMap *sym_map, char *key)
+struct SymMapNode *sym_map_find_not_global(struct SymMap *sym_map, char *key)
 {
-    struct SymMapKvp *kvp;
+    struct SymMapNode *node;
 
     if (sym_map->global == NULL) {
         return NULL;
     }
 
-    if ((kvp = sym_map_find_shallow(sym_map, key))) {
-        return kvp;
+    if ((node = sym_map_find_shallow(sym_map, key))) {
+        return node;
     }
 
     if (sym_map->global) {

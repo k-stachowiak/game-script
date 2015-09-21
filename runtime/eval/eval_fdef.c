@@ -68,9 +68,9 @@ static bool efd_refers_to_symbol(struct AstNode *node, char **symbol)
  */
 static bool efd_is_non_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *loc)
 {
-    struct SymMapKvp *kvp = sym_map_find_not_global(sym_map, symbol);
-    if (kvp) {
-        *loc = kvp->stack_loc;
+    struct SymMapNode *smn = sym_map_find_not_global(sym_map, symbol);
+    if (smn) {
+        *loc = smn->stack_loc;
         return true;
     } else {
         return false;

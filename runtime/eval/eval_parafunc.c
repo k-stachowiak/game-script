@@ -257,7 +257,7 @@ static void eval_parafunc_ref(
 {
     int len = ast_list_len(args);
     char *symbol;
-    struct SymMapKvp *kvp;
+    struct SymMapNode *smn;
 
     if (len != 1) {
         para_error_invalid_argc("ref", len);
@@ -269,14 +269,14 @@ static void eval_parafunc_ref(
         return;
     }
     symbol = args->data.reference.symbol;
-    kvp = sym_map_find(sym_map, symbol);
+    smn = sym_map_find(sym_map, symbol);
 
-    if (!kvp) {
+    if (!smn) {
         eval_error_not_found(symbol);
         return;
     }
 
-    rt_val_push_ref(&rt->stack, kvp->stack_loc);
+    rt_val_push_ref(&rt->stack, smn->stack_loc);
 }
 
 static void eval_parafunc_peek(
@@ -368,7 +368,7 @@ static void eval_parafunc_begin(
 {
     int len = ast_list_len(args);
     char *symbol;
-    struct SymMapKvp *kvp;
+    struct SymMapNode *smn;
     VAL_LOC_T cpd_loc;
     enum ValueType ref_type;
 
@@ -382,14 +382,14 @@ static void eval_parafunc_begin(
         return;
     }
     symbol = args->data.reference.symbol;
-    kvp = sym_map_find(sym_map, symbol);
+    smn = sym_map_find(sym_map, symbol);
 
-    if (!kvp) {
+    if (!smn) {
         eval_error_not_found(symbol);
         return;
     }
 
-    cpd_loc = kvp->stack_loc;
+    cpd_loc = smn->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
     if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
         para_error_arg_expected("begin", 1, "reference to compound object");
@@ -406,7 +406,7 @@ static void eval_parafunc_end(
 {
     int i, cpd_len, len = ast_list_len(args);
     char *symbol;
-    struct SymMapKvp *kvp;
+    struct SymMapNode *smn;
     VAL_LOC_T cpd_loc;
     enum ValueType ref_type;
 
@@ -420,14 +420,14 @@ static void eval_parafunc_end(
         return;
     }
     symbol = args->data.reference.symbol;
-    kvp = sym_map_find(sym_map, symbol);
+    smn = sym_map_find(sym_map, symbol);
 
-    if (!kvp) {
+    if (!smn) {
         eval_error_not_found(symbol);
         return;
     }
 
-    cpd_loc = kvp->stack_loc;
+    cpd_loc = smn->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
     if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
         para_error_arg_expected("end", 1, "reference to compound object");
@@ -449,7 +449,7 @@ static void eval_parafunc_inc(
         struct AstNode *args)
 {
     int len;
-    struct SymMapKvp *kvp;
+    struct SymMapNode *smn;
     VAL_LOC_T ref_loc, temp_loc;
     enum ValueType ref_type;
 
@@ -463,12 +463,12 @@ static void eval_parafunc_inc(
         return;
     }
 
-    kvp = sym_map_find(sym_map, args->data.reference.symbol);
-    if (!kvp) {
+    smn = sym_map_find(sym_map, args->data.reference.symbol);
+    if (!smn) {
         eval_error_not_found(args->data.reference.symbol);
         return;
     }
-    ref_loc = kvp->stack_loc;
+    ref_loc = smn->stack_loc;
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
