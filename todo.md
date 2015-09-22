@@ -1,5 +1,4 @@
 TODO
 ----
-- make it possible to sort 1000 ints :O
-    - remove recursion from the standard library wherever possible
-    - verify performance impact of the above
+- Make it possible to use patterns as keys in the switch parafunction
+- update documentation to describe the patern matching done in the switch.

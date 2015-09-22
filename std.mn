@@ -60,23 +60,13 @@
 
 ### Returns distance between two references
 (bind distance (func (first^ last^) (do
-    (bind distance_impl (func (first^ last^ counter)
-        (if (eq first^ last^)
-            counter
-            (distance_impl (succ first^) last^ (+ counter 1))
-        )
-    ))
-    (distance_impl first^ last^ 0)
-)))
-
-(bind distance` (func (first^ last^) (do
-    (bind i 0)
-    (bind i^ (ref i))
+    (bind count 0)
+    (bind count^ (ref count))
     (while (not (eq first^ last^)) (do
-        (poke i^ (+ (peek i^) 1))
+        (poke count^ (+ count 1))
         (inc first^)
     ))
-    (peek i^)
+    count
 )))
 
 ### Wraps a function operating on a value argument and accepts reference
@@ -174,26 +164,24 @@
 (bind none_of (func (pred first^ last^) (all_of (point pred not) first^ last^) ))
 
 ### Finds the minimum element in a compound structure with a custom comparator
-(bind min_element_cmp (func (cmp first^ last^) (do
-    (bind min_element_impl (func (current_min^ first^ last^)
-        (if (eq first^ last^)
-            current_min^
-            (min_element_impl
-                (min_ref_cmp cmp current_min^ first^)
-                (succ first^)
-                last^
-            )
-        )
-    ))
-    (bind len (distance first^ last^))
-    (if (eq len 0)
+(bind min_element_cmp (func (cmp first^ last^)
+    (if (eq first^ last^)
         last^
-        (if (eq len 1)
-            first^
-            (min_element_impl first^ (succ first^) last^)
+        (do
+            (bind minimum^ first^)
+            (bind minimum^^ (ref minimum^))
+            (inc first^)
+            (while (not (eq first^ last^)) (do
+                (if (cmp (peek first^) (peek minimum^))
+                    (poke minimum^^ first^)
+                    unit
+                )
+                (inc first^)
+            ))
+            minimum^
         )
     )
-)))
+))
 
 ### Finds the minimum element in a compound structure with a
 ### default comparator: less than
@@ -762,11 +750,26 @@
     ])
 ))
 
-(bind sort_test (func (sort-limit) (do
-    (bind array (array_gen (func () (rand_ur 0.0 100.0)) sort-limit))
-    (bind mergesorted (mergesort array))
-    (quicksort (begin array) (end array))
-    (test "sorted arrays equality" (eq mergesorted array))
+(bind array500 (array_gen (func () (rand_ur 0.0 100.0)) 500))
+(bind array750 (array_gen (func () (rand_ur 0.0 100.0)) 750))
+(bind array1000 (array_gen (func () (rand_ur 0.0 100.0)) 1000))
+
+(bind qsort_test (func (count) (do
+    (switch count
+        { 500 (quicksort (begin array500) (end array500)) }
+        { 750 (quicksort (begin array750) (end array750)) }
+        { 1000 (quicksort (begin array1000) (end array1000)) }
+    )
+    unit
+)))
+
+(bind msort_test (func (count) (do
+    (switch count
+        { 500 (mergesort array500) }
+        { 750 (mergesort array750) }
+        { 1000 (mergesort array1000) }
+    )
+    unit
 )))
 
 (bind while_test (func (while-count) (do

@@ -5,7 +5,7 @@ This is a documentation of the scripting language called MOON. The name is an ac
 
     Multi-paradigm, Object Oriented... Not!
 
-This is a great example of a language consistengs of layers over layers of afterthought.
+This is a great example of a language consistng of layers over layers of afterthought.
 In fact "afterthought" may have been a better name but it doesn't shorten to a swift acronym likt "moon", also it does not differentiate it from myriads of other language design failures.
 
 Language traits
@@ -15,7 +15,7 @@ Language traits
 * simple data-types (boolean, integer, real, character)
 * compound data-types (tuple and array)
 * higher order functions obtainable by explicit definition or currying
-* closures
+* closures (storing copies of captured values)
 * immutability by default
 * mutability via references
 * iterator-like references
@@ -51,34 +51,49 @@ There are also following compound literals:
 * Quote delimited character sequence automatically evaluating to array of characters
 
 Note that homogenity means the exact same type, which is relatively strict for arrays, meaning that not only the stored type but also the length must match.
-It is therefore impossible to create a jagged array in this language.
+It is therefore impossible to simply create a jagged array in this language.
+
+### Pattern matching
+A pattern matching mechanism is provided in the language.
+Currently it is available in two places:
+* bind expression keys,
+* formal function arguments.
+
+Note that the formal function arguments effectively constitute a bind operation as they enable injection of symbols into the local scope with assigning symbols to them.
+
+A Pattern is a symbolic expression which is one of the following:
+ - atomic symbol,
+ - an array of patterns ("[pattern1 pattern2 ...]"),
+ - a tuple of patterns (analogous to array of patterns).
 
 ### Bind
 Bind operation pushes a new value on the stack and makes it available for further computation in the given stack frame.
 
 ### Function declaration
-Func operation creates a new function value.
+"func" operation creates a new function value.
 The value captures all the reachable references in terms of the closure (all mismatched references are to be evaluated at call time).
-Since the values have been completely immutable at the earlier design stages, the closure will take all captures by falue (yes, even large buffers).
+Since the values have been completely immutable at the earlier design stages, the closure will take all captures by falue (yes, even large compound values).
 
 ### Function call
-Function call by default evaluates the given function object with the provided parameters.
+Function call evaluates the given function object with the provided parameters.
 If the actual parameters count is less than the formal parameters count the expression evaluates to a curried function object with the already applied arguments stored within.
+Passing too many arguments results in a runtime error.
 
 ### Function objects
 As the previous sections indicate function objects are relatively complex.
 They consist of:
 * (optional) values captured from the creation context
 * (optional) already aplied arguments
-* pointer to the function definition
+* reference to the function definition
 
 Para-functions
 --------------
-This chapter presents the so-called parafunctions.
-They differ from the regular functions in the way they are evaluated.
+The para-functions differ from the regular functions in the way they are evaluated.
 In case of the regular functions all the actual argments are evaluated before the function body.
-This however disables implementation of certain constructs such as short-circuiting "and" operators which will only evaluate enough operands to determine the outcome.
-This allows us to control the execution of such expression so that its arguments do not always have to be valid and evaluable in the given context.
+This however disables implementation of certain constructs such as short-circuiting logical operators which only evaluate enough operands to determine the outcome.
+
+The parafunctions are built into the language runtime with custom evaluation procedures implemented to control the execution of such expressions.
+Therefore a para-funcion can be valid and evaluable as a whole even if certain sub-expressions are not in a given context.
 There are several types of parafunctions available in the language.
 
 ### Short-circuit logical operators
@@ -89,6 +104,17 @@ There are several types of parafunctions available in the language.
 * if     : _boolean_ -> _?_ -> _?_ -> _?_
 * while  : _boolean_ -> _?_ -> unit
 * switch : _a_ -> { _a_ _b_ } -> { _a_ _b_ } -> ... -> _b_
+
+The switch expression is not trivial therefore an example will be provided:
+
+    (switch _some_value_
+        { true "boolean true" }
+        { 1 "integer one" }
+    )
+
+The above expression will test the given value and return an according message.
+No type is enforced upon the value, only equality check will be performed against the case keys.
+Currently there is no way of implementing a "capture all" case.
 
 ### Reference related expressions
 * ref   : _?_ -> _reference_            -- returns reference to a given value
@@ -228,12 +254,6 @@ The Abstract Syntax Tree structures reflect the actual semantic structure of the
 Most of the AST structures are of one of the following types:
  * atomic symbolic expression representing a literal, a reference, etc.,
  * list symbolic expression starting from a keyword, e.g. "do" block: (do ...).
-
-There is, however, a special type of the AST nodes, which is a pattern.
-A Pattern is a symbolic expression which is one of the following:
- - atomic symbol,
- - an array of patterns ("[pattern1 pattern2 ...]"),
- - a tuple of patterns (analogous to array of patterns).
 
 Front-end
 ---------
