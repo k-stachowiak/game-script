@@ -62,9 +62,10 @@ Currently it is available in two places:
 Note that the formal function arguments effectively constitute a bind operation as they enable injection of symbols into the local scope with assigning symbols to them.
 
 A Pattern is a symbolic expression which is one of the following:
- - atomic symbol,
- - an array of patterns ("[pattern1 pattern2 ...]"),
- - a tuple of patterns (analogous to array of patterns).
+ - a don't care token "\_" (matches any value without binding it to a symbol)
+ - atomic symbol (matches any value and binds it to a symbol),
+ - an array of patterns (matches an array and binds its elements to the given patterns),
+ - a tuple of patterns (analogous to array of patterns but for a tuple).
 
 ### Bind
 Bind operation pushes a new value on the stack and makes it available for further computation in the given stack frame.
