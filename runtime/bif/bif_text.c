@@ -267,6 +267,7 @@ static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
     case AST_BIND:
     case AST_FUNC_CALL:
     case AST_FUNC_DEF:
+    case AST_MATCH:
     case AST_PARAFUNC:
     case AST_REFERENCE:
         bif_text_error_parse();

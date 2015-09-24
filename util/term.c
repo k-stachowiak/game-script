@@ -53,16 +53,23 @@ char *my_getfile(char *filename)
     long length;
     FILE *file = fopen(filename, "rb");
 
-    if (file) {
-        fseek(file, 0, SEEK_END);
-        length = ftell(file);
-        fseek(file, 0, SEEK_SET);
-        buffer = mem_calloc(length + 1, 1);
-        fread(buffer, 1, length, file);
-        fclose(file);
-    } else {
+    if (!file) {
         return NULL;
     }
+
+    fseek(file, 0, SEEK_END);
+    length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    buffer = mem_malloc(length + 1);
+
+    if (fread(buffer, 1, length, file) == (size_t)length) {
+        buffer[length] = '\0';
+    } else {
+        mem_free(buffer);
+        buffer = NULL;
+    }
+
+    fclose(file);
 
     return buffer;
 }

@@ -359,7 +359,6 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
         int cap, size;
     } arg_locs = { NULL, 0, 0 };
 
-    int arg_count = 0;
     struct AstNode *expr = NULL;
 
     struct DomNode *child = NULL;
@@ -416,14 +415,13 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
         goto fail;
     }
 
-    arg_count = arg_locs.size;
     return ast_make_func_def(
         &dom->loc,
         formal_args,
         mem_realloc(
             arg_locs.data,
             arg_locs.size * sizeof(*arg_locs.data)),
-        arg_count,
+        arg_locs.size,
         expr);
 
 fail:
@@ -433,6 +431,106 @@ fail:
 
     if (arg_locs.size) {
         ARRAY_FREE(arg_locs);
+    }
+
+    return NULL;
+}
+
+static struct AstNode *parse_match(struct DomNode *dom)
+{
+    struct DomNode *child = NULL;
+    struct AstNode *expr = NULL;
+    struct Pattern *keys = NULL, *keys_end = NULL;
+    struct AstNode *values = NULL, *values_end = NULL;
+
+    struct {
+        struct AstMatchKvp *data;
+        int size, cap;
+    } kvps = { NULL, 0, 0 };
+
+    LOG_TRACE_FUNC
+
+    /* 1. Is compound CORE. */
+    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+        return NULL;
+    }
+
+    /* 2. Has 3 or more children. */
+    if (!dom_node_is_cpd_min_size(dom, 3)) {
+        return NULL;
+    }
+
+    child = dom->cpd_children;
+
+    /* 3.1. 1st child is "match" keyword. */
+    if (!dom_node_is_reserved_atom(child, DOM_RES_MATCH)) {
+        return NULL;
+    }
+    child = child->next;
+
+    /* 3.2. 2nd child is an expression. */
+    if (!(expr = parse_one(child))) {
+        return NULL;
+    }
+    child = child->next;
+
+    /* 3.3. Has at least one matching expression. */
+    while (child) {
+        struct DomNode *match_child = NULL;
+        struct Pattern *key = NULL;
+        struct AstNode *value = NULL;
+        struct AstMatchKvp kvp;
+
+        /* 3.3.1. Is compound CORE. */
+        if (!dom_node_is_spec_compound(child, DOM_CPD_CORE)) {
+            goto fail;
+        }
+
+        /* 3.3.2. Has 2 children. */
+        if (!dom_node_is_cpd_of_size(child, 2)) {
+            goto fail;
+        }
+        match_child = child->cpd_children;
+
+        /* 3.3.3. 1st child is a pattern. */
+        if (!(key = parse_pattern(match_child))) {
+            goto fail;
+        }
+        match_child = match_child->next;
+
+        /* 3.3.4. 2nd child is an expression. */
+        if (!(value = parse_one(match_child))) {
+            goto fail;
+        }
+
+        LIST_APPEND(key, &keys, &keys_end);
+        LIST_APPEND(value, &values, &values_end);
+
+        kvp.key = keys_end;
+        kvp.value = values_end;
+        ARRAY_APPEND(kvps, kvp);
+
+        child = child->next;
+    }
+
+    return ast_make_match(
+        &dom->loc,
+        expr,
+        keys, values,
+        kvps.data,
+        kvps.size);
+
+fail:
+    if (keys) {
+        pattern_free(keys);
+    }
+
+    if (values) {
+        ast_node_free(values);
+    }
+
+    if (kvps.size) {
+        ARRAY_FREE(kvps);
     }
 
     return NULL;
@@ -706,6 +804,7 @@ static struct AstNode *parse_one(struct DomNode *dom)
         (!err_state() && (node = parse_do_block(dom))) ||
         (!err_state() && (node = parse_bind(dom))) ||
         (!err_state() && (node = parse_func_def(dom))) ||
+        (!err_state() && (node = parse_match(dom))) ||
         (!err_state() && (node = parse_parafunc(dom))) ||
         (!err_state() && (node = parse_func_call(dom))) ||
         (!err_state() && (node = parse_compound(dom)))) {

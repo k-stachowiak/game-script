@@ -56,7 +56,13 @@ void sym_map_insert(
             }
         }
         if (!found) {
-            struct SymMapNode new_node = { 0, };
+            struct SymMapNode new_node = {
+                0,
+                { NULL, 0, 0 },
+                false,
+                0,
+                { 0, 0, 0 }
+            };
             new_node.key = *key;
             ARRAY_APPEND(node->children, new_node);
             node = node->children.data + i;

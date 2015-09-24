@@ -37,6 +37,9 @@ static struct AstNode *efd_get_children(struct AstNode* node)
         /* NOTE tha the func expression is artifically chained with the args list. */
         return node->data.func_call.func;
 
+    case AST_MATCH:
+        return node->data.match.values;
+
     case AST_PARAFUNC:
         return node->data.parafunc.args;
     }

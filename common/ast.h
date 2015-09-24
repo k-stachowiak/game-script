@@ -16,6 +16,7 @@ enum AstNodeType {
     AST_COMPOUND,
     AST_FUNC_CALL,
     AST_FUNC_DEF,
+    AST_MATCH,
     AST_LITERAL,
     AST_PARAFUNC,
     AST_REFERENCE,
@@ -84,6 +85,19 @@ struct AstFuncDef {
     struct AstNode *expr;
 };
 
+struct AstMatchKvp {
+    struct Pattern *key;    /* non-owning */
+    struct AstNode *value;  /* non-owning */
+};
+
+struct AstMatch {
+    struct AstNode *expr;
+    struct Pattern *keys;       /* owning */
+    struct AstNode *values;     /* owning */
+    struct AstMatchKvp *kvps;
+    int kvp_count;
+};
+
 struct AstLiteral {
     enum AstLiteralType type;
     union {
@@ -120,6 +134,7 @@ struct AstNode {
         struct AstCompound compound;
         struct AstFuncCall func_call;
         struct AstFuncDef func_def;
+        struct AstMatch match;
         struct AstLiteral literal;
         struct AstParafunc parafunc;
         struct AstReference reference;
@@ -157,6 +172,14 @@ struct AstNode *ast_make_func_def(
         struct SourceLocation *arg_locs,
         int arg_count,
         struct AstNode *expr);
+
+struct AstNode *ast_make_match(
+        struct SourceLocation *loc,
+        struct AstNode *expr,
+        struct Pattern *keys,
+        struct AstNode *values,
+        struct AstMatchKvp *kvps,
+        int kvp_count);
 
 struct AstNode *ast_make_parafunc(
     struct SourceLocation *loc,

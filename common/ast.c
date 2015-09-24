@@ -82,6 +82,26 @@ struct AstNode *ast_make_func_def(
     return result;
 }
 
+struct AstNode *ast_make_match(
+        struct SourceLocation *loc,
+        struct AstNode *expr,
+        struct Pattern *keys,
+        struct AstNode *values,
+        struct AstMatchKvp *kvps,
+        int kvp_count)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+    result->next = NULL;
+    result->type = AST_MATCH;
+    result->loc = *loc;
+    result->data.match.expr = expr;
+    result->data.match.keys = keys;
+    result->data.match.values = values;
+    result->data.match.kvps = kvps;
+    result->data.match.kvp_count = kvp_count;
+    return result;
+}
+
 struct AstNode *ast_make_literal_unit(struct SourceLocation *loc)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -203,6 +223,15 @@ static void ast_func_def_free(struct AstFuncDef *afdef)
     ast_node_free(afdef->expr);
 }
 
+static void ast_match_free(struct AstMatch *amatch)
+{
+    ast_node_free(amatch->expr);
+    pattern_free(amatch->keys);
+    ast_node_free(amatch->values);
+    mem_free(amatch->kvps);
+    amatch->kvp_count = 0;
+}
+
 static void ast_literal_free(struct AstLiteral *alit)
 {
     if (alit->type == AST_LIT_STRING) {
@@ -241,6 +270,10 @@ void ast_node_free_one(struct AstNode *node)
 
     case AST_FUNC_DEF:
         ast_func_def_free(&(node->data.func_def));
+        break;
+
+    case AST_MATCH:
+        ast_match_free(&(node->data.match));
         break;
 
     case AST_LITERAL:

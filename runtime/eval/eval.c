@@ -148,8 +148,12 @@ VAL_LOC_T eval_impl(
         eval_func_call(node, rt, sym_map);
         break;
 
+    case AST_MATCH:
+        LOG_ERROR("Match expression not implemented yet");
+        exit(1);
+
     default:
-        LOG_ERROR("Unhandled AST node type.\n");
+        LOG_ERROR("Unhandled AST node type");
         exit(1);
     }
 

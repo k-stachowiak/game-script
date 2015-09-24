@@ -74,6 +74,18 @@ static void dbg_print_node_func_call(struct AstFuncCall *func_call)
     printf("%s()\n", symbol);
 }
 
+static void dbg_print_node_func_def(struct AstFuncDef *func_def)
+{
+    (void)func_def;
+    printf("function definition\n");
+}
+
+static void dbg_print_node_match(struct AstMatch *match)
+{
+    (void)match;
+    printf("match expression");
+}
+
 static void dbg_print_node_literal(struct AstLiteral *literal)
 {
     switch (literal->type) {
@@ -127,7 +139,11 @@ static void dbg_print_node(struct AstNode *node)
         break;
 
     case AST_FUNC_DEF:
-        printf("function definition\n");
+        dbg_print_node_func_def(&node->data.func_def);
+        break;
+
+    case AST_MATCH:
+        dbg_print_node_match(&node->data.match);
         break;
 
     case AST_LITERAL:

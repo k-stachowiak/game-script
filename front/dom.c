@@ -20,6 +20,7 @@ static char *reserved[] = {
     "if",
     "while",
     "switch",
+    "match",
     "and",
     "or",
     "ref",
