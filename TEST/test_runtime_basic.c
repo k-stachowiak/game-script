@@ -49,10 +49,11 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     /* Compound binds */
     test_eval_source_fail(tc, rt, "(bind {} 1.0)", "Fail on binding to empty tuple");
     test_eval_source_fail(tc, rt, "(bind { a [] } 1.0 [ 1 2 ])", "Fail on binding to empty array");
-    test_eval_source_fail(tc, rt, "(bind [ 1 ] [ 2 ])", "Fail on binding to literal");
+    test_eval_source_fail(tc, rt, "(bind [ 1 ] [ 2 ])", "Fail on mismatched literals");
     test_eval_source_fail(tc, rt, "(bind { a } [ 1.0 ])", "Fail on mismatched types of compound bind");
     test_eval_source_fail(tc, rt, "(bind { b } { 1 2 })", "Fail on too many values in compound bind");
     test_eval_source_fail(tc, rt, "(bind [ c d ] [ 1 ])", "Fail on too many keys in compound bind");
+    test_eval_source_succeed(tc, rt, "(bind [ 3 ] [ 3 ])", "Succeed on matched literals");
     test_eval_source_succeed(tc, rt, "(bind { e f } { 1 2 })", "Succeed on tuple bind");
     test_eval_source_succeed(tc, rt, "(bind [ g ] [ 1.0 ])", "Succeed on array bind");
     test_eval_source_expect(tc, rt, "(do (bind { s _ } { 1.0 2.0 }) s)", "Bind tuple 1st dontcare 2nd", REAL, 1.0);
