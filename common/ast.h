@@ -85,16 +85,10 @@ struct AstFuncDef {
     struct AstNode *expr;
 };
 
-struct AstMatchKvp {
-    struct Pattern *key;    /* non-owning */
-    struct AstNode *value;  /* non-owning */
-};
-
 struct AstMatch {
-    struct AstNode *expr;       /* owning */
-    struct Pattern *keys;       /* owning */
-    struct AstNode *values;     /* owning */
-    struct AstMatchKvp *kvps;   /* owning storing non-owning references */
+    struct AstNode *expr;
+    struct Pattern *keys;
+    struct AstNode *values;
     int kvp_count;
 };
 
@@ -177,9 +171,7 @@ struct AstNode *ast_make_match(
         struct SourceLocation *loc,
         struct AstNode *expr,
         struct Pattern *keys,
-        struct AstNode *values,
-        struct AstMatchKvp *kvps,
-        int kvp_count);
+        struct AstNode *values);
 
 struct AstNode *ast_make_parafunc(
     struct SourceLocation *loc,

@@ -443,11 +443,6 @@ static struct AstNode *parse_match(struct DomNode *dom)
     struct Pattern *keys = NULL, *keys_end = NULL;
     struct AstNode *values = NULL, *values_end = NULL;
 
-    struct {
-        struct AstMatchKvp *data;
-        int size, cap;
-    } kvps = { NULL, 0, 0 };
-
     LOG_TRACE_FUNC
 
     /* 1. Is compound CORE. */
@@ -479,7 +474,6 @@ static struct AstNode *parse_match(struct DomNode *dom)
         struct DomNode *match_child = NULL;
         struct Pattern *key = NULL;
         struct AstNode *value = NULL;
-        struct AstMatchKvp kvp;
 
         /* 3.3.1. Is compound CORE. */
         if (!dom_node_is_spec_compound(child, DOM_CPD_CORE)) {
@@ -506,19 +500,10 @@ static struct AstNode *parse_match(struct DomNode *dom)
         LIST_APPEND(key, &keys, &keys_end);
         LIST_APPEND(value, &values, &values_end);
 
-        kvp.key = keys_end;
-        kvp.value = values_end;
-        ARRAY_APPEND(kvps, kvp);
-
         child = child->next;
     }
 
-    return ast_make_match(
-        &dom->loc,
-        expr,
-        keys, values,
-        kvps.data,
-        kvps.size);
+    return ast_make_match(&dom->loc, expr, keys, values);
 
 fail:
     if (keys) {
@@ -527,10 +512,6 @@ fail:
 
     if (values) {
         ast_node_free(values);
-    }
-
-    if (kvps.size) {
-        ARRAY_FREE(kvps);
     }
 
     return NULL;
