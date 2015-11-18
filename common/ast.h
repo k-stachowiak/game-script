@@ -91,10 +91,10 @@ struct AstMatchKvp {
 };
 
 struct AstMatch {
-    struct AstNode *expr;
+    struct AstNode *expr;       /* owning */
     struct Pattern *keys;       /* owning */
     struct AstNode *values;     /* owning */
-    struct AstMatchKvp *kvps;
+    struct AstMatchKvp *kvps;   /* owning storing non-owning references */
     int kvp_count;
 };
 
