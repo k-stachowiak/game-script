@@ -89,7 +89,6 @@ struct AstMatch {
     struct AstNode *expr;
     struct Pattern *keys;
     struct AstNode *values;
-    int kvp_count;
 };
 
 struct AstLiteral {

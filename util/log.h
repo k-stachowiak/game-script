@@ -3,13 +3,16 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdio.h>
-
 #define LLVL_TRACE 0
 #define LLVL_DEBUG 1
 #define LLVL_ERROR 2
+#define LLVL_NONE 3
 
 #define LOG_LEVEL LLVL_DEBUG
+
+#if LOG_LEVEL < LLVL_NONE
+#   include <stdio.h>
+#endif
 
 #if LOG_LEVEL <= LLVL_TRACE
 #   define LOG_TRACE(FORMAT, ...) fprintf(stderr, "[TRACE] %s:%d " FORMAT "\n", __FILE__, __LINE__, ##__VA_ARGS__)

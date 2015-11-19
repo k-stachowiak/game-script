@@ -46,6 +46,7 @@ add_library(lang OBJECT
         ./runtime/eval/eval_cpd.c
         ./runtime/eval/eval_fdef.c
         ./runtime/eval/eval_bind.c
+        ./runtime/eval/eval_match.c
         ./runtime/bif/bif_compound.c
         ./runtime/bif/bif_type.c
         ./runtime/bif/bif_random.c

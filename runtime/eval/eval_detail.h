@@ -10,6 +10,7 @@ void eval_func_call(struct AstNode *node, struct Runtime *rt, struct SymMap *sym
 void eval_compound(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 void eval_parafunc(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 void eval_bind(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
+void eval_match(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);
 
 void eval_bind_pattern(
     struct Runtime *rt,
