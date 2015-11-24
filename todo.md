@@ -1,9 +1,10 @@
 TODO
 ----
 - Replace switch parafunc with match full-blown match expression
-    - allow literals in patterns
+    - allow literals in patterns [tests in place]
     - update documentation to describe the patern matching done in the switch.
     - remove switch from parafunctions
+    - ast\_make\_literal\_string should make copy of input internally! And so should pattern counterpart.
 - Implement function overloading so that more than one function is allowed to be bound to
   a single symbol and it is not an error to fail binding to the formal arguments if there
   is yet another overload to be considered

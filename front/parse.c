@@ -43,6 +43,191 @@ static bool all_of(char *current, char *last, int (*f)(int))
     return true;
 }
 
+static char *unescape_string(char *in)
+{
+    int in_len = strlen(in);
+    char *out = mem_calloc(in_len + 1, 1);
+    char *write = out;
+    while (*in) {
+
+        if (*in != '\\') {
+            *write++ = *in++;
+            continue;
+        }
+
+        switch (*++in) {
+            case 'a':
+                *write++ = '\a';
+                break;
+            case 'b':
+                *write++ = '\b';
+                break;
+            case 't':
+                *write++ = '\t';
+                break;
+            case 'n':
+                *write++ = '\n';
+                break;
+            case 'f':
+                *write++ = '\f';
+                break;
+            case 'r':
+                *write++ = '\r';
+                break;
+            case 'v':
+                *write++ = '\v';
+                break;
+            case '\\':
+                *write++ = '\\';
+                break;
+            case '"':
+                *write++ = '"';
+                break;
+            case '\0':
+                *write++ = '\0';
+                break;
+            default:
+                mem_free(out);
+                return NULL;
+        }
+        ++in;
+    }
+
+    return mem_realloc(out, write - out + 1);
+}
+
+static bool parse_string(char *string, char **result)
+{
+    int len = strlen(string);
+
+    if (len < 2) {
+        return false;
+    }
+
+    if (string[0] == TOK_DELIM_STR && string[len - 1] == TOK_DELIM_STR) {
+        char *unescaped = unescape_string(string);
+        if (!unescaped) {
+            return false;
+        } else {
+            *result = unescaped;
+            return true;
+        }
+
+    } else {
+        return false;
+    }
+}
+
+static bool parse_char(char *string, char *result)
+{
+    int len = strlen(string);
+
+    if (string[0] != TOK_DELIM_CHAR || string[len - 1] != TOK_DELIM_CHAR) {
+        return false;
+    }
+
+    if (len == 3) {
+        *result = string[1];
+        return true;
+
+    } else if (len == 4 && string[1] == TOK_DELIM_ESCAPE) {
+        switch(string[2]) {
+         case 'a':
+            *result = '\a';
+            return true;
+         case 'b':
+            *result = '\b';
+            return true;
+         case 't':
+            *result = '\t';
+            return true;
+         case 'n':
+            *result = '\n';
+            return true;
+         case 'f':
+            *result = '\f';
+            return true;
+         case 'r':
+            *result = '\r';
+            return true;
+         case 'v':
+            *result = '\v';
+            return true;
+         case '\\':
+            *result = '\\';
+            return true;
+         case '\'':
+            *result = '\'';
+            return true;
+         case '0':
+            *result = '\0';
+            return true;
+         default:
+            return false;
+        }
+
+    } else {
+        return false;
+
+    }
+}
+
+static bool parse_int(char *string, long *result)
+{
+    char *first, *last;
+    int len = strlen(string);
+
+    if (len == 0) {
+        return false;
+    }
+
+    first = string;
+    last = string + len;
+
+    if (string[0] == '-' || string[0] == '+') {
+        ++first;
+    }
+
+    if (first == last) {
+        return false;
+    }
+
+    if (all_of(first, last, isdigit)) {
+        *result = atol(string);
+        return true;
+
+    } else {
+        return false;
+    }
+}
+
+static bool parse_real(char *string, double *result)
+{
+    char *first, *period, *last;
+    int len = strlen(string);
+
+    first = string;
+    last = first + len;
+    period = find(first, last, '.');
+
+    if (string[0] == '-' || string[0] == '+') {
+        ++first;
+    }
+
+    if (first == last) {
+        return false;
+    }
+
+    if (period == last ||
+        !all_of(first, period, isdigit) ||
+        !all_of(period + 1, last, isdigit)) {
+        return false;
+    }
+
+    *result = atof(string);
+    return true;
+}
+
 /* Pattern parsing.
  * ================
  */
@@ -64,14 +249,74 @@ static struct Pattern *parse_pattern_list(struct DomNode *dom)
     return result;
 }
 
+static struct Pattern *parse_pattern_literal_unit(struct DomNode *dom)
+{
+    (void)dom;
+    return NULL;
+}
+
+static struct Pattern *parse_pattern_literal_bool(struct DomNode *dom)
+{
+    (void)dom;
+    return NULL;
+}
+
+static struct Pattern *parse_pattern_literal_char(struct DomNode *dom)
+{
+    (void)dom;
+    return NULL;
+}
+
+static struct Pattern *parse_pattern_literal_real(struct DomNode *dom)
+{
+    (void)dom;
+    return NULL;
+}
+
+static struct Pattern *parse_pattern_literal_int(struct DomNode *dom)
+{
+    (void)dom;
+    return NULL;
+}
+
+static struct Pattern *parse_pattern_literal_string(struct DomNode *dom)
+{
+    (void)dom;
+    return NULL;
+}
+
+static struct Pattern *parse_pattern_literal(struct DomNode *dom)
+{
+    struct Pattern *result;
+
+    LOG_TRACE_FUNC
+
+    if ((!err_state() && (result = parse_pattern_literal_unit(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_bool(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_char(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_real(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_int(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_string(dom)))) {
+        return result;
+
+    } else {
+        return NULL;
+    }
+}
+
 static struct Pattern *parse_pattern_atom(struct DomNode *dom)
 {
     char *symbol;
+    struct Pattern *pattern;
+
     if ((symbol = dom_node_parse_symbol(dom))) {
         return pattern_make_symbol(symbol);
 
-    } else if (dom_node_is_reserved_atom(dom, DOM_RES_DONTCARE)) {
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_DONTCARE)) {
         return pattern_make_dontcare();
+
+    } else if ((pattern = parse_pattern_literal(dom))) {
+        return pattern;
 
     } else {
         err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
@@ -137,7 +382,7 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is "do" keyword. */
-    if (!dom_node_is_reserved_atom(child, DOM_RES_DO)) {
+    if (!dom_node_is_spec_reserved_atom(child, DOM_RES_DO)) {
         return NULL;
     }
     child = child->next;
@@ -171,7 +416,7 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is bind keyword. */
-    if (!dom_node_is_reserved_atom(child, DOM_RES_BIND)) {
+    if (!dom_node_is_spec_reserved_atom(child, DOM_RES_BIND)) {
         return NULL;
     }
     child = child->next;
@@ -216,62 +461,62 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
     }
 
     /* 3.1. Case &&: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_AND)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_AND)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_AND, args);
     }
 
     /* 3.2. Case ||: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_OR)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_OR)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_OR, args);
     }
 
     /* 3.3. Case if: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_IF)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_IF)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_IF, args);
     }
 
     /* 3.4. Case while: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_WHILE)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_WHILE)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_WHILE, args);
     }
 
     /* 3.5. Case switch: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_SWITCH)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_SWITCH)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SWITCH, args);
     }
 
     /* 3.6. Case ref: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_REF)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_REF)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_REF, args);
     }
 
     /* 3.7. Case peek: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_PEEK)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_PEEK)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_PEEK, args);
     }
 
     /* 3.8. Case poke: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_POKE)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_POKE)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_POKE, args);
     }
 
     /* 3.9. Case begin: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_BEGIN)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_BEGIN)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_BEGIN, args);
     }
 
     /* 3.10. Case end: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_END)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_END)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_END, args);
     }
 
     /* 3.11. Case inc: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_INC)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_INC)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_INC, args);
     }
 
     /* 3.12. Case succ: */
-    if (dom_node_is_reserved_atom(child, DOM_RES_SUCC)) {
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_SUCC)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
     }
 
@@ -336,7 +581,10 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
 
     child = dom->cpd_children;
 
-    /* 3.1. 1st child is an expression. */
+    /* 3.1. 1st child is an non-keyword expression. */
+    if (dom_node_is_reserved_atom(child)) {
+        return NULL;
+    }
     func = parse_one(child);
     if (err_state()) {
         return NULL;
@@ -381,7 +629,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is "func" keyword. */
-    if (!dom_node_is_reserved_atom(child, DOM_RES_FUNC)) {
+    if (!dom_node_is_spec_reserved_atom(child, DOM_RES_FUNC)) {
         return NULL;
     }
     child = child->next;
@@ -458,7 +706,7 @@ static struct AstNode *parse_match(struct DomNode *dom)
     child = dom->cpd_children;
 
     /* 3.1. 1st child is "match" keyword. */
-    if (!dom_node_is_reserved_atom(child, DOM_RES_MATCH)) {
+    if (!dom_node_is_spec_reserved_atom(child, DOM_RES_MATCH)) {
         return NULL;
     }
     child = child->next;
@@ -520,7 +768,7 @@ fail:
 static struct AstNode *parse_literal_unit(struct DomNode *dom)
 {
     LOG_TRACE_FUNC
-    if (dom_node_is_reserved_atom(dom, DOM_RES_UNIT)) {
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
         return ast_make_literal_unit(&dom->loc);
     } else {
         return NULL;
@@ -530,73 +778,18 @@ static struct AstNode *parse_literal_unit(struct DomNode *dom)
 static struct AstNode *parse_literal_bool(struct DomNode *dom)
 {
     LOG_TRACE_FUNC
-    if (dom_node_is_reserved_atom(dom, DOM_RES_TRUE)) {
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
         return ast_make_literal_bool(&dom->loc, 1);
-    } else if (dom_node_is_reserved_atom(dom, DOM_RES_FALSE)) {
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
         return ast_make_literal_bool(&dom->loc, 0);
     } else {
         return NULL;
     }
 }
 
-static char *unescape_string(char *in)
-{
-    int in_len = strlen(in);
-    char *out = mem_calloc(in_len + 1, 1);
-    char *write = out;
-    while (*in) {
-
-        if (*in != '\\') {
-            *write++ = *in++;
-            continue;
-        }
-
-        switch (*++in) {
-            case 'a':
-                *write++ = '\a';
-                break;
-            case 'b':
-                *write++ = '\b';
-                break;
-            case 't':
-                *write++ = '\t';
-                break;
-            case 'n':
-                *write++ = '\n';
-                break;
-            case 'f':
-                *write++ = '\f';
-                break;
-            case 'r':
-                *write++ = '\r';
-                break;
-            case 'v':
-                *write++ = '\v';
-                break;
-            case '\\':
-                *write++ = '\\';
-                break;
-            case '"':
-                *write++ = '"';
-                break;
-            case '\0':
-                *write++ = '\0';
-                break;
-            default:
-                mem_free(out);
-                return NULL;
-        }
-        ++in;
-    }
-
-    return mem_realloc(out, write - out + 1);
-}
-
 static struct AstNode *parse_literal_string(struct DomNode *dom)
 {
-    char *atom;
-    int len;
-    char delim = TOK_DELIM_STR;
+    char *value;
 
     LOG_TRACE_FUNC
 
@@ -604,26 +797,16 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
         return NULL;
     }
 
-    atom = dom->atom;
-    len = strlen(atom);
-
-    if (atom[0] == delim && atom[len - 1] == delim && len >= 2) {
-        char *unescaped = unescape_string(atom);
-        if (!unescaped) {
-            return NULL;
-        } else {
-            return ast_make_literal_string(&dom->loc, unescaped);
-        }
-    } else {
+    if (!parse_string(dom->atom, &value)) {
         return NULL;
     }
+
+    return ast_make_literal_string(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal_char(struct DomNode *dom)
 {
-    char *atom;
-    int len;
-    char delim = TOK_DELIM_CHAR;
+    char value;
 
     LOG_TRACE_FUNC
 
@@ -631,52 +814,16 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         return NULL;
     }
 
-    atom = dom->atom;
-    len = strlen(atom);
-
-    if (atom[0] != delim || atom[len - 1] != delim) {
+    if (!parse_char(dom->atom, &value)) {
         return NULL;
     }
 
-    if (len == 3) {
-        return ast_make_literal_character(&dom->loc, atom[1]);
-
-    } else if (len == 4 && atom[1] == TOK_DELIM_ESCAPE) {
-        switch(atom[2]) {
-         case 'a':
-            return ast_make_literal_character(&dom->loc, '\a');
-         case 'b':
-            return ast_make_literal_character(&dom->loc, '\b');
-         case 't':
-            return ast_make_literal_character(&dom->loc, '\t');
-         case 'n':
-            return ast_make_literal_character(&dom->loc, '\n');
-         case 'f':
-            return ast_make_literal_character(&dom->loc, '\f');
-         case 'r':
-            return ast_make_literal_character(&dom->loc, '\r');
-         case 'v':
-            return ast_make_literal_character(&dom->loc, '\v');
-         case '\\':
-            return ast_make_literal_character(&dom->loc, '\\');
-         case '\'':
-            return ast_make_literal_character(&dom->loc, '\'');
-         case '0':
-            return ast_make_literal_character(&dom->loc, '\0');
-         default:
-            return NULL;
-        }
-
-    } else {
-        err_push_src("PARSE", dom->loc, "Incorrect character length (%d)", len);
-        return NULL;
-    }
+    return ast_make_literal_character(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal_int(struct DomNode *dom)
 {
-    char *atom;
-    int len;
+    long value;
 
     LOG_TRACE_FUNC
 
@@ -684,33 +831,16 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
         return NULL;
     }
 
-    atom = dom->atom;
-    len = strlen(atom);
-
-    if (len > 0) {
-        char *first = atom, *last = atom + len;
-        if (atom[0] == '-' || atom[0] == '+') {
-            ++first;
-        }
-
-        if (first == last) {
-            return NULL;
-        }
-
-        if (all_of(first, last, isdigit)) {
-            long value = atol(atom);
-            return ast_make_literal_int(&dom->loc, value);
-        }
+    if (!parse_int(dom->atom, &value)) {
+        return NULL;
     }
 
-    return NULL;
+    return ast_make_literal_int(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal_real(struct DomNode *dom)
 {
-    char *atom, *first, *period, *last;
     double value;
-    int len;
 
     LOG_TRACE_FUNC
 
@@ -718,28 +848,10 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
         return NULL;
     }
 
-    atom = dom->atom;
-    len = strlen(atom);
-
-    first = atom;
-    last = first + len;
-    period = find(first, last, '.');
-
-    if (atom[0] == '-' || atom[0] == '+') {
-        ++first;
-    }
-
-    if (first == last) {
+    if (!parse_real(dom->atom, &value)) {
         return NULL;
     }
 
-    if (period == last ||
-        !all_of(first, period, isdigit) ||
-        !all_of(period + 1, last, isdigit)) {
-        return NULL;
-    }
-
-    value = atof(atom);
     return ast_make_literal_real(&dom->loc, value);
 }
 

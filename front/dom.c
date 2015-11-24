@@ -95,7 +95,24 @@ bool dom_node_is_atom(struct DomNode *node)
     return node->type == DOM_ATOM;
 }
 
-bool dom_node_is_reserved_atom(struct DomNode *node, enum Reserved res)
+bool dom_node_is_reserved_atom(struct DomNode *node)
+{
+    int i;
+
+    if (node->type != DOM_ATOM) {
+        return false;
+    }
+
+    for (i = 0; i < reserved_count; ++i) {
+        if (strcmp(node->atom, reserved[i]) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool dom_node_is_spec_reserved_atom(struct DomNode *node, enum Reserved res)
 {
     if (node->type != DOM_ATOM) {
         return false;
@@ -129,7 +146,7 @@ bool dom_node_is_cpd_min_size(struct DomNode *node, int size)
 char *dom_node_parse_symbol(struct DomNode *node)
 {
     char* result;
-    int len, i;
+    int len;
 
     /* Is an atom. */
     if (node->type != DOM_ATOM) {
@@ -147,10 +164,8 @@ char *dom_node_parse_symbol(struct DomNode *node)
     }
 
     /* Isn't a reserved word. */
-    for (i = 0; i < reserved_count; ++i) {
-        if (strcmp(node->atom, reserved[i]) == 0) {
-            return NULL;
-        }
+    if (dom_node_is_reserved_atom(node)) {
+        return NULL;
     }
 
     len = strlen(node->atom);

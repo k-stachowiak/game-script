@@ -16,6 +16,65 @@ struct Pattern *pattern_make_symbol(char *symbol)
     return result;
 }
 
+struct Pattern *pattern_make_literal_unit(void)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_LITERAL;
+    result->data.literal.type = PATTERN_LIT_UNIT;
+    result->next = NULL;
+    return result;
+}
+
+struct Pattern *pattern_make_literal_bool(int value)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_LITERAL;
+    result->data.literal.type = PATTERN_LIT_BOOL;
+    result->data.literal.data.boolean = value;
+    result->next = NULL;
+    return result;
+}
+
+struct Pattern *pattern_make_literal_string(char *value)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_LITERAL;
+    result->data.literal.type = PATTERN_LIT_STRING;
+    result->data.literal.data.string = value;
+    result->next = NULL;
+    return result;
+}
+
+struct Pattern *pattern_make_literal_character(char value)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_LITERAL;
+    result->data.literal.type = PATTERN_LIT_CHAR;
+    result->data.literal.data.character = value;
+    result->next = NULL;
+    return result;
+}
+
+struct Pattern *pattern_make_literal_int(long value)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_LITERAL;
+    result->data.literal.type = PATTERN_LIT_INT;
+    result->data.literal.data.integer = value;
+    result->next = NULL;
+    return result;
+}
+
+struct Pattern *pattern_make_literal_real(double value)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_LITERAL;
+    result->data.literal.type = PATTERN_LIT_REAL;
+    result->data.literal.data.real = value;
+    result->next = NULL;
+    return result;
+}
+
 struct Pattern *pattern_make_dontcare(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
@@ -49,6 +108,12 @@ void pattern_free(struct Pattern *pattern)
         switch (pattern->type) {
         case PATTERN_SYMBOL:
             mem_free(pattern->data.symbol.symbol);
+            break;
+
+        case PATTERN_LITERAL:
+            if (pattern->data.literal.type == PATTERN_LIT_STRING) {
+                mem_free(pattern->data.literal.data.string);
+            }
             break;
 
         case PATTERN_DONTCARE:
@@ -86,6 +151,7 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
             }
             break;
 
+        case PATTERN_LITERAL:
         case PATTERN_DONTCARE:
             break;
 

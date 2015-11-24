@@ -112,7 +112,10 @@ void dom_free(struct DomNode *dom);
 bool dom_node_is_atom(struct DomNode *node);
 
 /** Checks if the node is a given reserved atom */
-bool dom_node_is_reserved_atom(struct DomNode *node, enum Reserved res);
+bool dom_node_is_reserved_atom(struct DomNode *node);
+
+/** Checks if the node is a given reserved atom */
+bool dom_node_is_spec_reserved_atom(struct DomNode *node, enum Reserved res);
 
 /** Checks if the node is of any compound type */
 bool dom_node_is_compound(struct DomNode *node);

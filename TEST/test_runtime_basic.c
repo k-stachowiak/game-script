@@ -56,6 +56,8 @@ static void test_runtime_bind(struct TestContext *tc, struct Runtime *rt)
     test_eval_source_fail(tc, rt, "(bind [ c d ] [ 1 ])", "Fail on too many keys in compound bind");
     test_eval_source_succeed(tc, rt, "(bind 1.0 1.0)", "Succeed on matched simple literals");
     test_eval_source_succeed(tc, rt, "(bind [ 2 3 ] [ (+ 1 1) 3 ])", "Succeed on matched complex literals");
+    test_eval_source_succeed(tc, rt, "(bind \"asd\" [ 'a' 's' 'd' ])", "Succeed on matching array to string");
+    test_eval_source_succeed(tc, rt, "(bind [ 'a' 's' 'd' ] \"asd\")", "Succeed on matching string to array");
     test_eval_source_succeed(tc, rt, "(bind { e f } { 1 2 })", "Succeed on tuple bind");
     test_eval_source_succeed(tc, rt, "(bind [ g ] [ 1.0 ])", "Succeed on array bind");
     test_eval_source_expect(tc, rt, "(do (bind { s _ } { 1.0 2.0 }) s)", "Bind tuple 1st dontcare 2nd", REAL, 1.0);
