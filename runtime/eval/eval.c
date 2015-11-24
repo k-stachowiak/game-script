@@ -102,6 +102,15 @@ static void eval_reference(
  * ----------------------------------------------------------------------------
  */
 
+static void eval_bind_pattern_literal(
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct Pattern *pattern,
+        VAL_LOC_T location)
+{
+    err_push("EVAL", "Literal pattern binding not implemented yet");
+}
+
 void eval_bind_pattern(
         struct Runtime *rt,
         struct SymMap *sym_map,
@@ -128,7 +137,7 @@ void eval_bind_pattern(
     }
 
     if (pattern->type == PATTERN_LITERAL) {
-        err_push("EVAL", "Literal pattern binding not implemented yet");
+        eval_bind_pattern_literal(rt, sym_map, pattern, location);
         return;
     }
 
