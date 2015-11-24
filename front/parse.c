@@ -251,38 +251,91 @@ static struct Pattern *parse_pattern_list(struct DomNode *dom)
 
 static struct Pattern *parse_pattern_literal_unit(struct DomNode *dom)
 {
-    (void)dom;
-    return NULL;
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
+        return pattern_make_literal_unit();
+    } else {
+        return NULL;
+    }
 }
 
 static struct Pattern *parse_pattern_literal_bool(struct DomNode *dom)
 {
-    (void)dom;
-    return NULL;
+    LOG_TRACE_FUNC
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
+        return pattern_make_literal_bool(1);
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
+        return pattern_make_literal_bool(0);
+    } else {
+        return NULL;
+    }
 }
 
 static struct Pattern *parse_pattern_literal_char(struct DomNode *dom)
 {
-    (void)dom;
-    return NULL;
+    char value;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    if (!parse_char(dom->atom, &value)) {
+        return NULL;
+    }
+
+    return pattern_make_literal_character(value);
 }
 
 static struct Pattern *parse_pattern_literal_real(struct DomNode *dom)
 {
-    (void)dom;
-    return NULL;
+    double value;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    if (!parse_real(dom->atom, &value)) {
+        return NULL;
+    }
+
+    return pattern_make_literal_real(value);
 }
 
 static struct Pattern *parse_pattern_literal_int(struct DomNode *dom)
 {
-    (void)dom;
-    return NULL;
+    long value;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    if (!parse_int(dom->atom, &value)) {
+        return NULL;
+    }
+
+    return pattern_make_literal_int(value);
 }
 
 static struct Pattern *parse_pattern_literal_string(struct DomNode *dom)
 {
-    (void)dom;
-    return NULL;
+    char *value;
+
+    LOG_TRACE_FUNC
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    if (!parse_string(dom->atom, &value)) {
+        return NULL;
+    }
+
+    return pattern_make_literal_string(value);
 }
 
 static struct Pattern *parse_pattern_literal(struct DomNode *dom)

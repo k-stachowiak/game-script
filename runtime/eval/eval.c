@@ -127,6 +127,11 @@ void eval_bind_pattern(
         return;
     }
 
+    if (pattern->type == PATTERN_LITERAL) {
+        err_push("EVAL", "Literal pattern binding not implemented yet");
+        return;
+    }
+
     if ((pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) ||
         (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE)) {
         err_push("EVAL", "Compound type mismatched");
