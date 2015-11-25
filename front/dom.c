@@ -19,7 +19,6 @@ static char *reserved[] = {
     "bind",
     "if",
     "while",
-    "switch",
     "match",
     "and",
     "or",

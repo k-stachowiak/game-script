@@ -104,18 +104,6 @@ There are several types of parafunctions available in the language.
 ### Control flow expressions
 * if     : _boolean_ -> _?_ -> _?_ -> _?_
 * while  : _boolean_ -> _?_ -> unit
-* switch : _a_ -> { _a_ _b_ } -> { _a_ _b_ } -> ... -> _b_
-
-The switch expression is not trivial therefore an example will be provided:
-
-    (switch _some_value_
-        { true "boolean true" }
-        { 1 "integer one" }
-    )
-
-The above expression will test the given value and return an according message.
-No type is enforced upon the value, only equality check will be performed against the case keys.
-Currently there is no way of implementing a "capture all" case.
 
 ### Reference related expressions
 * ref   : _?_ -> _reference_            -- returns reference to a given value

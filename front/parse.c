@@ -533,11 +533,6 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_WHILE, args);
     }
 
-    /* 3.5. Case switch: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_SWITCH)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SWITCH, args);
-    }
-
     /* 3.6. Case ref: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_REF)) {
         return ast_make_parafunc(&dom->loc, AST_PARAFUNC_REF, args);

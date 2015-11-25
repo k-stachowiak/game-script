@@ -23,17 +23,6 @@ static void test_parafunc_if(struct TestContext *tc, struct Runtime *rt)
     rt_reset(rt);
 }
 
-static void test_parafunc_switch(struct TestContext *tc, struct Runtime *rt)
-{
-    test_eval_source_fail(tc, rt, "(switch)", "Fail on evaluating empty switch block");
-    test_eval_source_fail(tc, rt, "(switch 1)", "Fail on evaluating switch block with only 1 argument");
-    test_eval_source_fail(tc, rt, "(switch 1 2)", "Fail on evaluating switch block with a non-tuple case");
-    test_eval_source_fail(tc, rt, "(switch 1 { 2 })", "Fail on evaluating switch block with a 1-element");
-    test_eval_source_expect(tc, rt, "(switch 1 { 1 1.0 } { 2 2.0 })", "Succeed on switch a", REAL, 1.0);
-    test_eval_source_expect(tc, rt, "(switch 2 { 1 1.0 } { 2 2.0 })", "Succeed on switch b", REAL, 2.0);
-    rt_reset(rt);
-}
-
 static void test_parafunc_references_basic(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
@@ -94,7 +83,6 @@ void test_runtime_parafunc(struct TestContext *tc)
     struct Runtime *rt = rt_make();
     test_runtime_parafunc_logic(tc, rt);
     test_parafunc_if(tc, rt);
-    test_parafunc_switch(tc, rt);
     test_parafunc_references_basic(tc, rt);
     test_parafunc_references_iteration(tc, rt);
     test_parafunc_references_poke_type(tc, rt);

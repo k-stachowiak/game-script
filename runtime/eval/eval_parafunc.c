@@ -22,11 +22,6 @@ static void para_error_arg_expected(char *func, int index, char *expected)
             index, func, expected);
 }
 
-static void para_error_case(char *unmet)
-{
-    err_push("EVAL", "Case %s", unmet);
-}
-
 static void eval_parafunc_if(
         struct Runtime *rt,
         struct SymMap *sym_map,
@@ -119,93 +114,6 @@ static void eval_parafunc_while(
 
         stack_collapse(&rt->stack, temp_begin, temp_end);
     }
-}
-
-static bool eval_parafunc_switch_case(
-        VAL_LOC_T switch_loc,
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct AstNode *case_node)
-{
-    VAL_LOC_T temp_begin, temp_end;
-    VAL_LOC_T case_loc, case_key, case_value;
-    int case_len;
-    bool result = false;
-
-    temp_begin = rt->stack.top;
-    case_loc = eval_impl(case_node, rt, sym_map);
-    temp_end = rt->stack.top;
-
-    if (err_state()) {
-        err_push_src("EVAL", case_node->loc, "Failed evaluating case expression");
-        goto end;
-    }
-
-    if (rt_val_peek_type(&rt->stack, case_loc) != VAL_TUPLE) {
-        para_error_case("must be tuple");
-        goto end;
-    }
-
-    case_len = rt_val_cpd_len(rt, case_loc);
-
-    if (case_len != 2) {
-        para_error_case("must be 2 element tuple");
-        goto end;
-    }
-
-    case_key = rt_val_cpd_first_loc(case_loc);
-    case_value = rt_val_next_loc(rt, case_key);
-
-    if (rt_val_eq_bin(rt, switch_loc, case_key)) {
-        rt_val_push_copy(&rt->stack, case_value);
-        result = true;
-    }
-
-end:
-    stack_collapse(&rt->stack, temp_begin, temp_end);
-    return result;
-}
-
-static void eval_parafunc_switch(
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct AstNode *args)
-{
-    VAL_LOC_T switch_loc, temp_begin, temp_end;
-    int argc = ast_list_len(args);
-
-    if (argc < 2) {
-        para_error_invalid_argc("switch", argc);
-        return;
-    }
-
-    temp_begin = rt->stack.top;
-    switch_loc = eval_impl(args, rt, sym_map);
-    temp_end = rt->stack.top;
-
-    if (err_state()) {
-        err_push_src("EVAL", args->loc, "Failed evaluating switch expression");
-        goto end;
-    }
-
-    args = args->next;
-
-    while (args) {
-        if (eval_parafunc_switch_case(switch_loc, rt, sym_map, args)) {
-            goto end;
-        } else {
-            if (err_state()) {
-                err_push("EVAL", "Failed evaluating switch case");
-                goto end;
-            }
-            args = args->next;
-        }
-    }
-
-    err_push("EVAL", "Unmached case in a swithc");
-
-end:
-    stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
 static void eval_parafunc_logic(
@@ -534,10 +442,6 @@ void eval_parafunc(
 
     case AST_PARAFUNC_WHILE:
         eval_parafunc_while(rt, sym_map, args);
-        break;
-
-    case AST_PARAFUNC_SWITCH:
-        eval_parafunc_switch(rt, sym_map, args);
         break;
 
     case AST_PARAFUNC_AND:

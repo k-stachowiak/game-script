@@ -752,13 +752,11 @@
 
 (bind array500 (array_gen (func () (rand_ur 0.0 100.0)) 500))
 (bind array750 (array_gen (func () (rand_ur 0.0 100.0)) 750))
-(bind array1000 (array_gen (func () (rand_ur 0.0 100.0)) 1000))
 
 (bind qsort_test (func (count) (do
     (switch count
         { 500 (quicksort (begin array500) (end array500)) }
         { 750 (quicksort (begin array750) (end array750)) }
-        { 1000 (quicksort (begin array1000) (end array1000)) }
     )
     unit
 )))
@@ -767,7 +765,6 @@
     (switch count
         { 500 (mergesort array500) }
         { 750 (mergesort array750) }
-        { 1000 (mergesort array1000) }
     )
     unit
 )))
