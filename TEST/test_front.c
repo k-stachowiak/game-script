@@ -69,6 +69,24 @@ static void test_parse_bind(struct TestContext *tc)
     test_parse(tc, "(bind [ x { y z } ] [ 1 { 2 3 } ])", "Succeed on recursively compound bind", true);
 }
 
+static void test_parse_match(struct TestContext *tc)
+{
+    test_parse(tc, "[match]", "Fail on match in array", false);
+    test_parse(tc, "{match}", "Fail on match in tuple", false);
+    test_parse(tc, "(match)", "Fail on empty match block", false);
+    test_parse(tc, "(match x)", "Fail on missing cases", false);
+    test_parse(tc, "(match x [])", "Fail on missing array as case", false);
+    test_parse(tc, "(match x {})", "Fail on missing tuple as case", false);
+    test_parse(tc, "(match x ())", "Fail on empty case", false);
+    test_parse(tc, "(match x (y))", "Fail on missing case value", false);
+
+    test_parse(tc, "(match x (y z))", "Succeed on simple match", true);
+    test_parse(tc, "(match x (y z) (s t))", "Succeed on multiple simple matches", true);
+
+    test_parse(tc, "(match x ([y z] a))", "Succeed on compound match", true);
+    test_parse(tc, "(match x ([y z] a) ([s t] b))", "Succeed on multiple compund matches", true);
+}
+
 static void test_parse_compound(struct TestContext *tc)
 {
     test_parse(tc, "()", "Fail on empty core compound", false);
@@ -135,6 +153,7 @@ void test_front(struct TestContext *tc)
     test_lex_comments(tc);
     test_parse_do(tc);
     test_parse_bind(tc);
+    test_parse_match(tc);
     test_parse_compound(tc);
     test_parse_func_call(tc);
     test_parse_func_def(tc);

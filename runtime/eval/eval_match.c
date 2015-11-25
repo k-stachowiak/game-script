@@ -14,12 +14,15 @@ void eval_match(
     struct AstNode *expr = node->data.match.expr;
     struct Pattern *key = node->data.match.keys;
     struct AstNode *value = node->data.match.values;
+    VAL_LOC_T temp_begin, temp_end;
 
+    temp_begin = rt->stack.top;
     VAL_LOC_T location = eval_impl(expr, rt, sym_map);
     if (err_state()) {
         err_push_src("EVAL", expr->loc, "Failed evaluating match expression");
         return;
     }
+    temp_end = rt->stack.top;
 
     while (key && value) {
         struct SymMap local_sym_map;
@@ -33,11 +36,12 @@ void eval_match(
             value = value->next;
         } else {
             eval_impl(value, rt, &local_sym_map);
-            return; /* no stack collapsing - we keep the evaluated value. */
+            goto end;
         }
 
         sym_map_deinit(&local_sym_map);
     }
+
 
     /* Overzaleous sanity check. */
     if (key || value) {
@@ -49,4 +53,7 @@ void eval_match(
     err_push_src(
         "EVAL", node->loc,
         "None of the cases were matched in match expression");
+
+end:
+    stack_collapse(&rt->stack, temp_begin, temp_end);
 }

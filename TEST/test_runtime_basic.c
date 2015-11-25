@@ -91,6 +91,19 @@ static void test_runtime_cpd(struct TestContext *tc, struct Runtime *rt)
     rt_reset(rt);
 }
 
+static void test_runtime_match(struct TestContext *tc, struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(match (+ 2 2) (3 'a') (4 'b'))", "Succeed on evaluating a simple match", CHAR, 'b');
+    test_eval_source_expect(tc, rt, "(match \"asd\" (3 'a') (\"asd\" 'c'))", "Succeed on evaluating a simple match", CHAR, 'c');
+    test_eval_source_expect(tc, rt, "(match [ 'a' 's' 'd' ] (3 'a') (\"asd\" 'd'))", "Succeed on evaluating a simple match", CHAR, 'd');
+
+    test_eval_source_fail(tc, rt, "(match 1 (2 2.0) (3 3.0))", "Fail on missing match");
+    test_eval_source_expect(tc, rt, "(match 1 (2 2.0) (3 3.0) (_ 4.0))", "Succeed on catch all pattern", REAL, 4.0);
+    test_eval_source_expect(tc, rt, "(match 1 (2 2.0) (_ 3.0) (1 4.0))", "Succeed on early catch all pattern", REAL, 3.0);
+
+    rt_reset(rt);
+}
+
 void test_runtime_basic(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make();
@@ -99,6 +112,7 @@ void test_runtime_basic(struct TestContext *tc)
     test_runtime_bind(tc, rt);
     test_runtime_reference(tc, rt);
     test_runtime_cpd(tc, rt);
+    test_runtime_match(tc, rt);
     rt_free(rt);
 }
 
