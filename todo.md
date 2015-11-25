@@ -1,5 +1,6 @@
 TODO
 ----
+- ELIMINATE MEMORY LEAK IN mntest RUN
 - Replace short circuit para-functions like "and" and "or" with "all\_of", "any\_of", etc. algorithms.
 - In general get rid of all the para-functions in favor of algorithms and built-in functions
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
