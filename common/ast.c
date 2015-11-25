@@ -1,6 +1,7 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "log.h"
@@ -122,11 +123,17 @@ struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
 struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
+
+    int length = strlen(value);
+    char *copy = mem_malloc(length + 1);
+    memcpy(copy, value, length + 1);
+
     result->next = NULL;
     result->type = AST_LITERAL;
     result->loc = *loc;
     result->data.literal.type = AST_LIT_STRING;
-    result->data.literal.data.string = value;
+    result->data.literal.data.string = copy;
+
     return result;
 }
 

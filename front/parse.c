@@ -324,6 +324,7 @@ static struct Pattern *parse_pattern_literal_int(struct DomNode *dom)
 static struct Pattern *parse_pattern_literal_string(struct DomNode *dom)
 {
     char *value;
+    struct Pattern *result;
 
     LOG_TRACE_FUNC
 
@@ -335,7 +336,9 @@ static struct Pattern *parse_pattern_literal_string(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_string(value);
+    result = pattern_make_literal_string(value);
+    mem_free(value);
+    return result;
 }
 
 static struct Pattern *parse_pattern_literal(struct DomNode *dom)
@@ -838,6 +841,7 @@ static struct AstNode *parse_literal_bool(struct DomNode *dom)
 static struct AstNode *parse_literal_string(struct DomNode *dom)
 {
     char *value;
+    struct AstNode *result;
 
     LOG_TRACE_FUNC
 
@@ -849,7 +853,9 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_literal_string(&dom->loc, value);
+    result = ast_make_literal_string(&dom->loc, value);
+    mem_free(value);
+    return result;
 }
 
 static struct AstNode *parse_literal_char(struct DomNode *dom)

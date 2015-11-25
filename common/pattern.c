@@ -38,9 +38,14 @@ struct Pattern *pattern_make_literal_bool(int value)
 struct Pattern *pattern_make_literal_string(char *value)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
+
+    int len = strlen(value);
+    char *copy = mem_malloc(len + 1);
+    memcpy(copy, value, len + 1);
+
     result->type = PATTERN_LITERAL;
     result->data.literal.type = PATTERN_LIT_STRING;
-    result->data.literal.data.string = value;
+    result->data.literal.data.string = copy;
     result->next = NULL;
     return result;
 }
