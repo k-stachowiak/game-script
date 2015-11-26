@@ -805,6 +805,8 @@ static struct AstNode *parse_match(struct DomNode *dom)
     return ast_make_match(&dom->loc, expr, keys, values);
 
 fail:
+    ast_node_free(expr);
+
     if (keys) {
         pattern_free(keys);
     }
