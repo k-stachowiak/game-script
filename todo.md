@@ -1,10 +1,18 @@
 TODO
 ----
-- Replace short circuit para-functions like "and" and "or" with "all\_of", "any\_of", etc. algorithms.
-- In general get rid of all the para-functions in favor of algorithms and built-in functions
+- Turn all BIFs into parafunctions and create a clear AST divisions:
+    - literals including compounds
+    - computation control: do, bind, match, func-def, func-call, reference
+    - function-like: everything that works like a function but is a core language construct
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
+- A bind should create "references", i.e. a tuples of address and type.
+  This should be a common concept also used by the reference varaibles. Once
+  the references are implemented in terms of address+size the metadata may start
+  being removed from the stack. There may be optional boxed values for generic
+  implementations...
 - If type expressions are present, Implement function overloading so that more than one function is allowed
   to be bound to a single symbol and it is not an error to fail binding to the formal arguments if there
   is yet another overload to be considered
 - If overloading implemented test different matches
 - Serialize functions on the stack and enable execution
+- Remove automatic capture from lambdas and require user to bind needed values explicitly.
