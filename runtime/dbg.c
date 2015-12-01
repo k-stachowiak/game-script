@@ -7,7 +7,7 @@
 #include "timer_stack.h"
 #include "dbg.h"
 
-static void dbg_print_node_bind(struct AstBind *bind)
+static void dbg_print_node_bind(struct AstCtlBind *bind)
 {
     if (bind->pattern->type == PATTERN_SYMBOL) {
         printf("bind \"%s\"\n", bind->pattern->data.symbol.symbol);
@@ -58,12 +58,13 @@ static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
     }
 }
 
-static void dbg_print_node_func_call(struct AstFuncCall *func_call)
+static void dbg_print_node_func_call(struct AstCtlFuncCall *func_call)
 {
     char *symbol;
 
-    if (func_call->func->type == AST_REFERENCE) {
-        symbol = func_call->func->data.reference.symbol;
+    if (func_call->func->type == AST_CONTROL &&
+        func_call->func->data.control.type == AST_CTL_REFERENCE) {
+            symbol = func_call->func->data.control.data.reference.symbol;
     } else {
         symbol = "<function expression>";
     }
@@ -71,13 +72,13 @@ static void dbg_print_node_func_call(struct AstFuncCall *func_call)
     printf("%s()\n", symbol);
 }
 
-static void dbg_print_node_func_def(struct AstFuncDef *func_def)
+static void dbg_print_node_func_def(struct AstCtlFuncDef *func_def)
 {
     (void)func_def;
     printf("function definition\n");
 }
 
-static void dbg_print_node_match(struct AstMatch *match)
+static void dbg_print_node_match(struct AstCtlMatch *match)
 {
     (void)match;
     printf("match expression");
@@ -107,7 +108,7 @@ static void dbg_print_node_literal(struct AstLiteral *literal)
     }
 }
 
-static void dbg_print_node_reference(struct AstReference *reference)
+static void dbg_print_node_reference(struct AstCtlReference *reference)
 {
     printf("ref %s\n", reference->symbol);
 }
@@ -115,12 +116,32 @@ static void dbg_print_node_reference(struct AstReference *reference)
 static void dbg_print_node(struct AstNode *node)
 {
     switch (node->type) {
-    case AST_DO_BLOCK:
-        printf("do\n");
-        break;
+    case AST_CONTROL:
+        switch (node->data.control.type) {
+        case AST_CTL_DO:
+            printf("do\n");
+            break;
 
-    case AST_BIND:
-        dbg_print_node_bind(&node->data.bind);
+        case AST_CTL_BIND:
+            dbg_print_node_bind(&node->data.control.data.bind);
+            break;
+
+        case AST_CTL_MATCH:
+            dbg_print_node_match(&node->data.control.data.match);
+            break;
+
+        case AST_CTL_FUNC_DEF:
+            dbg_print_node_func_def(&node->data.control.data.fdef);
+            break;
+
+        case AST_CTL_FUNC_CALL:
+            dbg_print_node_func_call(&node->data.control.data.fcall);
+            break;
+
+        case AST_CTL_REFERENCE:
+            dbg_print_node_reference(&node->data.control.data.reference);
+            break;
+        }
         break;
 
     case AST_COMPOUND:
@@ -131,26 +152,11 @@ static void dbg_print_node(struct AstNode *node)
         dbg_print_node_parafunc(&node->data.parafunc);
         break;
 
-    case AST_FUNC_CALL:
-        dbg_print_node_func_call(&node->data.func_call);
-        break;
-
-    case AST_FUNC_DEF:
-        dbg_print_node_func_def(&node->data.func_def);
-        break;
-
-    case AST_MATCH:
-        dbg_print_node_match(&node->data.match);
-        break;
-
     case AST_LITERAL:
         printf("literal ");
         dbg_print_node_literal(&node->data.literal);
         break;
 
-    case AST_REFERENCE:
-        dbg_print_node_reference(&node->data.reference);
-        break;
     }
 }
 

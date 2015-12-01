@@ -41,12 +41,16 @@ add_library(lang OBJECT
         ./runtime/rt_val.c
         ./runtime/rt_val_poke.c
         ./runtime/eval/eval.c
+        ./runtime/eval/eval_compound.c
+        ./runtime/eval/eval_control.c
+        ./runtime/eval/eval_control_bind_pattern.c
+        ./runtime/eval/eval_control_fcall.c
+        ./runtime/eval/eval_control_fdef.c
+        ./runtime/eval/eval_literal.c
         ./runtime/eval/eval_parafunc.c
-        ./runtime/eval/eval_fcall.c
-        ./runtime/eval/eval_cpd.c
-        ./runtime/eval/eval_fdef.c
-        ./runtime/eval/eval_bind.c
-        ./runtime/eval/eval_match.c
+        ./runtime/eval/eval_parafunc_flow.c
+        ./runtime/eval/eval_parafunc_logic.c
+        ./runtime/eval/eval_parafunc_reference.c
         ./runtime/bif/bif_compound.c
         ./runtime/bif/bif_type.c
         ./runtime/bif/bif_random.c

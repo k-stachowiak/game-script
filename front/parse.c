@@ -448,7 +448,7 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_do_block(&dom->loc, exprs);
+    return ast_make_ctl_do(&dom->loc, exprs);
 }
 
 static struct AstNode *parse_bind(struct DomNode *dom)
@@ -489,7 +489,7 @@ static struct AstNode *parse_bind(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_bind(&dom->loc, pattern, expr);
+    return ast_make_ctl_bind(&dom->loc, pattern, expr);
 }
 
 static struct AstNode *parse_parafunc(struct DomNode *dom)
@@ -612,7 +612,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     }
 }
 
-static struct AstNode *parse_func_call(struct DomNode *dom)
+static struct AstNode *parse_fcall(struct DomNode *dom)
 {
     struct AstNode *func = NULL;
     struct AstNode *args = NULL;
@@ -648,10 +648,10 @@ static struct AstNode *parse_func_call(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_func_call(&dom->loc, func, args);
+    return ast_make_ctl_fcall(&dom->loc, func, args);
 }
 
-static struct AstNode *parse_func_def(struct DomNode *dom)
+static struct AstNode *parse_fdef(struct DomNode *dom)
 {
     struct {
         struct SourceLocation *data;
@@ -714,7 +714,7 @@ static struct AstNode *parse_func_def(struct DomNode *dom)
         goto fail;
     }
 
-    return ast_make_func_def(
+    return ast_make_ctl_fdef(
         &dom->loc,
         formal_args,
         mem_realloc(
@@ -802,7 +802,7 @@ static struct AstNode *parse_match(struct DomNode *dom)
         child = child->next;
     }
 
-    return ast_make_match(&dom->loc, expr, keys, values);
+    return ast_make_ctl_match(&dom->loc, expr, keys, values);
 
 fail:
     ast_node_free(expr);
@@ -941,7 +941,7 @@ static struct AstNode *parse_reference(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_reference(&dom->loc, symbol);
+    return ast_make_ctl_reference(&dom->loc, symbol);
 }
 
 static struct AstNode *parse_one(struct DomNode *dom)
@@ -952,10 +952,10 @@ static struct AstNode *parse_one(struct DomNode *dom)
         (!err_state() && (node = parse_reference(dom))) ||
         (!err_state() && (node = parse_do_block(dom))) ||
         (!err_state() && (node = parse_bind(dom))) ||
-        (!err_state() && (node = parse_func_def(dom))) ||
+        (!err_state() && (node = parse_fdef(dom))) ||
         (!err_state() && (node = parse_match(dom))) ||
         (!err_state() && (node = parse_parafunc(dom))) ||
-        (!err_state() && (node = parse_func_call(dom))) ||
+        (!err_state() && (node = parse_fcall(dom))) ||
         (!err_state() && (node = parse_compound(dom)))) {
         return node;
 

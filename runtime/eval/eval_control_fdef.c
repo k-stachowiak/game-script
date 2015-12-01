@@ -1,14 +1,10 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
-#include <string.h>
 
+#include "ast.h"
 #include "log.h"
-#include "collection.h"
-#include "eval.h"
-#include "eval_detail.h"
-#include "error.h"
-#include "rt_val.h"
+#include "symmap.h"
 
 /**
  * Analyzes an AST node to find if it contains children that can potentially
@@ -17,31 +13,36 @@
 static struct AstNode *efd_get_children(struct AstNode* node)
 {
     switch (node->type) {
-    case AST_LITERAL:
-    case AST_REFERENCE:
-        return NULL;
+    case AST_CONTROL:
+        switch(node->data.control.type) {
+        case AST_CTL_REFERENCE:
+            return NULL;
 
-    case AST_DO_BLOCK:
-        return node->data.do_block.exprs;
+        case AST_CTL_DO:
+            return node->data.control.data.doo.exprs;
 
-    case AST_BIND:
-        return node->data.bind.expr;
+        case AST_CTL_BIND:
+            return node->data.control.data.bind.expr;
+
+        case AST_CTL_MATCH:
+            return node->data.control.data.match.values;
+
+        case AST_CTL_FUNC_DEF:
+            return node->data.control.data.fdef.expr;
+
+        case AST_CTL_FUNC_CALL:
+            /* NOTE tha the func expression is artifically chained with the args list. */
+            return node->data.control.data.fcall.func;
+        }
+
+    case AST_PARAFUNC:
+        return node->data.parafunc.args;
 
     case AST_COMPOUND:
         return node->data.compound.exprs;
 
-    case AST_FUNC_DEF:
-        return node->data.func_def.expr;
-
-    case AST_FUNC_CALL:
-        /* NOTE tha the func expression is artifically chained with the args list. */
-        return node->data.func_call.func;
-
-    case AST_MATCH:
-        return node->data.match.values;
-
-    case AST_PARAFUNC:
-        return node->data.parafunc.args;
+    case AST_LITERAL:
+        return NULL;
     }
 
     LOG_ERROR("Unhandled AST node type.\n");
@@ -55,13 +56,11 @@ static struct AstNode *efd_get_children(struct AstNode* node)
  */
 static bool efd_refers_to_symbol(struct AstNode *node, char **symbol)
 {
-    if (node->type == AST_REFERENCE) {
-        *symbol = node->data.reference.symbol;
+    if (node->type == AST_CONTROL && node->data.control.type == AST_CTL_REFERENCE) {
+        *symbol = node->data.control.data.reference.symbol;
         return true;
-
     } else {
         return false;
-
     }
 }
 
@@ -88,7 +87,7 @@ static bool efd_is_non_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *l
 static int efd_push_captures_rec(
         struct Stack *stack,
         struct SymMap *sym_map,
-        struct AstFuncDef *func_def,
+        struct AstCtlFuncDef *func_def,
         struct AstNode *node)
 {
     char *symbol;
@@ -116,7 +115,7 @@ static int efd_push_captures_rec(
 static void efd_push_captures(
         struct Stack *stack,
         struct SymMap *sym_map,
-        struct AstFuncDef *func_def)
+        struct AstCtlFuncDef *func_def)
 {
     VAL_LOC_T cap_count_loc;
     VAL_SIZE_T cap_count = 0;
@@ -126,15 +125,15 @@ static void efd_push_captures(
 }
 
 void eval_func_def(
-        struct AstNode *node,
-        struct Stack *stack,
+        struct AstCtlFuncDef *fdef,
+        struct Runtime *rt,
         struct SymMap *sym_map)
 {
     VAL_LOC_T size_loc, data_begin;
-    VAL_SIZE_T arity = node->data.func_def.arg_count;
-    rt_val_push_func_init(stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)node);
-    efd_push_captures(stack, sym_map, &node->data.func_def);
-    rt_val_push_func_appl_init(stack, 0);
-    rt_val_push_func_final(stack, size_loc, data_begin);
+    VAL_SIZE_T arity = fdef->arg_count;
+    rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)fdef);
+    efd_push_captures(&rt->stack, sym_map, fdef);
+    rt_val_push_func_appl_init(&rt->stack, 0);
+    rt_val_push_func_final(&rt->stack, size_loc, data_begin);
 }
 

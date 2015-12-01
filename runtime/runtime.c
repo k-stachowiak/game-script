@@ -163,7 +163,7 @@ bool rt_consume_one(
         ast_node_free_one(ast);
         return false;
 
-    } else if (ast->type == AST_BIND) {
+    } else if (ast->type == AST_CONTROL && ast->data.control.type == AST_CTL_BIND) {
         ast->next = rt->node_store;
         rt->node_store = ast;
 

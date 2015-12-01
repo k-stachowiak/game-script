@@ -1,272 +1,17 @@
 /* Copyright (C) 2014,2015 Krzysztof Stachowiak */
 
-#include <string.h>
-#include <stdlib.h>
-#include <inttypes.h>
-
-#include "log.h"
-#include "collection.h"
-#include "eval.h"
-#include "eval_detail.h"
-#include "bif.h"
 #include "error.h"
-#include "runtime.h"
+#include "ast.h"
+#include "symmap.h"
 #include "rt_val.h"
+#include "eval_detail.h"
 
 void eval_error_not_found(char *symbol)
 {
     err_push("EVAL", "Symbol \"%s\" not found", symbol);
 }
 
-static void eval_literal(struct AstNode *node, struct Stack *stack)
-{
-    char *string;
-    int string_len;
-
-    switch (node->data.literal.type) {
-    case AST_LIT_UNIT:
-        rt_val_push_unit(stack);
-        break;
-
-    case AST_LIT_BOOL:
-        rt_val_push_bool(stack, node->data.literal.data.boolean);
-        break;
-
-    case AST_LIT_CHAR:
-        rt_val_push_char(stack, node->data.literal.data.character);
-        break;
-
-    case AST_LIT_INT:
-        rt_val_push_int(stack, node->data.literal.data.integer);
-        break;
-
-    case AST_LIT_REAL:
-        rt_val_push_real(stack, node->data.literal.data.real);
-        break;
-
-    case AST_LIT_STRING:
-        string = node->data.literal.data.string;
-        string_len = strlen(string);
-        rt_val_push_string(stack, string + 1, string + string_len - 1);
-        break;
-    }
-}
-
-static void eval_do_block(
-        struct AstNode *node,
-        struct Runtime *rt,
-        struct SymMap *sym_map)
-{
-    struct SymMap local_sym_map;
-    struct AstNode *expr = node->data.do_block.exprs;
-
-    sym_map_init_local(&local_sym_map, sym_map);
-
-    VAL_LOC_T begin = rt->stack.top;
-    VAL_LOC_T end = rt->stack.top;
-
-    for (; expr; expr = expr->next) {
-        VAL_LOC_T new_end = eval_impl(expr, rt, &local_sym_map);
-        if (err_state()) {
-            err_push_src("EVAL", node->loc, "Failed evaluating do expression");
-            break;
-        } else {
-            end = new_end;
-        }
-    }
-
-    stack_collapse(&rt->stack, begin, end);
-
-    sym_map_deinit(&local_sym_map);
-}
-
-static void eval_reference(
-        struct AstNode *node,
-        struct Stack *stack,
-        struct SymMap *sym_map)
-{
-    struct SymMapNode *smn;
-    char *symbol = node->data.reference.symbol;
-
-    LOG_TRACE_FUNC;
-
-    if (!(smn = sym_map_find(sym_map, symbol))) {
-        eval_error_not_found(symbol);
-        return;
-    }
-
-    rt_val_push_copy(stack, smn->stack_loc);
-}
-
-/* Common helper function realizing binding a pre-evaluated value to a pattern.
- * ----------------------------------------------------------------------------
- */
-
-static void eval_bind_pattern_literal_array(
-        struct Runtime *rt,
-        struct PatternLiteral *literal,
-        VAL_LOC_T location)
-{
-    VAL_LOC_T first_val = rt_val_cpd_first_loc(location);
-    char *val_string;
-    if (rt_val_peek_type(&rt->stack, first_val) != VAL_CHAR ||
-        literal->type != PATTERN_LIT_STRING) {
-        err_push("EVAL", "Failed matching array to literal pattern");
-        return;
-    }
-
-    val_string = rt_val_peek_cpd_as_string(rt, location);
-    if (!strcmp(val_string, literal->data.string)) {
-        err_push("EVAL", "Failed matching character array to string pattern");
-    }
-    mem_free(val_string);
-}
-
-static void eval_bind_pattern_literal_atom(
-        struct Runtime *rt,
-        struct PatternLiteral *literal,
-        VAL_LOC_T location,
-        enum ValueType value_type)
-{
-    switch (literal->type) {
-    case PATTERN_LIT_UNIT:
-        if (value_type == VAL_UNIT) {
-            return;
-        }
-        break;
-
-    case PATTERN_LIT_BOOL:
-        if (value_type == VAL_BOOL &&
-            rt_val_peek_bool(rt, location) == literal->data.boolean) {
-            return;
-        }
-        break;
-
-    case PATTERN_LIT_CHAR:
-        if (value_type == VAL_CHAR &&
-            rt_val_peek_char(rt, location) == literal->data.character) {
-            return;
-        }
-        break;
-
-    case PATTERN_LIT_INT:
-        if (value_type == VAL_INT &&
-            rt_val_peek_int(rt, location) == literal->data.integer) {
-            return;
-        }
-        break;
-
-    case PATTERN_LIT_REAL:
-        if (value_type == VAL_REAL &&
-            rt_val_peek_real(rt, location) == literal->data.real) {
-            return;
-        }
-        break;
-
-    case PATTERN_LIT_STRING:
-        break;
-    }
-
-    err_push("EVAL", "Literal to pattern mismatch");
-    return;
-}
-
-static void eval_bind_pattern_literal(
-        struct Runtime *rt,
-        struct PatternLiteral *literal,
-        VAL_LOC_T location)
-{
-    enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
-    switch (value_type) {
-    case VAL_TUPLE:
-        err_push("EVAL", "Compound value matched to literal pattern");
-        return;
-    case VAL_FUNCTION:
-        err_push("EVAL", "Function value matched to literal pattern");
-        return;
-    case VAL_REF:
-        err_push("EVAL", "Reference value matched to literal pattern");
-        return;
-
-    case VAL_ARRAY:
-        eval_bind_pattern_literal_array(rt, literal, location);
-        return;
-
-    case VAL_BOOL:
-    case VAL_INT:
-    case VAL_REAL:
-    case VAL_CHAR:
-    case VAL_UNIT:
-        eval_bind_pattern_literal_atom(rt, literal, location, value_type);
-        return;
-    }
-
-    LOG_ERROR("Should never get here.");
-    exit(1);
-}
-
-void eval_bind_pattern(
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct Pattern *pattern,
-        VAL_LOC_T location,
-        struct SourceLocation *source_loc)
-{
-    VAL_LOC_T child_loc;
-    struct Pattern *child_pat;
-    int i, cpd_len, pattern_len;
-    enum ValueType type = rt_val_peek_type(&rt->stack, location);
-
-    if (pattern->type == PATTERN_DONTCARE) {
-        return;
-    }
-
-    if (pattern->type == PATTERN_SYMBOL) {
-        sym_map_insert(
-            sym_map,
-            pattern->data.symbol.symbol,
-            location,
-            *source_loc);
-        return;
-    }
-
-    if (pattern->type == PATTERN_LITERAL) {
-        eval_bind_pattern_literal(rt, &pattern->data.literal, location);
-        return;
-    }
-
-    if ((pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) ||
-        (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE)) {
-        err_push("EVAL", "Compound type mismatched");
-        return;
-    }
-
-    cpd_len = rt_val_cpd_len(rt, location);
-    pattern_len = pattern_list_len(pattern->data.compound.children);
-    if (cpd_len != pattern_len) {
-        err_push("EVAL", "Compound bind length mismatched");
-        return;
-    }
-
-    child_loc = rt_val_cpd_first_loc(location);
-    child_pat = pattern->data.compound.children;
-    for (i = 0; i < pattern_len; ++i) {
-        eval_bind_pattern(rt, sym_map, child_pat, child_loc, source_loc);
-        if (err_state()) {
-            err_push("EVAL", "Failed evaluating bind pattern");
-            return;
-        }
-        child_loc = rt_val_next_loc(rt, child_loc);
-        child_pat = child_pat->next;
-    }
-}
-
-
-/* Main evaluation dispatch.
- * =========================
- */
-
-VAL_LOC_T eval_impl(
+VAL_LOC_T eval_dispatch(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map)
@@ -280,45 +25,21 @@ VAL_LOC_T eval_impl(
     }
 
     switch (node->type) {
-    case AST_COMPOUND:
-        eval_compound(node, rt, sym_map);
-        break;
-
-    case AST_LITERAL:
-        eval_literal(node, &rt->stack);
-        break;
-
-    case AST_DO_BLOCK:
-        eval_do_block(node, rt, sym_map);
-        break;
-
-    case AST_BIND:
-        eval_bind(node, rt, sym_map);
-        break;
-
-    case AST_REFERENCE:
-        eval_reference(node, &rt->stack, sym_map);
-        break;
-
-    case AST_FUNC_DEF:
-        eval_func_def(node, &rt->stack, sym_map);
+    case AST_CONTROL:
+        eval_control(&node->data.control, rt, sym_map, &node->loc);
         break;
 
     case AST_PARAFUNC:
-        eval_parafunc(node, rt, sym_map);
+        eval_parafunc(&node->data.parafunc, rt, sym_map);
         break;
 
-    case AST_FUNC_CALL:
-        eval_func_call(node, rt, sym_map);
+    case AST_COMPOUND:
+        eval_compound(&node->data.compound, rt, sym_map);
         break;
 
-    case AST_MATCH:
-        eval_match(node, rt, sym_map);
+    case AST_LITERAL:
+        eval_literal(&node->data.literal, rt, sym_map);
         break;
-
-    default:
-        LOG_ERROR("Unhandled AST node type");
-        exit(1);
     }
 
     if (err_state()) {
@@ -347,12 +68,15 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 
     err_reset();
 
+    /* The dispatch is delegated to another procedure as it is called
+     * recursively during the evaluation while the current function is only
+     * called by the top-level client.
+     */
     begin = rt->stack.top;
-    result = eval_impl(node, rt, sym_map);
+    result = eval_dispatch(node, rt, sym_map);
     end = rt->stack.top;
 
     if (err_state()) {
-        err_push_src("EVAL", node->loc, "Failed evaluating expression");
         stack_collapse(&rt->stack, begin, end);
         return -1;
     } else {

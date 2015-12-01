@@ -1,9 +1,6 @@
 TODO
 ----
-- Turn all BIFs into parafunctions and create a clear AST divisions:
-    - literals including compounds
-    - computation control: do, bind, match, func-def, func-call, reference
-    - function-like: everything that works like a function but is a core language construct
+- Improve AST module API so that client doesn't have to reach 3+ dereferences to inspect AST node.
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
 - A bind should create "references", i.e. a tuples of address and type.
   This should be a common concept also used by the reference varaibles. Once

@@ -1,17 +1,12 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2015 Krzysztof Stachowiak */
 
-#include <string.h>
-#include <inttypes.h>
-
-#include "eval.h"
-#include "eval_detail.h"
-
-#include "collection.h"
-#include "log.h"
-#include "error.h"
+#include "ast.h"
 #include "bif.h"
-#include "runtime.h"
+#include "error.h"
+#include "collection.h"
 #include "rt_val.h"
+#include "symmap.h"
+#include "eval_detail.h"
 #include "api_value.h"
 
 struct LocArray { VAL_LOC_T *data; int size, cap; };
@@ -36,7 +31,7 @@ static bool efc_evaluate_currently_applied(
         struct LocArray *result)
 {
     while (args) {
-        VAL_LOC_T loc = eval_impl(args, rt, sym_map);
+        VAL_LOC_T loc = eval_dispatch(args, rt, sym_map);
         if (err_state()) {
             err_push("EVAL", "Failed evaluating new funtcion arguments");
             return false;
@@ -57,13 +52,13 @@ static bool efc_evaluate_arg(
         struct Pattern *pattern,
         VAL_LOC_T *location)
 {
-    *location = eval_impl(arg_node, rt, caller_sym_map);
+    *location = eval_dispatch(arg_node, rt, caller_sym_map);
     if (err_state()) {
         err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
         return false;
     }
 
-    eval_bind_pattern(rt, new_sym_map, pattern, *location, arg_loc);
+    eval_bind_pattern(pattern, rt, new_sym_map, *location, arg_loc);
     if (err_state()) {
         err_push("EVAL", "Failed registering function argument in the local scope");
         return false;
@@ -115,7 +110,7 @@ static void efc_curry_on(
 
     /* ...currently. */
     for (; actual_args; actual_args = actual_args->next) {
-        eval_impl(actual_args, rt, sym_map);
+        eval_dispatch(actual_args, rt, sym_map);
         if (err_state()) {
             err_push_src("EVAL", actual_args->loc, "Failed evaluating function argument");
             break;
@@ -141,10 +136,11 @@ static void efc_evaluate_ast(
 
     struct SymMap local_sym_map;
 
-    struct AstNode *ast_def = (struct AstNode *)func_data->impl;
-    struct Pattern *formal_args = ast_def->data.func_def.formal_args;
+    struct AstCtlFuncDef *fdef = (struct AstCtlFuncDef *)func_data->impl;
 
-    struct SourceLocation *arg_locs = ast_def->data.func_def.arg_locs;
+    struct Pattern *formal_args = fdef->formal_args;
+    struct SourceLocation *arg_locs = fdef->arg_locs;
+
     struct SourceLocation cont_loc = src_loc_virtual();
 
     /* Initialize local scope. */
@@ -164,7 +160,7 @@ static void efc_evaluate_ast(
 
     /* Insert already applied arguments. */
     for (i = 0; i < func_data->appl_count; ++i) {
-        eval_bind_pattern(rt, &local_sym_map, formal_args, appl_loc, &cont_loc);
+        eval_bind_pattern(formal_args, rt, &local_sym_map, appl_loc, &cont_loc);
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
         if (err_state()) {
@@ -187,7 +183,7 @@ static void efc_evaluate_ast(
     temp_end = rt->stack.top;
 
     /* Evaluate the function expression. */
-    eval_impl(ast_def->data.func_def.expr, rt, &local_sym_map);
+    eval_dispatch(fdef->expr, rt, &local_sym_map);
 
     /* Collapse the temporaries. */
     stack_collapse(&rt->stack, temp_begin, temp_end);
@@ -359,20 +355,20 @@ cleanup:
 }
 
 void eval_func_call(
-        struct AstNode *node,
+        struct AstCtlFuncCall *fcall,
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
     VAL_LOC_T temp_begin, temp_end;
-    struct AstNode *func = node->data.func_call.func;
-    struct AstNode *actual_args = node->data.func_call.actual_args;
+    struct AstNode *func = fcall->func;
+    struct AstNode *actual_args = fcall->actual_args;
 
     VAL_LOC_T func_loc;
     struct ValueFuncData func_data;
     VAL_SIZE_T applied;
 
     temp_begin = rt->stack.top;
-    func_loc = eval_impl(func, rt, sym_map);
+    func_loc = eval_dispatch(func, rt, sym_map);
     temp_end = rt->stack.top;
     if (err_state()) {
         err_push("EVAL", "Failed evaluating function identity");

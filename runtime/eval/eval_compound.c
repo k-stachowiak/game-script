@@ -7,17 +7,17 @@
 #include "eval.h"
 
 void eval_compound(
-        struct AstNode *node,
+        struct AstCompound *compound,
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
-    struct AstNode *current = node->data.compound.exprs;
+    struct AstNode *current = compound->exprs;
     bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
 
     /* Header. */
-    switch (node->data.compound.type) {
+    switch (compound->type) {
     case AST_CPD_ARRAY:
         rt_val_push_array_init(&rt->stack, &size_loc);
         break;
@@ -30,7 +30,7 @@ void eval_compound(
     /* Data. */
     data_begin = rt->stack.top;
     while (current) {
-        elem_loc = eval_impl(current, rt, sym_map);
+        elem_loc = eval_dispatch(current, rt, sym_map);
         if (err_state()) {
             err_push_src("EVAL", current->loc, "Failed evaluating compound expression element");
             return;
@@ -38,7 +38,7 @@ void eval_compound(
             current = current->next;
         }
 
-        if (node->data.compound.type != AST_CPD_ARRAY) {
+        if (compound->type != AST_CPD_ARRAY) {
             continue;
         }
 

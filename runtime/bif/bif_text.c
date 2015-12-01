@@ -263,13 +263,8 @@ static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
         bif_parse_any_ast_literal(runtime, &ast->data.literal);
         break;
 
-    case AST_DO_BLOCK:
-    case AST_BIND:
-    case AST_FUNC_CALL:
-    case AST_FUNC_DEF:
-    case AST_MATCH:
+    case AST_CONTROL:
     case AST_PARAFUNC:
-    case AST_REFERENCE:
         bif_text_error_parse();
         break;
     }
