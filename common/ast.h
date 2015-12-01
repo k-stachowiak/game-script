@@ -67,6 +67,10 @@ struct AstNode;
 struct Value;
 struct Runtime;
 
+/* Control definition types.
+ * -------------------------
+ */
+
 struct AstCtlDo {
     struct AstNode *exprs;
 };
@@ -110,15 +114,9 @@ struct AstControl {
     } data;
 };
 
-struct AstParafunc {
-    enum AstParafuncType type;
-    struct AstNode *args;
-};
-
-struct AstCompound {
-    enum AstCompoundType type;
-    struct AstNode *exprs;
-};
+/* Simple types.
+ * -------------
+ */
 
 struct AstLiteral {
     enum AstLiteralType type;
@@ -131,24 +129,30 @@ struct AstLiteral {
     } data;
 };
 
+struct AstParafunc {
+    enum AstParafuncType type;
+    struct AstNode *args;
+};
+
+struct AstCompound {
+    enum AstCompoundType type;
+    struct AstNode *exprs;
+};
+
+
 /* Main AST node definition.
  * =========================
  */
 
 struct AstNode {
-    /* Base data. */
     enum AstNodeType type;
     struct SourceLocation loc;
-
-    /* Specific data. */
     union {
         struct AstControl control;
         struct AstParafunc parafunc;
         struct AstCompound compound;
         struct AstLiteral literal;
     } data;
-
-    /* Intrusive list. */
     struct AstNode *next;
 };
 
@@ -210,8 +214,8 @@ struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value);
 void ast_node_free(struct AstNode *node);
 void ast_node_free_one(struct AstNode *node);
 
-/* Operations.
- * ===========
+/* Introspection.
+ * ==============
  */
 
 int ast_list_len(struct AstNode *head);
