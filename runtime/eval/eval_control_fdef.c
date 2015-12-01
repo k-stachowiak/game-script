@@ -12,27 +12,29 @@
  */
 static struct AstNode *efd_get_children(struct AstNode* node)
 {
+    struct AstControl *control;
     switch (node->type) {
     case AST_CONTROL:
-        switch(node->data.control.type) {
+        control = &node->data.control;
+        switch(control->type) {
         case AST_CTL_REFERENCE:
             return NULL;
 
         case AST_CTL_DO:
-            return node->data.control.data.doo.exprs;
+            return control->data.doo.exprs;
 
         case AST_CTL_BIND:
-            return node->data.control.data.bind.expr;
+            return control->data.bind.expr;
 
         case AST_CTL_MATCH:
-            return node->data.control.data.match.values;
+            return control->data.match.values;
 
         case AST_CTL_FUNC_DEF:
-            return node->data.control.data.fdef.expr;
+            return control->data.fdef.expr;
 
         case AST_CTL_FUNC_CALL:
             /* NOTE tha the func expression is artifically chained with the args list. */
-            return node->data.control.data.fcall.func;
+            return control->data.fcall.func;
         }
 
     case AST_PARAFUNC:
@@ -56,12 +58,14 @@ static struct AstNode *efd_get_children(struct AstNode* node)
  */
 static bool efd_refers_to_symbol(struct AstNode *node, char **symbol)
 {
-    if (node->type == AST_CONTROL && node->data.control.type == AST_CTL_REFERENCE) {
-        *symbol = node->data.control.data.reference.symbol;
-        return true;
-    } else {
-        return false;
+    if (node->type == AST_CONTROL) {
+        struct AstControl *control = &node->data.control;
+        if (control->type == AST_CTL_REFERENCE) {
+            *symbol = control->data.reference.symbol;
+            return true;
+        }
     }
+    return false;
 }
 
 /**

@@ -366,4 +366,3 @@ int ast_list_len(struct AstNode *head)
     }
     return result;
 }
-
