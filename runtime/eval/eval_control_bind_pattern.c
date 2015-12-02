@@ -118,16 +118,14 @@ void eval_bind_pattern(
     int i, cpd_len, pattern_len;
     enum ValueType type = rt_val_peek_type(&rt->stack, location);
 
-    if (pattern->type == PATTERN_SYMBOL_DONTCARE) {
-        return;
-    }
-
     if (pattern->type == PATTERN_SYMBOL) {
-        sym_map_insert(
-            sym_map,
-            pattern->data.symbol.symbol,
-            location,
-            *source_loc);
+        if (pattern->data.symbol.type == PATTERN_SYM_REGULAR) {
+            sym_map_insert(
+                sym_map,
+                pattern->data.symbol.symbol,
+                location,
+                *source_loc);
+        }
         return;
     }
 

@@ -9,8 +9,12 @@ enum PatternType {
     PATTERN_LITERAL,
     PATTERN_CPD_ARRAY,
     PATTERN_CPD_TUPLE,
-    PATTERN_SYMBOL,
-    PATTERN_SYMBOL_DONTCARE
+    PATTERN_SYMBOL
+};
+
+enum PatternSymbolType {
+    PATTERN_SYM_REGULAR,
+    PATTERN_SYM_DONT_CARE
 };
 
 enum PatternLiteralType {
@@ -38,6 +42,7 @@ struct PatternCompound {
 };
 
 struct PatternSymbol {
+    enum PatternSymbolType type;
     char *symbol;
 };
 
@@ -52,13 +57,13 @@ struct Pattern {
 };
 
 struct Pattern *pattern_make_symbol(char *symbol);
+struct Pattern *pattern_make_dontcare(void);
 struct Pattern *pattern_make_literal_unit(void);
 struct Pattern *pattern_make_literal_bool(int value);
 struct Pattern *pattern_make_literal_string(char *value);
 struct Pattern *pattern_make_literal_character(char value);
 struct Pattern *pattern_make_literal_int(long value);
 struct Pattern *pattern_make_literal_real(double value);
-struct Pattern *pattern_make_dontcare(void);
 struct Pattern *pattern_make_array(struct Pattern *children);
 struct Pattern *pattern_make_tuple(struct Pattern *children);
 

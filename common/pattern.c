@@ -11,7 +11,18 @@ struct Pattern *pattern_make_symbol(char *symbol)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
     result->type = PATTERN_SYMBOL;
+    result->data.symbol.type = PATTERN_SYM_REGULAR;
     result->data.symbol.symbol = symbol;
+    result->next = NULL;
+    return result;
+}
+
+struct Pattern *pattern_make_dontcare(void)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+    result->type = PATTERN_SYMBOL;
+    result->data.symbol.type = PATTERN_SYM_DONT_CARE;
+    result->data.symbol.symbol = NULL;
     result->next = NULL;
     return result;
 }
@@ -80,14 +91,6 @@ struct Pattern *pattern_make_literal_real(double value)
     return result;
 }
 
-struct Pattern *pattern_make_dontcare(void)
-{
-    struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_SYMBOL_DONTCARE;
-    result->next = NULL;
-    return result;
-}
-
 struct Pattern *pattern_make_array(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
@@ -110,18 +113,22 @@ void pattern_free(struct Pattern *pattern)
 {
     while (pattern) {
         struct Pattern *next_pattern = pattern->next;
+
         switch (pattern->type) {
         case PATTERN_SYMBOL:
-            mem_free(pattern->data.symbol.symbol);
+            switch (pattern->data.symbol.type) {
+            case PATTERN_SYM_REGULAR:
+                mem_free(pattern->data.symbol.symbol);
+                break;
+            case PATTERN_SYM_DONT_CARE:
+                break;
+            }
             break;
 
         case PATTERN_LITERAL:
             if (pattern->data.literal.type == PATTERN_LIT_STRING) {
                 mem_free(pattern->data.literal.data.string);
             }
-            break;
-
-        case PATTERN_SYMBOL_DONTCARE:
             break;
 
         case PATTERN_CPD_ARRAY:
@@ -151,13 +158,18 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
     while (pattern) {
         switch (pattern->type) {
         case PATTERN_SYMBOL:
-            if (strcmp(pattern->data.symbol.symbol, symbol) == 0) {
-                return true;
+            switch (pattern->data.symbol.type) {
+            case PATTERN_SYM_REGULAR:
+                if (strcmp(pattern->data.symbol.symbol, symbol) == 0) {
+                    return true;
+                }
+                break;
+            case PATTERN_SYM_DONT_CARE:
+                break;
             }
             break;
 
         case PATTERN_LITERAL:
-        case PATTERN_SYMBOL_DONTCARE:
             break;
 
         case PATTERN_CPD_ARRAY:
