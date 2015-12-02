@@ -94,7 +94,8 @@ struct Pattern *pattern_make_literal_real(double value)
 struct Pattern *pattern_make_array(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_CPD_ARRAY;
+    result->type = PATTERN_COMPOUND;
+    result->data.compound.type = PATTERN_CPD_ARRAY;
     result->data.compound.children = children;
     result->next = NULL;
     return result;
@@ -103,7 +104,8 @@ struct Pattern *pattern_make_array(struct Pattern *children)
 struct Pattern *pattern_make_tuple(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_CPD_TUPLE;
+    result->type = PATTERN_COMPOUND;
+    result->data.compound.type = PATTERN_CPD_TUPLE;
     result->data.compound.children = children;
     result->next = NULL;
     return result;
@@ -131,11 +133,9 @@ void pattern_free(struct Pattern *pattern)
             }
             break;
 
-        case PATTERN_CPD_ARRAY:
-        case PATTERN_CPD_TUPLE:
+        case PATTERN_COMPOUND:
             pattern_free(pattern->data.compound.children);
             break;
-
         }
 
         mem_free(pattern);
@@ -158,22 +158,16 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
     while (pattern) {
         switch (pattern->type) {
         case PATTERN_SYMBOL:
-            switch (pattern->data.symbol.type) {
-            case PATTERN_SYM_REGULAR:
-                if (strcmp(pattern->data.symbol.symbol, symbol) == 0) {
+            if (pattern->data.symbol.type == PATTERN_SYM_REGULAR &&
+                strcmp(pattern->data.symbol.symbol, symbol) == 0) {
                     return true;
-                }
-                break;
-            case PATTERN_SYM_DONT_CARE:
-                break;
             }
             break;
 
         case PATTERN_LITERAL:
             break;
 
-        case PATTERN_CPD_ARRAY:
-        case PATTERN_CPD_TUPLE:
+        case PATTERN_COMPOUND:
             if (pattern_list_contains_symbol(
                     pattern->data.compound.children,
                     symbol)) {

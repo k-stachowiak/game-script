@@ -134,10 +134,13 @@ void eval_bind_pattern(
         return;
     }
 
-    if ((pattern->type == PATTERN_CPD_ARRAY && type != VAL_ARRAY) ||
-        (pattern->type == PATTERN_CPD_TUPLE && type != VAL_TUPLE)) {
-        err_push("EVAL", "Compound type mismatched");
-        return;
+    if (pattern->type == PATTERN_COMPOUND) {
+        struct PatternCompound *cpd = &pattern->data.compound;
+        if ((cpd->type == PATTERN_CPD_ARRAY && type != VAL_ARRAY) ||
+            (cpd->type == PATTERN_CPD_TUPLE && type != VAL_TUPLE)) {
+                err_push("EVAL", "Compound type mismatched");
+                return;
+        }
     }
 
     cpd_len = rt_val_cpd_len(rt, location);

@@ -7,9 +7,13 @@
 
 enum PatternType {
     PATTERN_LITERAL,
-    PATTERN_CPD_ARRAY,
-    PATTERN_CPD_TUPLE,
+    PATTERN_COMPOUND,
     PATTERN_SYMBOL
+};
+
+enum PatternCompoundType {
+    PATTERN_CPD_ARRAY,
+    PATTERN_CPD_TUPLE
 };
 
 enum PatternSymbolType {
@@ -38,6 +42,7 @@ struct PatternLiteral {
 };
 
 struct PatternCompound {
+    enum PatternCompoundType type;
     struct Pattern *children;
 };
 
