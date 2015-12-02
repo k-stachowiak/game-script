@@ -6,11 +6,11 @@
 #include <stdbool.h>
 
 enum PatternType {
-    PATTERN_SYMBOL,
     PATTERN_LITERAL,
-    PATTERN_DONTCARE,
-    PATTERN_ARRAY,
-    PATTERN_TUPLE
+    PATTERN_CPD_ARRAY,
+    PATTERN_CPD_TUPLE,
+    PATTERN_SYMBOL,
+    PATTERN_SYMBOL_DONTCARE
 };
 
 enum PatternLiteralType {
@@ -20,10 +20,6 @@ enum PatternLiteralType {
     PATTERN_LIT_CHAR,
     PATTERN_LIT_INT,
     PATTERN_LIT_REAL
-};
-
-struct PatternSymbol {
-    char *symbol;
 };
 
 struct PatternLiteral {
@@ -37,21 +33,20 @@ struct PatternLiteral {
     } data;
 };
 
-struct PatternDontCare {
-    /* Intentionally left blank */
-};
-
 struct PatternCompound {
     struct Pattern *children;
+};
+
+struct PatternSymbol {
+    char *symbol;
 };
 
 struct Pattern {
     enum PatternType type;
     union {
-        struct PatternSymbol symbol;
         struct PatternLiteral literal;
-        struct PatternDontCare dont_care;
         struct PatternCompound compound;
+        struct PatternSymbol symbol;
     } data;
     struct Pattern *next;
 };

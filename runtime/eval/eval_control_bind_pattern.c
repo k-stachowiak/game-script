@@ -118,7 +118,7 @@ void eval_bind_pattern(
     int i, cpd_len, pattern_len;
     enum ValueType type = rt_val_peek_type(&rt->stack, location);
 
-    if (pattern->type == PATTERN_DONTCARE) {
+    if (pattern->type == PATTERN_SYMBOL_DONTCARE) {
         return;
     }
 
@@ -136,8 +136,8 @@ void eval_bind_pattern(
         return;
     }
 
-    if ((pattern->type == PATTERN_ARRAY && type != VAL_ARRAY) ||
-        (pattern->type == PATTERN_TUPLE && type != VAL_TUPLE)) {
+    if ((pattern->type == PATTERN_CPD_ARRAY && type != VAL_ARRAY) ||
+        (pattern->type == PATTERN_CPD_TUPLE && type != VAL_TUPLE)) {
         err_push("EVAL", "Compound type mismatched");
         return;
     }

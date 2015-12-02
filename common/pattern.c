@@ -83,7 +83,7 @@ struct Pattern *pattern_make_literal_real(double value)
 struct Pattern *pattern_make_dontcare(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_DONTCARE;
+    result->type = PATTERN_SYMBOL_DONTCARE;
     result->next = NULL;
     return result;
 }
@@ -91,7 +91,7 @@ struct Pattern *pattern_make_dontcare(void)
 struct Pattern *pattern_make_array(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_ARRAY;
+    result->type = PATTERN_CPD_ARRAY;
     result->data.compound.children = children;
     result->next = NULL;
     return result;
@@ -100,7 +100,7 @@ struct Pattern *pattern_make_array(struct Pattern *children)
 struct Pattern *pattern_make_tuple(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_TUPLE;
+    result->type = PATTERN_CPD_TUPLE;
     result->data.compound.children = children;
     result->next = NULL;
     return result;
@@ -121,11 +121,11 @@ void pattern_free(struct Pattern *pattern)
             }
             break;
 
-        case PATTERN_DONTCARE:
+        case PATTERN_SYMBOL_DONTCARE:
             break;
 
-        case PATTERN_ARRAY:
-        case PATTERN_TUPLE:
+        case PATTERN_CPD_ARRAY:
+        case PATTERN_CPD_TUPLE:
             pattern_free(pattern->data.compound.children);
             break;
 
@@ -157,11 +157,11 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
             break;
 
         case PATTERN_LITERAL:
-        case PATTERN_DONTCARE:
+        case PATTERN_SYMBOL_DONTCARE:
             break;
 
-        case PATTERN_ARRAY:
-        case PATTERN_TUPLE:
+        case PATTERN_CPD_ARRAY:
+        case PATTERN_CPD_TUPLE:
             if (pattern_list_contains_symbol(
                     pattern->data.compound.children,
                     symbol)) {
