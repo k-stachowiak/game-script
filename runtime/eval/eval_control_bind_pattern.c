@@ -3,32 +3,15 @@
 #include "error.h"
 #include "runtime.h"
 
-static void eval_bind_pattern_literal_array(
-        struct Runtime *rt,
+static void eval_bind_pattern_literal(
         struct PatternLiteral *literal,
-        VAL_LOC_T location)
-{
-    VAL_LOC_T first_val = rt_val_cpd_first_loc(location);
-    char *val_string;
-    if (rt_val_peek_type(&rt->stack, first_val) != VAL_CHAR ||
-        literal->type != PATTERN_LIT_STRING) {
-        err_push("EVAL", "Failed matching array to literal pattern");
-        return;
-    }
-
-    val_string = rt_val_peek_cpd_as_string(rt, location);
-    if (!strcmp(val_string, literal->data.string)) {
-        err_push("EVAL", "Failed matching character array to string pattern");
-    }
-    mem_free(val_string);
-}
-
-static void eval_bind_pattern_literal_atom(
         struct Runtime *rt,
-        struct PatternLiteral *literal,
         VAL_LOC_T location,
-        enum ValueType value_type)
+        struct SourceLocation *source_loc)
 {
+    enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
+    VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
+
     switch (literal->type) {
     case PATTERN_LIT_UNIT:
         if (value_type == VAL_UNIT) {
@@ -65,45 +48,131 @@ static void eval_bind_pattern_literal_atom(
         break;
 
     case PATTERN_LIT_STRING:
+        if (value_type == VAL_ARRAY &&
+            rt_val_peek_type(current_loc) == VAL_CHAR) {
+            char *str_pat = literal->data.string;
+            int i, len = strlen(str_pat);
+            for (i = 0; i < len; ++i) {
+                if (*str_pat != rt_val_peek_char(rt, current_loc)) {
+                    err_push_src("EVAL", source_loc, "Failed matching string literal");
+                } else {
+                    current_loc = rt_val_next_loc(rt, current_loc);
+                    ++str_pat;
+                }
+            }
+        }
         break;
     }
 
-    err_push("EVAL", "Literal to pattern mismatch");
-    return;
+    err_push_src("EVAL", source_loc, "Literal value pattern mismatch");
 }
 
-static void eval_bind_pattern_literal(
+static void eval_bind_pattern_datatype_compound(
+        struct PatternDataType *data_type,
         struct Runtime *rt,
-        struct PatternLiteral *literal,
-        VAL_LOC_T location)
+        struct SymMap *sym_map,
+        VAL_LOC_T location,
+        struct SourceLocation *source_loc)
 {
-    enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
-    switch (value_type) {
-    case VAL_TUPLE:
-        err_push("EVAL", "Compound value matched to literal pattern");
-        return;
-    case VAL_FUNCTION:
-        err_push("EVAL", "Function value matched to literal pattern");
-        return;
-    case VAL_REF:
-        err_push("EVAL", "Reference value matched to literal pattern");
-        return;
+    VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
+    struct Pattern *current_pat = data_type->children;
+    int val_len = rt_val_cpd_len(rt, location);
+    int pat_len = pattern_list_len(current_pat);
 
-    case VAL_ARRAY:
-        eval_bind_pattern_literal_array(rt, literal, location);
-        return;
+    if (current_pat->type == PATTERN_DTYPE_SEQUENCE) {
+        if (pat_len > 1) {
+            err_push_src("EVAL", source_loc, "Illegal pattern tokens besides sequence");
+            return;
+        } else {
+            /* It has already been established that the value is of a
+             * correct compound type, therefore besides the syntactical check
+             * we can call it a day here.
+             */
+            return;
+        }
+    }
 
-    case VAL_BOOL:
-    case VAL_INT:
-    case VAL_REAL:
-    case VAL_CHAR:
-    case VAL_UNIT:
-        eval_bind_pattern_literal_atom(rt, literal, location, value_type);
+    if (val_len != pat_len) {
+        err_push_src("EVAL", source_loc, "Compound value and pattern length mismatch");
         return;
     }
 
-    LOG_ERROR("Should never get here.");
-    exit(1);
+    while (current_pat) {
+        eval_bind_pattern(current_pat, rt, sym_map, current_loc, source_loc);
+        if (err_state()) {
+            err_push_src("EVAL", source_loc, "Failed matching one of the array pattern elements");
+            return;
+        }
+        current_pat = current_pat->next;
+        current_loc = rt_val_next_loc(rt, current_loc);
+    }
+}
+
+static void eval_bind_pattern_datatype(
+        struct PatternDataType *data_type,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        VAL_LOC_T location,
+        struct SourceLocation *source_loc)
+{
+    enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
+    switch (data_type->type) {
+    case PATTERN_DTYPE_UNIT:
+        if (value_type == VAL_UNIT) {
+            return;
+        }
+        break;
+
+    case PATTERN_DTYPE_BOOLEAN:
+        if (value_type == VAL_BOOL) {
+            return;
+        }
+        break;
+
+    case PATTERN_DTYPE_INTEGER:
+        if (value_type == VAL_INT) {
+            return;
+        }
+        break;
+
+    case PATTERN_DTYPE_REAL:
+        if (value_type == VAL_REAL) {
+            return;
+        }
+        break;
+
+    case PATTERN_DTYPE_CHARACTER:
+        if (value_type == VAL_CHAR) {
+            return;
+        }
+        break;
+
+    case PATTERN_DTYPE_ARRAY:
+    case PATTERN_DTYPE_TUPLE:
+        if ((data_type->type == PATTERN_DTYPE_ARRAY && value_type != VAL_ARRAY) ||
+            (data_type->type == PATTERN_DTYPE_TUPLE && value_type != VAL_TUPLE)) {
+            err_push_src("EVAL", source_loc, "Compound type pattern mismatch");
+        } else {
+            eval_bind_pattern_datatype_compound(
+                    data_type, rt, sym_map, location, source_loc);
+        }
+        return;
+
+    case PATTERN_DTYPE_DONT_KNOW:
+    case PATTERN_DTYPE_DONT_CARE:
+        return;
+
+    case PATTERN_DTYPE_REFERENCE:
+        if (value_type != VAL_REF) {
+            break;
+        }
+        eval_bind_pattern_reference(...);
+        return;
+
+    case PATTERN_DTYPE_SEQUENCE:
+        err_push_src("EVAL", source_loc, "Unexpected sequence pattern");
+        return;
+    }
 }
 
 void eval_bind_pattern(
@@ -113,53 +182,21 @@ void eval_bind_pattern(
         VAL_LOC_T location,
         struct SourceLocation *source_loc)
 {
-    VAL_LOC_T child_loc;
-    struct Pattern *child_pat;
-    int i, cpd_len, pattern_len;
-    enum ValueType type = rt_val_peek_type(&rt->stack, location);
+    switch (pattern->type) {
+    case PATTERN_SYMBOL:
+        sym_map_insert(
+            sym_map, pattern->data.symbol.symbol, location, *source_loc);
+        break;
 
-    if (pattern->type == PATTERN_SYMBOL) {
-        if (pattern->data.symbol.type == PATTERN_SYM_REGULAR) {
-            sym_map_insert(
-                sym_map,
-                pattern->data.symbol.symbol,
-                location,
-                *source_loc);
-        }
-        return;
-    }
+    case PATTERN_LITERAL:
+        eval_bind_pattern_literal(
+            &pattern->data.literal, rt, location, source_loc);
+        break;
 
-    if (pattern->type == PATTERN_LITERAL) {
-        eval_bind_pattern_literal(rt, &pattern->data.literal, location);
-        return;
-    }
-
-    if (pattern->type == PATTERN_COMPOUND) {
-        struct PatternCompound *cpd = &pattern->data.compound;
-        if ((cpd->type == PATTERN_CPD_ARRAY && type != VAL_ARRAY) ||
-            (cpd->type == PATTERN_CPD_TUPLE && type != VAL_TUPLE)) {
-                err_push("EVAL", "Compound type mismatched");
-                return;
-        }
-    }
-
-    cpd_len = rt_val_cpd_len(rt, location);
-    pattern_len = pattern_list_len(pattern->data.compound.children);
-    if (cpd_len != pattern_len) {
-        err_push("EVAL", "Compound bind length mismatched");
-        return;
-    }
-
-    child_loc = rt_val_cpd_first_loc(location);
-    child_pat = pattern->data.compound.children;
-    for (i = 0; i < pattern_len; ++i) {
-        eval_bind_pattern(child_pat, rt, sym_map, child_loc, source_loc);
-        if (err_state()) {
-            err_push("EVAL", "Failed evaluating bind pattern");
-            return;
-        }
-        child_loc = rt_val_next_loc(rt, child_loc);
-        child_pat = child_pat->next;
+    case PATTERN_DATATYPE:
+        eval_bind_pattern_datatype(
+            &pattern->data.data_type, rt, sym_map, location, source_loc);
+        break;
     }
 }
 

@@ -7,85 +7,190 @@ This is a documentation of the scripting language called MOON. The name is an ac
 
 This is a great example of a language consistng of layers over layers of afterthought.
 In fact "afterthought" may have been a better name but it doesn't shorten to a swift acronym likt "moon", also it does not differentiate it from myriads of other language design failures.
+As of the december of 2015 the code for the interpreter has been tagged as the version 1 and is undergoing a heavy refactoring towards a more reasonable language.
+The documentation below describes the most recent goals in the general sections (to convey the ideas) and the current state in the specific sections (to enable usage).
 
 Language traits
 ---------------
-* syntactically lisp-based (i.e. virtually no syntax)
-* implicitly but strongly typed
-* simple data-types (boolean, integer, real, character)
-* compound data-types (tuple and array)
-* higher order functions obtainable by explicit definition or currying
-* closures (storing copies of captured values)
-* immutability by default
-* mutability via references
-* iterator-like references
+* No syntax yet - symbolic expressions are used to write code.
+* Is relatively strongly typed.
+* Has algebraic types - complex types are built as products (structs), sums (unions), and powers (arrays) of types.
+* Has higher order functions - objects that store state explicitly and provide function call semantics.
+* Has Data immutability by default.
+* Mutability is achievable via references
+* References provide pointer semantics, i.e. dereferencing as well as "pointer arithmetic"
 
 Runtime traits
 --------------
-* entirely stack based (sic!)
-* embeddable (REPL application provided as an example)
+* Stack based - heap allocation implemented as a library; no garbage collection
+* Embeddable (REPL application provided as an example of calling moon code from C code)
+* Expandable (REPL also shows how C functions can be injected into the moon environment)
 
 Language facilities
 ===================
 
-In the following sections a notation for function definitions will be used.
-There are following placeholders for expressing more than a single type
- - _?_          ::= any type
- - _a_          ::= any type matched in the scope of the definition 
- - _numeric_    ::= _integer_ or _real_
- - _compound_   ::= _array_, _tuple_ or _string_ (string is implicitly treated as an array of characters)
-
 Basic mechanisms
 ----------------
 
-### Literals
+### Symbol binding
+
+Any moon program constitutes a set of objects bound to according symbols.
+This set is traditionally called the global scope as the objects are accessible via the symbols from wherever in the program (globally).
+The introduction of new bindings into the scope is perforned with the `bind` expression.
+It is an expression that consists of two elements:
+* the binding pattern,
+* the bound expression.
+It evaluates to the value of the bound expression (following the controversial tradition from the C language).
+The example binding a simple value to a simple symbol looks like this:
+
+    (bind x 3),
+
+where `x` is the binding pattern (a simple example of one), and `3` is the bound expression.
+
+We do not always work with simple values and the binding pattern is a tool versatile enough to account for that.
+Let's say we know that there exists an array of two elements called `v`, and we want to bind the respective elements to new symbols `x` and `y`.
+We may perform this with the following binding expression:
+
+    (bind [ x y ] v).
+
+The expression `[ x y ]` is the binding pattern here, whereas `v` is the bound expression.
+
+It is actually not required for every binding to introduce a new symbol as the patterns provide the mechanism of wildcarding.
+If for some reason in the above example we only want to bind the second array element we may write:
+
+    (bind [ _ y ] v).
+
+The patterns syntax and semantics is quite complex compared to the rest of the language.
+Also the patterns, hovewer similar to other expressions, have a very different semantics.
+Even in cases of identical syntactical strucutre, depending on the context, the given expression may be considered a pattern or an expression, and carry a different meaning respectively.
+For these reasons a separate section has been devoted to the detailed explanation of the patterns mechanism.
+
+### Functions
+
+#### Function definition
+
+In the previous section a binding of a simple integer value to a symbol has been presented.
+Whereas the binding always connects the symbol with a value, there is a special type of values - the function object.
+The main differences between the function object and a regular one are:
+* it is the only type that may be used in the function call expression,
+* it doesn't provide any mutation semantics.
+
+The function objects are created with a `func` expression, e.g. in order to define a function which returns the square of its argument we can write:
+
+    (func (x) (* x x)),
+
+or bound to a symbol:
+
+    (bind square (func (x) (* x x))).
+
+As any other objects, functions can be passed to a function or returned from one.
+Normally this mechanism would not be of much use, hence it was not introduced in languages such as Pascal or C, to an
+
+Literals
+--------
+One way of expressing a value is a literal expression.
 There are following basic literals creating values of corresponding types:
-* "true" or "false" for boolean values
-* integral literal for integer values
-* double literal for real values
+* `unit` is a special value of a single-valued type `unit`
+* `true` or `false` for boolean values
+* integral literal for integer values (including sign)
+* double literal for real values (including sign)
 * apostrophe delimited character for character literals
 
-There are also following compound literals:
-* bracket enclosed list of other values creating an array (homogenity check is performed between the values)
-* brace enclosed list of other values creating a tuple
-* Quote delimited character sequence automatically evaluating to array of characters
+There are also following compound expressions instantly creating a value like the literal expressions:
+* bracket enclosed list of other values creating an array (homogenity check is performed between the values),
+* brace enclosed list of other values creating a tuple,
+* quote delimited character sequence automatically evaluating to array of characters
+
+The examples of the compound expressions enumerated above are respectively:
+
+   [ 1.0 2.0 3.0 ]
+   { 1.0 2 "three" }
+   "A man, a plan, a canal - Panama!"
 
 Note that homogenity means the exact same type, which is relatively strict for arrays, meaning that not only the stored type but also the length must match.
-It is therefore impossible to simply create a jagged array in this language.
+This mean that an array of arrays will be a rectangular structure not allowing for rows of different lengths a.k.a. jagged arrays.
+
+### Functions
+
+#### Function declaration
+"func" operation creates a new function value.
+The value captures all the reachable references in terms of the closure (all mismatched references are to be evaluated at call time).
+Since the values have been completely immutable at the earlier design stages, the closure will take all captures by falue (yes, even large compound values).
+
+#### Function call
+Function call evaluates the given function object with the provided parameters.
+If the actual parameters count is less than the formal parameters count the expression evaluates to a curried function object with the already applied arguments stored within.
+Passing too many arguments results in a runtime error.
+
+#### Function objects
+As the previous sections indicate function objects are relatively complex.
+They consist of:
+* (optional) values captured from the creation context
+* (optional) already aplied arguments
+* reference to the function definition
 
 ### Pattern matching
-A pattern matching mechanism is provided in the language.
-Currently it is available in two places:
-* bind expression keys,
-* formal function arguments.
+The act af assigning a value to a symbol is a case of the mechanism called binding.
+There are the following cases of binding in moon:
+* bind expression,
+* formal function argument,
+* keys in the match expression.
 
-Note that the formal function arguments effectively constitute a bind operation as they enable injection of symbols into the local scope with assigning symbols to them.
+The binding semantics supports pattern matching mechanism.
+For the bind expression this provides a mechanism of the value analysis like in the following example:
+
+    (bind foo (func (v)
+        (bind { x y } v)
+    ))
+
+The above function takes an argument v, which effectively means that inside the function the symbol `v` will refer to the argument.
+The bind expression inside the function performs matching of the `v` value to a tuple of two values: `x` and `y`.
+The matching failure will result in a runtime error, whereas upon success the following conditions hold:
+* v is a tuple of two elements
+* first element of v is accessible via the symbol x,
+* second element of v is accessible via the symbol y.
+
+If the `v` symbol is not needed anywhere inside the function, the pattern matching may be performed earlier, in the argument list.
+In such case the above function can be rewritten the following way:
+
+    (bind foo' (func ({ x y })
+        # ...
+    ))
+
+In order to avoid the aforementioned runtime error in the bind expression a `match` expression may be used.
+It is an equivalent of Pascal's `case` statememnt or C's `switch`.
+The expression is used the following way:
+
+    # ...
+    (match v
+        { x } 1
+        { x y } 2
+        { x y z } 3
+        _ -1
+    )
+    # ...
+
+The above example will match the value `v` against 3 specific patterns (one-, two- and three- element tuples), and the "don't care" pattern `\_`.
+The patterns are checked one by one and upon the first matching success the expression to the right is evaluated and its result is returned.
+If none of the expressions is successfully matched it will still result in a runtime error, however the "don't care" pattern prevents this completely.
+
+In order to make them conveniently usable, patterns are context-dependent symbolic expressions.
+This means that for example an expression:
+
+    [ 1 2 3 ]
+
+may mean both:
+* literal expression creating a 3-element array,
+* pattern which will match a particular array value.
+
+In order to avoid ambiguity the patterns are treated as a separate syntactic cathegory compared to all the other language expressions.
+Also they match the rest of the language in terms of complexity which further justifies their separation.
 
 A Pattern is a symbolic expression which is one of the following:
  - a don't care token "\_" (matches any value without binding it to a symbol)
  - atomic symbol (matches any value and binds it to a symbol),
  - an array of patterns (matches an array and binds its elements to the given patterns),
  - a tuple of patterns (analogous to array of patterns but for a tuple).
-
-### Bind
-Bind operation pushes a new value on the stack and makes it available for further computation in the given stack frame.
-
-### Function declaration
-"func" operation creates a new function value.
-The value captures all the reachable references in terms of the closure (all mismatched references are to be evaluated at call time).
-Since the values have been completely immutable at the earlier design stages, the closure will take all captures by falue (yes, even large compound values).
-
-### Function call
-Function call evaluates the given function object with the provided parameters.
-If the actual parameters count is less than the formal parameters count the expression evaluates to a curried function object with the already applied arguments stored within.
-Passing too many arguments results in a runtime error.
-
-### Function objects
-As the previous sections indicate function objects are relatively complex.
-They consist of:
-* (optional) values captured from the creation context
-* (optional) already aplied arguments
-* reference to the function definition
 
 Para-functions
 --------------

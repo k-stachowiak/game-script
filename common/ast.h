@@ -64,8 +64,6 @@ enum AstLiteralType {
  */
 
 struct AstNode;
-struct Value;
-struct Runtime;
 
 /* Control definition types.
  * -------------------------

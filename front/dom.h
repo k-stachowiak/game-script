@@ -49,7 +49,15 @@ enum Reserved {
     DOM_RES_UNIT,
     DOM_RES_TRUE,
     DOM_RES_FALSE,
-    DOM_RES_DONTCARE,
+    DOM_RES_DONT_CARE,
+    DOM_RES_TUNIT,
+    DOM_RES_BOOLEAN,
+    DOM_RES_INTEGER,
+    DOM_RES_REAL,
+    DOM_RES_CHARACTER,
+    DOM_RES_ARRAY_OF,
+    DOM_RES_TREFERENCE,
+    DOM_RES_TFUNC,
 };
 
 /**
@@ -106,6 +114,9 @@ void dom_free(struct DomNode *dom);
 /* Operations.
  * ===========
  */
+
+/** Measures DOM list length */
+int dom_list_length(struct DomNode *node);
 
 /** Checks if the node is atomic */
 bool dom_node_is_atom(struct DomNode *node);

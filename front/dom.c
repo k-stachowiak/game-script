@@ -34,19 +34,17 @@ static char *reserved[] = {
     "true",
     "false",
     "_",
+    "UNIT",
+    "BOOL",
+    "INT",
+    "REAL",
+    "CHAR",
+    "ARRAY-OF",
+    "REF",
+    "FUNC",
 };
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);
-
-static int dom_list_length(struct DomNode* current)
-{
-    int result = 0;
-    while (current) {
-        current = current->next;
-        ++result;
-    }
-    return result;
-}
 
 struct DomNode *dom_make_atom(struct SourceLocation *loc, char *begin, char *end)
 {
@@ -75,18 +73,28 @@ struct DomNode *dom_make_compound(
     return result;
 }
 
-void dom_free(struct DomNode *current)
+void dom_free(struct DomNode *list)
 {
-    while (current) {
-        struct DomNode *next = current->next;
-        if (current->type == DOM_ATOM) {
-            mem_free(current->atom);
+    while (list) {
+        struct DomNode *next = list->next;
+        if (list->type == DOM_ATOM) {
+            mem_free(list->atom);
         } else {
-            dom_free(current->cpd_children);
+            dom_free(list->cpd_children);
         }
-        mem_free(current);
-        current = next;
+        mem_free(list);
+        list = next;
     }
+}
+
+int dom_list_length(struct DomNode* list)
+{
+    int result = 0;
+    while (list) {
+        list = list->next;
+        ++result;
+    }
+    return result;
 }
 
 bool dom_node_is_atom(struct DomNode *node)

@@ -249,7 +249,26 @@ static struct Pattern *parse_pattern_list(struct DomNode *dom)
     return result;
 }
 
-static struct Pattern *parse_pattern_literal_unit(struct DomNode *dom)
+static struct Pattern *parse_pattern_dont_care(struct DomNode *dom)
+{
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_DONT_CARE)) {
+        return pattern_make_dont_care();
+    } else {
+        return NULL;
+    }
+}
+
+static struct Pattern *parse_pattern_symbol(struct DomNode *dom)
+{
+    char *symbol;
+    if ((symbol = dom_node_parse_symbol(dom))) {
+        return pattern_make_symbol(symbol);
+    } else {
+        return NULL;
+    }
+}
+
+static struct Pattern *parse_pattern_literal_atom_unit(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
         return pattern_make_literal_unit();
@@ -258,9 +277,8 @@ static struct Pattern *parse_pattern_literal_unit(struct DomNode *dom)
     }
 }
 
-static struct Pattern *parse_pattern_literal_bool(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atom_bool(struct DomNode *dom)
 {
-    LOG_TRACE_FUNC
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
         return pattern_make_literal_bool(1);
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
@@ -270,45 +288,9 @@ static struct Pattern *parse_pattern_literal_bool(struct DomNode *dom)
     }
 }
 
-static struct Pattern *parse_pattern_literal_char(struct DomNode *dom)
-{
-    char value;
-
-    LOG_TRACE_FUNC
-
-    if (!dom_node_is_atom(dom)) {
-        return NULL;
-    }
-
-    if (!parse_char(dom->atom, &value)) {
-        return NULL;
-    }
-
-    return pattern_make_literal_character(value);
-}
-
-static struct Pattern *parse_pattern_literal_real(struct DomNode *dom)
-{
-    double value;
-
-    LOG_TRACE_FUNC
-
-    if (!dom_node_is_atom(dom)) {
-        return NULL;
-    }
-
-    if (!parse_real(dom->atom, &value)) {
-        return NULL;
-    }
-
-    return pattern_make_literal_real(value);
-}
-
-static struct Pattern *parse_pattern_literal_int(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atom_int(struct DomNode *dom)
 {
     long value;
-
-    LOG_TRACE_FUNC
 
     if (!dom_node_is_atom(dom)) {
         return NULL;
@@ -321,12 +303,40 @@ static struct Pattern *parse_pattern_literal_int(struct DomNode *dom)
     return pattern_make_literal_int(value);
 }
 
-static struct Pattern *parse_pattern_literal_string(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atom_real(struct DomNode *dom)
+{
+    double value;
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    if (!parse_real(dom->atom, &value)) {
+        return NULL;
+    }
+
+    return pattern_make_literal_real(value);
+}
+
+static struct Pattern *parse_pattern_literal_atom_char(struct DomNode *dom)
+{
+    char value;
+
+    if (!dom_node_is_atom(dom)) {
+        return NULL;
+    }
+
+    if (!parse_char(dom->atom, &value)) {
+        return NULL;
+    }
+
+    return pattern_make_literal_character(value);
+}
+
+static struct Pattern *parse_pattern_literal_atom_string(struct DomNode *dom)
 {
     char *value;
     struct Pattern *result;
-
-    LOG_TRACE_FUNC
 
     if (!dom_node_is_atom(dom)) {
         return NULL;
@@ -341,74 +351,140 @@ static struct Pattern *parse_pattern_literal_string(struct DomNode *dom)
     return result;
 }
 
-static struct Pattern *parse_pattern_literal(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atom(struct DomNode *dom)
 {
     struct Pattern *result;
 
-    LOG_TRACE_FUNC
-
     if ((!err_state() && (result = parse_pattern_literal_unit(dom))) ||
         (!err_state() && (result = parse_pattern_literal_bool(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_char(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_real(dom))) ||
         (!err_state() && (result = parse_pattern_literal_int(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_real(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_char(dom))) ||
         (!err_state() && (result = parse_pattern_literal_string(dom)))) {
         return result;
-
     } else {
         return NULL;
     }
 }
 
-static struct Pattern *parse_pattern_atom(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_compound(struct DomNode *dom)
 {
-    char *symbol;
-    struct Pattern *pattern;
+    if (dom_node_is_spec_compound(dom, DOM_CPD_ARRAY)) {
+        struct Pattern *children = parse_pattern_list(dom->cpd_children);
+        if (!children) {
+            return NULL;
+        } else {
+            return pattern_make_literal_cpd_array(children);
+        }
+    } else if (dom_node_is_spec_compound(dom, DOM_CPD_TUPLE)) {
+        struct Pattern *children = parse_pattern_list(dom->cpd_children);
+        if (!children) {
+            return NULL;
+        } else {
+            return pattern_make_literal_cpd_tuple(children);
+        }
+    } else {
+        return NULL;
+    }
+}
 
-    if ((symbol = dom_node_parse_symbol(dom))) {
-        return pattern_make_symbol(symbol);
+static struct Pattern *parse_pattern_datatype_atomic(struct DomNode *dom)
+{
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TUNIT)) {
+        return pattern_make_type_unit();
 
-    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_DONTCARE)) {
-        return pattern_make_dontcare();
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_BOOLEAN)) {
+        return pattern_make_type_boolean();
 
-    } else if ((pattern = parse_pattern_literal(dom))) {
-        return pattern;
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_INTEGER)) {
+        return pattern_make_type_integer();
+
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_REAL)) {
+        return pattern_make_type_real();
+
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_CHARACTER)) {
+        return pattern_make_type_character();
 
     } else {
-        err_push_src("PARSE", dom->loc, "Attempt at binding to a literal");
+        return NULL;
+
+    }
+}
+
+static struct Pattern *parse_pattern_datatype_compound(struct DomNode *dom)
+{
+    struct DomNode *child = NULL;
+    struct Pattern *pattern_children = NULL;
+
+    /* 1. Is compound CORE */
+    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+        return NULL;
+    }
+
+    /* 2. Has at least two children */
+    if (!dom_node_is_cpd_min_size(dom, 2)) {
+        return NULL;
+    }
+
+    /* 3. Is of one of three legal types */
+    child = dom->cpd_children;
+    if (dom_node_is_spec_reserved_atom(child, DOM_RES_ARRAY_OF) &&
+            dom_list_length(child) == 2) {
+        /* 3.a) Array of - only one pattern argument allowed */
+        pattern_children = parse_pattern(child->next);
+        if (pattern_children) {
+            return pattern_make_datatype_array_of(pattern_children);
+        } else {
+            return NULL;
+        }
+    } else if (dom_node_is_spec_reserved_atom(child, DOM_RES_TREFERENCE) &&
+            dom_list_length(child) == 2) {
+        /* 3.b) Reference to - only one pattern argument allowed */
+        pattern_children = parse_pattern(child->next);
+        if (pattern_children) {
+            return pattern_make_datatype_reference_to(pattern_children);
+        } else {
+            return NULL;
+        }
+    } else if (dom_node_is_spec_reserved_atom(child, DOM_RES_TFUNC) &&
+            dom_list_length(child) >= 2) {
+        /* 3.c) Function - at least two additional pattern arguments required */
+        pattern_children = parse_pattern_list(child->next);
+        if (pattern_children) {
+            return pattern_make_datatype_function(pattern_children);
+        } else {
+            return NULL;
+        }
+    } else {
+        return NULL;
+    }
+}
+
+static struct Pattern *parse_pattern_datatype(struct DomNode *dom)
+{
+    struct Pattern *result = NULL;
+
+    if ((!err_state() && (result = parse_pattern_datatype_atomic(dom))) ||
+        (!err_state() && (result = parse_pattern_datatype_compound(dom)))) {
+        return result;
+    } else {
         return NULL;
     }
 }
 
 static struct Pattern *parse_pattern(struct DomNode *dom)
 {
-    if (dom_node_is_atom(dom)) {
-        return parse_pattern_atom(dom);
+    struct Pattern *result = NULL;
 
+    if ((!err_state() && (result = parse_pattern_dont_care(dom))) ||
+        (!err_state() && (result = parse_pattern_symbol(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atom(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_compound(dom))) ||
+        (!err_state() && (result = parse_pattern_datatype(dom)))) {
+        return result;
     } else {
-        struct Pattern *children = parse_pattern_list(dom->cpd_children);
-
-        if (!children && err_state()) {
-            err_push_src("PARSE", dom->loc, "Failed parsing compound pattern children");
-            return NULL;
-        }
-
-        switch (dom->cpd_type) {
-        case DOM_CPD_CORE:
-            pattern_free(children);
-            err_push_src("PARSE", dom->loc, "Pattern cannot be core compound");
-            return NULL;
-
-        case DOM_CPD_ARRAY:
-            return pattern_make_array(children);
-
-        case DOM_CPD_TUPLE:
-            return pattern_make_tuple(children);
-        }
+        return NULL;
     }
-
-    LOG_ERROR("Impossible to get here.");
-    exit(1);
 }
 
 /* Regular AST parsing.
@@ -422,8 +498,6 @@ static struct AstNode *parse_do_block(struct DomNode *dom)
 {
     struct AstNode *exprs = NULL;
     struct DomNode *child = NULL;
-
-    LOG_TRACE_FUNC
 
     /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -456,8 +530,6 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     struct DomNode *child = NULL;
     struct Pattern *pattern = NULL;
     struct AstNode *expr = NULL;
-
-    LOG_TRACE_FUNC
 
     /* 1. Is compound CORE */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -581,8 +653,6 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     enum AstCompoundType type;
     struct AstNode *exprs = NULL;
 
-    LOG_TRACE_FUNC
-
     /* 1. Is compound. */
     if (dom_node_is_atom(dom)) {
         return NULL;
@@ -617,8 +687,6 @@ static struct AstNode *parse_fcall(struct DomNode *dom)
     struct AstNode *func = NULL;
     struct AstNode *args = NULL;
     struct DomNode *child = NULL;
-
-    LOG_TRACE_FUNC
 
     /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -664,8 +732,6 @@ static struct AstNode *parse_fdef(struct DomNode *dom)
     struct DomNode *arg_child = NULL;
 
     struct Pattern *formal_args = NULL, *formal_args_end = NULL;
-
-    LOG_TRACE_FUNC
 
     /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -741,8 +807,6 @@ static struct AstNode *parse_match(struct DomNode *dom)
     struct AstNode *expr = NULL;
     struct Pattern *keys = NULL, *keys_end = NULL;
     struct AstNode *values = NULL, *values_end = NULL;
-
-    LOG_TRACE_FUNC
 
     /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -820,7 +884,6 @@ fail:
 
 static struct AstNode *parse_literal_unit(struct DomNode *dom)
 {
-    LOG_TRACE_FUNC
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
         return ast_make_literal_unit(&dom->loc);
     } else {
@@ -830,7 +893,6 @@ static struct AstNode *parse_literal_unit(struct DomNode *dom)
 
 static struct AstNode *parse_literal_bool(struct DomNode *dom)
 {
-    LOG_TRACE_FUNC
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
         return ast_make_literal_bool(&dom->loc, 1);
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
@@ -844,8 +906,6 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
 {
     char *value;
     struct AstNode *result;
-
-    LOG_TRACE_FUNC
 
     if (!dom_node_is_atom(dom)) {
         return NULL;
@@ -864,8 +924,6 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
 {
     char value;
 
-    LOG_TRACE_FUNC
-
     if (!dom_node_is_atom(dom)) {
         return NULL;
     }
@@ -880,8 +938,6 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
 static struct AstNode *parse_literal_int(struct DomNode *dom)
 {
     long value;
-
-    LOG_TRACE_FUNC
 
     if (!dom_node_is_atom(dom)) {
         return NULL;
@@ -898,8 +954,6 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
 {
     double value;
 
-    LOG_TRACE_FUNC
-
     if (!dom_node_is_atom(dom)) {
         return NULL;
     }
@@ -914,8 +968,6 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
 static struct AstNode *parse_literal(struct DomNode *dom)
 {
     struct AstNode *result;
-
-    LOG_TRACE_FUNC
 
     if ((!err_state() && (result = parse_literal_unit(dom))) ||
         (!err_state() && (result = parse_literal_bool(dom))) ||
@@ -933,8 +985,6 @@ static struct AstNode *parse_literal(struct DomNode *dom)
 static struct AstNode *parse_reference(struct DomNode *dom)
 {
     char *symbol;
-
-    LOG_TRACE_FUNC
 
     /* 1. Is a symbol. */
     if (!(symbol = dom_node_parse_symbol(dom))) {

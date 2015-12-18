@@ -7,107 +7,240 @@
 #include "memory.h"
 #include "pattern.h"
 
+struct Pattern *pattern_make_dont_care(void)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_DONT_CARE;
+    result->next = NULL;
+
+    return result;
+}
+
 struct Pattern *pattern_make_symbol(char *symbol)
 {
+    int len = strlen(symbol);
+    char *copy = mem_malloc(len + 1);
+    memcpy(copy, symbol, len + 1);
+
     struct Pattern *result = mem_malloc(sizeof(*result));
+
     result->type = PATTERN_SYMBOL;
-    result->data.symbol.type = PATTERN_SYM_REGULAR;
-    result->data.symbol.symbol = symbol;
     result->next = NULL;
+
+    result->data.symbol.symbol = copy;
+
     return result;
 }
 
-struct Pattern *pattern_make_dontcare(void)
+struct Pattern *pattern_make_literal_atom_unit(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_SYMBOL;
-    result->data.symbol.type = PATTERN_SYM_DONT_CARE;
-    result->data.symbol.symbol = NULL;
+
+    result->type = PATTERN_LITERAL_ATOM;
     result->next = NULL;
+
+    result->data.literal_atom.type = PATTERN_LITERAL_ATOM_UNIT;
+
     return result;
 }
 
-struct Pattern *pattern_make_literal_unit(void)
+struct Pattern *pattern_make_literal_atom_bool(int value)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_LITERAL;
-    result->data.literal.type = PATTERN_LIT_UNIT;
+
+    result->type = PATTERN_LITERAL_ATOM;
     result->next = NULL;
+
+    result->data.literal_atom.type = PATTERN_LITERAL_ATOM_BOOL;
+    result->data.literal_atom.data.boolean = value;
+
     return result;
 }
 
-struct Pattern *pattern_make_literal_bool(int value)
+struct Pattern *pattern_make_literal_atom_int(long value)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_LITERAL;
-    result->data.literal.type = PATTERN_LIT_BOOL;
-    result->data.literal.data.boolean = value;
+
+    result->type = PATTERN_LITERAL_ATOM;
     result->next = NULL;
+
+    result->data.literal_atom.type = PATTERN_LITERAL_ATOM_INT;
+    result->data.literal_atom.data.integer = value;
+
     return result;
 }
 
-struct Pattern *pattern_make_literal_string(char *value)
+struct Pattern *pattern_make_literal_atom_real(double value)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
 
+    result->type = PATTERN_LITERAL_ATOM;
+    result->next = NULL;
+
+    result->data.literal_atom.type = PATTERN_LITERAL_ATOM_REAL;
+    result->data.literal_atom.data.real = value;
+
+    return result;
+}
+
+struct Pattern *pattern_make_literal_atom_character(char value)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_LITERAL_ATOM;
+    result->next = NULL;
+
+    result->data.literal_atom.type = PATTERN_LITERAL_ATOM_CHAR;
+    result->data.literal_atom.data.character = value;
+
+    return result;
+}
+
+struct Pattern *pattern_make_literal_atom_string(char *value)
+{
     int len = strlen(value);
     char *copy = mem_malloc(len + 1);
     memcpy(copy, value, len + 1);
 
-    result->type = PATTERN_LITERAL;
-    result->data.literal.type = PATTERN_LIT_STRING;
-    result->data.literal.data.string = copy;
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_LITERAL_ATOM;
     result->next = NULL;
+
+    result->data.literal_atom.type = PATTERN_LITERAL_ATOM_STRING;
+    result->data.literal_atom.data.string = copy;
+
     return result;
 }
 
-struct Pattern *pattern_make_literal_character(char value)
+struct Pattern *pattern_make_literal_cpd_array(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_LITERAL;
-    result->data.literal.type = PATTERN_LIT_CHAR;
-    result->data.literal.data.character = value;
+
+    result->type = PATTERN_LITERAL_COMPOUND;
     result->next = NULL;
+
+    result->data.literal_compound.type = PATTERN_LITERAL_CPD_ARRAY;
+    result->data.literal_compound.children = children;
+
     return result;
 }
 
-struct Pattern *pattern_make_literal_int(long value)
+struct Pattern *pattern_make_datatype_unit(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_LITERAL;
-    result->data.literal.type = PATTERN_LIT_INT;
-    result->data.literal.data.integer = value;
+
+    result->type = PATTERN_DATATYPE;
     result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_UNIT;
+    result->data.datatype.children = NULL;
+
     return result;
 }
 
-struct Pattern *pattern_make_literal_real(double value)
+struct Pattern *pattern_make_datatype_boolean(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_LITERAL;
-    result->data.literal.type = PATTERN_LIT_REAL;
-    result->data.literal.data.real = value;
+
+    result->type = PATTERN_DATATYPE;
     result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_BOOLEAN;
+    result->data.datatype.children = NULL;
+
     return result;
 }
 
-struct Pattern *pattern_make_array(struct Pattern *children)
+struct Pattern *pattern_make_datatype_integer(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_COMPOUND;
-    result->data.compound.type = PATTERN_CPD_ARRAY;
-    result->data.compound.children = children;
+
+    result->type = PATTERN_DATATYPE;
     result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_INTEGER;
+    result->data.datatype.children = NULL;
+
     return result;
 }
 
-struct Pattern *pattern_make_tuple(struct Pattern *children)
+struct Pattern *pattern_make_datatype_real(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
-    result->type = PATTERN_COMPOUND;
-    result->data.compound.type = PATTERN_CPD_TUPLE;
-    result->data.compound.children = children;
+
+    result->type = PATTERN_DATATYPE;
     result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_REAL;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct Pattern *pattern_make_datatype_character(void)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_CHARACTER;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct Pattern *pattern_make_datatype_array_of(struct Pattern *child)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_ARRAY_OF;
+    result->data.datatype.children = child;
+
+    return result;
+}
+
+struct Pattern *pattern_make_datatype_tuple_of(struct Pattern *children)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_TUPLE_OF;
+    result->data.datatype.children = children;
+
+    return result;
+}
+
+struct Pattern *pattern_make_datatype_reference_to(struct Pattern *child)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_REFERENCE_TO;
+    result->data.datatype.children = child;
+
+    return result;
+}
+
+struct Pattern *pattern_make_datatype_function(struct Pattern *children)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = PATTERN_DATATYPE_FUNCTION;
+    result->data.datatype.children = children;
+
     return result;
 }
 
@@ -117,24 +250,37 @@ void pattern_free(struct Pattern *pattern)
         struct Pattern *next_pattern = pattern->next;
 
         switch (pattern->type) {
+        case PATTERN_DONT_CARE:
+            break;
+
         case PATTERN_SYMBOL:
-            switch (pattern->data.symbol.type) {
-            case PATTERN_SYM_REGULAR:
-                mem_free(pattern->data.symbol.symbol);
-                break;
-            case PATTERN_SYM_DONT_CARE:
-                break;
+            mem_free(pattern->data.symbol.symbol);
+            break;
+
+        case PATTERN_LITERAL_ATOM:
+            if (pattern->data.literal_atom.type == PATTERN_LITERAL_ATOM_STRING) {
+                mem_free(pattern->data.literal_atom.data.string);
             }
             break;
 
-        case PATTERN_LITERAL:
-            if (pattern->data.literal.type == PATTERN_LIT_STRING) {
-                mem_free(pattern->data.literal.data.string);
-            }
+        case PATTERN_LITERAL_COMPOUND:
+            pattern_free(pattern->data.literal_compound.children);
             break;
 
-        case PATTERN_COMPOUND:
-            pattern_free(pattern->data.compound.children);
+        case PATTERN_DATATYPE:
+            switch (pattern->data.datatype.type) {
+                case PATTERN_DATATYPE_UNIT:
+                case PATTERN_DATATYPE_BOOLEAN:
+                case PATTERN_DATATYPE_INTEGER:
+                case PATTERN_DATATYPE_REAL:
+                case PATTERN_DATATYPE_CHARACTER:
+                    break;
+
+                case PATTERN_DATATYPE_ARRAY_OF:
+                case PATTERN_DATATYPE_REFERENCE_TO:
+                    pattern_free(pattern->data.datatype.children);
+                    break;
+            }
             break;
         }
 
@@ -158,18 +304,14 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
     while (pattern) {
         switch (pattern->type) {
         case PATTERN_SYMBOL:
-            if (pattern->data.symbol.type == PATTERN_SYM_REGULAR &&
-                strcmp(pattern->data.symbol.symbol, symbol) == 0) {
-                    return true;
-            }
-            break;
+            return strcmp(pattern->data.symbol.symbol, symbol) == 0;
 
         case PATTERN_LITERAL:
             break;
 
-        case PATTERN_COMPOUND:
+        case PATTERN_DATATYPE:
             if (pattern_list_contains_symbol(
-                    pattern->data.compound.children,
+                    pattern->data.datatype.children,
                     symbol)) {
                 return true;
             }
