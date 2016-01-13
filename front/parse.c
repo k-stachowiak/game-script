@@ -271,7 +271,7 @@ static struct Pattern *parse_pattern_symbol(struct DomNode *dom)
 static struct Pattern *parse_pattern_literal_atom_unit(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
-        return pattern_make_literal_unit();
+        return pattern_make_literal_atom_unit();
     } else {
         return NULL;
     }
@@ -280,9 +280,9 @@ static struct Pattern *parse_pattern_literal_atom_unit(struct DomNode *dom)
 static struct Pattern *parse_pattern_literal_atom_bool(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
-        return pattern_make_literal_bool(1);
+        return pattern_make_literal_atom_bool(1);
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
-        return pattern_make_literal_bool(0);
+        return pattern_make_literal_atom_bool(0);
     } else {
         return NULL;
     }
@@ -300,7 +300,7 @@ static struct Pattern *parse_pattern_literal_atom_int(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_int(value);
+    return pattern_make_literal_atom_int(value);
 }
 
 static struct Pattern *parse_pattern_literal_atom_real(struct DomNode *dom)
@@ -315,7 +315,7 @@ static struct Pattern *parse_pattern_literal_atom_real(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_real(value);
+    return pattern_make_literal_atom_real(value);
 }
 
 static struct Pattern *parse_pattern_literal_atom_char(struct DomNode *dom)
@@ -330,7 +330,7 @@ static struct Pattern *parse_pattern_literal_atom_char(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_character(value);
+    return pattern_make_literal_atom_character(value);
 }
 
 static struct Pattern *parse_pattern_literal_atom_string(struct DomNode *dom)
@@ -346,7 +346,7 @@ static struct Pattern *parse_pattern_literal_atom_string(struct DomNode *dom)
         return NULL;
     }
 
-    result = pattern_make_literal_string(value);
+    result = pattern_make_literal_atom_string(value);
     mem_free(value);
     return result;
 }
@@ -355,12 +355,12 @@ static struct Pattern *parse_pattern_literal_atom(struct DomNode *dom)
 {
     struct Pattern *result;
 
-    if ((!err_state() && (result = parse_pattern_literal_unit(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_bool(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_int(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_real(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_char(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_string(dom)))) {
+    if ((!err_state() && (result = parse_pattern_literal_atom_unit(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atom_bool(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atom_int(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atom_real(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atom_char(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atom_string(dom)))) {
         return result;
     } else {
         return NULL;
@@ -391,19 +391,19 @@ static struct Pattern *parse_pattern_literal_compound(struct DomNode *dom)
 static struct Pattern *parse_pattern_datatype_atomic(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TUNIT)) {
-        return pattern_make_type_unit();
+        return pattern_make_datatype_unit();
 
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_BOOLEAN)) {
-        return pattern_make_type_boolean();
+        return pattern_make_datatype_bool();
 
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_INTEGER)) {
-        return pattern_make_type_integer();
+        return pattern_make_datatype_int();
 
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_REAL)) {
-        return pattern_make_type_real();
+        return pattern_make_datatype_real();
 
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_CHARACTER)) {
-        return pattern_make_type_character();
+        return pattern_make_datatype_character();
 
     } else {
         return NULL;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Krzysztof Stachowiak */
+/* Copyright (C) 2015-2016 Krzysztof Stachowiak */
 
 #include <stdlib.h>
 #include <string.h>
@@ -205,19 +205,6 @@ struct Pattern *pattern_make_datatype_array_of(struct Pattern *child)
     return result;
 }
 
-struct Pattern *pattern_make_datatype_tuple_of(struct Pattern *children)
-{
-    struct Pattern *result = mem_malloc(sizeof(*result));
-
-    result->type = PATTERN_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = PATTERN_DATATYPE_TUPLE_OF;
-    result->data.datatype.children = children;
-
-    return result;
-}
-
 struct Pattern *pattern_make_datatype_reference_to(struct Pattern *child)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
@@ -278,6 +265,7 @@ void pattern_free(struct Pattern *pattern)
 
                 case PATTERN_DATATYPE_ARRAY_OF:
                 case PATTERN_DATATYPE_REFERENCE_TO:
+                case PATTERN_DATATYPE_FUNCTION:
                     pattern_free(pattern->data.datatype.children);
                     break;
             }
@@ -306,10 +294,12 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
         case PATTERN_SYMBOL:
             return strcmp(pattern->data.symbol.symbol, symbol) == 0;
 
-        case PATTERN_LITERAL:
+        case PATTERN_DATATYPE:
+        case PATTERN_LITERAL_ATOM:
+        case PATTERN_DONT_CARE:
             break;
 
-        case PATTERN_DATATYPE:
+        case PATTERN_LITERAL_COMPOUND:
             if (pattern_list_contains_symbol(
                     pattern->data.datatype.children,
                     symbol)) {
