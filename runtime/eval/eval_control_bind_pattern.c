@@ -67,10 +67,9 @@ static void eval_bind_pattern_literal_atom(
     err_push_src("EVAL", *source_loc, "Literal_atom value pattern mismatch");
 }
 
-static void eval_bind_pattern_datatype_compound(
-        struct PatternDataType *data_type,
+static void eval_bind_pattern_literal_compound(
+        struct PatternLiteralAtom *literal_atom,
         struct Runtime *rt,
-        struct SymMap *sym_map,
         VAL_LOC_T location,
         struct SourceLocation *source_loc)
 {
@@ -78,19 +77,6 @@ static void eval_bind_pattern_datatype_compound(
     struct Pattern *current_pat = data_type->children;
     int val_len = rt_val_cpd_len(rt, location);
     int pat_len = pattern_list_len(current_pat);
-
-    if (current_pat->type == PATTERN_DATATYPE_SEQUENCE) {
-        if (pat_len > 1) {
-            err_push_src("EVAL", source_loc, "Illegal pattern tokens besides sequence");
-            return;
-        } else {
-            /* It has already been established that the value is of a
-             * correct compound type, therefore besides the syntactical check
-             * we can call it a day here.
-             */
-            return;
-        }
-    }
 
     if (val_len != pat_len) {
         err_push_src("EVAL", source_loc, "Compound value and pattern length mismatch");
@@ -100,12 +86,21 @@ static void eval_bind_pattern_datatype_compound(
     while (current_pat) {
         eval_bind_pattern(current_pat, rt, sym_map, current_loc, source_loc);
         if (err_state()) {
-            err_push_src("EVAL", *source_loc, "Failed matching one of the array pattern elements");
+            err_push_src("EVAL", *source_loc, "Failed matching one of the compound pattern elements");
             return;
         }
         current_pat = current_pat->next;
         current_loc = rt_val_next_loc(rt, current_loc);
     }
+}
+
+static void eval_bind_pattern_datatype_compound(
+        struct PatternDataType *data_type,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        VAL_LOC_T location,
+        struct SourceLocation *source_loc)
+{
 }
 
 static void eval_bind_pattern_datatype(
@@ -117,62 +112,56 @@ static void eval_bind_pattern_datatype(
 {
     enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
     switch (data_type->type) {
-    case PATTERN_DTYPE_UNIT:
+    case PATTERN_DATATYPE_UNIT:
         if (value_type == VAL_UNIT) {
             return;
         }
         break;
 
-    case PATTERN_DTYPE_BOOLEAN:
+    case PATTERN_DATATYPE_BOOLEAN:
         if (value_type == VAL_BOOL) {
             return;
         }
         break;
 
-    case PATTERN_DTYPE_INTEGER:
+    case PATTERN_DATATYPE_INTEGER:
         if (value_type == VAL_INT) {
             return;
         }
         break;
 
-    case PATTERN_DTYPE_REAL:
+    case PATTERN_DATATYPE_REAL:
         if (value_type == VAL_REAL) {
             return;
         }
         break;
 
-    case PATTERN_DTYPE_CHARACTER:
+    case PATTERN_DATATYPE_CHARACTER:
         if (value_type == VAL_CHAR) {
             return;
         }
         break;
 
-    case PATTERN_DTYPE_ARRAY:
-    case PATTERN_DTYPE_TUPLE:
-        if ((data_type->type == PATTERN_DTYPE_ARRAY && value_type != VAL_ARRAY) ||
-            (data_type->type == PATTERN_DTYPE_TUPLE && value_type != VAL_TUPLE)) {
-            err_push_src("EVAL", *source_loc, "Compound type pattern mismatch");
-        } else {
+    case PATTERN_DATATYPE_ARRAY_OF:
+        if (value_type != VAL_ARRAY) {
             eval_bind_pattern_datatype_compound(
                     data_type, rt, sym_map, location, source_loc);
         }
         return;
 
-    case PATTERN_DTYPE_DONT_KNOW:
-    case PATTERN_DTYPE_DONT_CARE:
-        return;
-
-    case PATTERN_DTYPE_REFERENCE:
+    case PATTERN_DTYPE_REFERENCE_TO:
         if (value_type != VAL_REF) {
             break;
         }
         eval_bind_pattern_reference(...);
         return;
 
-    case PATTERN_DTYPE_SEQUENCE:
-        err_push_src("EVAL", *source_loc, "Unexpected sequence pattern");
+    case PATTERN_DATATYPE_FUNCTION:
+        eval_bind_pattern_function(...);
         return;
     }
+
+    err_push_src("EVAL", *source_loc, "Type pattern mismatch");
 }
 
 void eval_bind_pattern(
