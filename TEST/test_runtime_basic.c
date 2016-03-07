@@ -1,4 +1,3 @@
-
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include "test_helpers.h"

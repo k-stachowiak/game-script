@@ -127,6 +127,19 @@ struct Pattern *pattern_make_literal_cpd_array(struct Pattern *children)
     return result;
 }
 
+struct Pattern *pattern_make_literal_cpd_tuple(struct Pattern *children)
+{
+    struct Pattern *result = mem_malloc(sizeof(*result));
+
+    result->type = PATTERN_LITERAL_COMPOUND;
+    result->next = NULL;
+
+    result->data.literal_compound.type = PATTERN_LITERAL_CPD_TUPLE;
+    result->data.literal_compound.children = children;
+
+    return result;
+}
+
 struct Pattern *pattern_make_datatype_unit(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
@@ -140,7 +153,7 @@ struct Pattern *pattern_make_datatype_unit(void)
     return result;
 }
 
-struct Pattern *pattern_make_datatype_boolean(void)
+struct Pattern *pattern_make_datatype_bool(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
 
@@ -153,7 +166,7 @@ struct Pattern *pattern_make_datatype_boolean(void)
     return result;
 }
 
-struct Pattern *pattern_make_datatype_integer(void)
+struct Pattern *pattern_make_datatype_int(void)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
 
@@ -294,9 +307,9 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
         case PATTERN_SYMBOL:
             return strcmp(pattern->data.symbol.symbol, symbol) == 0;
 
-        case PATTERN_DATATYPE:
-        case PATTERN_LITERAL_ATOM:
         case PATTERN_DONT_CARE:
+        case PATTERN_LITERAL_ATOM:
+        case PATTERN_DATATYPE:
             break;
 
         case PATTERN_LITERAL_COMPOUND:
