@@ -1,5 +1,6 @@
-TODO
-----
+# TODO #
+- [BUG] error while parsing standard library, example captured in the CCI test
+    - add trace debug messages to the entire evaluation call tree
 - Bring order to AST. It should only consist of:
   - literals (atomic and compound; constitute a type)
   - special forms
