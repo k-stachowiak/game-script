@@ -8,7 +8,7 @@
 #define LLVL_ERROR 2
 #define LLVL_NONE 3
 
-#define LOG_LEVEL LLVL_DEBUG
+#define LOG_LEVEL LLVL_TRACE
 
 #if LOG_LEVEL < LLVL_NONE
 #   include <stdio.h>

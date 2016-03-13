@@ -18,7 +18,15 @@ VAL_LOC_T eval_dispatch(
 {
     /* It is possible that the debugger flag will change during evaluation. */
     bool debug_begin_called = false;
+    
     VAL_LOC_T begin = rt->stack.top;
+
+#if LOG_LEVEL <= LLVL_TRACE
+    char *node_string = ast_serialize(node);
+    LOG_TRACE("eval_impl BEGIN(%s)", node_string);
+    mem_free(node_string);
+#endif
+
     if (rt->debug) {
         dbg_call_begin(&rt->debugger, node);
         debug_begin_called = true;
@@ -50,6 +58,7 @@ VAL_LOC_T eval_dispatch(
         }
 
         err_push_src("EVAL", node->loc, "Failed evaluating expression");
+	LOG_TRACE("eval_impl END(error)");
         return ret_val;
 
     } else {
@@ -58,6 +67,7 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, begin, false);
         }
 
+	LOG_TRACE("eval_impl END(result=%d)", begin);
         return begin;
     }
 }
@@ -65,6 +75,12 @@ VAL_LOC_T eval_dispatch(
 VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 {
     VAL_LOC_T begin, result, end;
+    
+#if LOG_LEVEL <= LLVL_TRACE
+    char *node_string = ast_serialize(node);
+    LOG_TRACE("eval BEGIN(%s)", node_string);
+    mem_free(node_string);
+#endif
 
     err_reset();
 
@@ -78,8 +94,10 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 
     if (err_state()) {
         stack_collapse(&rt->stack, begin, end);
+	LOG_TRACE("eval END(error)");
         return -1;
     } else {
+	LOG_TRACE("eval END(result=%d)", result);
         return result;
     }
 }
@@ -87,20 +105,24 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 VAL_LOC_T eval_bif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
 {
     VAL_LOC_T size_loc, data_begin, result_loc = rt->stack.top;
+    LOG_TRACE("eval_bif BEGIN");
     rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_BIF, impl);
     rt_val_push_func_cap_init(&rt->stack, 0);
     rt_val_push_func_appl_init(&rt->stack, 0);
     rt_val_push_func_final(&rt->stack, size_loc, data_begin);
+    LOG_TRACE("eval_bif END");
     return result_loc;
 }
 
 VAL_LOC_T eval_clif(struct Runtime *rt, void *impl, VAL_SIZE_T arity)
 {
     VAL_LOC_T size_loc, data_begin, result_loc = rt->stack.top;
+    LOG_TRACE("eval_clif END");
     rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_CLIF, impl);
     rt_val_push_func_cap_init(&rt->stack, 0);
     rt_val_push_func_appl_init(&rt->stack, 0);
     rt_val_push_func_final(&rt->stack, size_loc, data_begin);
+    LOG_TRACE("eval_clif END");
     return result_loc;
 }
 

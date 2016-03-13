@@ -1,6 +1,7 @@
 # TODO #
 - [BUG] error while parsing standard library, example captured in the CCI test
     - add trace debug messages to the entire evaluation call tree
+        - add serialization for AST and Pattern modules to be used in the evaluation tracing
 - Bring order to AST. It should only consist of:
   - literals (atomic and compound; constitute a type)
   - special forms

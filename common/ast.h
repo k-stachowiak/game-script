@@ -212,6 +212,12 @@ struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value);
 void ast_node_free(struct AstNode *node);
 void ast_node_free_one(struct AstNode *node);
 
+/* Serialization.
+ * ==============
+ */
+
+char *ast_serialize(struct AstNode *node);
+
 /* Introspection.
  * ==============
  */
