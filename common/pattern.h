@@ -40,6 +40,7 @@ enum PatternDataTypeType {
 
 struct PatternDontCare {
     /* Structure intentionally left blank */
+	char DUMMY_FIELD;
 };
 
 struct PatternSymbol {
@@ -103,6 +104,8 @@ struct Pattern *pattern_make_datatype_reference_to(struct Pattern *child);
 struct Pattern *pattern_make_datatype_function(struct Pattern *children);
 
 void pattern_free(struct Pattern *pattern);
+
+char *pattern_serialize(struct Pattern *pattern);
 
 int pattern_list_len(struct Pattern *pattern);
 bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol);

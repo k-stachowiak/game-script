@@ -3,7 +3,9 @@
 #ifndef STRBUILD_H
 #define STRBUILD_H
 
+#include <stdio.h>
 #include "memory.h"
+#include "log.h"
 
 #define STR_TEMP_BUFFER_SIZE 1024
 
