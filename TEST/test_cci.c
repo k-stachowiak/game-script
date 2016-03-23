@@ -1,21 +1,21 @@
-/* Copyright (C) 2015 Krzysztof Stachowiak */
+/* Copyright (C) 2015-2016 Krzysztof Stachowiak */
 
 #include "test_helpers.h"
 
 static void test_cci_impl(struct TestContext *tc, struct Runtime *rt)
 {
-    char *source =
-		"(bind array_gen (func (f n) (do\n"
-		"    (bind array_gen_impl (func (f n acc)\n"
-		"        (if (eq n 0)\n"
-		"            acc\n"
-		"            (array_gen_impl f (- n 1) (push_back acc (f)))\n"
+	char *source =
+		"(bind foo (func (x y) (do\n"
+		"    (bind bar (func (x y z)\n"
+		"        (if (eq y 0)\n"
+		"            z\n"
+		"            (bar x (- y 1) (push_back z (f)))\n"
 		"        )\n"
 		"    ))\n"
-		"    (array_gen_impl f n [])\n"
+		"    (bar x y [])\n"
 		")))\n"
 		"\n"
-		"(array_gen (func () (rand_ur 0.0 100.0)) 500)";
+		"(foo (func () (rand_ur 0.0 100.0)) 1)";
     test_eval_source_succeed(tc, rt, source, "Test CCI");
 }
 
