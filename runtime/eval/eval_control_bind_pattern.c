@@ -59,25 +59,25 @@ static void eval_bind_pattern_literal_atom(
         if (value_type == VAL_ARRAY && rt_val_peek_type(&rt->stack, current_loc) == VAL_CHAR) {
 
             char *str_pat = literal_atom->data.string;
-	    int arr_len = rt_val_cpd_len(rt, location);
-	    int str_len = strlen(str_pat) - 2; /* Take the quotes into account */
+        int arr_len = rt_val_cpd_len(rt, location);
+        int str_len = strlen(str_pat) - 2; /* Take the quotes into account */
 
-	    if (str_len != arr_len) {
-		err_push_src("EVAL", *source_loc, "Failed matching string literal");
-		return;
-	    }
+        if (str_len != arr_len) {
+        err_push_src("EVAL", *source_loc, "Failed matching string literal");
+        return;
+        }
 
-	    ++str_pat; /* Skip the initial quote */
-	    while (arr_len) {
-		if (*str_pat != rt_val_peek_char(rt, current_loc)) {
-		    err_push_src("EVAL", *source_loc, "Failed matching string literal");
-		    return;
-		}
-		current_loc = rt_val_next_loc(rt, current_loc);
-		++str_pat;
-		--arr_len;
-	    }
-	    return;
+        ++str_pat; /* Skip the initial quote */
+        while (arr_len) {
+        if (*str_pat != rt_val_peek_char(rt, current_loc)) {
+            err_push_src("EVAL", *source_loc, "Failed matching string literal");
+            return;
+        }
+        current_loc = rt_val_next_loc(rt, current_loc);
+        ++str_pat;
+        --arr_len;
+        }
+        return;
         }
         break;
     }
@@ -102,7 +102,7 @@ static void eval_bind_pattern_literal_compound(
     int pat_len = pattern_list_len(current_pat);
 
     if (!(val_type == VAL_ARRAY && pat_type == PATTERN_LITERAL_CPD_ARRAY) &&
-	!(val_type == VAL_TUPLE && pat_type == PATTERN_LITERAL_CPD_TUPLE)) {
+    !(val_type == VAL_TUPLE && pat_type == PATTERN_LITERAL_CPD_TUPLE)) {
             err_push_src("EVAL", *source_loc, "Compound value and pattern type mismatch");
             return;
     }
@@ -137,25 +137,25 @@ static void eval_bind_pattern_datatype_array(
 
     if (value_type != VAL_ARRAY) {
         err_push_src("EVAL", *source_loc, "Failed matching array pattern");
-	return;
+    return;
     }
 
     arr_length = rt_val_cpd_len(rt, location);
     if (arr_length == 0) {
-	/* Always match an empty array */
+    /* Always match an empty array */
         return;
     }
 
     pat_length = pattern_list_len(datatype->children);
     if (pat_length != 1) {
-	err_push_src("EVAL", *source_loc, "Failed matching array pattern");
-	return;
+    err_push_src("EVAL", *source_loc, "Failed matching array pattern");
+    return;
     }
 
     child = datatype->children;
     if (child->type != PATTERN_DATATYPE) {
-	err_push_src("EVAL", *source_loc, "Failed matching array pattern");
-	return;
+    err_push_src("EVAL", *source_loc, "Failed matching array pattern");
+    return;
     }
     
     first_loc = rt_val_cpd_first_loc(location);
@@ -175,20 +175,20 @@ static void eval_bind_pattern_datatype_reference(
     struct Pattern *child;
 
     if (value_type != VAL_REF) {
-	err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
-	return;
+    err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
+    return;
     }
 
     length = pattern_list_len(datatype->children);
     if (length != 1) {
-	err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
-	return;
+    err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
+    return;
     }
 
     child = datatype->children;
     if (child->type != PATTERN_DATATYPE) {
-	err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
-	return;
+    err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
+    return;
     }
     
     refered_loc = rt_val_peek_ref(rt, location);

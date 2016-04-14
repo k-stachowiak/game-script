@@ -23,11 +23,13 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -O0 -std=c++11")
 
 add_library(lang OBJECT
         ./common/pattern.c
+        ./common/pattern_serialize.c
         ./common/ast.c
+        ./common/ast_serialize.c
         ./common/src_iter.c
+        ./common/sexpr_tools.c
         ./common/error.c
         ./common/api_value.c
-        ./common/test.c
         ./front/lex.c
         ./front/parse.c
         ./front/tok.c
@@ -75,6 +77,7 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     ./TEST/test_runtime_parafunc.c
     ./TEST/test_runtime_scope.c
     ./TEST/test_cci.c
+    ./TEST/test.c
     )
 target_link_libraries(mntest m stdc++)
 

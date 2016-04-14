@@ -115,9 +115,9 @@ void test_eval_source_succeed(
     if (test_eval_source(rt, source, result)) {
         tc_record(tc, test_name, true);
     } else {
-		char *error_message = err_msg();
-		printf("Error in test [%s]:\n%s", test_name, error_message);
-		mem_free(error_message);
+        char *error_message = err_msg();
+        printf("Error in test [%s]:\n%s", test_name, error_message);
+        mem_free(error_message);
         tc_record(tc, test_name, false);
     }
 }

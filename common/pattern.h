@@ -40,7 +40,7 @@ enum PatternDataTypeType {
 
 struct PatternDontCare {
     /* Structure intentionally left blank */
-	char DUMMY_FIELD;
+    char DUMMY_FIELD;
 };
 
 struct PatternSymbol {

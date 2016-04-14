@@ -58,7 +58,7 @@ VAL_LOC_T eval_dispatch(
         }
 
         err_push_src("EVAL", node->loc, "Failed evaluating expression");
-	LOG_TRACE("eval_impl END(error)");
+    LOG_TRACE("eval_impl END(error)");
         return ret_val;
 
     } else {
@@ -67,7 +67,7 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, begin, false);
         }
 
-	LOG_TRACE("eval_impl END(result=%d)", begin);
+    LOG_TRACE("eval_impl END(result=%td)", begin);
         return begin;
     }
 }
@@ -94,10 +94,10 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 
     if (err_state()) {
         stack_collapse(&rt->stack, begin, end);
-	LOG_TRACE("eval END(error)");
+    LOG_TRACE("eval END(error)");
         return -1;
     } else {
-	LOG_TRACE("eval END(result=%d)", result);
+    LOG_TRACE("eval END(result=%td)", result);
         return result;
     }
 }
