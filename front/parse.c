@@ -262,7 +262,9 @@ static struct Pattern *parse_pattern_symbol(struct DomNode *dom)
 {
     char *symbol;
     if ((symbol = dom_node_parse_symbol(dom))) {
-        return pattern_make_symbol(symbol);
+        struct Pattern *result = pattern_make_symbol(symbol);
+        mem_free(symbol);
+        return result;
     } else {
         return NULL;
     }
