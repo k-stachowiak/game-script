@@ -17,10 +17,7 @@ static void test_cci_impl(struct TestContext *tc, struct Runtime *rt)
         ")))\n"
         "\n"
         "(foo (func () (rand_ur 0.0 100.0)) 1)";
-    char *pp = sexpr_prettyprint(source);
-    printf("%s\n", pp);
-    mem_free(pp);
-//    test_eval_source_succeed(tc, rt, source, "Test CCI");
+    test_eval_source_succeed(tc, rt, source, "Test CCI");
 }
 
 void test_cci(struct TestContext *tc)

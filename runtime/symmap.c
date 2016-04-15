@@ -45,11 +45,12 @@ void sym_map_insert(
         struct SourceLocation source_loc)
 {
     struct SymMapNode *node = &sym_map->root;
-    while (*key) {
+    char *current = key;
+    while (*current) {
         int i;
         bool found = false;
         for (i = 0; i < node->children.size; ++i) {
-            if (node->children.data[i].key == *key) {
+            if (node->children.data[i].key == *current) {
                 node = node->children.data + i;
                 found = true;
                 break;
@@ -63,11 +64,11 @@ void sym_map_insert(
                 0,
                 { 0, 0, 0 }
             };
-            new_node.key = *key;
+            new_node.key = *current;
             ARRAY_APPEND(node->children, new_node);
             node = node->children.data + i;
         }
-        ++key;
+        ++current;
     }
     if (node->is_set) {
         err_push("RUNTIME", "Symbol \"%s\" already inserted", key);
