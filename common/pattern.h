@@ -14,17 +14,17 @@ enum PatternType {
 };
 
 enum PatternLiteralAtomicType {
-    PATTERN_LITERAL_ATOMIC_UNIT,
-    PATTERN_LITERAL_ATOMIC_BOOL,
-    PATTERN_LITERAL_ATOMIC_INT,
-    PATTERN_LITERAL_ATOMIC_REAL,
-    PATTERN_LITERAL_ATOMIC_CHAR,
-    PATTERN_LITERAL_ATOMIC_STRING
+    PATTERN_LIT_ATOM_UNIT,
+    PATTERN_LIT_ATOM_BOOL,
+    PATTERN_LIT_ATOM_INT,
+    PATTERN_LIT_ATOM_REAL,
+    PATTERN_LIT_ATOM_CHAR,
+    PATTERN_LIT_ATOM_STRING
 };
 
 enum PatternLiteralCompoundType {
-    PATTERN_LITERAL_CPD_ARRAY,
-    PATTERN_LITERAL_CPD_TUPLE
+    PATTERN_LIT_CPD_ARRAY,
+    PATTERN_LIT_CPD_TUPLE
 };
 
 enum PatternDataTypeType {
@@ -91,8 +91,8 @@ struct Pattern *pattern_make_literal_atomic_real(double value);
 struct Pattern *pattern_make_literal_atomic_character(char value);
 struct Pattern *pattern_make_literal_atomic_string(char *value);
 
-struct Pattern *pattern_make_literal_cpd_array(struct Pattern *children);
-struct Pattern *pattern_make_literal_cpd_tuple(struct Pattern *children);
+struct Pattern *pattern_make_literal_compound_array(struct Pattern *children);
+struct Pattern *pattern_make_literal_compound_tuple(struct Pattern *children);
 
 struct Pattern *pattern_make_datatype_unit(void);
 struct Pattern *pattern_make_datatype_bool(void);

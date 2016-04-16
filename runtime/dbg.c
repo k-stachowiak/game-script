@@ -14,11 +14,6 @@ static void dbg_print_node_bind(struct AstCtlBind *bind)
     }
 }
 
-static void dbg_print_node_compound(struct AstCompound *compound)
-{
-    printf("%s\n", (compound->type == AST_CPD_ARRAY) ? "array" : "tuple");
-}
-
 static void dbg_print_node_special(struct AstSpecial *special)
 {
     switch (special->type) {
@@ -84,7 +79,7 @@ static void dbg_print_node_match(struct AstCtlMatch *match)
     printf("match expression");
 }
 
-static void dbg_print_node_literal(struct AstLiteralAtomic *literal_atomic)
+static void dbg_print_node_literal_atomic(struct AstLiteralAtomic *literal_atomic)
 {
     switch (literal_atomic->type) {
     case AST_LIT_ATOM_UNIT:
@@ -144,8 +139,15 @@ static void dbg_print_node(struct AstNode *node)
         }
         break;
 
-    case AST_COMPOUND:
-        dbg_print_node_compound(&node->data.compound);
+    case AST_LITERAL_COMPOUND:
+        switch (node->data.literal_compound.type) {
+        case AST_LIT_CPD_ARRAY:
+            printf("%s\n", "literal-array");
+            break;
+        case AST_LIT_CPD_TUPLE:
+            printf("%s\n", "literal-tuple");
+            break;
+        }
         break;
 
     case AST_SPECIAL:
@@ -154,7 +156,7 @@ static void dbg_print_node(struct AstNode *node)
 
     case AST_LITERAL_ATOMIC:
         printf("literal-atomic ");
-        dbg_print_node_literal(&node->data.literal_atomic);
+        dbg_print_node_literal_atomic(&node->data.literal_atomic);
         break;
 
     }

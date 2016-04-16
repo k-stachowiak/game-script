@@ -53,8 +53,8 @@ static struct AstNode *efd_get_children(struct AstNode* node)
     case AST_SPECIAL:
         return node->data.special.args;
 
-    case AST_COMPOUND:
-        return node->data.compound.exprs;
+    case AST_LITERAL_COMPOUND:
+        return node->data.literal_compound.exprs;
 
     case AST_LITERAL_ATOMIC:
         return NULL;

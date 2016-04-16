@@ -41,8 +41,8 @@ VAL_LOC_T eval_dispatch(
         eval_special(&node->data.special, rt, sym_map);
         break;
 
-    case AST_COMPOUND:
-        eval_compound(&node->data.compound, rt, sym_map);
+    case AST_LITERAL_COMPOUND:
+        eval_literal_compound(&node->data.literal_compound, rt, sym_map);
         break;
 
     case AST_LITERAL_ATOMIC:

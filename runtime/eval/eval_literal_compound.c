@@ -6,23 +6,23 @@
 #include "eval_detail.h"
 #include "eval.h"
 
-void eval_compound(
-        struct AstCompound *compound,
+void eval_literal_compound(
+        struct AstLiteralCompound *literal_compound,
         struct Runtime *rt,
         struct SymMap *sym_map)
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
-    struct AstNode *current = compound->exprs;
+    struct AstNode *current = literal_compound->exprs;
     bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
 
     /* Header. */
-    switch (compound->type) {
-    case AST_CPD_ARRAY:
+    switch (literal_compound->type) {
+    case AST_LIT_CPD_ARRAY:
         rt_val_push_array_init(&rt->stack, &size_loc);
         break;
 
-    case AST_CPD_TUPLE:
+    case AST_LIT_CPD_TUPLE:
         rt_val_push_tuple_init(&rt->stack, &size_loc);
         break;
     }
@@ -32,13 +32,13 @@ void eval_compound(
     while (current) {
         elem_loc = eval_dispatch(current, rt, sym_map);
         if (err_state()) {
-            err_push_src("EVAL", current->loc, "Failed evaluating compound expression element");
+            err_push_src("EVAL", current->loc, "Failed evaluating literal compound expression element");
             return;
         } else {
             current = current->next;
         }
 
-        if (compound->type != AST_CPD_ARRAY) {
+        if (literal_compound->type != AST_LIT_CPD_ARRAY) {
             continue;
         }
 

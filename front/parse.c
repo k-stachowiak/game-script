@@ -376,14 +376,14 @@ static struct Pattern *parse_pattern_literal_compound(struct DomNode *dom)
         if (!children) {
             return NULL;
         } else {
-            return pattern_make_literal_cpd_array(children);
+            return pattern_make_literal_compound_array(children);
         }
     } else if (dom_node_is_spec_compound(dom, DOM_CPD_TUPLE)) {
         struct Pattern *children = parse_pattern_list(dom->cpd_children);
         if (!children) {
             return NULL;
         } else {
-            return pattern_make_literal_cpd_tuple(children);
+            return pattern_make_literal_compound_tuple(children);
         }
     } else {
         return NULL;
@@ -650,9 +650,9 @@ static struct AstNode *parse_special(struct DomNode *dom)
     return NULL;
 }
 
-static struct AstNode *parse_compound(struct DomNode *dom)
+static struct AstNode *parse_literal_compound(struct DomNode *dom)
 {
-    enum AstCompoundType type;
+    enum AstLiteralCompoundType type;
     struct AstNode *exprs = NULL;
 
     /* 1. Is compound. */
@@ -663,11 +663,11 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     /* 2. Is of ARRAY or TUPLE type. */
     switch (dom->cpd_type) {
     case DOM_CPD_ARRAY:
-        type = AST_CPD_ARRAY;
+        type = AST_LIT_CPD_ARRAY;
         break;
 
     case DOM_CPD_TUPLE:
-        type = AST_CPD_TUPLE;
+        type = AST_LIT_CPD_TUPLE;
         break;
 
     case DOM_CPD_CORE:
@@ -680,7 +680,7 @@ static struct AstNode *parse_compound(struct DomNode *dom)
     if (err_state()) {
         return NULL;
     } else {
-        return ast_make_compound(&dom->loc, type, exprs);
+        return ast_make_literal_compound(&dom->loc, type, exprs);
     }
 }
 
@@ -1008,7 +1008,7 @@ static struct AstNode *parse_one(struct DomNode *dom)
         (!err_state() && (node = parse_match(dom))) ||
         (!err_state() && (node = parse_special(dom))) ||
         (!err_state() && (node = parse_fcall(dom))) ||
-        (!err_state() && (node = parse_compound(dom)))) {
+        (!err_state() && (node = parse_literal_compound(dom)))) {
         return node;
 
     } else {

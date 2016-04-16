@@ -21,41 +21,41 @@ static void eval_bind_pattern_literal_atomic(
     VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
 
     switch (literal_atomic->type) {
-    case PATTERN_LITERAL_ATOMIC_UNIT:
+    case PATTERN_LIT_ATOM_UNIT:
         if (value_type == VAL_UNIT) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOMIC_BOOL:
+    case PATTERN_LIT_ATOM_BOOL:
         if (value_type == VAL_BOOL &&
             rt_val_peek_bool(rt, location) == literal_atomic->data.boolean) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOMIC_CHAR:
+    case PATTERN_LIT_ATOM_CHAR:
         if (value_type == VAL_CHAR &&
             rt_val_peek_char(rt, location) == literal_atomic->data.character) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOMIC_INT:
+    case PATTERN_LIT_ATOM_INT:
         if (value_type == VAL_INT &&
             rt_val_peek_int(rt, location) == literal_atomic->data.integer) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOMIC_REAL:
+    case PATTERN_LIT_ATOM_REAL:
         if (value_type == VAL_REAL &&
             rt_val_peek_real(rt, location) == literal_atomic->data.real) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOMIC_STRING:
+    case PATTERN_LIT_ATOM_STRING:
         if (value_type == VAL_ARRAY && rt_val_peek_type(&rt->stack, current_loc) == VAL_CHAR) {
             char *str_pat = literal_atomic->data.string;
             int arr_len = rt_val_cpd_len(rt, location);
@@ -100,8 +100,8 @@ static void eval_bind_pattern_literal_compound(
     struct Pattern *current_pat = literal_compound->children;
     int pat_len = pattern_list_len(current_pat);
 
-    if (!(val_type == VAL_ARRAY && pat_type == PATTERN_LITERAL_CPD_ARRAY) &&
-        !(val_type == VAL_TUPLE && pat_type == PATTERN_LITERAL_CPD_TUPLE)) {
+    if (!(val_type == VAL_ARRAY && pat_type == PATTERN_LIT_CPD_ARRAY) &&
+        !(val_type == VAL_TUPLE && pat_type == PATTERN_LIT_CPD_TUPLE)) {
             err_push_src("EVAL", *source_loc, "Compound value and pattern type mismatch");
             return;
     }

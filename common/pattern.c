@@ -40,7 +40,7 @@ struct Pattern *pattern_make_literal_atomic_unit(void)
     result->type = PATTERN_LITERAL_ATOMIC;
     result->next = NULL;
 
-    result->data.literal_atomic.type = PATTERN_LITERAL_ATOMIC_UNIT;
+    result->data.literal_atomic.type = PATTERN_LIT_ATOM_UNIT;
 
     return result;
 }
@@ -52,7 +52,7 @@ struct Pattern *pattern_make_literal_atomic_bool(int value)
     result->type = PATTERN_LITERAL_ATOMIC;
     result->next = NULL;
 
-    result->data.literal_atomic.type = PATTERN_LITERAL_ATOMIC_BOOL;
+    result->data.literal_atomic.type = PATTERN_LIT_ATOM_BOOL;
     result->data.literal_atomic.data.boolean = value;
 
     return result;
@@ -65,7 +65,7 @@ struct Pattern *pattern_make_literal_atomic_int(long value)
     result->type = PATTERN_LITERAL_ATOMIC;
     result->next = NULL;
 
-    result->data.literal_atomic.type = PATTERN_LITERAL_ATOMIC_INT;
+    result->data.literal_atomic.type = PATTERN_LIT_ATOM_INT;
     result->data.literal_atomic.data.integer = value;
 
     return result;
@@ -78,7 +78,7 @@ struct Pattern *pattern_make_literal_atomic_real(double value)
     result->type = PATTERN_LITERAL_ATOMIC;
     result->next = NULL;
 
-    result->data.literal_atomic.type = PATTERN_LITERAL_ATOMIC_REAL;
+    result->data.literal_atomic.type = PATTERN_LIT_ATOM_REAL;
     result->data.literal_atomic.data.real = value;
 
     return result;
@@ -91,7 +91,7 @@ struct Pattern *pattern_make_literal_atomic_character(char value)
     result->type = PATTERN_LITERAL_ATOMIC;
     result->next = NULL;
 
-    result->data.literal_atomic.type = PATTERN_LITERAL_ATOMIC_CHAR;
+    result->data.literal_atomic.type = PATTERN_LIT_ATOM_CHAR;
     result->data.literal_atomic.data.character = value;
 
     return result;
@@ -108,33 +108,33 @@ struct Pattern *pattern_make_literal_atomic_string(char *value)
     result->type = PATTERN_LITERAL_ATOMIC;
     result->next = NULL;
 
-    result->data.literal_atomic.type = PATTERN_LITERAL_ATOMIC_STRING;
+    result->data.literal_atomic.type = PATTERN_LIT_ATOM_STRING;
     result->data.literal_atomic.data.string = copy;
 
     return result;
 }
 
-struct Pattern *pattern_make_literal_cpd_array(struct Pattern *children)
+struct Pattern *pattern_make_literal_compound_array(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
 
     result->type = PATTERN_LITERAL_COMPOUND;
     result->next = NULL;
 
-    result->data.literal_compound.type = PATTERN_LITERAL_CPD_ARRAY;
+    result->data.literal_compound.type = PATTERN_LIT_CPD_ARRAY;
     result->data.literal_compound.children = children;
 
     return result;
 }
 
-struct Pattern *pattern_make_literal_cpd_tuple(struct Pattern *children)
+struct Pattern *pattern_make_literal_compound_tuple(struct Pattern *children)
 {
     struct Pattern *result = mem_malloc(sizeof(*result));
 
     result->type = PATTERN_LITERAL_COMPOUND;
     result->next = NULL;
 
-    result->data.literal_compound.type = PATTERN_LITERAL_CPD_TUPLE;
+    result->data.literal_compound.type = PATTERN_LIT_CPD_TUPLE;
     result->data.literal_compound.children = children;
 
     return result;
@@ -258,7 +258,7 @@ void pattern_free(struct Pattern *pattern)
             break;
 
         case PATTERN_LITERAL_ATOMIC:
-            if (pattern->data.literal_atomic.type == PATTERN_LITERAL_ATOMIC_STRING) {
+            if (pattern->data.literal_atomic.type == PATTERN_LIT_ATOM_STRING) {
                 mem_free(pattern->data.literal_atomic.data.string);
             }
             break;
@@ -308,8 +308,8 @@ bool pattern_list_contains_symbol(struct Pattern *pattern, char *symbol)
             return strcmp(pattern->data.symbol.symbol, symbol) == 0;
 
         case PATTERN_DONT_CARE:
-        case PATTERN_LITERAL_ATOMIC:
         case PATTERN_DATATYPE:
+        case PATTERN_LITERAL_ATOMIC:
             break;
 
         case PATTERN_LITERAL_COMPOUND:

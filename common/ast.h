@@ -13,7 +13,7 @@
 enum AstNodeType {
     AST_CONTROL,
     AST_SPECIAL,
-    AST_COMPOUND,
+    AST_LITERAL_COMPOUND,
     AST_LITERAL_ATOMIC
 };
 
@@ -45,9 +45,9 @@ enum AstSpecialType {
     AST_SPECIAL_SUCC
 };
 
-enum AstCompoundType {
-    AST_CPD_ARRAY,
-    AST_CPD_TUPLE
+enum AstLiteralCompoundType {
+    AST_LIT_CPD_ARRAY,
+    AST_LIT_CPD_TUPLE
 };
 
 enum AstLiteralAtomicType {
@@ -132,8 +132,8 @@ struct AstSpecial {
     struct AstNode *args;
 };
 
-struct AstCompound {
-    enum AstCompoundType type;
+struct AstLiteralCompound {
+    enum AstLiteralCompoundType type;
     struct AstNode *exprs;
 };
 
@@ -148,7 +148,7 @@ struct AstNode {
     union {
         struct AstControl control;
         struct AstSpecial special;
-        struct AstCompound compound;
+        struct AstLiteralCompound literal_compound;
         struct AstLiteralAtomic literal_atomic;
     } data;
     struct AstNode *next;
@@ -193,9 +193,9 @@ struct AstNode *ast_make_special(
         enum AstSpecialType type,
         struct AstNode *args);
 
-struct AstNode *ast_make_compound(
+struct AstNode *ast_make_literal_compound(
         struct SourceLocation *loc,
-        enum AstCompoundType type,
+        enum AstLiteralCompoundType type,
         struct AstNode *exprs);
 
 struct AstNode *ast_make_literal_atomic_unit(struct SourceLocation *loc);

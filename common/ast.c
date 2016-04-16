@@ -138,19 +138,19 @@ struct AstNode *ast_make_special(
     return result;
 }
 
-struct AstNode *ast_make_compound(
+struct AstNode *ast_make_literal_compound(
         struct SourceLocation *loc,
-        enum AstCompoundType type,
+        enum AstLiteralCompoundType type,
         struct AstNode *exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
-    result->type = AST_COMPOUND;
+    result->type = AST_LITERAL_COMPOUND;
     result->loc = *loc;
 
-    result->data.compound.type = type;
-    result->data.compound.exprs = exprs;
+    result->data.literal_compound.type = type;
+    result->data.literal_compound.exprs = exprs;
 
     return result;
 }
@@ -313,15 +313,15 @@ static void ast_special_free(struct AstSpecial *special)
     ast_node_free(special->args);
 }
 
-static void ast_compound_free(struct AstCompound *cpd)
+static void ast_literal_compound_free(struct AstLiteralCompound *lit_cpd)
 {
-    ast_node_free(cpd->exprs);
+    ast_node_free(lit_cpd->exprs);
 }
 
-static void ast_literal_atomic_free(struct AstLiteralAtomic *literal)
+static void ast_literal_atomic_free(struct AstLiteralAtomic *lit_atom)
 {
-    if (literal->type == AST_LIT_ATOM_STRING) {
-        mem_free(literal->data.string);
+    if (lit_atom->type == AST_LIT_ATOM_STRING) {
+        mem_free(lit_atom->data.string);
     }
 }
 
@@ -336,8 +336,8 @@ void ast_node_free_one(struct AstNode *node)
         ast_special_free(&node->data.special);
         break;
 
-    case AST_COMPOUND:
-        ast_compound_free(&node->data.compound);
+    case AST_LITERAL_COMPOUND:
+        ast_literal_compound_free(&node->data.literal_compound);
         break;
 
     case AST_LITERAL_ATOMIC:

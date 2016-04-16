@@ -299,7 +299,7 @@ static char *ast_serialize_special(struct AstSpecial *special)
     return result;
 }
 
-static char *ast_serialize_compound(struct AstCompound *compound)
+static char *ast_serialize_literal_compound(struct AstLiteralCompound *lit_cpd)
 {
     char *result = NULL;
     char *expr_str = NULL;
@@ -312,11 +312,11 @@ static char *ast_serialize_compound(struct AstCompound *compound)
      * sub-expressions. */
 
     /* 1. An opening delimiter is added to the result based on the node type. */
-    switch (compound->type) {
-    case AST_CPD_ARRAY:
+    switch (lit_cpd->type) {
+    case AST_LIT_CPD_ARRAY:
         str_append(result, "[");
         break;
-    case AST_CPD_TUPLE:
+    case AST_LIT_CPD_TUPLE:
         str_append(result, "{");
         break;
     }
@@ -324,18 +324,18 @@ static char *ast_serialize_compound(struct AstCompound *compound)
     /* 2. The list of the sub-expressions is appended to the result if one is
      * present. The temporary string is deleted afterwards.
      */
-    if (compound->exprs) {
-        expr_str = ast_serialize(compound->exprs);
+    if (lit_cpd->exprs) {
+        expr_str = ast_serialize(lit_cpd->exprs);
         str_append(result, " %s ", expr_str);
         mem_free(expr_str);
     }
 
     /* 3. A closing delimiter is added to the result based on the node type. */
-    switch (compound->type) {
-    case AST_CPD_ARRAY:
+    switch (lit_cpd->type) {
+    case AST_LIT_CPD_ARRAY:
         str_append(result, "]");
         break;
-    case AST_CPD_TUPLE:
+    case AST_LIT_CPD_TUPLE:
         str_append(result, "}");
         break;
     }
@@ -422,8 +422,8 @@ char *ast_serialize(struct AstNode *node)
             temp = ast_serialize_special(&node->data.special);
             break;
 
-        case AST_COMPOUND:
-            temp = ast_serialize_compound(&node->data.compound);
+        case AST_LITERAL_COMPOUND:
+            temp = ast_serialize_literal_compound(&node->data.literal_compound);
             break;
 
         case AST_LITERAL_ATOMIC:

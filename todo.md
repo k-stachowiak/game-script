@@ -6,6 +6,7 @@
   - para-function calls
  The procedure:
  - move control elements to the para function sections one by one
+- use AST serialization for debug printer and all other cases of printing
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
 - migrate to auto-tools; think of carving out libraries such as a parser, runtime, semantics (AST, etc.), etc.
 - A bind should create "references", i.e. a tuples of address and type.

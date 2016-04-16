@@ -9,11 +9,11 @@ static char *pattern_serialize_literal_atomic(struct PatternLiteralAtomic *liter
     char *result = NULL;
 
     switch (literal_atomic->type) {
-    case PATTERN_LITERAL_ATOMIC_UNIT:
+    case PATTERN_LIT_ATOM_UNIT:
         str_append(result, "unit");
         break;
 
-    case PATTERN_LITERAL_ATOMIC_BOOL:
+    case PATTERN_LIT_ATOM_BOOL:
         if (literal_atomic->data.boolean) {
             str_append(result, "true");
         } else {
@@ -21,19 +21,19 @@ static char *pattern_serialize_literal_atomic(struct PatternLiteralAtomic *liter
         }
         break;
 
-    case PATTERN_LITERAL_ATOMIC_INT:
+    case PATTERN_LIT_ATOM_INT:
         str_append(result, "%ld", literal_atomic->data.integer);
         break;
 
-    case PATTERN_LITERAL_ATOMIC_REAL:
+    case PATTERN_LIT_ATOM_REAL:
         str_append(result, "%f", literal_atomic->data.real);
         break;
 
-    case PATTERN_LITERAL_ATOMIC_CHAR:
+    case PATTERN_LIT_ATOM_CHAR:
         str_append(result, "%c", literal_atomic->data.character);
         break;
 
-    case PATTERN_LITERAL_ATOMIC_STRING:
+    case PATTERN_LIT_ATOM_STRING:
         str_append(result, "\"%s\"", literal_atomic->data.string);
         break;
     }
@@ -48,10 +48,10 @@ static char *pattern_serialize_literal_compound(struct PatternLiteralCompound *l
 
     switch (literal_compound->type)
     {
-    case PATTERN_LITERAL_CPD_ARRAY:
+    case PATTERN_LIT_CPD_ARRAY:
         str_append(result, "[");
         break;
-    case PATTERN_LITERAL_CPD_TUPLE:
+    case PATTERN_LIT_CPD_TUPLE:
         str_append(result, "{");
         break;
     }
@@ -66,10 +66,10 @@ static char *pattern_serialize_literal_compound(struct PatternLiteralCompound *l
 
     switch (literal_compound->type)
     {
-    case PATTERN_LITERAL_CPD_ARRAY:
+    case PATTERN_LIT_CPD_ARRAY:
         str_append(result, " ]");
         break;
-    case PATTERN_LITERAL_CPD_TUPLE:
+    case PATTERN_LIT_CPD_TUPLE:
         str_append(result, " }");
         break;
     }

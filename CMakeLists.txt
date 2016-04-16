@@ -43,7 +43,7 @@ add_library(lang OBJECT
         ./runtime/rt_val.c
         ./runtime/rt_val_poke.c
         ./runtime/eval/eval.c
-        ./runtime/eval/eval_compound.c
+        ./runtime/eval/eval_literal_compound.c
         ./runtime/eval/eval_control.c
         ./runtime/eval/eval_control_bind_pattern.c
         ./runtime/eval/eval_control_fcall.c

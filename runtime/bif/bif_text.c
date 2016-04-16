@@ -167,23 +167,23 @@ end:
 
 static void bif_parse_any_ast(struct Runtime *rt, struct AstNode *ast);
 
-static void bif_parse_any_ast_compound(
+static void bif_parse_any_ast_literal_compound(
         struct Runtime *rt,
-        struct AstCompound *cpd)
+        struct AstLiteralCompound *lit_cpd)
 {
 
     VAL_LOC_T size_loc = -1, data_begin, data_size;
-    struct AstNode *current = cpd->exprs;
+    struct AstNode *current = lit_cpd->exprs;
     bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
 
     /* Header. */
-    switch (cpd->type) {
-    case AST_CPD_ARRAY:
+    switch (lit_cpd->type) {
+    case AST_LIT_CPD_ARRAY:
         rt_val_push_array_init(&rt->stack, &size_loc);
         break;
 
-    case AST_CPD_TUPLE:
+    case AST_LIT_CPD_TUPLE:
         rt_val_push_tuple_init(&rt->stack, &size_loc);
         break;
     }
@@ -201,7 +201,7 @@ static void bif_parse_any_ast_compound(
             current = current->next;
         }
 
-        if (cpd->type != AST_CPD_ARRAY) {
+        if (lit_cpd->type != AST_LIT_CPD_ARRAY) {
             continue;
         }
 
@@ -255,8 +255,8 @@ static void bif_parse_any_ast_literal_atomic(
 static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
 {
     switch (ast->type) {
-    case AST_COMPOUND:
-        bif_parse_any_ast_compound(runtime, &ast->data.compound);
+    case AST_LITERAL_COMPOUND:
+        bif_parse_any_ast_literal_compound(runtime, &ast->data.literal_compound);
         break;
 
     case AST_LITERAL_ATOMIC:

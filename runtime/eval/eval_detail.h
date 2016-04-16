@@ -14,7 +14,7 @@ void eval_control(
         struct SourceLocation *src_loc);
 
 void eval_special(struct AstSpecial *special, struct Runtime *rt, struct SymMap *sym_map);
-void eval_compound(struct AstCompound *compound, struct Runtime *rt, struct SymMap *sym_map);
+void eval_literal_compound(struct AstLiteralCompound *literal_compound, struct Runtime *rt, struct SymMap *sym_map);
 void eval_literal_atomic(struct AstLiteralAtomic *literal_atomic, struct Runtime *rt, struct SymMap *sym_map);
 
 void eval_func_call(struct AstCtlFuncCall *fcall, struct Runtime *rt, struct SymMap *sym_map);
