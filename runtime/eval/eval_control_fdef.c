@@ -177,6 +177,7 @@ static void efd_push_captures(
         rt_val_push_func_cap(stack, candidate->symbol, candidate->stack_loc);
         ++candidate;
     }
+    mem_free(capture_candidates.data);
 
     /* 5. Finalize the capture push with updating the actual captures count */
     rt_val_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
