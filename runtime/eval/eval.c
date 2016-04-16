@@ -18,7 +18,7 @@ VAL_LOC_T eval_dispatch(
 {
     /* It is possible that the debugger flag will change during evaluation. */
     bool debug_begin_called = false;
-    
+
     VAL_LOC_T begin = rt->stack.top;
 
 #if LOG_LEVEL <= LLVL_TRACE
@@ -75,7 +75,7 @@ VAL_LOC_T eval_dispatch(
 VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 {
     VAL_LOC_T begin, result, end;
-    
+
 #if LOG_LEVEL <= LLVL_TRACE
     char *node_string = ast_serialize(node);
     LOG_TRACE("eval BEGIN(%s)", node_string);
