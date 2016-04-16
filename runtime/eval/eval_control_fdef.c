@@ -1,10 +1,23 @@
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "ast.h"
 #include "log.h"
 #include "symmap.h"
+#include "collection.h"
+
+struct CaptureCandidate {
+    char *symbol;
+    int lookup_depth;
+    VAL_LOC_T stack_loc;
+};
+
+struct CaptureCandidateArray {
+    struct CaptureCandidate *data;
+    int cap, size;
+};
 
 /**
  * Analyzes an AST node to find if it contains children that can potentially
@@ -88,32 +101,31 @@ static bool efd_is_non_global(char *symbol, struct SymMap *sym_map, VAL_LOC_T *l
  * Pushes on the stack all the values refered to that are not global and
  * not passed in as an argument.
  */
-static int efd_push_captures_rec(
+static void efd_push_captures_rec(
+        int level,
         struct Stack *stack,
         struct SymMap *sym_map,
         struct AstCtlFuncDef *func_def,
-        struct AstNode *node)
+        struct AstNode *node,
+        struct CaptureCandidateArray *capture_candidates)
 {
     char *symbol;
     VAL_LOC_T cap_location;
-    int captures = 0;
     struct AstNode *child = efd_get_children(node);
 
     /* Store a capture from the current node if necessary and possible. */
     if (efd_refers_to_symbol(node, &symbol) &&
             !pattern_list_contains_symbol(func_def->formal_args, symbol) &&
             efd_is_non_global(symbol, sym_map, &cap_location)) {
-        rt_val_push_func_cap(stack, symbol, cap_location);
-        ++captures;
+        struct CaptureCandidate capture_candidate = { symbol, level, cap_location };
+        ARRAY_APPEND(*capture_candidates, capture_candidate);
     }
 
     /* Analyze children of the current node. */
     while (child) {
-        captures += efd_push_captures_rec(stack, sym_map, func_def, child);
+        efd_push_captures_rec(level + 1, stack, sym_map, func_def, child, capture_candidates);
         child = child->next;
     }
-
-    return captures;
 }
 
 static void efd_push_captures(
@@ -122,9 +134,51 @@ static void efd_push_captures(
         struct AstCtlFuncDef *func_def)
 {
     VAL_LOC_T cap_count_loc;
-    VAL_SIZE_T cap_count = 0;
+    int i, j, cap_count;
+    struct CaptureCandidate *candidate;
+    struct CaptureCandidateArray capture_candidates = { NULL, 0, 0 };
+
+    /* 1. Initialize the capture push operation */
     rt_val_push_func_cap_init_deferred(stack, &cap_count_loc);
-    cap_count = efd_push_captures_rec(stack, sym_map, func_def, func_def->expr);
+
+    /* 2. Store all refered symbols, a.k.a. capture candidates */
+    efd_push_captures_rec(0, stack, sym_map, func_def, func_def->expr, &capture_candidates);
+
+    /* 3. Filter out the duplicate, discarding the deeper ones */
+    for (i = 0; i < capture_candidates.size; ++i) {
+        for (j = i + 1; j < capture_candidates.size; ++j) {
+
+            /* 3.1. Store helper references to the compared objects */
+            struct CaptureCandidate *x = capture_candidates.data + i;
+            struct CaptureCandidate *y = capture_candidates.data + j;
+
+            /* 3.2. Skip pairs with different symbols */
+            if (strcmp(x->symbol, y->symbol) != 0) {
+                continue;
+            } else {
+                LOG_TRACE("Duplicate found while pushing captures: %s", x->symbol);
+            }
+
+            /* 3.3. If x is to be discarded, overwrite it with the y value */
+            if (x->lookup_depth > y->lookup_depth) {
+                *x = *y;
+            }
+
+            /* 3.4. By now the item under the index j (a.k.a. y) is obsolete */
+            ARRAY_REMOVE(capture_candidates, j);
+            --j;
+        }
+    }
+
+    /* 4. Push the actual captures in the setack */
+    candidate = capture_candidates.data;
+    cap_count = capture_candidates.size;
+    for (i = 0; i < cap_count; ++i) {
+        rt_val_push_func_cap(stack, candidate->symbol, candidate->stack_loc);
+        ++candidate;
+    }
+
+    /* 5. Finalize the capture push with updating the actual captures count */
     rt_val_push_func_cap_final_deferred(stack, cap_count_loc, cap_count);
 }
 

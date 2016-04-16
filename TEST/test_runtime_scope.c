@@ -2,6 +2,26 @@
 
 #include "test_helpers.h"
 
+static void test_runtime_scope_duplicate_capture(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_succeed(tc, rt,
+        "(bind foo (func (x y) (do\n"
+        "    (bind bar (func (x y z)\n"
+        "        (if (eq y 0)\n"
+        "            z\n"
+        "            (bar x (- y 1) (push_back z (x)))\n"
+        "        )\n"
+        "    ))\n"
+        "    (bar x y [])\n"
+        ")))\n"
+        "\n"
+        "(foo (func () (rand_ur 0.0 100.0)) 1)",
+        "Test CCI");
+    rt_reset(rt);
+}
+
 static void test_runtime_scope_simple(
         struct TestContext *tc,
         struct Runtime *rt)
@@ -35,5 +55,6 @@ void test_runtime_scope(struct TestContext *tc)
     struct Runtime *rt = rt_make();
     test_runtime_scope_simple(tc, rt);
     test_runtime_scope_capture(tc, rt);
+    test_runtime_scope_duplicate_capture(tc, rt);
     rt_free(rt);
 }

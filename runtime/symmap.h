@@ -16,12 +16,12 @@ struct SymMapNode {
 };
 
 struct SymMap {
-    struct SymMap *global;
+    struct SymMap *parent;
     struct SymMapNode root;
 };
 
 void sym_map_init_global(struct SymMap *sym_map);
-void sym_map_init_local(struct SymMap *sym_map, struct SymMap *global);
+void sym_map_init_local(struct SymMap *sym_map, struct SymMap *parent);
 void sym_map_deinit(struct SymMap *sym_map);
 
 void sym_map_insert(
@@ -33,5 +33,12 @@ void sym_map_insert(
 struct SymMapNode *sym_map_find(struct SymMap *sym_map, char *key);
 struct SymMapNode *sym_map_find_shallow(struct SymMap *sym_map, char *key);
 struct SymMapNode *sym_map_find_not_global(struct SymMap *sym_map, char *key);
+
+void sym_map_for_each(
+        struct SymMap *sym_map,
+        void (*callback)(char*, struct SymMapNode*, void*),
+        void *data);
+
+char *sym_map_serialize(struct SymMap *sym_map);
 
 #endif

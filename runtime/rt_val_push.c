@@ -104,7 +104,7 @@ void rt_val_push_string(struct Stack *stack, char *begin, char *end)
 }
 
 void rt_val_push_func_init(
-struct Stack *stack,
+    struct Stack *stack,
     VAL_LOC_T *size_loc,
     VAL_LOC_T *data_begin,
     VAL_SIZE_T arity,
@@ -120,7 +120,7 @@ struct Stack *stack,
 }
 
 void rt_val_push_func_cap_init_deferred(
-struct Stack *stack,
+    struct Stack *stack,
     VAL_LOC_T *cap_count_loc)
 {
     *cap_count_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);

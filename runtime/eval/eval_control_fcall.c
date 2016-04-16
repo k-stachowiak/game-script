@@ -134,7 +134,8 @@ static void efc_evaluate_ast(
     VAL_LOC_T cap_loc = func_data->cap_start;
     VAL_LOC_T appl_loc = func_data->appl_start;
 
-    struct SymMap local_sym_map;
+    struct SymMap captures_sym_map;
+    struct SymMap args_sym_map;
 
     struct AstCtlFuncDef *fdef = (struct AstCtlFuncDef *)func_data->impl;
 
@@ -143,14 +144,16 @@ static void efc_evaluate_ast(
 
     struct SourceLocation cont_loc = src_loc_virtual();
 
-    /* Initialize local scope. */
-    sym_map_init_local(&local_sym_map, sym_map);
+    /* Initialize local scopes hierarchy. */
+    sym_map_init_local(&captures_sym_map, sym_map);
+    sym_map_init_local(&args_sym_map, &captures_sym_map);
 
     /* Insert captures into the scope. */
+    LOG_TRACE("Evaluate AST call: captures scope");
     for (i = 0; i < func_data->cap_count; ++i) {
         char *cap_symbol = rt_val_peek_fun_cap_symbol(rt, cap_loc);
         VAL_LOC_T cap_val_loc = rt_val_fun_cap_loc(rt, cap_loc);
-        sym_map_insert(&local_sym_map, cap_symbol, cap_val_loc, cont_loc);
+        sym_map_insert(&captures_sym_map, cap_symbol, cap_val_loc, cont_loc);
         cap_loc = rt_val_fun_next_cap_loc(rt, cap_loc);
         if (err_state()) {
             err_push_src("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
@@ -159,8 +162,9 @@ static void efc_evaluate_ast(
     }
 
     /* Insert already applied arguments. */
+    LOG_TRACE("Evaluate AST call: already applied in args scope");
     for (i = 0; i < func_data->appl_count; ++i) {
-        eval_bind_pattern(formal_args, rt, &local_sym_map, appl_loc, &cont_loc);
+        eval_bind_pattern(formal_args, rt, &args_sym_map, appl_loc, &cont_loc);
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
         if (err_state()) {
@@ -170,10 +174,11 @@ static void efc_evaluate_ast(
     }
 
     /* Evaluate and insert new arguments. */
+    LOG_TRACE("Evaluate AST call: applied now in args scope");
     temp_begin = rt->stack.top;
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T actual_loc;
-        if (efc_evaluate_arg(rt, sym_map, &local_sym_map,
+        if (efc_evaluate_arg(rt, sym_map, &args_sym_map,
             actual_args, arg_locs++, formal_args, &actual_loc)) {
             formal_args = formal_args->next;
         } else {
@@ -183,7 +188,7 @@ static void efc_evaluate_ast(
     temp_end = rt->stack.top;
 
     /* Evaluate the function expression. */
-    eval_dispatch(fdef->expr, rt, &local_sym_map);
+    eval_dispatch(fdef->expr, rt, &args_sym_map);
 
     /* Collapse the temporaries. */
     stack_collapse(&rt->stack, temp_begin, temp_end);
@@ -191,7 +196,8 @@ static void efc_evaluate_ast(
 cleanup:
 
     /* Free the local scope. */
-    sym_map_deinit(&local_sym_map);
+    sym_map_deinit(&args_sym_map);
+    sym_map_deinit(&captures_sym_map);
 }
 
 /** Evaluates a BIF. */
