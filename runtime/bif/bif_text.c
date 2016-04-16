@@ -264,7 +264,7 @@ static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
         break;
 
     case AST_CONTROL:
-    case AST_PARAFUNC:
+    case AST_SPECIAL:
         bif_text_error_parse();
         break;
     }

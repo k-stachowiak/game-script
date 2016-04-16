@@ -19,40 +19,40 @@ static void dbg_print_node_compound(struct AstCompound *compound)
     printf("%s\n", (compound->type == AST_CPD_ARRAY) ? "array" : "tuple");
 }
 
-static void dbg_print_node_parafunc(struct AstParafunc *parafunc)
+static void dbg_print_node_special(struct AstSpecial *special)
 {
-    switch (parafunc->type) {
-    case AST_PARAFUNC_AND:
+    switch (special->type) {
+    case AST_SPECIAL_AND:
         printf("(and ...)\n");
         break;
-    case AST_PARAFUNC_OR:
+    case AST_SPECIAL_OR:
         printf("(or ...)\n");
         break;
-    case AST_PARAFUNC_IF:
+    case AST_SPECIAL_IF:
         printf("(if ...)\n");
         break;
-    case AST_PARAFUNC_WHILE:
+    case AST_SPECIAL_WHILE:
         printf("(while ...)\n");
         break;
-    case AST_PARAFUNC_REF:
+    case AST_SPECIAL_REF:
         printf("(ref ...)\n");
         break;
-    case AST_PARAFUNC_PEEK:
+    case AST_SPECIAL_PEEK:
         printf("(peek ...)\n");
         break;
-    case AST_PARAFUNC_POKE:
+    case AST_SPECIAL_POKE:
         printf("(poke ...)\n");
         break;
-    case AST_PARAFUNC_BEGIN:
+    case AST_SPECIAL_BEGIN:
         printf("(begin ...)\n");
         break;
-    case AST_PARAFUNC_END:
+    case AST_SPECIAL_END:
         printf("(end ...)\n");
         break;
-    case AST_PARAFUNC_INC:
+    case AST_SPECIAL_INC:
         printf("(inc ...)\n");
         break;
-    case AST_PARAFUNC_SUCC:
+    case AST_SPECIAL_SUCC:
         printf("(succ ...)\n");
         break;
     }
@@ -148,8 +148,8 @@ static void dbg_print_node(struct AstNode *node)
         dbg_print_node_compound(&node->data.compound);
         break;
 
-    case AST_PARAFUNC:
-        dbg_print_node_parafunc(&node->data.parafunc);
+    case AST_SPECIAL:
+        dbg_print_node_special(&node->data.special);
         break;
 
     case AST_LITERAL:

@@ -1,13 +1,13 @@
 ### The M.O.O.N. standard library
 ### =============================
 
-### Functions filling in for parafunctions
+### Functions filling in for special forms
 ### --------------------------------------
 
-### Binary function realizing the logic of the and parafunc.
+### Binary function realizing the logic of the and special form.
 (bind f_and (func (x y) (and x y)))
 
-### Binary function realizing the logic of the or parafunc.
+### Binary function realizing the logic of the or special form.
 (bind f_or (func (x y) (or x y)))
 
 ### Unary function realizing the logical negation.

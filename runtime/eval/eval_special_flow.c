@@ -6,7 +6,7 @@
 #include "ast.h"
 #include "eval_detail.h"
 
-void eval_parafunc_if(
+void eval_special_if(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -16,7 +16,7 @@ void eval_parafunc_if(
     int argc = ast_list_len(args);
 
     if (argc != 3) {
-        para_error_invalid_argc("if", argc);
+        spec_error_invalid_argc("if", argc);
         return;
     }
 
@@ -30,7 +30,7 @@ void eval_parafunc_if(
     }
 
     if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-        para_error_arg_expected("if", 1, "boolean");
+        spec_error_arg_expected("if", 1, "boolean");
         stack_collapse(&rt->stack, temp_begin, temp_end);
         return;
     }
@@ -45,7 +45,7 @@ void eval_parafunc_if(
     }
 }
 
-void eval_parafunc_while(
+void eval_special_while(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -54,7 +54,7 @@ void eval_parafunc_while(
     bool done = false;
 
     if (argc != 2) {
-        para_error_invalid_argc("while", argc);
+        spec_error_invalid_argc("while", argc);
         return;
     }
 
@@ -73,7 +73,7 @@ void eval_parafunc_while(
         }
 
         if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-            para_error_arg_expected("while", 1, "boolean");
+            spec_error_arg_expected("while", 1, "boolean");
             stack_collapse(&rt->stack, temp_begin, temp_end);
             return;
         }

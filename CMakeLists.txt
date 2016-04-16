@@ -49,10 +49,10 @@ add_library(lang OBJECT
         ./runtime/eval/eval_control_fcall.c
         ./runtime/eval/eval_control_fdef.c
         ./runtime/eval/eval_literal.c
-        ./runtime/eval/eval_parafunc.c
-        ./runtime/eval/eval_parafunc_flow.c
-        ./runtime/eval/eval_parafunc_logic.c
-        ./runtime/eval/eval_parafunc_reference.c
+        ./runtime/eval/eval_special.c
+        ./runtime/eval/eval_special_flow.c
+        ./runtime/eval/eval_special_logic.c
+        ./runtime/eval/eval_special_reference.c
         ./runtime/bif/bif_compound.c
         ./runtime/bif/bif_type.c
         ./runtime/bif/bif_random.c
@@ -74,7 +74,7 @@ add_executable(mntest $<TARGET_OBJECTS:lang>
     ./TEST/test_runtime_basic.c
     ./TEST/test_runtime_bif.c
     ./TEST/test_runtime_func.c
-    ./TEST/test_runtime_parafunc.c
+    ./TEST/test_runtime_special.c
     ./TEST/test_runtime_scope.c
     ./TEST/test_cci.c
     ./TEST/test.c

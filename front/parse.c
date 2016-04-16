@@ -566,7 +566,7 @@ static struct AstNode *parse_bind(struct DomNode *dom)
     return ast_make_ctl_bind(&dom->loc, pattern, expr);
 }
 
-static struct AstNode *parse_parafunc(struct DomNode *dom)
+static struct AstNode *parse_special(struct DomNode *dom)
 {
     struct DomNode *child = NULL;
     struct AstNode *args = NULL;
@@ -592,57 +592,57 @@ static struct AstNode *parse_parafunc(struct DomNode *dom)
 
     /* 3.1. Case &&: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_AND)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_AND, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_AND, args);
     }
 
     /* 3.2. Case ||: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_OR)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_OR, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_OR, args);
     }
 
     /* 3.3. Case if: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_IF)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_IF, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_IF, args);
     }
 
     /* 3.4. Case while: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_WHILE)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_WHILE, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_WHILE, args);
     }
 
     /* 3.6. Case ref: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_REF)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_REF, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_REF, args);
     }
 
     /* 3.7. Case peek: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_PEEK)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_PEEK, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_PEEK, args);
     }
 
     /* 3.8. Case poke: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_POKE)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_POKE, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_POKE, args);
     }
 
     /* 3.9. Case begin: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_BEGIN)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_BEGIN, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_BEGIN, args);
     }
 
     /* 3.10. Case end: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_END)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_END, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_END, args);
     }
 
     /* 3.11. Case inc: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_INC)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_INC, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_INC, args);
     }
 
     /* 3.12. Case succ: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_SUCC)) {
-        return ast_make_parafunc(&dom->loc, AST_PARAFUNC_SUCC, args);
+        return ast_make_special(&dom->loc, AST_SPECIAL_SUCC, args);
     }
 
     /* None of the reserved words were matched. */
@@ -1006,7 +1006,7 @@ static struct AstNode *parse_one(struct DomNode *dom)
         (!err_state() && (node = parse_bind(dom))) ||
         (!err_state() && (node = parse_fdef(dom))) ||
         (!err_state() && (node = parse_match(dom))) ||
-        (!err_state() && (node = parse_parafunc(dom))) ||
+        (!err_state() && (node = parse_special(dom))) ||
         (!err_state() && (node = parse_fcall(dom))) ||
         (!err_state() && (node = parse_compound(dom)))) {
         return node;

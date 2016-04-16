@@ -121,19 +121,19 @@ struct AstNode *ast_make_ctl_reference(
     return result;
 }
 
-struct AstNode *ast_make_parafunc(
+struct AstNode *ast_make_special(
         struct SourceLocation *loc,
-        enum AstParafuncType type,
+        enum AstSpecialType type,
         struct AstNode *args)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
-    result->type = AST_PARAFUNC;
+    result->type = AST_SPECIAL;
     result->loc = *loc;
 
-    result->data.parafunc.type = type;
-    result->data.parafunc.args = args;
+    result->data.special.type = type;
+    result->data.special.args = args;
 
     return result;
 }
@@ -308,9 +308,9 @@ static void ast_control_free(struct AstControl *ctl)
     }
 }
 
-static void ast_parafunc_free(struct AstParafunc *parafunc)
+static void ast_special_free(struct AstSpecial *special)
 {
-    ast_node_free(parafunc->args);
+    ast_node_free(special->args);
 }
 
 static void ast_compound_free(struct AstCompound *cpd)
@@ -332,8 +332,8 @@ void ast_node_free_one(struct AstNode *node)
         ast_control_free(&node->data.control);
         break;
 
-    case AST_PARAFUNC:
-        ast_parafunc_free(&node->data.parafunc);
+    case AST_SPECIAL:
+        ast_special_free(&node->data.special);
         break;
 
     case AST_COMPOUND:

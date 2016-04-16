@@ -12,7 +12,7 @@
 
 enum AstNodeType {
     AST_CONTROL,    /* Program control; special syntax */
-    AST_PARAFUNC,   /* Program control; function-like syntax */
+    AST_SPECIAL,    /* Special forms */
     AST_COMPOUND,   /* Arrays and tuples */
     AST_LITERAL     /* Terminal AST nodes */
 };
@@ -26,23 +26,23 @@ enum AstControlType {
     AST_CTL_REFERENCE
 };
 
-enum AstParafuncType {
+enum AstSpecialType {
     /* Flow control */
-    AST_PARAFUNC_IF,
-    AST_PARAFUNC_WHILE,
+    AST_SPECIAL_IF,
+    AST_SPECIAL_WHILE,
 
     /* Short circuit logic */
-    AST_PARAFUNC_AND,
-    AST_PARAFUNC_OR,
+    AST_SPECIAL_AND,
+    AST_SPECIAL_OR,
 
     /* References(coordinates) manipulation */
-    AST_PARAFUNC_REF,
-    AST_PARAFUNC_PEEK,
-    AST_PARAFUNC_POKE,
-    AST_PARAFUNC_BEGIN,
-    AST_PARAFUNC_END,
-    AST_PARAFUNC_INC,
-    AST_PARAFUNC_SUCC
+    AST_SPECIAL_REF,
+    AST_SPECIAL_PEEK,
+    AST_SPECIAL_POKE,
+    AST_SPECIAL_BEGIN,
+    AST_SPECIAL_END,
+    AST_SPECIAL_INC,
+    AST_SPECIAL_SUCC
 };
 
 enum AstCompoundType {
@@ -127,8 +127,8 @@ struct AstLiteral {
     } data;
 };
 
-struct AstParafunc {
-    enum AstParafuncType type;
+struct AstSpecial {
+    enum AstSpecialType type;
     struct AstNode *args;
 };
 
@@ -147,7 +147,7 @@ struct AstNode {
     struct SourceLocation loc;
     union {
         struct AstControl control;
-        struct AstParafunc parafunc;
+        struct AstSpecial special;
         struct AstCompound compound;
         struct AstLiteral literal;
     } data;
@@ -188,9 +188,9 @@ struct AstNode *ast_make_ctl_reference(
         struct SourceLocation *loc,
         char *symbol);
 
-struct AstNode *ast_make_parafunc(
+struct AstNode *ast_make_special(
         struct SourceLocation *loc,
-        enum AstParafuncType type,
+        enum AstSpecialType type,
         struct AstNode *args);
 
 struct AstNode *ast_make_compound(

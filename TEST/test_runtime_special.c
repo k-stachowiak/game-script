@@ -2,7 +2,7 @@
 
 #include "test_helpers.h"
 
-static void test_runtime_parafunc_logic(
+static void test_runtime_special_logic(
         struct TestContext *tc,
         struct Runtime *rt)
 {
@@ -13,7 +13,7 @@ static void test_runtime_parafunc_logic(
     rt_reset(rt);
 }
 
-static void test_parafunc_if(struct TestContext *tc, struct Runtime *rt)
+static void test_special_if(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_fail(tc, rt, "(if)", "Fail on evaluating empty if block");
     test_eval_source_fail(tc, rt, "(if a)", "Fail on evaluating incomplete if block 1");
@@ -23,7 +23,7 @@ static void test_parafunc_if(struct TestContext *tc, struct Runtime *rt)
     rt_reset(rt);
 }
 
-static void test_parafunc_references_basic(struct TestContext *tc, struct Runtime *rt)
+static void test_special_references_basic(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
             "(bind x 1)\n"
@@ -36,7 +36,7 @@ static void test_parafunc_references_basic(struct TestContext *tc, struct Runtim
     rt_reset(rt);
 }
 
-static void test_parafunc_references_iteration(struct TestContext *tc, struct Runtime *rt)
+static void test_special_references_iteration(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
             "(bind vec [ 1 2 3 ])\n"
@@ -53,7 +53,7 @@ static void test_parafunc_references_iteration(struct TestContext *tc, struct Ru
     rt_reset(rt);
 }
 
-static void test_parafunc_references_poke_type(struct TestContext *tc, struct Runtime *rt)
+static void test_special_references_poke_type(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
             "(bind v [ 1 2 3 ])\n"
@@ -78,13 +78,13 @@ static void test_parafunc_references_poke_type(struct TestContext *tc, struct Ru
 
     rt_reset(rt);
 }
-void test_runtime_parafunc(struct TestContext *tc)
+void test_runtime_special(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make();
-    test_runtime_parafunc_logic(tc, rt);
-    test_parafunc_if(tc, rt);
-    test_parafunc_references_basic(tc, rt);
-    test_parafunc_references_iteration(tc, rt);
-    test_parafunc_references_poke_type(tc, rt);
+    test_runtime_special_logic(tc, rt);
+    test_special_if(tc, rt);
+    test_special_references_basic(tc, rt);
+    test_special_references_iteration(tc, rt);
+    test_special_references_poke_type(tc, rt);
     rt_free(rt);
 }

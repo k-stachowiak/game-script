@@ -6,7 +6,7 @@
 #include "ast.h"
 #include "eval_detail.h"
 
-void eval_parafunc_ref(
+void eval_special_ref(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -16,12 +16,12 @@ void eval_parafunc_ref(
     struct SymMapNode *smn;
 
     if (len != 1) {
-        para_error_invalid_argc("ref", len);
+        spec_error_invalid_argc("ref", len);
         return;
     }
 
     if (args->type != AST_CONTROL || args->data.control.type != AST_CTL_REFERENCE) {
-        para_error_arg_expected("ref", 1, "symbol");
+        spec_error_arg_expected("ref", 1, "symbol");
         return;
     }
     symbol = args->data.control.data.reference.symbol;
@@ -35,7 +35,7 @@ void eval_parafunc_ref(
     rt_val_push_ref(&rt->stack, smn->stack_loc);
 }
 
-void eval_parafunc_peek(
+void eval_special_peek(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -47,7 +47,7 @@ void eval_parafunc_peek(
 
     len = ast_list_len(args);
     if (len != 1) {
-        para_error_invalid_argc("peek", len);
+        spec_error_invalid_argc("peek", len);
         return;
     }
 
@@ -61,7 +61,7 @@ void eval_parafunc_peek(
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_arg_expected("peek", 1, "reference");
+        spec_error_arg_expected("peek", 1, "reference");
         return;
     }
 
@@ -70,7 +70,7 @@ void eval_parafunc_peek(
     stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
-void eval_parafunc_poke(
+void eval_special_poke(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -82,7 +82,7 @@ void eval_parafunc_poke(
 
     len = ast_list_len(args);
     if (len != 2) {
-        para_error_invalid_argc("poke", len);
+        spec_error_invalid_argc("poke", len);
         return;
     }
 
@@ -95,7 +95,7 @@ void eval_parafunc_poke(
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_arg_expected("poke", 1, "reference");
+        spec_error_arg_expected("poke", 1, "reference");
         return;
     }
 
@@ -117,7 +117,7 @@ void eval_parafunc_poke(
     stack_collapse(&rt->stack, temp_begin, temp_end);
 }
 
-void eval_parafunc_begin(
+void eval_special_begin(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -129,12 +129,12 @@ void eval_parafunc_begin(
     enum ValueType ref_type;
 
     if (len != 1) {
-        para_error_invalid_argc("begin", len);
+        spec_error_invalid_argc("begin", len);
         return;
     }
 
     if (args->type != AST_CONTROL || args->data.control.type != AST_CTL_REFERENCE) {
-        para_error_arg_expected("begin", 1, "symbol");
+        spec_error_arg_expected("begin", 1, "symbol");
         return;
     }
     symbol = args->data.control.data.reference.symbol;
@@ -148,14 +148,14 @@ void eval_parafunc_begin(
     cpd_loc = smn->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
     if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
-        para_error_arg_expected("begin", 1, "reference to compound object");
+        spec_error_arg_expected("begin", 1, "reference to compound object");
         return;
     }
 
     rt_val_push_ref(&rt->stack, rt_val_cpd_first_loc(cpd_loc));
 }
 
-void eval_parafunc_end(
+void eval_special_end(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -167,12 +167,12 @@ void eval_parafunc_end(
     enum ValueType ref_type;
 
     if (len != 1) {
-        para_error_invalid_argc("end", len);
+        spec_error_invalid_argc("end", len);
         return;
     }
 
     if (args->type != AST_CONTROL || args->data.control.type != AST_CTL_REFERENCE) {
-        para_error_arg_expected("end", 1, "symbol");
+        spec_error_arg_expected("end", 1, "symbol");
         return;
     }
     symbol = args->data.control.data.reference.symbol;
@@ -186,7 +186,7 @@ void eval_parafunc_end(
     cpd_loc = smn->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
     if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
-        para_error_arg_expected("end", 1, "reference to compound object");
+        spec_error_arg_expected("end", 1, "reference to compound object");
         return;
     }
 
@@ -199,7 +199,7 @@ void eval_parafunc_end(
     rt_val_push_ref(&rt->stack, cpd_loc);
 }
 
-void eval_parafunc_inc(
+void eval_special_inc(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -212,11 +212,11 @@ void eval_parafunc_inc(
 
     len = ast_list_len(args);
     if (len != 1) {
-        para_error_invalid_argc("inc", len);
+        spec_error_invalid_argc("inc", len);
     }
 
     if (args->type != AST_CONTROL || args->data.control.type != AST_CTL_REFERENCE) {
-        para_error_arg_expected("inc", 1, "plain reference");
+        spec_error_arg_expected("inc", 1, "plain reference");
         return;
     }
     symbol = args->data.control.data.reference.symbol;
@@ -230,7 +230,7 @@ void eval_parafunc_inc(
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_arg_expected("inc", 1, "reference to reference");
+        spec_error_arg_expected("inc", 1, "reference to reference");
         return;
     }
 
@@ -241,7 +241,7 @@ void eval_parafunc_inc(
     rt_val_push_unit(&rt->stack);
 }
 
-void eval_parafunc_succ(
+void eval_special_succ(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args)
@@ -253,7 +253,7 @@ void eval_parafunc_succ(
 
     len = ast_list_len(args);
     if (len != 1) {
-        para_error_invalid_argc("succ", len);
+        spec_error_invalid_argc("succ", len);
         return;
     }
 
@@ -267,7 +267,7 @@ void eval_parafunc_succ(
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        para_error_arg_expected("succ", 1, "reference");
+        spec_error_arg_expected("succ", 1, "reference");
         return;
     }
 

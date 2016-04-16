@@ -37,8 +37,8 @@ VAL_LOC_T eval_dispatch(
         eval_control(&node->data.control, rt, sym_map, &node->loc);
         break;
 
-    case AST_PARAFUNC:
-        eval_parafunc(&node->data.parafunc, rt, sym_map);
+    case AST_SPECIAL:
+        eval_special(&node->data.special, rt, sym_map);
         break;
 
     case AST_COMPOUND:

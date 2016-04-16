@@ -4,8 +4,8 @@
 #include "runtime.h"
 
 void eval_error_not_found(char *symbol);
-void para_error_invalid_argc(char *func, int count);
-void para_error_arg_expected(char *func, int index, char *expected);
+void spec_error_invalid_argc(char *func, int count);
+void spec_error_arg_expected(char *func, int index, char *expected);
 
 void eval_control(
         struct AstControl *control,
@@ -13,24 +13,24 @@ void eval_control(
         struct SymMap *sym_map,
         struct SourceLocation *src_loc);
 
-void eval_parafunc(struct AstParafunc *parafunc, struct Runtime *rt, struct SymMap *sym_map);
+void eval_special(struct AstSpecial *special, struct Runtime *rt, struct SymMap *sym_map);
 void eval_compound(struct AstCompound *compound, struct Runtime *rt, struct SymMap *sym_map);
 void eval_literal(struct AstLiteral *literal, struct Runtime *rt, struct SymMap *sym_map);
 
 void eval_func_call(struct AstCtlFuncCall *fcall, struct Runtime *rt, struct SymMap *sym_map);
 void eval_func_def(struct AstCtlFuncDef *fdef, struct Runtime *rt, struct SymMap *sym_map);
 
-void eval_parafunc_if(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_while(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_ref(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_logic(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args, bool bv, char *f);
-void eval_parafunc_ref(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_peek(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_poke(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_begin(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_end(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_inc(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_parafunc_succ(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_if(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_while(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_ref(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_logic(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args, bool bv, char *f);
+void eval_special_ref(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_peek(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_poke(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_begin(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_end(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_inc(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
+void eval_special_succ(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
 
 void eval_bind_pattern(
         struct Pattern *pattern,

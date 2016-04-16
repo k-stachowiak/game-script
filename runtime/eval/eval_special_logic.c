@@ -4,7 +4,7 @@
 #include "error.h"
 #include "eval_detail.h"
 
-void eval_parafunc_logic(
+void eval_special_logic(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args,
@@ -16,7 +16,7 @@ void eval_parafunc_logic(
     VAL_BOOL_T result = !breaking_value;
 
     if (!args) {
-        para_error_invalid_argc(func, 0);
+        spec_error_invalid_argc(func, 0);
         return;
     }
 
@@ -24,12 +24,12 @@ void eval_parafunc_logic(
 
         VAL_LOC_T loc = eval_dispatch(args, rt, sym_map);
         if (err_state()) {
-            err_push_src("EVAL", args->loc, "Failed evaluating logic parafunc element");
+            err_push_src("EVAL", args->loc, "Failed evaluating logic special form element");
             return;
         }
 
         if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
-            para_error_arg_expected(func, i, "boolean");
+            spec_error_arg_expected(func, i, "boolean");
             return;
         }
 

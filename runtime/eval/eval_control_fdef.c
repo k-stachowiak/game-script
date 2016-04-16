@@ -50,8 +50,8 @@ static struct AstNode *efd_get_children(struct AstNode* node)
             return control->data.fcall.func;
         }
 
-    case AST_PARAFUNC:
-        return node->data.parafunc.args;
+    case AST_SPECIAL:
+        return node->data.special.args;
 
     case AST_COMPOUND:
         return node->data.compound.exprs;

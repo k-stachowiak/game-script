@@ -1,8 +1,11 @@
 # TODO #
 - Bring order to AST. It should only consist of:
-  - literals (atomic and compound; constitute a type)
-  - special forms
+  - atomic literals
+  - compound literals
   - function calls
+  - para-function calls
+ The procedure:
+ - move control elements to the para function sections one by one
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
 - migrate to auto-tools; think of carving out libraries such as a parser, runtime, semantics (AST, etc.), etc.
 - A bind should create "references", i.e. a tuples of address and type.

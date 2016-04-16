@@ -70,7 +70,7 @@ static char *ast_serialize_control_match(struct AstCtlMatch *match)
     struct AstNode *value = match->values;
 
     /* 0. Overview:
-     * Function returning the string representation of a match parafunction.
+     * Function returning the string representation of a match special form.
          * The expected form is: (match <expression> \(<pattern> <expression>\)+)
      */
 
@@ -237,57 +237,57 @@ static char *ast_serialize_control(struct AstControl *control)
     return result;
 }
 
-static char *ast_serialize_parafunc(struct AstParafunc *parafunc)
+static char *ast_serialize_special(struct AstSpecial *special)
 {
     char *result = NULL;
     char *child_str = NULL;
 
     /* 0. Overview:
-     * The function returns a string representation of the given parafunction.
+     * The function returns a string representation of the given special form.
      */
 
-    /* 1. The symbolic list is opened with an according parafunction name. */
-    switch (parafunc->type) {
-    case AST_PARAFUNC_IF:
+    /* 1. The symbolic list is opened with an according special form name. */
+    switch (special->type) {
+    case AST_SPECIAL_IF:
         str_append(result, "(if");
         break;
-    case AST_PARAFUNC_WHILE:
+    case AST_SPECIAL_WHILE:
         str_append(result, "(while");
         break;
-    case AST_PARAFUNC_AND:
+    case AST_SPECIAL_AND:
         str_append(result, "(and");
         break;
-    case AST_PARAFUNC_OR:
+    case AST_SPECIAL_OR:
         str_append(result, "(or");
         break;
-    case AST_PARAFUNC_REF:
+    case AST_SPECIAL_REF:
         str_append(result, "(ref");
         break;
-    case AST_PARAFUNC_PEEK:
+    case AST_SPECIAL_PEEK:
         str_append(result, "(peek");
         break;
-    case AST_PARAFUNC_POKE:
+    case AST_SPECIAL_POKE:
         str_append(result, "(poke");
         break;
-    case AST_PARAFUNC_BEGIN:
+    case AST_SPECIAL_BEGIN:
         str_append(result, "(begin");
         break;
-    case AST_PARAFUNC_END:
+    case AST_SPECIAL_END:
         str_append(result, "(end");
         break;
-    case AST_PARAFUNC_INC:
+    case AST_SPECIAL_INC:
         str_append(result, "(inc");
         break;
-    case AST_PARAFUNC_SUCC:
+    case AST_SPECIAL_SUCC:
         str_append(result, "(succ");
         break;
     }
 
-    /* 2. The arguments to the parafunction are appended to the result if such
+    /* 2. The arguments to the special forms are appended to the result if such
      * are present. Afterwards the temporary string is released.
      */
-    if (parafunc->args) {
-        child_str = ast_serialize(parafunc->args);
+    if (special->args) {
+        child_str = ast_serialize(special->args);
         str_append(result, " %s", child_str);
         mem_free(child_str);
     }
@@ -418,8 +418,8 @@ char *ast_serialize(struct AstNode *node)
             temp = ast_serialize_control(&node->data.control);
             break;
 
-        case AST_PARAFUNC:
-            temp = ast_serialize_parafunc(&node->data.parafunc);
+        case AST_SPECIAL:
+            temp = ast_serialize_special(&node->data.special);
             break;
 
         case AST_COMPOUND:
