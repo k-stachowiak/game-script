@@ -4,37 +4,37 @@
 #include "pattern.h"
 #include "strbuild.h"
 
-static char *pattern_serialize_literal_atom(struct PatternLiteralAtom *literal_atom)
+static char *pattern_serialize_literal_atomic(struct PatternLiteralAtomic *literal_atomic)
 {
     char *result = NULL;
 
-    switch (literal_atom->type) {
-    case PATTERN_LITERAL_ATOM_UNIT:
+    switch (literal_atomic->type) {
+    case PATTERN_LITERAL_ATOMIC_UNIT:
         str_append(result, "unit");
         break;
 
-    case PATTERN_LITERAL_ATOM_BOOL:
-        if (literal_atom->data.boolean) {
+    case PATTERN_LITERAL_ATOMIC_BOOL:
+        if (literal_atomic->data.boolean) {
             str_append(result, "true");
         } else {
             str_append(result, "false");
         }
         break;
 
-    case PATTERN_LITERAL_ATOM_INT:
-        str_append(result, "%ld", literal_atom->data.integer);
+    case PATTERN_LITERAL_ATOMIC_INT:
+        str_append(result, "%ld", literal_atomic->data.integer);
         break;
 
-    case PATTERN_LITERAL_ATOM_REAL:
-        str_append(result, "%f", literal_atom->data.real);
+    case PATTERN_LITERAL_ATOMIC_REAL:
+        str_append(result, "%f", literal_atomic->data.real);
         break;
 
-    case PATTERN_LITERAL_ATOM_CHAR:
-        str_append(result, "%c", literal_atom->data.character);
+    case PATTERN_LITERAL_ATOMIC_CHAR:
+        str_append(result, "%c", literal_atomic->data.character);
         break;
 
-    case PATTERN_LITERAL_ATOM_STRING:
-        str_append(result, "\"%s\"", literal_atom->data.string);
+    case PATTERN_LITERAL_ATOMIC_STRING:
+        str_append(result, "\"%s\"", literal_atomic->data.string);
         break;
     }
 
@@ -143,8 +143,8 @@ char *pattern_serialize(struct Pattern *pattern)
             str_append(temp, "%s", pattern->data.symbol.symbol);
             break;
 
-        case PATTERN_LITERAL_ATOM:
-            temp = pattern_serialize_literal_atom(&pattern->data.literal_atom);
+        case PATTERN_LITERAL_ATOMIC:
+            temp = pattern_serialize_literal_atomic(&pattern->data.literal_atomic);
             break;
 
         case PATTERN_LITERAL_COMPOUND:

@@ -220,34 +220,34 @@ static void bif_parse_any_ast_compound(
     rt_val_push_cpd_final(&rt->stack, size_loc, data_size);
 }
 
-static void bif_parse_any_ast_literal(
+static void bif_parse_any_ast_literal_atomic(
         struct Runtime *rt,
-        struct AstLiteral *literal)
+        struct AstLiteralAtomic *literal_atomic)
 {
     char *str;
-    switch (literal->type) {
-    case AST_LIT_UNIT:
+    switch (literal_atomic->type) {
+    case AST_LIT_ATOM_UNIT:
         break;
 
-    case AST_LIT_BOOL:
-        rt_val_push_bool(&rt->stack, literal->data.boolean);
+    case AST_LIT_ATOM_BOOL:
+        rt_val_push_bool(&rt->stack, literal_atomic->data.boolean);
         break;
 
-    case AST_LIT_STRING:
-        str = literal->data.string;
+    case AST_LIT_ATOM_STRING:
+        str = literal_atomic->data.string;
         rt_val_push_string(&rt->stack, str, str + strlen(str));
         break;
 
-    case AST_LIT_CHAR:
-        rt_val_push_char(&rt->stack, literal->data.character);
+    case AST_LIT_ATOM_CHAR:
+        rt_val_push_char(&rt->stack, literal_atomic->data.character);
         break;
 
-    case AST_LIT_INT:
-        rt_val_push_int(&rt->stack, literal->data.integer);
+    case AST_LIT_ATOM_INT:
+        rt_val_push_int(&rt->stack, literal_atomic->data.integer);
         break;
 
-    case AST_LIT_REAL:
-        rt_val_push_real(&rt->stack, literal->data.real);
+    case AST_LIT_ATOM_REAL:
+        rt_val_push_real(&rt->stack, literal_atomic->data.real);
         break;
     }
 }
@@ -259,8 +259,8 @@ static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
         bif_parse_any_ast_compound(runtime, &ast->data.compound);
         break;
 
-    case AST_LITERAL:
-        bif_parse_any_ast_literal(runtime, &ast->data.literal);
+    case AST_LITERAL_ATOMIC:
+        bif_parse_any_ast_literal_atomic(runtime, &ast->data.literal_atomic);
         break;
 
     case AST_CONTROL:
@@ -290,11 +290,11 @@ static void bif_parse_any(struct Runtime *rt, char *string)
     ast_node_free(ast);
 }
 
-static void bif_parse_atom(
+static void bif_parse_atomic(
         struct Runtime *rt,
         VAL_LOC_T arg_loc,
         char *func,
-        enum AstLiteralType type)
+        enum AstLiteralAtomicType type)
 {
     VAL_LOC_T size_loc, data_begin, data_size;
     struct AstNode *ast = NULL;
@@ -316,7 +316,7 @@ static void bif_parse_atom(
 
     /* Error detection. */
     if (!ast) {
-        err = "Failed parsing literal";
+        err = "Failed parsing atomic literal";
         rt_val_push_bool(&rt->stack, false);
         rt_val_push_string(&rt->stack, err, err + strlen(err));
         goto end;
@@ -327,7 +327,7 @@ static void bif_parse_atom(
         rt_val_push_string(&rt->stack, err, err + strlen(err));
         goto end;
     }
-    if (ast->type != AST_LITERAL || ast->data.literal.type != type) {
+    if (ast->type != AST_LITERAL_ATOMIC || ast->data.literal_atomic.type != type) {
         err = "Incorrect type.";
         rt_val_push_bool(&rt->stack, false);
         rt_val_push_string(&rt->stack, err, err + strlen(err));
@@ -336,7 +336,7 @@ static void bif_parse_atom(
 
     /* Correct case. */
     rt_val_push_bool(&rt->stack, true);
-    bif_parse_any_ast_literal(rt, &ast->data.literal);
+    bif_parse_any_ast_literal_atomic(rt, &ast->data.literal_atomic);
 
 end:
     data_size = rt->stack.top - data_begin;
@@ -432,21 +432,22 @@ void bif_parse(struct Runtime *rt, VAL_LOC_T arg_loc)
 
 void bif_parse_bool(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
-    bif_parse_atom(rt, arg_loc, "parse-bool", AST_LIT_BOOL);
+    bif_parse_atomic(rt, arg_loc, "parse-bool", AST_LIT_ATOM_BOOL);
 }
 
 void bif_parse_int(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
-    bif_parse_atom(rt, arg_loc, "parse-int", AST_LIT_INT);
+    bif_parse_atomic(rt, arg_loc, "parse-int", AST_LIT_ATOM_INT);
 }
 
 void bif_parse_real(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
-    bif_parse_atom(rt, arg_loc, "parse-real", AST_LIT_REAL);
+    bif_parse_atomic(rt, arg_loc, "parse-real", AST_LIT_ATOM_REAL);
 }
 
 void bif_parse_char(struct Runtime *rt, VAL_LOC_T arg_loc)
 {
-    bif_parse_atom(rt, arg_loc, "parse-char", AST_LIT_CHAR);
+    bif_parse_atomic(rt, arg_loc, "parse-char", AST_LIT_ATOM_CHAR);
 }
+
 

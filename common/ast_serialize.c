@@ -344,40 +344,40 @@ static char *ast_serialize_compound(struct AstCompound *compound)
     return result;
 }
 
-char *ast_serialize_literal(struct AstLiteral *literal)
+char *ast_serialize_literal_atomic(struct AstLiteralAtomic *literal_atomic)
 {
     char *result = NULL;
 
     /* 0. Overview:
-     * The function returns a string representation of a literal node.
+     * The function returns a string representation of a atomic literal node.
      */
 
-    /* 1. The literal nodes are atoms, therefore this function may be implemented
+    /* 1. The atomic literal nodes are atoms, therefore this function may be implemented
      * in terms of a simple, shallow switch statement.
      */
-    switch (literal->type) {
-    case AST_LIT_UNIT:
+    switch (literal_atomic->type) {
+    case AST_LIT_ATOM_UNIT:
         str_append(result, "unit");
         break;
-    case AST_LIT_BOOL:
-        if (literal->data.boolean) {
+    case AST_LIT_ATOM_BOOL:
+        if (literal_atomic->data.boolean) {
             str_append(result, "true");
         }
         else {
             str_append(result, "false");
         }
         break;
-    case AST_LIT_STRING:
-        str_append(result, "%s", literal->data.string);
+    case AST_LIT_ATOM_STRING:
+        str_append(result, "%s", literal_atomic->data.string);
         break;
-    case AST_LIT_CHAR:
-        str_append(result, "%c", literal->data.character);
+    case AST_LIT_ATOM_CHAR:
+        str_append(result, "%c", literal_atomic->data.character);
         break;
-    case AST_LIT_INT:
-        str_append(result, "%ld", literal->data.integer);
+    case AST_LIT_ATOM_INT:
+        str_append(result, "%ld", literal_atomic->data.integer);
         break;
-    case AST_LIT_REAL:
-        str_append(result, "%f", literal->data.real);
+    case AST_LIT_ATOM_REAL:
+        str_append(result, "%f", literal_atomic->data.real);
         break;
     }
 
@@ -426,8 +426,8 @@ char *ast_serialize(struct AstNode *node)
             temp = ast_serialize_compound(&node->data.compound);
             break;
 
-        case AST_LITERAL:
-            temp = ast_serialize_literal(&node->data.literal);
+        case AST_LITERAL_ATOMIC:
+            temp = ast_serialize_literal_atomic(&node->data.literal_atomic);
             break;
         }
 

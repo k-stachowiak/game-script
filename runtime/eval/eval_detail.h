@@ -15,7 +15,7 @@ void eval_control(
 
 void eval_special(struct AstSpecial *special, struct Runtime *rt, struct SymMap *sym_map);
 void eval_compound(struct AstCompound *compound, struct Runtime *rt, struct SymMap *sym_map);
-void eval_literal(struct AstLiteral *literal, struct Runtime *rt, struct SymMap *sym_map);
+void eval_literal_atomic(struct AstLiteralAtomic *literal_atomic, struct Runtime *rt, struct SymMap *sym_map);
 
 void eval_func_call(struct AstCtlFuncCall *fcall, struct Runtime *rt, struct SymMap *sym_map);
 void eval_func_def(struct AstCtlFuncDef *fdef, struct Runtime *rt, struct SymMap *sym_map);

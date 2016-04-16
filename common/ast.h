@@ -11,10 +11,10 @@
  */
 
 enum AstNodeType {
-    AST_CONTROL,    /* Program control; special syntax */
-    AST_SPECIAL,    /* Special forms */
-    AST_COMPOUND,   /* Arrays and tuples */
-    AST_LITERAL     /* Terminal AST nodes */
+    AST_CONTROL,
+    AST_SPECIAL,
+    AST_COMPOUND,
+    AST_LITERAL_ATOMIC
 };
 
 enum AstControlType {
@@ -50,13 +50,13 @@ enum AstCompoundType {
     AST_CPD_TUPLE
 };
 
-enum AstLiteralType {
-    AST_LIT_UNIT,
-    AST_LIT_BOOL,
-    AST_LIT_STRING, /* Syntactical sugar for char arrays */
-    AST_LIT_CHAR,
-    AST_LIT_INT,
-    AST_LIT_REAL
+enum AstLiteralAtomicType {
+    AST_LIT_ATOM_UNIT,
+    AST_LIT_ATOM_BOOL,
+    AST_LIT_ATOM_STRING, /* Syntactical sugar for char arrays */
+    AST_LIT_ATOM_CHAR,
+    AST_LIT_ATOM_INT,
+    AST_LIT_ATOM_REAL
 };
 
 /* Partial types.
@@ -116,8 +116,8 @@ struct AstControl {
  * -------------
  */
 
-struct AstLiteral {
-    enum AstLiteralType type;
+struct AstLiteralAtomic {
+    enum AstLiteralAtomicType type;
     union {
         int boolean;
         char *string;
@@ -149,7 +149,7 @@ struct AstNode {
         struct AstControl control;
         struct AstSpecial special;
         struct AstCompound compound;
-        struct AstLiteral literal;
+        struct AstLiteralAtomic literal_atomic;
     } data;
     struct AstNode *next;
 };
@@ -198,12 +198,12 @@ struct AstNode *ast_make_compound(
         enum AstCompoundType type,
         struct AstNode *exprs);
 
-struct AstNode *ast_make_literal_unit(struct SourceLocation *loc);
-struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value);
-struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value);
-struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char value);
-struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value);
-struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value);
+struct AstNode *ast_make_literal_atomic_unit(struct SourceLocation *loc);
+struct AstNode *ast_make_literal_atomic_bool(struct SourceLocation *loc, int value);
+struct AstNode *ast_make_literal_atomic_string(struct SourceLocation *loc, char *value);
+struct AstNode *ast_make_literal_atomic_character(struct SourceLocation *loc, char value);
+struct AstNode *ast_make_literal_atomic_int(struct SourceLocation *loc, long value);
+struct AstNode *ast_make_literal_atomic_real(struct SourceLocation *loc, double value);
 
 /* Destruction.
  * ============

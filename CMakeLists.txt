@@ -48,7 +48,7 @@ add_library(lang OBJECT
         ./runtime/eval/eval_control_bind_pattern.c
         ./runtime/eval/eval_control_fcall.c
         ./runtime/eval/eval_control_fdef.c
-        ./runtime/eval/eval_literal.c
+        ./runtime/eval/eval_literal_atomic.c
         ./runtime/eval/eval_special.c
         ./runtime/eval/eval_special_flow.c
         ./runtime/eval/eval_special_logic.c

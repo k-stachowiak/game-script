@@ -39,17 +39,17 @@ void test_parse_literal_fail(struct TestContext *tc,
             tc_record(TC, NAME, false); \
             break; \
         } \
-        if (node->type != AST_LITERAL) { \
+        if (node->type != AST_LITERAL_ATOMIC) { \
             tc_record(TC, NAME, false); \
             ast_node_free(node); \
             break; \
         } \
-        if (node->data.literal.type != EX_ASTTYPE) { \
+        if (node->data.literal_atomic.type != EX_ASTTYPE) { \
             tc_record(TC, NAME, false); \
             ast_node_free(node); \
             break; \
         } \
-        if (*((EX_CTYPE*)(&(node->data.literal.data))) != EX_VALUE) { \
+        if (*((EX_CTYPE*)(&(node->data.literal_atomic.data))) != EX_VALUE) { \
             tc_record(TC, NAME, false); \
             ast_node_free(node); \
             break; \

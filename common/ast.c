@@ -155,31 +155,31 @@ struct AstNode *ast_make_compound(
     return result;
 }
 
-struct AstNode *ast_make_literal_unit(struct SourceLocation *loc)
+struct AstNode *ast_make_literal_atomic_unit(struct SourceLocation *loc)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
-    result->type = AST_LITERAL;
+    result->type = AST_LITERAL_ATOMIC;
     result->loc = *loc;
-    result->data.literal.type = AST_LIT_UNIT;
+    result->data.literal_atomic.type = AST_LIT_ATOM_UNIT;
     return result;
 }
 
-struct AstNode *ast_make_literal_bool(struct SourceLocation *loc, int value)
+struct AstNode *ast_make_literal_atomic_bool(struct SourceLocation *loc, int value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
-    result->type = AST_LITERAL;
+    result->type = AST_LITERAL_ATOMIC;
     result->loc = *loc;
 
-    result->data.literal.type = AST_LIT_BOOL;
-    result->data.literal.data.boolean = value;
+    result->data.literal_atomic.type = AST_LIT_ATOM_BOOL;
+    result->data.literal_atomic.data.boolean = value;
 
     return result;
 }
 
-struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
+struct AstNode *ast_make_literal_atomic_string(struct SourceLocation *loc, char *value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -188,53 +188,53 @@ struct AstNode *ast_make_literal_string(struct SourceLocation *loc, char *value)
     memcpy(copy, value, length + 1);
 
     result->next = NULL;
-    result->type = AST_LITERAL;
+    result->type = AST_LITERAL_ATOMIC;
     result->loc = *loc;
 
-    result->data.literal.type = AST_LIT_STRING;
-    result->data.literal.data.string = copy;
+    result->data.literal_atomic.type = AST_LIT_ATOM_STRING;
+    result->data.literal_atomic.data.string = copy;
 
     return result;
 }
 
-struct AstNode *ast_make_literal_character(struct SourceLocation *loc, char value)
+struct AstNode *ast_make_literal_atomic_character(struct SourceLocation *loc, char value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
-    result->type = AST_LITERAL;
+    result->type = AST_LITERAL_ATOMIC;
     result->loc = *loc;
 
-    result->data.literal.type = AST_LIT_CHAR;
-    result->data.literal.data.character = value;
+    result->data.literal_atomic.type = AST_LIT_ATOM_CHAR;
+    result->data.literal_atomic.data.character = value;
 
     return result;
 }
 
-struct AstNode *ast_make_literal_int(struct SourceLocation *loc, long value)
+struct AstNode *ast_make_literal_atomic_int(struct SourceLocation *loc, long value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
-    result->type = AST_LITERAL;
+    result->type = AST_LITERAL_ATOMIC;
     result->loc = *loc;
 
-    result->data.literal.type = AST_LIT_INT;
-    result->data.literal.data.integer = value;
+    result->data.literal_atomic.type = AST_LIT_ATOM_INT;
+    result->data.literal_atomic.data.integer = value;
 
     return result;
 }
 
-struct AstNode *ast_make_literal_real(struct SourceLocation *loc, double value)
+struct AstNode *ast_make_literal_atomic_real(struct SourceLocation *loc, double value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
-    result->type = AST_LITERAL;
+    result->type = AST_LITERAL_ATOMIC;
     result->loc = *loc;
 
-    result->data.literal.type = AST_LIT_REAL;
-    result->data.literal.data.real = value;
+    result->data.literal_atomic.type = AST_LIT_ATOM_REAL;
+    result->data.literal_atomic.data.real = value;
 
     return result;
 }
@@ -318,9 +318,9 @@ static void ast_compound_free(struct AstCompound *cpd)
     ast_node_free(cpd->exprs);
 }
 
-static void ast_literal_free(struct AstLiteral *literal)
+static void ast_literal_atomic_free(struct AstLiteralAtomic *literal)
 {
-    if (literal->type == AST_LIT_STRING) {
+    if (literal->type == AST_LIT_ATOM_STRING) {
         mem_free(literal->data.string);
     }
 }
@@ -340,8 +340,8 @@ void ast_node_free_one(struct AstNode *node)
         ast_compound_free(&node->data.compound);
         break;
 
-    case AST_LITERAL:
-        ast_literal_free(&node->data.literal);
+    case AST_LITERAL_ATOMIC:
+        ast_literal_atomic_free(&node->data.literal_atomic);
         break;
     }
 

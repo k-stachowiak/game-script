@@ -56,7 +56,7 @@ static struct AstNode *efd_get_children(struct AstNode* node)
     case AST_COMPOUND:
         return node->data.compound.exprs;
 
-    case AST_LITERAL:
+    case AST_LITERAL_ATOMIC:
         return NULL;
     }
 

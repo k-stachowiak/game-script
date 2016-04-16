@@ -270,27 +270,27 @@ static struct Pattern *parse_pattern_symbol(struct DomNode *dom)
     }
 }
 
-static struct Pattern *parse_pattern_literal_atom_unit(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic_unit(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
-        return pattern_make_literal_atom_unit();
+        return pattern_make_literal_atomic_unit();
     } else {
         return NULL;
     }
 }
 
-static struct Pattern *parse_pattern_literal_atom_bool(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic_bool(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
-        return pattern_make_literal_atom_bool(1);
+        return pattern_make_literal_atomic_bool(1);
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
-        return pattern_make_literal_atom_bool(0);
+        return pattern_make_literal_atomic_bool(0);
     } else {
         return NULL;
     }
 }
 
-static struct Pattern *parse_pattern_literal_atom_int(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic_int(struct DomNode *dom)
 {
     long value;
 
@@ -302,10 +302,10 @@ static struct Pattern *parse_pattern_literal_atom_int(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_atom_int(value);
+    return pattern_make_literal_atomic_int(value);
 }
 
-static struct Pattern *parse_pattern_literal_atom_real(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic_real(struct DomNode *dom)
 {
     double value;
 
@@ -317,10 +317,10 @@ static struct Pattern *parse_pattern_literal_atom_real(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_atom_real(value);
+    return pattern_make_literal_atomic_real(value);
 }
 
-static struct Pattern *parse_pattern_literal_atom_char(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic_char(struct DomNode *dom)
 {
     char value;
 
@@ -332,10 +332,10 @@ static struct Pattern *parse_pattern_literal_atom_char(struct DomNode *dom)
         return NULL;
     }
 
-    return pattern_make_literal_atom_character(value);
+    return pattern_make_literal_atomic_character(value);
 }
 
-static struct Pattern *parse_pattern_literal_atom_string(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic_string(struct DomNode *dom)
 {
     char *value;
     struct Pattern *result;
@@ -348,21 +348,21 @@ static struct Pattern *parse_pattern_literal_atom_string(struct DomNode *dom)
         return NULL;
     }
 
-    result = pattern_make_literal_atom_string(value);
+    result = pattern_make_literal_atomic_string(value);
     mem_free(value);
     return result;
 }
 
-static struct Pattern *parse_pattern_literal_atom(struct DomNode *dom)
+static struct Pattern *parse_pattern_literal_atomic(struct DomNode *dom)
 {
     struct Pattern *result;
 
-    if ((!err_state() && (result = parse_pattern_literal_atom_unit(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atom_bool(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atom_int(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atom_real(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atom_char(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atom_string(dom)))) {
+    if ((!err_state() && (result = parse_pattern_literal_atomic_unit(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atomic_bool(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atomic_int(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atomic_real(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atomic_char(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atomic_string(dom)))) {
         return result;
     } else {
         return NULL;
@@ -480,7 +480,7 @@ static struct Pattern *parse_pattern(struct DomNode *dom)
 
     if ((!err_state() && (result = parse_pattern_dont_care(dom))) ||
         (!err_state() && (result = parse_pattern_symbol(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atom(dom))) ||
+        (!err_state() && (result = parse_pattern_literal_atomic(dom))) ||
         (!err_state() && (result = parse_pattern_literal_compound(dom))) ||
         (!err_state() && (result = parse_pattern_datatype(dom)))) {
         return result;
@@ -887,7 +887,7 @@ fail:
 static struct AstNode *parse_literal_unit(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
-        return ast_make_literal_unit(&dom->loc);
+        return ast_make_literal_atomic_unit(&dom->loc);
     } else {
         return NULL;
     }
@@ -896,9 +896,9 @@ static struct AstNode *parse_literal_unit(struct DomNode *dom)
 static struct AstNode *parse_literal_bool(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
-        return ast_make_literal_bool(&dom->loc, 1);
+        return ast_make_literal_atomic_bool(&dom->loc, 1);
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
-        return ast_make_literal_bool(&dom->loc, 0);
+        return ast_make_literal_atomic_bool(&dom->loc, 0);
     } else {
         return NULL;
     }
@@ -917,7 +917,7 @@ static struct AstNode *parse_literal_string(struct DomNode *dom)
         return NULL;
     }
 
-    result = ast_make_literal_string(&dom->loc, value);
+    result = ast_make_literal_atomic_string(&dom->loc, value);
     mem_free(value);
     return result;
 }
@@ -934,7 +934,7 @@ static struct AstNode *parse_literal_char(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_literal_character(&dom->loc, value);
+    return ast_make_literal_atomic_character(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal_int(struct DomNode *dom)
@@ -949,7 +949,7 @@ static struct AstNode *parse_literal_int(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_literal_int(&dom->loc, value);
+    return ast_make_literal_atomic_int(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal_real(struct DomNode *dom)
@@ -964,7 +964,7 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
         return NULL;
     }
 
-    return ast_make_literal_real(&dom->loc, value);
+    return ast_make_literal_atomic_real(&dom->loc, value);
 }
 
 static struct AstNode *parse_literal(struct DomNode *dom)

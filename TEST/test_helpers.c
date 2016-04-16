@@ -48,13 +48,13 @@ void test_parse_literal_string(
         return;
     }
 
-    if (node->type != AST_LITERAL) {
+    if (node->type != AST_LITERAL_ATOMIC) {
         tc_record(tc, test_name, false);
         ast_node_free(node);
         return;
     }
 
-    if (node->data.literal.type != AST_LIT_STRING) {
+    if (node->data.literal_atomic.type != AST_LIT_ATOM_STRING) {
         tc_record(tc, test_name, false);
         ast_node_free(node);
         return;

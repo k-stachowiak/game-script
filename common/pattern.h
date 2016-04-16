@@ -8,18 +8,18 @@
 enum PatternType {
     PATTERN_DONT_CARE,
     PATTERN_SYMBOL,
-    PATTERN_LITERAL_ATOM,
+    PATTERN_LITERAL_ATOMIC,
     PATTERN_LITERAL_COMPOUND,
     PATTERN_DATATYPE
 };
 
-enum PatternLiteralAtomType {
-    PATTERN_LITERAL_ATOM_UNIT,
-    PATTERN_LITERAL_ATOM_BOOL,
-    PATTERN_LITERAL_ATOM_INT,
-    PATTERN_LITERAL_ATOM_REAL,
-    PATTERN_LITERAL_ATOM_CHAR,
-    PATTERN_LITERAL_ATOM_STRING
+enum PatternLiteralAtomicType {
+    PATTERN_LITERAL_ATOMIC_UNIT,
+    PATTERN_LITERAL_ATOMIC_BOOL,
+    PATTERN_LITERAL_ATOMIC_INT,
+    PATTERN_LITERAL_ATOMIC_REAL,
+    PATTERN_LITERAL_ATOMIC_CHAR,
+    PATTERN_LITERAL_ATOMIC_STRING
 };
 
 enum PatternLiteralCompoundType {
@@ -47,8 +47,8 @@ struct PatternSymbol {
     char *symbol;
 };
 
-struct PatternLiteralAtom {
-    enum PatternLiteralAtomType type;
+struct PatternLiteralAtomic {
+    enum PatternLiteralAtomicType type;
     union {
         int boolean;
         long integer;
@@ -73,7 +73,7 @@ struct Pattern {
     union {
         struct PatternDontCare dont_care;
         struct PatternSymbol symbol;
-        struct PatternLiteralAtom literal_atom;
+        struct PatternLiteralAtomic literal_atomic;
         struct PatternLiteralCompound literal_compound;
         struct PatternDataType datatype;
     } data;
@@ -84,12 +84,12 @@ struct Pattern *pattern_make_dont_care(void);
 
 struct Pattern *pattern_make_symbol(char *symbol);
 
-struct Pattern *pattern_make_literal_atom_unit(void);
-struct Pattern *pattern_make_literal_atom_bool(int value);
-struct Pattern *pattern_make_literal_atom_int(long value);
-struct Pattern *pattern_make_literal_atom_real(double value);
-struct Pattern *pattern_make_literal_atom_character(char value);
-struct Pattern *pattern_make_literal_atom_string(char *value);
+struct Pattern *pattern_make_literal_atomic_unit(void);
+struct Pattern *pattern_make_literal_atomic_bool(int value);
+struct Pattern *pattern_make_literal_atomic_int(long value);
+struct Pattern *pattern_make_literal_atomic_real(double value);
+struct Pattern *pattern_make_literal_atomic_character(char value);
+struct Pattern *pattern_make_literal_atomic_string(char *value);
 
 struct Pattern *pattern_make_literal_cpd_array(struct Pattern *children);
 struct Pattern *pattern_make_literal_cpd_tuple(struct Pattern *children);

@@ -119,28 +119,28 @@ static void test_parse_func_def(struct TestContext *tc)
 
 static void test_parse_literals(struct TestContext *tc)
 {
-    test_parse_literal(tc, "true", "Boolean true", AST_LIT_BOOL, int, true);
-    test_parse_literal(tc, "false", "Boolean false", AST_LIT_BOOL, int, false);
+    test_parse_literal(tc, "true", "Boolean true", AST_LIT_ATOM_BOOL, int, true);
+    test_parse_literal(tc, "false", "Boolean false", AST_LIT_ATOM_BOOL, int, false);
 
     test_parse_literal_string(tc, "\"simple string\"", "Simple string");
     test_parse_literal_string(tc,
             "\"string \\\"with\\\" escaped 'quotes'\"",
             "Quoted string");
 
-    test_parse_literal(tc, "\'a\'", "Character \'a\'", AST_LIT_CHAR, char, 'a');
-    test_parse_literal(tc, "\'\n\'", "Character \'\\n\'", AST_LIT_CHAR, char, '\n');
+    test_parse_literal(tc, "\'a\'", "Character \'a\'", AST_LIT_ATOM_CHAR, char, 'a');
+    test_parse_literal(tc, "\'\n\'", "Character \'\\n\'", AST_LIT_ATOM_CHAR, char, '\n');
     test_parse(tc, "\'ab\'", "Fail on too long character literal", false);
 
-    test_parse_literal(tc, "1", "Integer 1", AST_LIT_INT, long, 1);
-    test_parse_literal(tc, "+2", "Integer +2", AST_LIT_INT, long, 2);
-    test_parse_literal(tc, "-3", "Integer -3", AST_LIT_INT, long, -3);
+    test_parse_literal(tc, "1", "Integer 1", AST_LIT_ATOM_INT, long, 1);
+    test_parse_literal(tc, "+2", "Integer +2", AST_LIT_ATOM_INT, long, 2);
+    test_parse_literal(tc, "-3", "Integer -3", AST_LIT_ATOM_INT, long, -3);
     test_parse(tc, "42L", "Fail on integer with an alphabetic character", false);
 
-    test_parse_literal(tc, "1.0", "Real 1.0", AST_LIT_REAL, double, 1.0);
-    test_parse_literal(tc, "+2.0", "Real +2.0", AST_LIT_REAL, double, 2.0);
-    test_parse_literal(tc, "-3.0", "Real -3.0", AST_LIT_REAL, double, -3.0);
-    test_parse_literal(tc, "4.", "Real 4.", AST_LIT_REAL, double, 4.0);
-    test_parse_literal(tc, ".5", "Real .5", AST_LIT_REAL, double, 0.5);
+    test_parse_literal(tc, "1.0", "Real 1.0", AST_LIT_ATOM_REAL, double, 1.0);
+    test_parse_literal(tc, "+2.0", "Real +2.0", AST_LIT_ATOM_REAL, double, 2.0);
+    test_parse_literal(tc, "-3.0", "Real -3.0", AST_LIT_ATOM_REAL, double, -3.0);
+    test_parse_literal(tc, "4.", "Real 4.", AST_LIT_ATOM_REAL, double, 4.0);
+    test_parse_literal(tc, ".5", "Real .5", AST_LIT_ATOM_REAL, double, 0.5);
     test_parse(tc, "6E7", "Fail on real scientific notation", false);
     test_parse(tc, "8e9", "Fail on real scientific notation", false);
 }

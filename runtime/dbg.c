@@ -84,26 +84,26 @@ static void dbg_print_node_match(struct AstCtlMatch *match)
     printf("match expression");
 }
 
-static void dbg_print_node_literal(struct AstLiteral *literal)
+static void dbg_print_node_literal(struct AstLiteralAtomic *literal_atomic)
 {
-    switch (literal->type) {
-    case AST_LIT_UNIT:
+    switch (literal_atomic->type) {
+    case AST_LIT_ATOM_UNIT:
         printf("unit\n");
         break;
-    case AST_LIT_BOOL:
-        printf("%s\n", literal->data.boolean ? "true" : "false");
+    case AST_LIT_ATOM_BOOL:
+        printf("%s\n", literal_atomic->data.boolean ? "true" : "false");
         break;
-    case AST_LIT_STRING:
-        printf("%s\n", literal->data.string);
+    case AST_LIT_ATOM_STRING:
+        printf("%s\n", literal_atomic->data.string);
         break;
-    case AST_LIT_CHAR:
-        printf("'%c'\n", literal->data.character);
+    case AST_LIT_ATOM_CHAR:
+        printf("'%c'\n", literal_atomic->data.character);
         break;
-    case AST_LIT_INT:
-        printf("%ld\n", literal->data.integer);
+    case AST_LIT_ATOM_INT:
+        printf("%ld\n", literal_atomic->data.integer);
         break;
-    case AST_LIT_REAL:
-        printf("%f\n", literal->data.real);
+    case AST_LIT_ATOM_REAL:
+        printf("%f\n", literal_atomic->data.real);
         break;
     }
 }
@@ -152,9 +152,9 @@ static void dbg_print_node(struct AstNode *node)
         dbg_print_node_special(&node->data.special);
         break;
 
-    case AST_LITERAL:
-        printf("literal ");
-        dbg_print_node_literal(&node->data.literal);
+    case AST_LITERAL_ATOMIC:
+        printf("literal-atomic ");
+        dbg_print_node_literal(&node->data.literal_atomic);
         break;
 
     }

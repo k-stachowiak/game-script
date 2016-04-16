@@ -11,8 +11,8 @@ static void eval_bind_pattern_datatype(
     VAL_LOC_T location,
     struct SourceLocation *source_loc);
 
-static void eval_bind_pattern_literal_atom(
-        struct PatternLiteralAtom *literal_atom,
+static void eval_bind_pattern_literal_atomic(
+        struct PatternLiteralAtomic *literal_atomic,
         struct Runtime *rt,
         VAL_LOC_T location,
         struct SourceLocation *source_loc)
@@ -20,69 +20,68 @@ static void eval_bind_pattern_literal_atom(
     enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
     VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
 
-    switch (literal_atom->type) {
-    case PATTERN_LITERAL_ATOM_UNIT:
+    switch (literal_atomic->type) {
+    case PATTERN_LITERAL_ATOMIC_UNIT:
         if (value_type == VAL_UNIT) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOM_BOOL:
+    case PATTERN_LITERAL_ATOMIC_BOOL:
         if (value_type == VAL_BOOL &&
-            rt_val_peek_bool(rt, location) == literal_atom->data.boolean) {
+            rt_val_peek_bool(rt, location) == literal_atomic->data.boolean) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOM_CHAR:
+    case PATTERN_LITERAL_ATOMIC_CHAR:
         if (value_type == VAL_CHAR &&
-            rt_val_peek_char(rt, location) == literal_atom->data.character) {
+            rt_val_peek_char(rt, location) == literal_atomic->data.character) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOM_INT:
+    case PATTERN_LITERAL_ATOMIC_INT:
         if (value_type == VAL_INT &&
-            rt_val_peek_int(rt, location) == literal_atom->data.integer) {
+            rt_val_peek_int(rt, location) == literal_atomic->data.integer) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOM_REAL:
+    case PATTERN_LITERAL_ATOMIC_REAL:
         if (value_type == VAL_REAL &&
-            rt_val_peek_real(rt, location) == literal_atom->data.real) {
+            rt_val_peek_real(rt, location) == literal_atomic->data.real) {
             return;
         }
         break;
 
-    case PATTERN_LITERAL_ATOM_STRING:
+    case PATTERN_LITERAL_ATOMIC_STRING:
         if (value_type == VAL_ARRAY && rt_val_peek_type(&rt->stack, current_loc) == VAL_CHAR) {
+            char *str_pat = literal_atomic->data.string;
+            int arr_len = rt_val_cpd_len(rt, location);
+            int str_len = strlen(str_pat) - 2; /* Take the quotes into account */
 
-            char *str_pat = literal_atom->data.string;
-        int arr_len = rt_val_cpd_len(rt, location);
-        int str_len = strlen(str_pat) - 2; /* Take the quotes into account */
+            if (str_len != arr_len) {
+                err_push_src("EVAL", *source_loc, "Failed matching string literal");
+                return;
+            }
 
-        if (str_len != arr_len) {
-        err_push_src("EVAL", *source_loc, "Failed matching string literal");
-        return;
-        }
-
-        ++str_pat; /* Skip the initial quote */
-        while (arr_len) {
-        if (*str_pat != rt_val_peek_char(rt, current_loc)) {
-            err_push_src("EVAL", *source_loc, "Failed matching string literal");
+            ++str_pat; /* Skip the initial quote */
+            while (arr_len) {
+                if (*str_pat != rt_val_peek_char(rt, current_loc)) {
+                    err_push_src("EVAL", *source_loc, "Failed matching string literal");
+                    return;
+                }
+                current_loc = rt_val_next_loc(rt, current_loc);
+                ++str_pat;
+                --arr_len;
+            }
             return;
-        }
-        current_loc = rt_val_next_loc(rt, current_loc);
-        ++str_pat;
-        --arr_len;
-        }
-        return;
         }
         break;
     }
 
-    err_push_src("EVAL", *source_loc, "Literal_atom value pattern mismatch");
+    err_push_src("EVAL", *source_loc, "Literal_atomic value pattern mismatch");
 }
 
 static void eval_bind_pattern_literal_compound(
@@ -93,20 +92,20 @@ static void eval_bind_pattern_literal_compound(
         struct SourceLocation *source_loc)
 {
     VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
-    
+
     enum ValueType val_type = rt_val_peek_type(&rt->stack, location);
     int val_len = rt_val_cpd_len(rt, location);
-    
+
     enum PatternLiteralCompoundType pat_type = literal_compound->type;
     struct Pattern *current_pat = literal_compound->children;
     int pat_len = pattern_list_len(current_pat);
 
     if (!(val_type == VAL_ARRAY && pat_type == PATTERN_LITERAL_CPD_ARRAY) &&
-    !(val_type == VAL_TUPLE && pat_type == PATTERN_LITERAL_CPD_TUPLE)) {
+        !(val_type == VAL_TUPLE && pat_type == PATTERN_LITERAL_CPD_TUPLE)) {
             err_push_src("EVAL", *source_loc, "Compound value and pattern type mismatch");
             return;
     }
-    
+
     if (val_len != pat_len) {
         err_push_src("EVAL", *source_loc, "Compound value and pattern length mismatch");
         return;
@@ -137,27 +136,27 @@ static void eval_bind_pattern_datatype_array(
 
     if (value_type != VAL_ARRAY) {
         err_push_src("EVAL", *source_loc, "Failed matching array pattern");
-    return;
+        return;
     }
 
     arr_length = rt_val_cpd_len(rt, location);
     if (arr_length == 0) {
-    /* Always match an empty array */
+        /* Always match an empty array */
         return;
     }
 
     pat_length = pattern_list_len(datatype->children);
     if (pat_length != 1) {
-    err_push_src("EVAL", *source_loc, "Failed matching array pattern");
-    return;
+        err_push_src("EVAL", *source_loc, "Failed matching array pattern");
+        return;
     }
 
     child = datatype->children;
     if (child->type != PATTERN_DATATYPE) {
-    err_push_src("EVAL", *source_loc, "Failed matching array pattern");
-    return;
+        err_push_src("EVAL", *source_loc, "Failed matching array pattern");
+        return;
     }
-    
+
     first_loc = rt_val_cpd_first_loc(location);
     eval_bind_pattern_datatype(&child->data.datatype, rt, sym_map, first_loc, source_loc);
 }
@@ -175,22 +174,22 @@ static void eval_bind_pattern_datatype_reference(
     struct Pattern *child;
 
     if (value_type != VAL_REF) {
-    err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
-    return;
+        err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
+        return;
     }
 
     length = pattern_list_len(datatype->children);
     if (length != 1) {
-    err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
-    return;
+        err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
+        return;
     }
 
     child = datatype->children;
     if (child->type != PATTERN_DATATYPE) {
-    err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
-    return;
+        err_push_src("EVAL", *source_loc, "Failed matching reference pattern");
+        return;
     }
-    
+
     refered_loc = rt_val_peek_ref(rt, location);
     eval_bind_pattern_datatype(&child->data.datatype, rt, sym_map, refered_loc, source_loc);
 }
@@ -264,9 +263,9 @@ void eval_bind_pattern(
             sym_map, pattern->data.symbol.symbol, location, *source_loc);
         break;
 
-    case PATTERN_LITERAL_ATOM:
-        eval_bind_pattern_literal_atom(
-            &pattern->data.literal_atom, rt, location, source_loc);
+    case PATTERN_LITERAL_ATOMIC:
+        eval_bind_pattern_literal_atomic(
+            &pattern->data.literal_atomic, rt, location, source_loc);
         break;
 
     case PATTERN_LITERAL_COMPOUND:
