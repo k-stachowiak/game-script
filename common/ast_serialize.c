@@ -6,19 +6,61 @@
 #include "strbuild.h"
 #include "log.h"
 
-static char *ast_serialize_control_do(struct AstCtlDo *doo)
+static char *ast_serialize_symbol(struct AstSymbol *symbol)
+{
+    /* 0. Overview:
+     * The function returns the string representation of the reference node.
+     */
+
+    /* 1. The string stored in the AST node is copied. */
+    int len = strlen(symbol->symbol);
+    char *result = mem_malloc(len + 1);
+    memcpy(result, symbol->symbol, len + 1);
+
+    /* 2. The copy of the string is returned along with the ownership. */
+    return result;
+}
+
+static char *ast_serialize_special_common(char *name, struct AstNode *args)
+{
+    char *result = NULL;
+    char *inner_str = NULL;
+
+    /* 0. Overview:
+     * The function returns a string representation of a common special form.
+     * Common means that it consists of a name and a list of arguments. The
+     * special forms that contain patterns don't fit in this pattern and need
+     * custom serialization code.
+     */
+
+    /* 1. The symbolic list is opened with an according special form name. */
+    str_append(result, "(%s", name);
+
+    /* 2. The arguments are linked and will be serialized together */
+    inner_str = ast_serialize(args);
+    str_append(result, " %s", inner_str);
+    mem_free(inner_str);
+
+    /* 3. The closing parenthesis is appended. */
+    str_append(result, ")");
+
+    /* 4. The result is returned passing the ownership. */
+    return result;
+}
+
+static char *ast_serialize_special_do(struct AstSpecDo *doo)
 {
     char *result = NULL;
     char *expr_string = NULL;
 
     /* 0. Overview:
      * Returns the string representation of a do expression.
-         * The expected form is: (do <expression>)
+     * The expected form is: (do <expression>)
      */
 
     /* 1. Serialize the inner expression. It is assumed not to be null
-         * which is derived from the do statement definition.
-         */
+     * which is derived from the do statement definition.
+     */
     expr_string = ast_serialize(doo->exprs);
     assert(expr_string);
     str_append(result, "(do %s)", expr_string);
@@ -28,41 +70,7 @@ static char *ast_serialize_control_do(struct AstCtlDo *doo)
     return result;
 }
 
-static char *ast_serialize_control_bind(struct AstCtlBind *bind)
-{
-    char *result = NULL;
-    char *pat_string = NULL;
-    char *expr_string = NULL;
-
-    /* 0. Overview:
-     * Returns the string representation of a bind expression.
-         * The expected form is: (bind <pattern> <expression>)
-     */
-
-    /* 1. Appends the keyword to the result. */
-    str_append(result, "(bind ");
-
-    /* 2. Appends the pattern to the result assumming it is not null by
-         * the bind expression definition.
-     */
-    pat_string = pattern_serialize(bind->pattern);
-    assert(pat_string);
-    str_append(result, "%s", pat_string);
-    mem_free(pat_string);
-
-    /* 3. Appends the expression to the result assumming it is not null by
-         * the bind expression definition.
-     */
-    expr_string = ast_serialize(bind->expr);
-    assert(expr_string);
-    str_append(result, " %s)", expr_string);
-    mem_free(expr_string);
-
-    /* 4. Returns the result passing the ownership along. */
-    return result;
-}
-
-static char *ast_serialize_control_match(struct AstCtlMatch *match)
+static char *ast_serialize_special_match(struct AstSpecMatch *match)
 {
     char *result = NULL;
     char *expr_string = NULL;
@@ -71,7 +79,7 @@ static char *ast_serialize_control_match(struct AstCtlMatch *match)
 
     /* 0. Overview:
      * Function returning the string representation of a match special form.
-         * The expected form is: (match <expression> \(<pattern> <expression>\)+)
+     * The expected form is: (match <expression> \(<pattern> <expression>\)+)
      */
 
     /* 1. The matched expression is appended to the result along with the keyword.
@@ -84,8 +92,8 @@ static char *ast_serialize_control_match(struct AstCtlMatch *match)
 
     /* 2. The key-value sequence is appended to the result one by one.
      * It is assumed that there is at least one pattern-expression pair by
-         * definition.
-         */
+     * definition.
+     */
     assert(key && value);
     do {
         /* 2.1. The key and the value string representations are generated. */
@@ -93,8 +101,8 @@ static char *ast_serialize_control_match(struct AstCtlMatch *match)
         char *value_string = ast_serialize(value);
 
         /* 2.2. An according pair is added to the result string releasing
-                 * the temporary values afterwards.
-                 */
+         * the temporary values afterwards.
+         */
         assert(key_string && value_string);
         str_append(result, " %s %s", key_string, value_string);
         mem_free(value_string);
@@ -115,7 +123,7 @@ static char *ast_serialize_control_match(struct AstCtlMatch *match)
     return result;
 }
 
-static char *ast_serialize_control_fdef(struct AstCtlFuncDef *fdef)
+static char *ast_serialize_special_func_def(struct AstSpecFuncDef *func_def)
 {
     char *result = NULL;
     char *arg_string = NULL;
@@ -124,14 +132,14 @@ static char *ast_serialize_control_fdef(struct AstCtlFuncDef *fdef)
     /* 0. Overview:
      * Function returns a string representation of the given function definition
      * AST node.
-         * The expected form is: (func (<pattern>*) <expression>)
+     * The expected form is: (func (<pattern>*) <expression>)
      */
 
     /* 1. The argument list string is generated and appended to the result along
      * with the opening parenthesis and the keyword. The temporary string is
      * released afterwards. The pattern list is optional.
      */
-    arg_string = pattern_serialize(fdef->formal_args);
+    arg_string = pattern_serialize(func_def->formal_args);
     if (arg_string) {
         str_append(result, "(func (%s)", arg_string);
         mem_free(arg_string);
@@ -139,9 +147,9 @@ static char *ast_serialize_control_fdef(struct AstCtlFuncDef *fdef)
 
     /* 2. The function body string is generated and appended to the result.
      * The temporary string is released afterwards. The expression element is
-         * obligatory which is subject to assertion.
+     * obligatory which is subject to assertion.
      */
-    expr_string = ast_serialize(fdef->expr);
+    expr_string = ast_serialize(func_def->expr);
     assert(expr_string);
     str_append(result, " %s)", expr_string);
     mem_free(expr_string);
@@ -150,53 +158,41 @@ static char *ast_serialize_control_fdef(struct AstCtlFuncDef *fdef)
     return result;
 }
 
-static char *ast_serialize_control_fcall(struct AstCtlFuncCall *fcall)
+static char *ast_serialize_special_bind(struct AstSpecBind *bind)
 {
     char *result = NULL;
+    char *pat_string = NULL;
     char *expr_string = NULL;
 
     /* 0. Overview:
-     * Function returns a string representation of the given function call
-     * AST node.
-         * The expected form is: (<expression>+)
-         * It calls to an explanation as it does not follow an intuition which
-         * would be closer to (<function-name> <argument>*). However the language
-         * enables using complex expressions as the first element to the function
-         * call list. This differentiation is recognized in the runtime and
-         * therefore is indistinguishable from the arguments which are optional.
-         * The required function expression plus the zero or more argument
-         * expressions reduce to one or more expression.
+     * Returns the string representation of a bind expression.
+     * The expected form is: (bind <pattern> <expression>)
      */
 
-    /* 1. The function expression string is generated and appended to the result.
-     * The temporary string is released afterwards. Note that the function
-         * expression is linked to the argument expressions therefore in is the only
-         * one that we need to serialize here.
+    /* 1. Appends the keyword to the result. */
+    str_append(result, "(bind ");
+
+    /* 2. Appends the pattern to the result assumming it is not null by
+     * the bind expression definition.
      */
-    expr_string = ast_serialize(fcall->func);
-    str_append(result, "(%s)", expr_string);
+    pat_string = pattern_serialize(bind->pattern);
+    assert(pat_string);
+    str_append(result, "%s", pat_string);
+    mem_free(pat_string);
+
+    /* 3. Appends the expression to the result assumming it is not null by
+     * the bind expression definition.
+     */
+    expr_string = ast_serialize(bind->expr);
+    assert(expr_string);
+    str_append(result, " %s)", expr_string);
     mem_free(expr_string);
 
-    /* 2. The result is returned passing the ownership. */
+    /* 4. Returns the result passing the ownership along. */
     return result;
 }
 
-static char *ast_serialize_control_reference(struct AstCtlReference *reference)
-{
-    /* 0. Overview:
-     * The function returns the string representation of the reference node.
-     */
-
-    /* 1. The string stored in the AST node is copied. */
-    int len = strlen(reference->symbol);
-    char *result = mem_malloc(len + 1);
-    memcpy(result, reference->symbol, len + 1);
-
-    /* 2. The copy of the string is returned along with the ownership. */
-    return result;
-}
-
-static char *ast_serialize_control(struct AstControl *control)
+static char *ast_serialize_special(struct AstSpecial *special)
 {
     char *result = NULL;
 
@@ -207,95 +203,85 @@ static char *ast_serialize_control(struct AstControl *control)
     /* 1. The creation of the particular string is delegated to an according
      * subprocedure.
      */
-    switch (control->type) {
-    case AST_CTL_DO:
-        result = ast_serialize_control_do(&control->data.doo);
-        break;
+    switch (special->type) {
+    case AST_SPEC_DO:
+        return ast_serialize_special_do(&special->data.doo);
 
-    case AST_CTL_BIND:
-        result = ast_serialize_control_bind(&control->data.bind);
-        break;
+    case AST_SPEC_MATCH:
+        return ast_serialize_special_match(&special->data.match);
 
-    case AST_CTL_MATCH:
-        result = ast_serialize_control_match(&control->data.match);
-        break;
+    case AST_SPEC_IF:
+        return ast_serialize_special_common("if", special->data.iff.test);
 
-    case AST_CTL_FUNC_DEF:
-        result = ast_serialize_control_fdef(&control->data.fdef);
-        break;
+    case AST_SPEC_WHILE:
+        return ast_serialize_special_common("while", special->data.whilee.test);
 
-    case AST_CTL_FUNC_CALL:
-        result = ast_serialize_control_fcall(&control->data.fcall);
-        break;
+    case AST_SPEC_FUNC_DEF:
+        return ast_serialize_special_func_def(&special->data.func_def);
 
-    case AST_CTL_REFERENCE:
-        result = ast_serialize_control_reference(&control->data.reference);
-        break;
+    case AST_SPEC_AND:
+        return ast_serialize_special_common("and", special->data.andd.exprs);
+
+    case AST_SPEC_OR:
+        return ast_serialize_special_common("or", special->data.orr.exprs);
+
+    case AST_SPEC_BIND:
+        return ast_serialize_special_bind(&special->data.bind);
+
+    case AST_SPEC_REF:
+        return ast_serialize_special_common("ref", special->data.ref.expr);
+
+    case AST_SPEC_PEEK:
+        return ast_serialize_special_common("peek", special->data.peek.expr);
+
+    case AST_SPEC_POKE:
+        return ast_serialize_special_common("poke", special->data.poke.reference);
+
+    case AST_SPEC_BEGIN:
+        return ast_serialize_special_common("begin", special->data.begin.collection);
+
+    case AST_SPEC_END:
+        return ast_serialize_special_common("end", special->data.end.collection);
+
+    case AST_SPEC_INC:
+        return ast_serialize_special_common("inc", special->data.inc.reference);
+
+    case AST_SPEC_SUCC:
+        return ast_serialize_special_common("succ", special->data.succ.reference);
     }
 
     /* 2. The result is returned passing the ownership. */
     return result;
 }
 
-static char *ast_serialize_special(struct AstSpecial *special)
+static char *ast_serialize_func_call(struct AstFuncCall *func_call)
 {
     char *result = NULL;
-    char *child_str = NULL;
+    char *expr_string = NULL;
 
     /* 0. Overview:
-     * The function returns a string representation of the given special form.
+     * Function returns a string representation of the given function call
+     * AST node.
+     * The expected form is: (<expression>+)
+     * It calls to an explanation as it does not follow an intuition which
+     * would be closer to (<function-name> <argument>*). However the language
+     * enables using complex expressions as the first element to the function
+     * call list. This differentiation is recognized in the runtime and
+     * therefore is indistinguishable from the arguments which are optional.
+     * The required function expression plus the zero or more argument
+     * expressions reduce to one or more expression.
      */
 
-    /* 1. The symbolic list is opened with an according special form name. */
-    switch (special->type) {
-    case AST_SPECIAL_IF:
-        str_append(result, "(if");
-        break;
-    case AST_SPECIAL_WHILE:
-        str_append(result, "(while");
-        break;
-    case AST_SPECIAL_AND:
-        str_append(result, "(and");
-        break;
-    case AST_SPECIAL_OR:
-        str_append(result, "(or");
-        break;
-    case AST_SPECIAL_REF:
-        str_append(result, "(ref");
-        break;
-    case AST_SPECIAL_PEEK:
-        str_append(result, "(peek");
-        break;
-    case AST_SPECIAL_POKE:
-        str_append(result, "(poke");
-        break;
-    case AST_SPECIAL_BEGIN:
-        str_append(result, "(begin");
-        break;
-    case AST_SPECIAL_END:
-        str_append(result, "(end");
-        break;
-    case AST_SPECIAL_INC:
-        str_append(result, "(inc");
-        break;
-    case AST_SPECIAL_SUCC:
-        str_append(result, "(succ");
-        break;
-    }
-
-    /* 2. The arguments to the special forms are appended to the result if such
-     * are present. Afterwards the temporary string is released.
+    /* 1. The function expression string is generated and appended to the result.
+     * The temporary string is released afterwards. Note that the function
+     * expression is linked to the argument expressions therefore in is the only
+     * one that we need to serialize here.
      */
-    if (special->args) {
-        child_str = ast_serialize(special->args);
-        str_append(result, " %s", child_str);
-        mem_free(child_str);
-    }
+    expr_string = ast_serialize(func_call->func);
+    str_append(result, "(%s)", expr_string);
+    mem_free(expr_string);
 
-    /* 3. The closing parenthesis is appended. */
-    str_append(result, ")");
-
-    /* 4. The result is returned passing the ownership. */
+    /* 2. The result is returned passing the ownership. */
     return result;
 }
 
@@ -407,19 +393,23 @@ char *ast_serialize(struct AstNode *node)
     }
 
     /* 2. The procedure iterates over a linked list of AST nodes. */
-    for (; node; node = node->next)    {
+    for (; node; node = node->next) {
 
         /* 2.1. A temporary string is acquired from the subprocedures depending on
          * the actual type of the current node.
          */
         char *temp = NULL;
         switch (node->type) {
-        case AST_CONTROL:
-            temp = ast_serialize_control(&node->data.control);
+        case AST_SYMBOL:
+            temp = ast_serialize_symbol(&node->data.symbol);
             break;
 
         case AST_SPECIAL:
             temp = ast_serialize_special(&node->data.special);
+            break;
+
+        case AST_FUNCTION_CALL:
+            temp = ast_serialize_func_call(&node->data.func_call);
             break;
 
         case AST_LITERAL_COMPOUND:
@@ -449,3 +439,4 @@ char *ast_serialize(struct AstNode *node)
     /* 3. The result is returned along with the ownership. */
     return result;
 }
+

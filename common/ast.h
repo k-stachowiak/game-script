@@ -11,38 +11,34 @@
  */
 
 enum AstNodeType {
-    AST_CONTROL,
+    AST_SYMBOL,
     AST_SPECIAL,
+    AST_FUNCTION_CALL,
     AST_LITERAL_COMPOUND,
     AST_LITERAL_ATOMIC
 };
 
-enum AstControlType {
-    AST_CTL_DO,
-    AST_CTL_BIND,
-    AST_CTL_MATCH,
-    AST_CTL_FUNC_DEF,
-    AST_CTL_FUNC_CALL,
-    AST_CTL_REFERENCE
-};
-
 enum AstSpecialType {
     /* Flow control */
-    AST_SPECIAL_IF,
-    AST_SPECIAL_WHILE,
+    AST_SPEC_DO,
+    AST_SPEC_MATCH,
+    AST_SPEC_IF,
+    AST_SPEC_WHILE,
+    AST_SPEC_FUNC_DEF,
 
     /* Short circuit logic */
-    AST_SPECIAL_AND,
-    AST_SPECIAL_OR,
+    AST_SPEC_AND,
+    AST_SPEC_OR,
 
-    /* References(coordinates) manipulation */
-    AST_SPECIAL_REF,
-    AST_SPECIAL_PEEK,
-    AST_SPECIAL_POKE,
-    AST_SPECIAL_BEGIN,
-    AST_SPECIAL_END,
-    AST_SPECIAL_INC,
-    AST_SPECIAL_SUCC
+    /* Variables manipulation */
+    AST_SPEC_BIND,
+    AST_SPEC_REF,
+    AST_SPEC_PEEK,
+    AST_SPEC_POKE,
+    AST_SPEC_BEGIN,
+    AST_SPEC_END,
+    AST_SPEC_INC,
+    AST_SPEC_SUCC
 };
 
 enum AstLiteralCompoundType {
@@ -65,56 +61,110 @@ enum AstLiteralAtomicType {
 
 struct AstNode;
 
-/* Control definition types.
- * -------------------------
- */
+struct AstSymbol {
+    char *symbol;
+};
 
-struct AstCtlDo {
+struct AstSpecDo {
     struct AstNode *exprs;
 };
 
-struct AstCtlBind {
-    struct Pattern *pattern;
-    struct AstNode *expr;
-};
-
-struct AstCtlMatch {
+struct AstSpecMatch {
     struct AstNode *expr;
     struct Pattern *keys;
     struct AstNode *values;
 };
 
-struct AstCtlFuncDef {
+struct AstSpecIf {
+    struct AstNode *test;
+    struct AstNode *true_expr;
+    struct AstNode *false_expr;
+};
+
+struct AstSpecWhile {
+    struct AstNode *test;
+    struct AstNode *expr;
+};
+
+struct AstSpecFuncDef {
     struct Pattern *formal_args;
     struct SourceLocation *arg_locs;
     int arg_count;
     struct AstNode *expr;
 };
 
-struct AstCtlFuncCall {
+struct AstSpecAnd {
+    struct AstNode *exprs;
+};
+
+struct AstSpecOr{
+    struct AstNode *exprs;
+};
+
+struct AstSpecBind {
+    struct Pattern *pattern;
+    struct AstNode *expr;
+};
+
+struct AstSpecRef {
+    struct AstNode *expr;
+};
+
+struct AstSpecPeek {
+    struct AstNode *expr;
+};
+
+struct AstSpecPoke {
+    struct AstNode *reference;
+    struct AstNode *value;
+};
+
+struct AstSpecBegin {
+    struct AstNode *collection;
+};
+
+struct AstSpecEnd {
+    struct AstNode *collection;
+};
+
+struct AstSpecInc {
+    struct AstNode *reference;
+};
+
+struct AstSpecSucc {
+    struct AstNode *reference;
+};
+
+struct AstSpecial {
+    enum AstSpecialType type;
+    union {
+        struct AstSpecDo doo;
+        struct AstSpecMatch match;
+        struct AstSpecIf iff;
+        struct AstSpecWhile whilee;
+        struct AstSpecFuncDef func_def;
+        struct AstSpecAnd andd;
+        struct AstSpecOr orr;
+        struct AstSpecBind bind;
+        struct AstSpecRef ref;
+        struct AstSpecPeek peek;
+        struct AstSpecPoke poke;
+        struct AstSpecBegin begin;
+        struct AstSpecEnd end;
+        struct AstSpecInc inc;
+        struct AstSpecSucc succ;
+    } data;
+};
+
+struct AstFuncCall {
     struct AstNode *func;
     struct AstNode *actual_args;
 };
 
-struct AstCtlReference {
-    char *symbol;
+struct AstLiteralCompound {
+    enum AstLiteralCompoundType type;
+    struct AstNode *exprs;
 };
-
-struct AstControl {
-    enum AstControlType type;
-    union {
-        struct AstCtlDo doo;
-        struct AstCtlBind bind;
-        struct AstCtlMatch match;
-        struct AstCtlFuncDef fdef;
-        struct AstCtlFuncCall fcall;
-        struct AstCtlReference reference;
-    } data;
-};
-
-/* Simple types.
- * -------------
- */
 
 struct AstLiteralAtomic {
     enum AstLiteralAtomicType type;
@@ -127,16 +177,6 @@ struct AstLiteralAtomic {
     } data;
 };
 
-struct AstSpecial {
-    enum AstSpecialType type;
-    struct AstNode *args;
-};
-
-struct AstLiteralCompound {
-    enum AstLiteralCompoundType type;
-    struct AstNode *exprs;
-};
-
 
 /* Main AST node definition.
  * =========================
@@ -146,8 +186,9 @@ struct AstNode {
     enum AstNodeType type;
     struct SourceLocation loc;
     union {
-        struct AstControl control;
+        struct AstSymbol symbol;
         struct AstSpecial special;
+        struct AstFuncCall func_call;
         struct AstLiteralCompound literal_compound;
         struct AstLiteralAtomic literal_atomic;
     } data;
@@ -158,39 +199,83 @@ struct AstNode {
  * =========
  */
 
-struct AstNode *ast_make_ctl_do(
+struct AstNode *ast_make_symbol(
+        struct SourceLocation *loc,
+        char *symbol);
+
+struct AstNode *ast_make_spec_do(
         struct SourceLocation *loc,
         struct AstNode* exprs);
 
-struct AstNode *ast_make_ctl_bind(
-        struct SourceLocation *loc,
-        struct Pattern *pattern,
-        struct AstNode *expr);
-
-struct AstNode *ast_make_ctl_match(
+struct AstNode *ast_make_spec_match(
         struct SourceLocation *loc,
         struct AstNode *expr,
         struct Pattern *keys,
         struct AstNode *values);
 
-struct AstNode *ast_make_ctl_fdef(
+struct AstNode *ast_make_spec_if(
+        struct SourceLocation *loc,
+        struct AstNode* test,
+        struct AstNode* true_expr,
+        struct AstNode* false_expr);
+
+struct AstNode *ast_make_spec_while(
+        struct SourceLocation *loc,
+        struct AstNode* test,
+        struct AstNode* expr);
+
+struct AstNode *ast_make_spec_func_def(
         struct SourceLocation *loc,
         struct Pattern *formal_args,
         struct SourceLocation *arg_locs,
         int arg_count,
         struct AstNode *expr);
 
-struct AstNode *ast_make_ctl_fcall(
+struct AstNode *ast_make_spec_and(
         struct SourceLocation *loc,
-        struct AstNode *func, struct AstNode *args);
+        struct AstNode* exprs);
 
-struct AstNode *ast_make_ctl_reference(
+struct AstNode *ast_make_spec_or(
         struct SourceLocation *loc,
-        char *symbol);
+        struct AstNode* exprs);
 
-struct AstNode *ast_make_special(
+struct AstNode *ast_make_spec_bind(
         struct SourceLocation *loc,
-        enum AstSpecialType type,
+        struct Pattern *pattern,
+        struct AstNode *expr);
+
+struct AstNode *ast_make_spec_ref(
+        struct SourceLocation *loc,
+        struct AstNode* expr);
+
+struct AstNode *ast_make_spec_peek(
+        struct SourceLocation *loc,
+        struct AstNode* expr);
+
+struct AstNode *ast_make_spec_poke(
+        struct SourceLocation *loc,
+        struct AstNode* reference,
+        struct AstNode* value);
+
+struct AstNode *ast_make_spec_begin(
+        struct SourceLocation *loc,
+        struct AstNode* collection);
+
+struct AstNode *ast_make_spec_end(
+        struct SourceLocation *loc,
+        struct AstNode* collection);
+
+struct AstNode *ast_make_spec_inc(
+        struct SourceLocation *loc,
+        struct AstNode* reference);
+
+struct AstNode *ast_make_spec_succ(
+        struct SourceLocation *loc,
+        struct AstNode* reference);
+
+struct AstNode *ast_make_func_call(
+        struct SourceLocation *loc,
+        struct AstNode *func,
         struct AstNode *args);
 
 struct AstNode *ast_make_literal_compound(
