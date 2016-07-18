@@ -6,6 +6,10 @@ static void test_runtime_special_logic(
         struct TestContext *tc,
         struct Runtime *rt)
 {
+    test_eval_source_expect(tc, rt, "(and true)", "Evaluate and 1 true arg", BOOL, true);
+    test_eval_source_expect(tc, rt, "(and false)", "Evaluate and 1 false arg", BOOL, false);
+    test_eval_source_expect(tc, rt, "(or true)", "Evaluate or 1 true arg", BOOL, true);
+    test_eval_source_expect(tc, rt, "(or false)", "Evaluate or 1 false arg", BOOL, false);
     test_eval_source_expect(tc, rt, "(and true true)", "Evaluate and true result", BOOL, true);
     test_eval_source_expect(tc, rt, "(and false true)", "Evaluate and false result", BOOL, false);
     test_eval_source_expect(tc, rt, "(or false true)", "Evaluate or true result", BOOL, true);

@@ -13,11 +13,11 @@ include_directories(
     .
     )
 
-set(CMAKE_C_COMPILER "clang")
-set(CMAKE_CXX_COMPILER "clang++")
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "g++")
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -g -O0 -std=c11")
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -O0 -std=c++11")
+set(CMAKE_C_FLAGS "-Wall -Wextra -g -O0 -std=c11 -DNO_TIMER_STACK")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -O0 -std=c++11 -DNO_TIMER_STACK")
 #set(CMAKE_C_FLAGS "-Wall -Wextra -O2 -std=c11")
 #set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2 -std=c++11")
 
@@ -43,16 +43,12 @@ add_library(lang OBJECT
         ./runtime/rt_val.c
         ./runtime/rt_val_poke.c
         ./runtime/eval/eval.c
-        ./runtime/eval/eval_literal_compound.c
-        ./runtime/eval/eval_control.c
-        ./runtime/eval/eval_control_bind_pattern.c
-        ./runtime/eval/eval_control_fcall.c
-        ./runtime/eval/eval_control_fdef.c
+        ./runtime/eval/eval_func_call.c
         ./runtime/eval/eval_literal_atomic.c
+        ./runtime/eval/eval_literal_compound.c
         ./runtime/eval/eval_special.c
-        ./runtime/eval/eval_special_flow.c
-        ./runtime/eval/eval_special_logic.c
-        ./runtime/eval/eval_special_reference.c
+        ./runtime/eval/eval_special_bind_pattern.c
+        ./runtime/eval/eval_special_func_def.c
         ./runtime/bif/bif_compound.c
         ./runtime/bif/bif_type.c
         ./runtime/bif/bif_random.c

@@ -9,12 +9,15 @@
 void eval_literal_compound(
         struct AstLiteralCompound *literal_compound,
         struct Runtime *rt,
-        struct SymMap *sym_map)
+        struct SymMap *sym_map,
+        struct SourceLocation *src_loc)
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
     struct AstNode *current = literal_compound->exprs;
     bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
+
+    (void)src_loc;
 
     /* Header. */
     switch (literal_compound->type) {

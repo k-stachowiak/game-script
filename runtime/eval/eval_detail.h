@@ -4,39 +4,42 @@
 #include "runtime.h"
 
 void eval_error_not_found(char *symbol);
-void spec_error_invalid_argc(char *func, int count);
-void spec_error_arg_expected(char *func, int index, char *expected);
 
-void eval_control(
-        struct AstControl *control,
+void eval_special(
+        struct AstSpecial *special,
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct SourceLocation *src_loc);
 
-void eval_special(struct AstSpecial *special, struct Runtime *rt, struct SymMap *sym_map);
-void eval_literal_compound(struct AstLiteralCompound *literal_compound, struct Runtime *rt, struct SymMap *sym_map);
-void eval_literal_atomic(struct AstLiteralAtomic *literal_atomic, struct Runtime *rt, struct SymMap *sym_map);
-
-void eval_func_call(struct AstCtlFuncCall *fcall, struct Runtime *rt, struct SymMap *sym_map);
-void eval_func_def(struct AstCtlFuncDef *fdef, struct Runtime *rt, struct SymMap *sym_map);
-
-void eval_special_if(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_while(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_ref(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_logic(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args, bool bv, char *f);
-void eval_special_ref(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_peek(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_poke(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_begin(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_end(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_inc(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-void eval_special_succ(struct Runtime *rt, struct SymMap *sym_map, struct AstNode *args);
-
-void eval_bind_pattern(
-        struct Pattern *pattern,
+void eval_special_func_def(
+        struct AstSpecFuncDef* func_def,
         struct Runtime *rt,
         struct SymMap *sym_map,
+        struct SourceLocation *src_loc);
+
+void eval_special_bind_pattern(
+        struct Pattern *pattern,
         VAL_LOC_T location,
-        struct SourceLocation *source_loc);
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct SourceLocation *src_loc);
+
+void eval_func_call(
+        struct AstFuncCall *fcall,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct SourceLocation *src_loc);
+
+void eval_literal_compound(
+        struct AstLiteralCompound *literal_compound,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct SourceLocation *src_loc);
+
+void eval_literal_atomic(
+        struct AstLiteralAtomic *literal_atomic,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct SourceLocation *src_loc);
 
 VAL_LOC_T eval_dispatch(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map);

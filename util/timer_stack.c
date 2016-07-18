@@ -10,7 +10,24 @@
 #    endif
 #endif
 
-#if defined(_WIN32) || defined(WIN32)
+#if defined(NO_TIMER_STACK)
+
+void ts_start(void)
+{
+    // nop
+}
+
+long long ts_ustop(void)
+{
+    return -1;
+}
+
+void ts_deinit(void)
+{
+    // nop
+}
+
+#elif defined(_WIN32) || defined(WIN32)
 
 #include <windows.h>
 

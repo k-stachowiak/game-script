@@ -1,4 +1,4 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #include "error.h"
 #include "ast.h"
@@ -9,6 +9,27 @@
 void eval_error_not_found(char *symbol)
 {
     err_push("EVAL", "Symbol \"%s\" not found", symbol);
+}
+
+static void eval_symbol(
+        struct AstSymbol *symbol_node,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct SourceLocation *src_loc)
+{
+    struct SymMapNode *smn;
+    char *symbol = symbol_node->symbol;
+
+    (void)src_loc;
+
+    LOG_TRACE_FUNC;
+
+    if (!(smn = sym_map_find(sym_map, symbol))) {
+        eval_error_not_found(symbol);
+        return;
+    }
+
+    rt_val_push_copy(&rt->stack, smn->stack_loc);
 }
 
 VAL_LOC_T eval_dispatch(
@@ -33,20 +54,24 @@ VAL_LOC_T eval_dispatch(
     }
 
     switch (node->type) {
-    case AST_CONTROL:
-        eval_control(&node->data.control, rt, sym_map, &node->loc);
+    case AST_SYMBOL:
+        eval_symbol(&node->data.symbol, rt, sym_map, &node->loc);
         break;
 
     case AST_SPECIAL:
-        eval_special(&node->data.special, rt, sym_map);
+        eval_special(&node->data.special, rt, sym_map, &node->loc);
+        break;
+
+    case AST_FUNCTION_CALL:
+        eval_func_call(&node->data.func_call, rt, sym_map, &node->loc);
         break;
 
     case AST_LITERAL_COMPOUND:
-        eval_literal_compound(&node->data.literal_compound, rt, sym_map);
+        eval_literal_compound(&node->data.literal_compound, rt, sym_map, &node->loc);
         break;
 
     case AST_LITERAL_ATOMIC:
-        eval_literal_atomic(&node->data.literal_atomic, rt, sym_map);
+        eval_literal_atomic(&node->data.literal_atomic, rt, sym_map, &node->loc);
         break;
     }
 
@@ -94,10 +119,10 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
 
     if (err_state()) {
         stack_collapse(&rt->stack, begin, end);
-    LOG_TRACE("eval END(error)");
+        LOG_TRACE("eval END(error)");
         return -1;
     } else {
-    LOG_TRACE("eval END(result=%td)", result);
+        LOG_TRACE("eval END(result=%td)", result);
         return result;
     }
 }

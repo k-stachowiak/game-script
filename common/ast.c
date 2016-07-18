@@ -56,6 +56,9 @@ struct AstNode *ast_make_spec_match(
     result->data.special.data.match.keys = keys;
     result->data.special.data.match.values = values;
 
+    /* Link values list to the matched expression to ease traversal. */
+    expr->next = values;
+
     return result;
 }
 
@@ -428,7 +431,7 @@ static void ast_special_match_free(struct AstSpecMatch *match)
 {
     ast_node_free(match->expr);
     pattern_free(match->keys);
-    ast_node_free(match->values);
+    /* The expression node is linked with the values list. */
 }
 
 static void ast_special_if_free(struct AstSpecIf *iff)

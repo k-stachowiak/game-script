@@ -1,14 +1,7 @@
 # TODO #
-- Bring order to AST. It should only consist of:
-  - atomic literals
-  - compound literals
-  - function calls
-  - para-function calls
- The procedure:
- - move control elements to the para function sections one by one
-- use AST serialization for debug printer and all other cases of printing
+- track the source location information propagation in the error reporting.
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
-- migrate to auto-tools; think of carving out libraries such as a parser, runtime, semantics (AST, etc.), etc.
+- migrate from cmake to make; think of carving out libraries such as a parser, runtime, semantics (AST, etc.), etc.
 - A bind should create "references", i.e. a tuples of address and type.
   This should be a common concept also used by the reference varaibles. Once
   the references are implemented in terms of address+size the metadata may start

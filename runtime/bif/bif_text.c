@@ -263,8 +263,9 @@ static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
         bif_parse_any_ast_literal_atomic(runtime, &ast->data.literal_atomic);
         break;
 
-    case AST_CONTROL:
     case AST_SPECIAL:
+    case AST_SYMBOL:
+    case AST_FUNCTION_CALL:
         bif_text_error_parse();
         break;
     }

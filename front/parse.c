@@ -955,9 +955,9 @@ static struct AstNode *parse_min_nary(
     }
     child = child->next;
 
-    /* 2.2. Has 2 or more further children being any expression. */
+    /* 2.2. Has proper amount of further children being any expression. */
     exprs = parse_list(child);
-    if (err_state() || !exprs || ast_list_len(exprs) <= min_args) {
+    if (err_state() || !exprs || ast_list_len(exprs) < min_args) {
         return NULL;
     }
 
@@ -1019,7 +1019,7 @@ static struct AstNode *parse_binary(
     }
 
     /* 2. Has 2 children */
-    if (!dom_node_is_cpd_of_size(dom, 2)) {
+    if (!dom_node_is_cpd_of_size(dom, 3)) {
         return NULL;
     }
 
@@ -1093,14 +1093,14 @@ static struct AstNode *parse_special(struct DomNode *dom)
         return parse_func_def(dom);
     }
 
-    /* 3.6. Case &&: */
+    /* 3.6. Case and: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_AND)) {
-        return parse_min_nary(dom, 2, DOM_RES_AND, ast_make_spec_and);
+        return parse_min_nary(dom, 1, DOM_RES_AND, ast_make_spec_and);
     }
 
-    /* 3.7. Case ||: */
+    /* 3.7. Case or: */
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_OR)) {
-        return parse_min_nary(dom, 2, DOM_RES_OR, ast_make_spec_and);
+        return parse_min_nary(dom, 1, DOM_RES_OR, ast_make_spec_or);
     }
 
     /* 3.8. Case bind: */

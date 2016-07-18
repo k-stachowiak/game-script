@@ -22,17 +22,6 @@ static void test_runtime_bif_arythmetic(
     rt_reset(rt);
 }
 
-static void test_runtime_bif_logic(
-        struct TestContext *tc,
-        struct Runtime *rt)
-{
-    test_eval_source_expect(tc, rt, "(xor false true)", "Evaluate xor true result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(xor true true)", "Evaluate xor false result", BOOL, false);
-    test_eval_source_expect(tc, rt, "(not false)", "Evaluate not false result", BOOL, true);
-    test_eval_source_expect(tc, rt, "(not true)", "Evaluate not true result", BOOL, false);
-    rt_reset(rt);
-}
-
 static void test_runtime_bif_compare(
         struct TestContext *tc,
         struct Runtime *rt)
@@ -43,23 +32,21 @@ static void test_runtime_bif_compare(
     test_eval_source_expect(tc, rt, "(lt 2 2)", "Evaluate less than false", BOOL, false);
 
     /* Handle a curious case of parsing "+" or "-" as a numeric literal. */
+    /* TODO: Put this test in the parser testing section */
     test_eval_source_fail(tc, rt, "(lt 2 -)", "Fail on performing numerical operation on a - sign");
     test_eval_source_fail(tc, rt, "(lt + 3.0)", "Fail on performing numerical operation on a + sign");
 
     rt_reset(rt);
 }
 
-static void test_runtime_bif_length(
+static void test_runtime_bif_logic(
         struct TestContext *tc,
         struct Runtime *rt)
 {
-    test_eval_source_expect(tc, rt, "(length [])", "Evaluate length of an empty array", INT, 0);
-    test_eval_source_expect(tc, rt, "(length [ 'a' 'b' 'c' ])", "Evaluate length of an non-empty array", INT, 3);
-    test_eval_source_expect(tc, rt, "(length {})", "Evaluate length of an empty tuple", INT, 0);
-    test_eval_source_expect(tc, rt, "(length { 1 2.0 \"three\" })", "Evaluate length of an non-empty tuple", INT, 3);
-    test_eval_source_expect(tc, rt, "(length \"\")", "Evaluate length of an empty string", INT, 0);
-    test_eval_source_expect(tc, rt, "(length \"asd\\n\")", "Evaluate length of a non-empty string", INT, 4);
-    test_eval_source_fail(tc, rt, "(length 'x')", "Fail on length of a non-compound value");
+    test_eval_source_expect(tc, rt, "(xor false true)", "Evaluate xor true result", BOOL, true);
+    test_eval_source_expect(tc, rt, "(xor true true)", "Evaluate xor false result", BOOL, false);
+    test_eval_source_expect(tc, rt, "(not false)", "Evaluate not false result", BOOL, true);
+    test_eval_source_expect(tc, rt, "(not true)", "Evaluate not true result", BOOL, false);
     rt_reset(rt);
 }
 
@@ -73,22 +60,6 @@ static void test_runtime_bif_pushfb(
     test_eval_source_expect(tc, rt, "(eq (push_back [2 3] 1) [2 3 1])", "Push_back to non-empty", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (push_back \"\" 'a') \"a\")", "Push_back to empty string", BOOL, true);
     test_eval_source_expect(tc, rt, "(eq (push_back \"as\" 'd') \"asd\")", "Push_back to non-empty string", BOOL, true);
-    rt_reset(rt);
-}
-
-static void test_runtime_bif_at(
-        struct TestContext *tc,
-        struct Runtime *rt)
-{
-    test_eval_source_expect(tc, rt, "(at [ 1 2 3 ] 0)", "Evaluate valid at call for array", INT, 1);
-    test_eval_source_expect(tc, rt, "(at { 1 2.0 \"three\" } 1)", "Evaluate valid at call for tuple", REAL, 2.0);
-    test_eval_source_expect(tc, rt, "(at \"asd\" 1)", "Evaluate valid at call for string", CHAR, 's');
-    test_eval_source_fail(tc, rt, "(at [ 1 ] 0 0)", "Fail at on too many arguments");
-    test_eval_source_fail(tc, rt, "(at {} 1.0)", "Fail at on non-integer index");
-    test_eval_source_fail(tc, rt, "(at 1.0 1)", "Fail at on non-array subject");
-    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] -1)", "Fail at on negative index");
-    test_eval_source_fail(tc, rt, "(at { \"alpha\" \"beta\" \"gamma\" } 3)", "Fail at on index == size");
-    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 300)", "Fail at on index beyond size");
     rt_reset(rt);
 }
 
@@ -129,6 +100,36 @@ static void test_runtime_bif_cat(
     rt_reset(rt);
 }
 
+static void test_runtime_bif_length(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(length [])", "Evaluate length of an empty array", INT, 0);
+    test_eval_source_expect(tc, rt, "(length [ 'a' 'b' 'c' ])", "Evaluate length of an non-empty array", INT, 3);
+    test_eval_source_expect(tc, rt, "(length {})", "Evaluate length of an empty tuple", INT, 0);
+    test_eval_source_expect(tc, rt, "(length { 1 2.0 \"three\" })", "Evaluate length of an non-empty tuple", INT, 3);
+    test_eval_source_expect(tc, rt, "(length \"\")", "Evaluate length of an empty string", INT, 0);
+    test_eval_source_expect(tc, rt, "(length \"asd\\n\")", "Evaluate length of a non-empty string", INT, 4);
+    test_eval_source_fail(tc, rt, "(length 'x')", "Fail on length of a non-compound value");
+    rt_reset(rt);
+}
+
+static void test_runtime_bif_at(
+        struct TestContext *tc,
+        struct Runtime *rt)
+{
+    test_eval_source_expect(tc, rt, "(at [ 1 2 3 ] 0)", "Evaluate valid at call for array", INT, 1);
+    test_eval_source_expect(tc, rt, "(at { 1 2.0 \"three\" } 1)", "Evaluate valid at call for tuple", REAL, 2.0);
+    test_eval_source_expect(tc, rt, "(at \"asd\" 1)", "Evaluate valid at call for string", CHAR, 's');
+    test_eval_source_fail(tc, rt, "(at [ 1 ] 0 0)", "Fail at on too many arguments");
+    test_eval_source_fail(tc, rt, "(at {} 1.0)", "Fail at on non-integer index");
+    test_eval_source_fail(tc, rt, "(at 1.0 1)", "Fail at on non-array subject");
+    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] -1)", "Fail at on negative index");
+    test_eval_source_fail(tc, rt, "(at { \"alpha\" \"beta\" \"gamma\" } 3)", "Fail at on index == size");
+    test_eval_source_fail(tc, rt, "(at [ \"alpha\" \"beta\" \"gamma\" ] 300)", "Fail at on index beyond size");
+    rt_reset(rt);
+}
+
 static void test_runtime_bif_slice(
         struct TestContext *tc,
         struct Runtime *rt)
@@ -164,19 +165,48 @@ static void test_runtime_bif_format(
     rt_reset(rt);
 }
 
-static void test_runtime_bif_parse_any(
+static void test_runtime_bif_parse_serialize(
         struct TestContext *tc,
         struct Runtime *rt)
 {
+    size_t i;
+    char *valid_expressions[] = {
+	"false",
+	"1",
+	"2.0",
+	"'3'",
+	"{ 1 2.0 [ '3' ] }",
+	"[ { 1 2 } { 3 4 } ]"
+    };
+
     test_eval_source_fail(tc, rt, "(parse 1)", "Parse nonstring argument");
 
-    test_eval_source_succeed(tc, rt, "(parse \"false\")", "Parse boolean value");
-    test_eval_source_succeed(tc, rt, "(parse \"1\")", "Parse integer value");
-    test_eval_source_succeed(tc, rt, "(parse \"2.0\")", "Parse real value");
-    test_eval_source_succeed(tc, rt, "(parse \"'3'\")", "Parse character value");
-    test_eval_source_succeed(tc, rt, "(parse \"\\\"four\\\"\")", "Parse string value");
-    test_eval_source_succeed(tc, rt, "(parse \"{ 1 2.0 '3' [ \\\"four\\\" ]}\")", "Parse tuple successfully");
-    test_eval_source_succeed(tc, rt, "(parse \"[ { 1 2 } { 3 4 } ]\")", "Parse array successfully");
+    for (i = 0; i < sizeof(valid_expressions)/sizeof(*valid_expressions); ++i) {
+	char *source = NULL;
+	char *message = NULL;
+	str_append(source, "(parse \"%s\")", valid_expressions[i]);
+	str_append(message, "Parsing value: \"%s\"", valid_expressions[i]);
+	test_eval_source_succeed(tc, rt, source, message);
+	mem_free(message);
+	mem_free(source);
+    }
+
+    for (i = 0; i < sizeof(valid_expressions)/sizeof(*valid_expressions); ++i) {
+	char *source = NULL;
+	char *message = NULL;
+	str_append(
+	    source,
+	    "(eq %s (parse (to_string %s)))",
+	    valid_expressions[i],
+	    valid_expressions[i]);
+	str_append(
+	    message,
+	    "Testing parse/serialize: %s",
+	    valid_expressions[i]);
+	test_eval_source_succeed(tc, rt, source, message);
+	mem_free(message);
+	mem_free(source);
+    }
 
     test_eval_source_expect(tc, rt,
             "(do (bind { x _ } (parse \"2.0\")) x)",
@@ -205,15 +235,16 @@ void test_runtime_bif(struct TestContext *tc)
 {
     struct Runtime *rt = rt_make();
     test_runtime_bif_arythmetic(tc, rt);
-    test_runtime_bif_logic(tc, rt);
     test_runtime_bif_compare(tc, rt);
-    test_runtime_bif_length(tc, rt);
+    test_runtime_bif_logic(tc, rt);
     test_runtime_bif_pushfb(tc, rt);
-    test_runtime_bif_at(tc, rt);
     test_runtime_bif_cat(tc, rt);
+    test_runtime_bif_length(tc, rt);
+    test_runtime_bif_at(tc, rt);
     test_runtime_bif_slice(tc, rt);
     test_runtime_bif_format(tc, rt);
-    test_runtime_bif_parse_any(tc, rt);
+    test_runtime_bif_parse_serialize(tc, rt);
+    // TYPE
     rt_free(rt);
 }
 
