@@ -28,10 +28,11 @@ static bool efc_evaluate_currently_applied(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *args,
-        struct LocArray *result)
+        struct LocArray *result,
+	struct AstLocMap *alm)
 {
     while (args) {
-        VAL_LOC_T loc = eval_dispatch(args, rt, sym_map);
+        VAL_LOC_T loc = eval_dispatch(args, rt, sym_map, alm);
         if (err_state()) {
             err_push("EVAL", "Failed evaluating new funtcion arguments");
             return false;
@@ -48,19 +49,25 @@ static bool efc_evaluate_arg(
         struct SymMap *caller_sym_map,
         struct SymMap *new_sym_map,
         struct AstNode *arg_node,
-        struct SourceLocation *arg_loc,
         struct Pattern *pattern,
-        VAL_LOC_T *location)
+        VAL_LOC_T *location,
+	struct AstLocMap *alm)
 {
-    *location = eval_dispatch(arg_node, rt, caller_sym_map);
+    *location = eval_dispatch(arg_node, rt, caller_sym_map, alm);
     if (err_state()) {
-        err_push_src("EVAL", arg_node->loc, "Failed evaluating function argument expression");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, arg_node),
+	    "Failed evaluating function argument expression");
         return false;
     }
 
-    eval_special_bind_pattern(pattern, *location, rt, new_sym_map, arg_loc);
+    eval_special_bind_pattern(pattern, *location, rt, new_sym_map, alm);
     if (err_state()) {
-        err_push("EVAL", "Failed registering function argument in the local scope");
+        err_push_src(
+	    "EVAL",
+	    alm_get_pat(alm, pattern),
+	    "Failed registering function argument in the local scope");
         return false;
     }
 
@@ -75,7 +82,8 @@ static void efc_curry_on(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *actual_args,
-        struct ValueFuncData *func_data)
+        struct ValueFuncData *func_data,
+	struct AstLocMap *alm)
 {
     VAL_LOC_T current_loc, size_loc, data_begin;
     VAL_SIZE_T i, arg_count;
@@ -110,9 +118,12 @@ static void efc_curry_on(
 
     /* ...currently. */
     for (; actual_args; actual_args = actual_args->next) {
-        eval_dispatch(actual_args, rt, sym_map);
+        eval_dispatch(actual_args, rt, sym_map, alm);
         if (err_state()) {
-            err_push_src("EVAL", actual_args->loc, "Failed evaluating function argument");
+            err_push_src(
+		"EVAL",
+		alm_get_ast(alm, actual_args),
+		"Failed evaluating function argument");
             break;
         }
     }
@@ -126,7 +137,8 @@ static void efc_evaluate_ast(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *actual_args,
-        struct ValueFuncData *func_data)
+        struct ValueFuncData *func_data,
+	struct AstLocMap *alm)
 {
     VAL_SIZE_T i;
 
@@ -137,12 +149,10 @@ static void efc_evaluate_ast(
     struct SymMap captures_sym_map;
     struct SymMap args_sym_map;
 
-    struct AstSpecFuncDef *fdef = (struct AstSpecFuncDef *)func_data->impl;
+    struct AstNode *node = (struct AstNode *)func_data->impl;
+    struct AstSpecFuncDef *fdef = &node->data.special.data.func_def;
 
     struct Pattern *formal_args = fdef->formal_args;
-    struct SourceLocation *arg_locs = fdef->arg_locs;
-
-    struct SourceLocation cont_loc = src_loc_virtual();
 
     /* Initialize local scopes hierarchy. */
     sym_map_init_local(&captures_sym_map, sym_map);
@@ -153,10 +163,10 @@ static void efc_evaluate_ast(
     for (i = 0; i < func_data->cap_count; ++i) {
         char *cap_symbol = rt_val_peek_fun_cap_symbol(rt, cap_loc);
         VAL_LOC_T cap_val_loc = rt_val_fun_cap_loc(rt, cap_loc);
-        sym_map_insert(&captures_sym_map, cap_symbol, cap_val_loc, cont_loc);
+        sym_map_insert(&captures_sym_map, cap_symbol, cap_val_loc);
         cap_loc = rt_val_fun_next_cap_loc(rt, cap_loc);
         if (err_state()) {
-            err_push_src("EVAL", cont_loc, "Failed re-evaluating funtcion captures");
+            err_push("EVAL", "Failed re-evaluating funtcion captures");
             goto cleanup;
         }
     }
@@ -164,7 +174,7 @@ static void efc_evaluate_ast(
     /* Insert already applied arguments. */
     LOG_TRACE("Evaluate AST call: already applied in args scope");
     for (i = 0; i < func_data->appl_count; ++i) {
-        eval_special_bind_pattern(formal_args, appl_loc, rt, &args_sym_map, &cont_loc);
+        eval_special_bind_pattern(formal_args, appl_loc, rt, &args_sym_map, alm);
         formal_args = formal_args->next;
         appl_loc = rt_val_fun_next_appl_loc(rt, appl_loc);
         if (err_state()) {
@@ -178,8 +188,10 @@ static void efc_evaluate_ast(
     temp_begin = rt->stack.top;
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T actual_loc;
-        if (efc_evaluate_arg(rt, sym_map, &args_sym_map,
-            actual_args, arg_locs++, formal_args, &actual_loc)) {
+        if (efc_evaluate_arg(
+		rt, sym_map, &args_sym_map,
+		actual_args, formal_args,
+		&actual_loc, alm)) {
             formal_args = formal_args->next;
         } else {
             goto cleanup;
@@ -188,7 +200,7 @@ static void efc_evaluate_ast(
     temp_end = rt->stack.top;
 
     /* Evaluate the function expression. */
-    eval_dispatch(fdef->expr, rt, &args_sym_map);
+    eval_dispatch(fdef->expr, rt, &args_sym_map, alm);
 
     /* Collapse the temporaries. */
     stack_collapse(&rt->stack, temp_begin, temp_end);
@@ -205,7 +217,8 @@ static void efc_evaluate_bif(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *actual_args,
-        struct ValueFuncData *func_data)
+        struct ValueFuncData *func_data,
+	struct AstLocMap *alm)
 {
     struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
@@ -213,7 +226,7 @@ static void efc_evaluate_bif(
     efc_get_already_applied_locs(rt, func_data, &arg_locs);
 
     temp_begin = rt->stack.top;
-    if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
+    if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs, alm)) {
         goto cleanup;
     }
     temp_end = rt->stack.top;
@@ -330,7 +343,8 @@ static void efc_evaluate_clif(
         struct Runtime *rt,
         struct SymMap *sym_map,
         struct AstNode *actual_args,
-        struct ValueFuncData *func_data)
+        struct ValueFuncData *func_data,
+	struct AstLocMap *alm)
 {
     struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
@@ -340,7 +354,7 @@ static void efc_evaluate_clif(
     efc_get_already_applied_locs(rt, func_data, &arg_locs);
 
     temp_begin = rt->stack.top;
-    if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs)) {
+    if (!efc_evaluate_currently_applied(rt, sym_map, actual_args, &arg_locs, alm)) {
         goto cleanup;
     }
     temp_end = rt->stack.top;
@@ -361,12 +375,13 @@ cleanup:
 }
 
 void eval_func_call(
-        struct AstFuncCall *fcall,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     VAL_LOC_T temp_begin, temp_end;
+    struct AstFuncCall *fcall = &node->data.func_call;
     struct AstNode *func = fcall->func;
     struct AstNode *actual_args = fcall->actual_args;
 
@@ -374,18 +389,22 @@ void eval_func_call(
     struct ValueFuncData func_data;
     VAL_SIZE_T applied;
 
-    (void)src_loc;
-
     temp_begin = rt->stack.top;
-    func_loc = eval_dispatch(func, rt, sym_map);
+    func_loc = eval_dispatch(func, rt, sym_map, alm);
     temp_end = rt->stack.top;
     if (err_state()) {
-        err_push("EVAL", "Failed evaluating function identity");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, func),
+	    "Failed evaluating function identity");
         return;
     }
 
     if (rt_val_peek_type(&rt->stack, func_loc) != VAL_FUNCTION) {
-        err_push("EVAL", "Function call key doesn't evaluate to a function");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, func),
+	    "Function call key doesn't evaluate to a function");
         return;
     }
 
@@ -393,20 +412,20 @@ void eval_func_call(
     applied = func_data.appl_count + ast_list_len(actual_args);
 
     if (func_data.arity > applied) {
-        efc_curry_on(rt, sym_map, actual_args, &func_data);
+        efc_curry_on(rt, sym_map, actual_args, &func_data, alm);
 
     } else if (func_data.arity == applied) {
         switch (func_data.func_type) {
         case VAL_FUNC_AST:
-            efc_evaluate_ast(rt, sym_map, actual_args, &func_data);
+            efc_evaluate_ast(rt, sym_map, actual_args, &func_data, alm);
             break;
 
         case VAL_FUNC_BIF:
-            efc_evaluate_bif(rt, sym_map, actual_args, &func_data);
+            efc_evaluate_bif(rt, sym_map, actual_args, &func_data, alm);
             break;
 
         case VAL_FUNC_CLIF:
-            efc_evaluate_clif(rt, sym_map, actual_args, &func_data);
+            efc_evaluate_clif(rt, sym_map, actual_args, &func_data, alm);
             break;
         }
 

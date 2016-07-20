@@ -7,17 +7,16 @@
 #include "eval.h"
 
 void eval_literal_compound(
-        struct AstLiteralCompound *literal_compound,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     VAL_LOC_T size_loc = -1, data_begin, data_size;
+    struct AstLiteralCompound *literal_compound = &node->data.literal_compound;
     struct AstNode *current = literal_compound->exprs;
     bool has_first_elem = false;
     VAL_LOC_T first_elem_loc, elem_loc;
-
-    (void)src_loc;
 
     /* Header. */
     switch (literal_compound->type) {
@@ -33,9 +32,12 @@ void eval_literal_compound(
     /* Data. */
     data_begin = rt->stack.top;
     while (current) {
-        elem_loc = eval_dispatch(current, rt, sym_map);
+        elem_loc = eval_dispatch(current, rt, sym_map, alm);
         if (err_state()) {
-            err_push_src("EVAL", current->loc, "Failed evaluating literal compound expression element");
+            err_push_src(
+		"EVAL",
+		alm_get_ast(alm, current),
+		"Failed evaluating literal compound expression element");
             return;
         } else {
             current = current->next;
@@ -50,7 +52,10 @@ void eval_literal_compound(
             has_first_elem = true;
             first_elem_loc = elem_loc;
         } else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
-            err_push("EVAL", "Heterogenous array literal evaluated");
+            err_push_src(
+		"EVAL",
+		alm_get_ast(alm, current),
+		"Heterogenous array literal evaluated");
             return;
         }
     }

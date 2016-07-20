@@ -44,8 +44,7 @@ void sym_map_deinit(struct SymMap *sym_map)
 void sym_map_insert(
         struct SymMap *sym_map,
         char *key,
-        VAL_LOC_T stack_loc,
-        struct SourceLocation source_loc)
+        VAL_LOC_T stack_loc)
 {
     struct SymMapNode *node = &sym_map->root;
     char *current = key;
@@ -67,8 +66,7 @@ void sym_map_insert(
                 0,
                 { NULL, 0, 0 },
                 false,
-                0,
-                { 0, 0, 0 }
+                0
             };
             new_node.key = *current;
             ARRAY_APPEND(node->children, new_node);
@@ -84,7 +82,6 @@ void sym_map_insert(
     } else {
         node->is_set = true;
         node->stack_loc = stack_loc;
-        node->source_loc = source_loc;
     }
 }
 
@@ -209,11 +206,9 @@ static void sym_map_serialize_callback(
     struct SerializationState *state = (struct SerializationState *)data;
     str_append(
         state->string,
-        "%s -> %td @ %d,%d\n",
+        "%s -> %td\n",
         symbol,
-        node->stack_loc,
-        node->source_loc.line,
-        node->source_loc.column);
+        node->stack_loc);
 }
 
 char *sym_map_serialize(struct SymMap *sym_map)

@@ -34,7 +34,7 @@ void test_parse_literal_fail(struct TestContext *tc,
     do { \
         struct AstNode *node; \
         err_reset(); \
-        node = parse_source(SRC); \
+        node = parse_source(SRC, NULL, NULL, NULL); \
         if (!node) { \
             tc_record(TC, NAME, false); \
             break; \

@@ -7,14 +7,17 @@
 #include "symmap.h"
 
 void eval_literal_atomic(
-        struct AstLiteralAtomic *literal_atomic,
+        struct AstNode *node,
         struct Runtime *rt,
-        struct SymMap *sym_map)
+        struct SymMap *sym_map,
+	struct AstLocMap *alm)
 {
     char *string;
     int string_len;
+    struct AstLiteralAtomic *literal_atomic = &node->data.literal_atomic;
 
     (void)sym_map;
+    (void)alm;
 
     switch (literal_atomic->type) {
     case AST_LIT_ATOM_UNIT:

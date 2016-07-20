@@ -12,7 +12,6 @@ struct SymMapNode {
     struct { struct SymMapNode *data; int cap, size; } children;
     bool is_set;
     VAL_LOC_T stack_loc;
-    struct SourceLocation source_loc;
 };
 
 struct SymMap {
@@ -27,8 +26,7 @@ void sym_map_deinit(struct SymMap *sym_map);
 void sym_map_insert(
         struct SymMap *sym_map,
         char *key,
-        VAL_LOC_T stack_loc,
-        struct SourceLocation source_loc);
+        VAL_LOC_T stack_loc);
 
 struct SymMapNode *sym_map_find(struct SymMap *sym_map, char *key);
 struct SymMapNode *sym_map_find_shallow(struct SymMap *sym_map, char *key);

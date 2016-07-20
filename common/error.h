@@ -17,7 +17,7 @@
 struct ErrFrame {
     char *module;
     char *message;
-    struct SourceLocation src_loc;
+    struct SourceLocation *src_loc;
     struct ErrFrame *next;
 };
 
@@ -34,12 +34,17 @@ void err_report(void);
         struct ErrFrame *_frame_ = mem_malloc(sizeof(*_frame_)); \
         _frame_->module = (MODULE); \
         _frame_->message = NULL; \
-        _frame_->src_loc = (SRC_LOC); \
+	if (SRC_LOC) { \
+	    _frame_->src_loc = mem_malloc(sizeof(*_frame_->src_loc)); \
+	    *_frame_->src_loc = (*(struct SourceLocation*)SRC_LOC); \
+	} else { \
+	    _frame_->src_loc = NULL; \
+	} \
         _frame_->next = NULL; \
         str_append(_frame_->message, FORMAT, ##__VA_ARGS__); \
         LIST_APPEND(_frame_, &err_stack, &err_stack_end); \
     } while(0)
 
-#define err_push(MODULE, FORMAT, ...) err_push_src(MODULE, src_loc_virtual(), FORMAT, ##__VA_ARGS__)
+#define err_push(MODULE, FORMAT, ...) err_push_src(MODULE, NULL, FORMAT, ##__VA_ARGS__)
 
 #endif

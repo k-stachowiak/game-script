@@ -88,8 +88,6 @@ struct AstSpecWhile {
 
 struct AstSpecFuncDef {
     struct Pattern *formal_args;
-    struct SourceLocation *arg_locs;
-    int arg_count;
     struct AstNode *expr;
 };
 
@@ -184,7 +182,6 @@ struct AstLiteralAtomic {
 
 struct AstNode {
     enum AstNodeType type;
-    struct SourceLocation loc;
     union {
         struct AstSymbol symbol;
         struct AstSpecial special;
@@ -200,95 +197,75 @@ struct AstNode {
  */
 
 struct AstNode *ast_make_symbol(
-        struct SourceLocation *loc,
         char *symbol);
 
 struct AstNode *ast_make_spec_do(
-        struct SourceLocation *loc,
         struct AstNode* exprs);
 
 struct AstNode *ast_make_spec_match(
-        struct SourceLocation *loc,
         struct AstNode *expr,
         struct Pattern *keys,
         struct AstNode *values);
 
 struct AstNode *ast_make_spec_if(
-        struct SourceLocation *loc,
         struct AstNode* test,
         struct AstNode* true_expr,
         struct AstNode* false_expr);
 
 struct AstNode *ast_make_spec_while(
-        struct SourceLocation *loc,
         struct AstNode* test,
         struct AstNode* expr);
 
 struct AstNode *ast_make_spec_func_def(
-        struct SourceLocation *loc,
         struct Pattern *formal_args,
-        struct SourceLocation *arg_locs,
-        int arg_count,
         struct AstNode *expr);
 
 struct AstNode *ast_make_spec_and(
-        struct SourceLocation *loc,
         struct AstNode* exprs);
 
 struct AstNode *ast_make_spec_or(
-        struct SourceLocation *loc,
         struct AstNode* exprs);
 
 struct AstNode *ast_make_spec_bind(
-        struct SourceLocation *loc,
         struct Pattern *pattern,
         struct AstNode *expr);
 
 struct AstNode *ast_make_spec_ref(
-        struct SourceLocation *loc,
         struct AstNode* expr);
 
 struct AstNode *ast_make_spec_peek(
-        struct SourceLocation *loc,
         struct AstNode* expr);
 
 struct AstNode *ast_make_spec_poke(
-        struct SourceLocation *loc,
         struct AstNode* reference,
         struct AstNode* value);
 
 struct AstNode *ast_make_spec_begin(
-        struct SourceLocation *loc,
         struct AstNode* collection);
 
 struct AstNode *ast_make_spec_end(
-        struct SourceLocation *loc,
         struct AstNode* collection);
 
 struct AstNode *ast_make_spec_inc(
-        struct SourceLocation *loc,
         struct AstNode* reference);
 
 struct AstNode *ast_make_spec_succ(
-        struct SourceLocation *loc,
         struct AstNode* reference);
 
 struct AstNode *ast_make_func_call(
-        struct SourceLocation *loc,
         struct AstNode *func,
         struct AstNode *args);
 
 struct AstNode *ast_make_literal_compound(
-        struct SourceLocation *loc,
         enum AstLiteralCompoundType type,
         struct AstNode *exprs);
 
-struct AstNode *ast_make_literal_atomic_unit(struct SourceLocation *loc);
-struct AstNode *ast_make_literal_atomic_bool(struct SourceLocation *loc, int value);
-struct AstNode *ast_make_literal_atomic_string(struct SourceLocation *loc, char *value);
-struct AstNode *ast_make_literal_atomic_character(struct SourceLocation *loc, char value);
-struct AstNode *ast_make_literal_atomic_int(struct SourceLocation *loc, long value);
-struct AstNode *ast_make_literal_atomic_real(struct SourceLocation *loc, double value);
+struct AstNode *ast_make_literal_atomic_unit(void);
+struct AstNode *ast_make_literal_atomic_bool(int value);
+struct AstNode *ast_make_literal_atomic_string(char *value);
+struct AstNode *ast_make_literal_atomic_character(char value);
+struct AstNode *ast_make_literal_atomic_int(long value);
+struct AstNode *ast_make_literal_atomic_real(double value);
 
 /* Destruction.
  * ============

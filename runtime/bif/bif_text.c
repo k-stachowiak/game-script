@@ -275,7 +275,7 @@ static void bif_parse_any(struct Runtime *rt, char *string)
 {
     struct AstNode *ast;
 
-    ast = parse_source(string);
+    ast = parse_source(string, NULL, NULL, NULL);
     if (!ast) {
         bif_text_error_parse();
         return;
@@ -312,7 +312,7 @@ static void bif_parse_atomic(
     data_begin = rt->stack.top;
 
     source = rt_val_peek_cpd_as_string(rt, arg_loc);
-    ast = parse_source(source);
+    ast = parse_source(source, NULL, NULL, NULL);
     mem_free(source);
 
     /* Error detection. */

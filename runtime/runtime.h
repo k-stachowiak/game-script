@@ -9,6 +9,7 @@
 #include "ast.h"
 #include "stack.h"
 #include "symmap.h"
+#include "ast_loc_map.h"
 #include "moon.h"
 
 struct Runtime {
@@ -40,12 +41,14 @@ void rt_register_clif_handler(
 bool rt_consume_one(
         struct Runtime *rt,
         struct AstNode *ast,
+	struct AstLocMap *alm,
         VAL_LOC_T *loc,
         struct AstNode **next);
 
 bool rt_consume_list(
         struct Runtime *rt,
         struct AstNode *ast,
+	struct AstLocMap *alm,
         VAL_LOC_T *last_loc);
 
 #endif

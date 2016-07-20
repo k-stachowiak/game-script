@@ -6,26 +6,27 @@
 #include "rt_val.h"
 #include "eval_detail.h"
 
-void eval_error_not_found(char *symbol)
+void eval_error_not_found_src(
+    char *symbol,
+    struct SourceLocation *loc)
 {
-    err_push("EVAL", "Symbol \"%s\" not found", symbol);
+    err_push_src("EVAL", loc, "Symbol \"%s\" not found", symbol);
 }
 
 static void eval_symbol(
-        struct AstSymbol *symbol_node,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     struct SymMapNode *smn;
+    struct AstSymbol *symbol_node = &node->data.symbol;
     char *symbol = symbol_node->symbol;
-
-    (void)src_loc;
 
     LOG_TRACE_FUNC;
 
     if (!(smn = sym_map_find(sym_map, symbol))) {
-        eval_error_not_found(symbol);
+        eval_error_not_found_src(symbol, alm_get_ast(alm, node));
         return;
     }
 
@@ -35,7 +36,8 @@ static void eval_symbol(
 VAL_LOC_T eval_dispatch(
         struct AstNode *node,
         struct Runtime *rt,
-        struct SymMap *sym_map)
+        struct SymMap *sym_map,
+	struct AstLocMap *alm)
 {
     /* It is possible that the debugger flag will change during evaluation. */
     bool debug_begin_called = false;
@@ -55,23 +57,23 @@ VAL_LOC_T eval_dispatch(
 
     switch (node->type) {
     case AST_SYMBOL:
-        eval_symbol(&node->data.symbol, rt, sym_map, &node->loc);
+        eval_symbol(node, rt, sym_map, alm);
         break;
 
     case AST_SPECIAL:
-        eval_special(&node->data.special, rt, sym_map, &node->loc);
+        eval_special(node, rt, sym_map, alm);
         break;
 
     case AST_FUNCTION_CALL:
-        eval_func_call(&node->data.func_call, rt, sym_map, &node->loc);
+        eval_func_call(node, rt, sym_map, alm);
         break;
 
     case AST_LITERAL_COMPOUND:
-        eval_literal_compound(&node->data.literal_compound, rt, sym_map, &node->loc);
+        eval_literal_compound(node, rt, sym_map, alm);
         break;
 
     case AST_LITERAL_ATOMIC:
-        eval_literal_atomic(&node->data.literal_atomic, rt, sym_map, &node->loc);
+        eval_literal_atomic(node, rt, sym_map, alm);
         break;
     }
 
@@ -82,8 +84,8 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, ret_val, true);
         }
 
-        err_push_src("EVAL", node->loc, "Failed evaluating expression");
-    LOG_TRACE("eval_impl END(error)");
+        err_push_src("EVAL", alm_get_ast(alm, node), "Failed evaluating expression");
+	LOG_TRACE("eval_impl END(error)");
         return ret_val;
 
     } else {
@@ -92,12 +94,16 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, begin, false);
         }
 
-    LOG_TRACE("eval_impl END(result=%td)", begin);
+	LOG_TRACE("eval_impl END(result=%td)", begin);
         return begin;
     }
 }
 
-VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
+VAL_LOC_T eval(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm)
 {
     VAL_LOC_T begin, result, end;
 
@@ -114,7 +120,7 @@ VAL_LOC_T eval(struct AstNode *node, struct Runtime *rt, struct SymMap *sym_map)
      * called by the top-level client.
      */
     begin = rt->stack.top;
-    result = eval_dispatch(node, rt, sym_map);
+    result = eval_dispatch(node, rt, sym_map, alm);
     end = rt->stack.top;
 
     if (err_state()) {

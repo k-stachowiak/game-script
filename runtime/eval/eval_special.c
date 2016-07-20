@@ -8,30 +8,30 @@
 #include "eval_detail.h"
 #include "rt_val.h"
 
-void spec_error_invalid_argc(char *func, int count)
+static void spec_error_arg_expected(
+    char *func,
+    int index,
+    char *expected,
+    struct SourceLocation *loc)
 {
-    err_push("EVAL",
-        "Incorrect arguments count passed to _%s_: %d",
-        func, count);
-}
-
-void spec_error_arg_expected(char *func, int index, char *expected)
-{
-    err_push("EVAL",
-            "Argument %d of special form _%s_ must be %s",
-            index, func, expected);
+    err_push_src(
+	"EVAL",
+	loc,
+	"Argument %d of special form _%s_ must be %s",
+	index,
+	func,
+	expected);
 }
 
 static void eval_special_do(
-        struct AstSpecDo *doo,
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm)
 {
     struct SymMap local_sym_map;
+    struct AstSpecDo *doo = &node->data.special.data.doo;
     struct AstNode *expr = doo->exprs;
-
-    (void)src_loc;
 
     sym_map_init_local(&local_sym_map, sym_map);
 
@@ -39,9 +39,12 @@ static void eval_special_do(
     VAL_LOC_T end = rt->stack.top;
 
     for (; expr; expr = expr->next) {
-        VAL_LOC_T new_end = eval_dispatch(expr, rt, &local_sym_map);
+        VAL_LOC_T new_end = eval_dispatch(expr, rt, &local_sym_map, alm);
         if (err_state()) {
-            err_push_src("EVAL", expr->loc, "Failed evaluating do expression");
+            err_push_src(
+		"EVAL",
+		alm_get_ast(alm, expr),
+		"Failed evaluating do expression");
             break;
         } else {
             end = new_end;
@@ -54,20 +57,24 @@ static void eval_special_do(
 }
 
 static void eval_special_match(
-        struct AstSpecMatch *match,
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm)
 {
+    struct AstSpecMatch *match = &node->data.special.data.match;
     struct AstNode *expr = match->expr;
     struct Pattern *key = match->keys;
     struct AstNode *value = match->values;
     VAL_LOC_T temp_begin, temp_end;
 
     temp_begin = rt->stack.top;
-    VAL_LOC_T location = eval_dispatch(expr, rt, sym_map);
+    VAL_LOC_T location = eval_dispatch(expr, rt, sym_map, alm);
     if (err_state()) {
-        err_push_src("EVAL", expr->loc, "Failed evaluating match expression");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, expr),
+	    "Failed evaluating match expression");
         return;
     }
     temp_end = rt->stack.top;
@@ -76,14 +83,14 @@ static void eval_special_match(
         struct SymMap local_sym_map;
         sym_map_init_local(&local_sym_map, sym_map);
 
-        eval_special_bind_pattern(key, location, rt, &local_sym_map, &expr->loc);
+        eval_special_bind_pattern(key, location, rt, &local_sym_map, alm);
 
         if (err_state()) {
-            err_reset(); /* We ignore the error while in this loop. */
+            err_reset(); /* We ignore all errors while in this loop. */
             key = key->next;
             value = value->next;
         } else {
-            eval_dispatch(value, rt, &local_sym_map);
+            eval_dispatch(value, rt, &local_sym_map, alm);
             goto end;
         }
 
@@ -99,7 +106,8 @@ static void eval_special_match(
 
     /* No match found. */
     err_push_src(
-        "EVAL", *src_loc,
+        "EVAL",
+	alm_get_ast(alm, node),
         "None of the cases were matched in match expression");
 
 end:
@@ -107,25 +115,30 @@ end:
 }
 
 static void eval_special_if(
-        struct AstSpecIf* iff,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     VAL_LOC_T test_loc, temp_begin, temp_end;
     VAL_BOOL_T test_val;
 
+    struct AstSpecIf *iff = &node->data.special.data.iff;
+
     temp_begin = rt->stack.top;
-    test_loc = eval_dispatch(iff->test, rt, sym_map);
+    test_loc = eval_dispatch(iff->test, rt, sym_map, alm);
     temp_end = rt->stack.top;
 
     if (err_state()) {
-        err_push_src("EVAL", *src_loc, "Failed evaluating if test");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, iff->test),
+	    "Failed evaluating if test");
         return;
     }
 
     if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-        spec_error_arg_expected("if", 1, "boolean");
+        spec_error_arg_expected("if", 1, "boolean", alm_get_ast(alm, iff->test));
         stack_collapse(&rt->stack, temp_begin, temp_end);
         return;
     }
@@ -134,18 +147,19 @@ static void eval_special_if(
     stack_collapse(&rt->stack, temp_begin, temp_end);
 
     if (test_val) {
-        eval_dispatch(iff->true_expr, rt, sym_map);
+        eval_dispatch(iff->true_expr, rt, sym_map, alm);
     } else {
-        eval_dispatch(iff->false_expr, rt, sym_map);
+        eval_dispatch(iff->false_expr, rt, sym_map, alm);
     }
 }
 
 static void eval_special_while(
-        struct AstSpecWhile* whilee,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
+    struct AstSpecWhile *whilee = &node->data.special.data.whilee;
     bool done = false;
 
     while (!done) {
@@ -154,25 +168,31 @@ static void eval_special_while(
         VAL_BOOL_T test_val;
 
         temp_begin = rt->stack.top;
-        test_loc = eval_dispatch(whilee->test, rt, sym_map);
+        test_loc = eval_dispatch(whilee->test, rt, sym_map, alm);
         temp_end = rt->stack.top;
 
         if (err_state()) {
-            err_push_src("EVAL", *src_loc, "Failed evaluating while test");
+            err_push_src(
+		"EVAL",
+		alm_get_ast(alm, whilee->test),
+		"Failed evaluating while test");
             return;
         }
 
         if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-            spec_error_arg_expected("while", 1, "boolean");
+            spec_error_arg_expected("while", 1, "boolean", alm_get_ast(alm, whilee->test));
             stack_collapse(&rt->stack, temp_begin, temp_end);
             return;
         }
 
         test_val = rt_val_peek_bool(rt, test_loc);
         if (test_val) {
-            eval_dispatch(whilee->expr, rt, sym_map);
+            eval_dispatch(whilee->expr, rt, sym_map, alm);
             if (err_state()) {
-                err_push_src("EVAL", whilee->test->loc, "Failed evaluating while expression");
+                err_push_src(
+		    "EVAL",
+		    alm_get_ast(alm, whilee->expr),
+		    "Failed evaluating while expression");
                 stack_collapse(&rt->stack, temp_begin, temp_end);
                 return;
             } else {
@@ -195,7 +215,8 @@ static void eval_special_logic(
         struct Runtime *rt,
         struct SymMap *sym_map,
         bool breaking_value,
-        char *func_name)
+        char *func_name,
+	struct AstLocMap *alm)
 {
     int i = 0;
     VAL_LOC_T temp_begin = rt->stack.top;
@@ -203,14 +224,17 @@ static void eval_special_logic(
 
     while (exprs) {
 
-        VAL_LOC_T loc = eval_dispatch(exprs, rt, sym_map);
+        VAL_LOC_T loc = eval_dispatch(exprs, rt, sym_map, alm);
         if (err_state()) {
-            err_push_src("EVAL", exprs->loc, "Failed evaluating logic special form element");
+            err_push_src(
+		"EVAL",
+		alm_get_ast(alm, exprs),
+		"Failed evaluating logic special form element");
             return;
         }
 
         if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
-            spec_error_arg_expected(func_name, i, "boolean");
+            spec_error_arg_expected(func_name, i, "boolean", alm_get_ast(alm, exprs));
             return;
         }
 
@@ -228,45 +252,46 @@ static void eval_special_logic(
 }
 
 static void eval_special_bind(
-        struct AstSpecBind* bind,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
-    VAL_LOC_T location = eval_dispatch(bind->expr, rt, sym_map);
-
-    (void)src_loc;
+    struct AstSpecBind *bind = &node->data.special.data.bind;
+    VAL_LOC_T location = eval_dispatch(bind->expr, rt, sym_map, alm);
 
     if (err_state()) {
-        err_push_src("EVAL", bind->expr->loc, "Failed evaluating bind expression");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, bind->expr),
+	    "Failed evaluating bind expression");
         return;
     }
 
-    eval_special_bind_pattern(bind->pattern, location, rt, sym_map, &bind->expr->loc);
+    eval_special_bind_pattern(bind->pattern, location, rt, sym_map, alm);
 
     /* NOTE implicitly returning the bound value since there's no collapse. */
 }
 
 static void eval_special_ref(
-        struct AstSpecRef* ref,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     char *symbol;
     struct SymMapNode *smn;
-
-    (void)src_loc;
+    struct AstSpecRef *ref = &node->data.special.data.ref;
 
     if (ref->expr->type != AST_SYMBOL) {
-        spec_error_arg_expected("ref", 1, "symbol");
+        spec_error_arg_expected("ref", 1, "symbol", alm_get_ast(alm, ref->expr));
         return;
     }
     symbol = ref->expr->data.symbol.symbol;
     smn = sym_map_find(sym_map, symbol);
 
     if (!smn) {
-        eval_error_not_found(symbol);
+        eval_error_not_found_src(symbol, alm_get_ast(alm, ref->expr));
         return;
     }
 
@@ -274,28 +299,30 @@ static void eval_special_ref(
 }
 
 static void eval_special_peek(
-        struct AstSpecPeek* peek,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     VAL_LOC_T ref_loc, target_loc;
     VAL_LOC_T temp_begin, temp_end;
     enum ValueType ref_type;
-
-    (void)src_loc;
+    struct AstSpecPeek *peek = &node->data.special.data.peek;
 
     temp_begin = rt->stack.top;
-    ref_loc = eval_dispatch(peek->expr, rt, sym_map);
+    ref_loc = eval_dispatch(peek->expr, rt, sym_map, alm);
     temp_end = rt->stack.top;
     if (err_state()) {
-        err_push_src("EVAL", peek->expr->loc, "Failed evaluating _peek_ reference argument");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, peek->expr),
+	    "Failed evaluating _peek_ reference argument");
         return;
     }
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        spec_error_arg_expected("peek", 1, "reference");
+        spec_error_arg_expected("peek", 1, "reference", alm_get_ast(alm, peek->expr));
         return;
     }
 
@@ -305,41 +332,49 @@ static void eval_special_peek(
 }
 
 static void eval_special_poke(
-        struct AstSpecPoke* poke,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     VAL_LOC_T ref_loc, source_loc, target_loc;
     VAL_LOC_T temp_begin, temp_end;
     enum ValueType ref_type;
-
-    (void)src_loc;
+    struct AstSpecPoke *poke = &node->data.special.data.poke;
 
     temp_begin = rt->stack.top;
-    ref_loc = eval_dispatch(poke->reference, rt, sym_map);
+    ref_loc = eval_dispatch(poke->reference, rt, sym_map, alm);
     if (err_state()) {
-        err_push_src("EVAL", poke->reference->loc, "Failed evaluating _poke_ reference argument");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, poke->reference),
+	    "Failed evaluating _poke_ reference argument");
         return;
     }
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        spec_error_arg_expected("poke", 1, "reference");
+        spec_error_arg_expected("poke", 1, "reference", alm_get_ast(alm, poke->reference));
         return;
     }
 
     target_loc = rt_val_peek_ref(rt, ref_loc);
 
-    source_loc = eval_dispatch(poke->value, rt, sym_map);
+    source_loc = eval_dispatch(poke->value, rt, sym_map, alm);
     temp_end = rt->stack.top;
     if (err_state()) {
-        err_push_src("EVAL", poke->value->loc, "Failed evaluating _poke_ source argument");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, poke->value),
+	    "Failed evaluating _poke_ source argument");
         return;
     }
 
     if (!rt_val_pair_homo(rt, source_loc, target_loc)) {
-        err_push_src("EVAL", poke->value->loc, "Attempted to _poke_ value of mismatched type");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, poke->value),
+	    "Attempted to _poke_ value of mismatched type");
         return;
     }
 
@@ -348,34 +383,37 @@ static void eval_special_poke(
 }
 
 static void eval_special_begin(
-        struct AstSpecBegin* begin,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     char *symbol;
     struct SymMapNode *smn;
     VAL_LOC_T cpd_loc;
     enum ValueType ref_type;
-
-    (void)src_loc;
+    struct AstSpecBegin *begin = &node->data.special.data.begin;
 
     if (begin->collection->type != AST_SYMBOL) {
-        spec_error_arg_expected("begin", 1, "symbol");
+        spec_error_arg_expected(
+	    "begin", 1, "symbol",
+	    alm_get_ast(alm, begin->collection));
         return;
     }
     symbol = begin->collection->data.symbol.symbol;
     smn = sym_map_find(sym_map, symbol);
 
     if (!smn) {
-        eval_error_not_found(symbol);
+        eval_error_not_found_src(symbol, alm_get_ast(alm, begin->collection));
         return;
     }
 
     cpd_loc = smn->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
     if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
-        spec_error_arg_expected("begin", 1, "reference to compound object");
+        spec_error_arg_expected(
+	    "begin", 1, "reference to compound object",
+	    alm_get_ast(alm, begin->collection));
         return;
     }
 
@@ -383,35 +421,38 @@ static void eval_special_begin(
 }
 
 static void eval_special_end(
-        struct AstSpecEnd* end,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     int i, cpd_len;
     char *symbol;
     struct SymMapNode *smn;
     VAL_LOC_T cpd_loc;
     enum ValueType ref_type;
-
-    (void)src_loc;
+    struct AstSpecEnd *end = &node->data.special.data.end;
 
     if (end->collection->type != AST_SYMBOL) {
-        spec_error_arg_expected("end", 1, "symbol");
+        spec_error_arg_expected(
+	    "end", 1, "symbol",
+	    alm_get_ast(alm, end->collection));
         return;
     }
     symbol = end->collection->data.symbol.symbol;
     smn = sym_map_find(sym_map, symbol);
 
     if (!smn) {
-        eval_error_not_found(symbol);
+        eval_error_not_found_src(symbol, alm_get_ast(alm, end->collection));
         return;
     }
 
     cpd_loc = smn->stack_loc;
     ref_type = rt_val_peek_type(&rt->stack, cpd_loc);
     if (ref_type != VAL_ARRAY && ref_type != VAL_TUPLE) {
-        spec_error_arg_expected("end", 1, "reference to compound object");
+        spec_error_arg_expected(
+	    "end", 1, "reference to compound object",
+	    alm_get_ast(alm, end->collection));
         return;
     }
 
@@ -425,34 +466,37 @@ static void eval_special_end(
 }
 
 static void eval_special_inc(
-        struct AstSpecInc* inc,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     char *symbol;
     struct SymMapNode *smn;
     VAL_LOC_T ref_loc, temp_loc;
     enum ValueType ref_type;
-
-    (void)src_loc;
+    struct AstSpecInc *inc = &node->data.special.data.inc;
 
     if (inc->reference->type != AST_SYMBOL) {
-        spec_error_arg_expected("inc", 1, "symbol");
+        spec_error_arg_expected(
+	    "inc", 1, "symbol",
+	    alm_get_ast(alm, inc->reference));
         return;
     }
     symbol = inc->reference->data.symbol.symbol;
 
     smn = sym_map_find(sym_map, symbol);
     if (!smn) {
-        eval_error_not_found(symbol);
+        eval_error_not_found_src(symbol, alm_get_ast(alm, inc->reference));
         return;
     }
     ref_loc = smn->stack_loc;
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        spec_error_arg_expected("inc", 1, "reference to reference");
+        spec_error_arg_expected(
+	    "inc", 1, "reference to reference",
+	    alm_get_ast(alm, inc->reference));
         return;
     }
 
@@ -464,28 +508,32 @@ static void eval_special_inc(
 }
 
 static void eval_special_succ(
-        struct AstSpecSucc* succ,
+        struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
     VAL_LOC_T temp_begin, temp_end;
     VAL_LOC_T ref_loc, target_loc;
     enum ValueType ref_type;
-
-    (void)src_loc;
+    struct AstSpecSucc *succ = &node->data.special.data.succ;
 
     temp_begin = rt->stack.top;
-    ref_loc = eval_dispatch(succ->reference, rt, sym_map);
+    ref_loc = eval_dispatch(succ->reference, rt, sym_map, alm);
     temp_end = rt->stack.top;
     if (err_state()) {
-        err_push_src("EVAL", succ->reference->loc, "Failed evaluating _succ_ reference argument");
+        err_push_src(
+	    "EVAL",
+	    alm_get_ast(alm, succ->reference),
+	    "Failed evaluating _succ_ reference argument");
         return;
     }
 
     ref_type = rt_val_peek_type(&rt->stack, ref_loc);
     if (ref_type != VAL_REF) {
-        spec_error_arg_expected("succ", 1, "reference");
+        spec_error_arg_expected(
+	    "succ", 1, "reference",
+	    alm_get_ast(alm, succ->reference));
         return;
     }
 
@@ -496,72 +544,77 @@ static void eval_special_succ(
 }
 
 void eval_special(
-        struct AstSpecial *special,
+        struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+	struct AstLocMap *alm)
 {
+    struct AstSpecial *special = &node->data.special;
     enum AstSpecialType type = special->type;
 
     switch (type) {
     case AST_SPEC_DO:
-        eval_special_do(&special->data.doo, rt, sym_map, src_loc);
+        eval_special_do(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_MATCH:
-        eval_special_match(&special->data.match, rt, sym_map, src_loc);
+        eval_special_match(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_IF:
-        eval_special_if(&special->data.iff, rt, sym_map, src_loc);
+        eval_special_if(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_WHILE:
-        eval_special_while(&special->data.whilee, rt, sym_map, src_loc);
+        eval_special_while(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_FUNC_DEF:
-        eval_special_func_def(&special->data.func_def, rt, sym_map, src_loc);
+        eval_special_func_def(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_AND:
-        eval_special_logic(special->data.andd.exprs, rt, sym_map, false, "and");
+        eval_special_logic(
+	    node->data.special.data.andd.exprs,
+	    rt, sym_map, false, "and", alm);
         break;
 
     case AST_SPEC_OR:
-        eval_special_logic(special->data.orr.exprs, rt, sym_map, true, "or");
+        eval_special_logic(
+	    node->data.special.data.orr.exprs,
+	    rt, sym_map, true, "or", alm);
         break;
 
     case AST_SPEC_BIND:
-        eval_special_bind(&special->data.bind, rt, sym_map, src_loc);
+        eval_special_bind(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_REF:
-        eval_special_ref(&special->data.ref, rt, sym_map, src_loc);
+        eval_special_ref(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_PEEK:
-        eval_special_peek(&special->data.peek, rt, sym_map, src_loc);
+        eval_special_peek(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_POKE:
-        eval_special_poke(&special->data.poke, rt, sym_map, src_loc);
+        eval_special_poke(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_BEGIN:
-        eval_special_begin(&special->data.begin, rt, sym_map, src_loc);
+        eval_special_begin(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_END:
-        eval_special_end(&special->data.end, rt, sym_map, src_loc);
+        eval_special_end(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_INC:
-        eval_special_inc(&special->data.inc, rt, sym_map, src_loc);
+        eval_special_inc(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_SUCC:
-        eval_special_succ(&special->data.succ, rt, sym_map, src_loc);
+        eval_special_succ(node, rt, sym_map, alm);
         break;
     }
 }

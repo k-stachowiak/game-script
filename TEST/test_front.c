@@ -1,3 +1,4 @@
+
 /* Copyright (C) 2015 Krzysztof Stachowiak */
 
 #include <stdlib.h>

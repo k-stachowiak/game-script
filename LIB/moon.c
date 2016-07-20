@@ -44,6 +44,7 @@ bool mn_exec_file(struct MoonContext *ctx, const char *filename)
 {
     char *source;
     struct AstNode *ast_list;
+    struct AstLocMap alm;
 
     err_reset();
 
@@ -52,12 +53,12 @@ bool mn_exec_file(struct MoonContext *ctx, const char *filename)
         return false;
     }
 
-    if (!(ast_list = parse_source(source))) {
+    if (!(ast_list = parse_source_build_alm(source, &alm))) {
         mem_free(source);
         return false;
     }
 
-    if (!rt_consume_list(ctx->rt, ast_list, NULL)) {
+    if (!rt_consume_list(ctx->rt, ast_list, &alm, NULL)) {
         mem_free(source);
         return false;
     }
@@ -70,20 +71,26 @@ struct MoonValue *mn_exec_command(struct MoonContext *ctx, const char *source)
 {
     struct AstNode *expr;
     VAL_LOC_T result_loc;
+    struct AstLocMap alm;
 
     err_reset();
+    alm_init(&alm);
 
-    expr = parse_source((char*)source);
+    expr = parse_source_build_alm((char*)source, &alm);
     if (err_state()) {
         err_push("LIB", "Failed executing command: %s", source);
+	alm_deinit(&alm);
         return NULL;
     }
 
-    rt_consume_one(ctx->rt, expr, &result_loc, NULL);
+    rt_consume_one(ctx->rt, expr, &alm, &result_loc, NULL);
     if (err_state()) {
         err_push("LIB", "Failed executing command: %s", source);
+	alm_deinit(&alm);
         return NULL;
     }
+
+    alm_deinit(&alm);
 
     if (result_loc) {
         return mn_make_api_value(ctx->rt, result_loc);

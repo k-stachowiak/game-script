@@ -30,8 +30,6 @@ void bif_eq(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_lt(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 
 /* Logic */
-void bif_and(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
-void bif_or(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_xor(struct Runtime *rt, VAL_LOC_T x_loc, VAL_LOC_T y_loc);
 void bif_not(struct Runtime *rt, VAL_LOC_T x_loc);
 

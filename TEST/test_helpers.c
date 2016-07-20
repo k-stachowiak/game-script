@@ -27,7 +27,7 @@ void test_parse(
     struct AstNode *node;
 
     err_reset();
-    node = parse_source(source);
+    node = parse_source(source, NULL, NULL, NULL);
     tc_record(tc, test_name, !(expect_success ^ (!!node)));
     if (node) {
         ast_node_free(node);
@@ -42,7 +42,7 @@ void test_parse_literal_string(
     struct AstNode *node;
 
     err_reset();
-    node = parse_source(source);
+    node = parse_source(source, NULL, NULL, NULL);
     if (!node) {
         tc_record(tc, test_name, false);
         return;
@@ -71,23 +71,28 @@ bool test_eval_source(
 {
     int i = 0;
     struct AstNode *ast_list = NULL, *next;
+    struct AstLocMap alm;
 
     err_reset();
+    alm_init(&alm);
 
-    ast_list = parse_source(source);
+    ast_list = parse_source_build_alm(source, &alm);
     if (!ast_list) {
+	alm_deinit(&alm);
         return false;
     }
 
     while (ast_list) {
-        rt_consume_one(rt, ast_list, locs + (i++), &next);
+        rt_consume_one(rt, ast_list, &alm, locs + (i++), &next);
         if (err_state()) {
             ast_node_free(next);
+	    alm_deinit(&alm);
             return false;
         }
         ast_list = next;
     }
 
+    alm_deinit(&alm);
     return true;
 }
 

@@ -26,6 +26,7 @@ add_library(lang OBJECT
         ./common/pattern_serialize.c
         ./common/ast.c
         ./common/ast_serialize.c
+	./common/ast_loc_map.c
         ./common/src_iter.c
         ./common/sexpr_tools.c
         ./common/error.c

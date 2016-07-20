@@ -213,17 +213,17 @@ static void efd_push_captures(
 }
 
 void eval_special_func_def(
-        struct AstSpecFuncDef* func_def,
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct SourceLocation *src_loc)
+    struct AstNode* node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm)
 {
     VAL_LOC_T size_loc, data_begin;
-    VAL_SIZE_T arity = func_def->arg_count;
-    (void)src_loc;
-    rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)func_def);
+    struct AstSpecFuncDef *func_def = &node->data.special.data.func_def;
+    VAL_SIZE_T arity = pattern_list_len(func_def->formal_args);
+    (void)alm;
+    rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)node);
     efd_push_captures(func_def, &rt->stack, sym_map);
     rt_val_push_func_appl_init(&rt->stack, 0);
     rt_val_push_func_final(&rt->stack, size_loc, data_begin);
 }
-

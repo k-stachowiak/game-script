@@ -37,8 +37,12 @@ char *err_msg(void)
     while (frame) {
         char *message_line = NULL;
         str_append(message_line, "%d: [%s] ", i++, frame->module);
-        if (frame->src_loc.type == SRC_LOC_NORMAL) {
-            str_append(message_line, "(%d,%d) ", frame->src_loc.line, frame->src_loc.column);
+        if (frame->src_loc) {
+            str_append(
+		message_line,
+		"(%d,%d) ",
+		frame->src_loc->line,
+		frame->src_loc->column);
         }
         str_append(message_line, ": %s\n", frame->message);
         str_append(result, "\t%s", message_line);

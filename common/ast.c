@@ -9,14 +9,12 @@
 #include "ast.h"
 
 struct AstNode *ast_make_symbol(
-        struct SourceLocation *loc,
         char *symbol)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SYMBOL;
-    result->loc = *loc;
 
     result->data.symbol.symbol = symbol;
 
@@ -24,14 +22,12 @@ struct AstNode *ast_make_symbol(
 }
 
 struct AstNode *ast_make_spec_do(
-        struct SourceLocation *loc,
         struct AstNode* exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_DO;
     result->data.special.data.doo.exprs = exprs;
@@ -40,7 +36,6 @@ struct AstNode *ast_make_spec_do(
 }
 
 struct AstNode *ast_make_spec_match(
-        struct SourceLocation *loc,
         struct AstNode *expr,
         struct Pattern *keys,
         struct AstNode *values)
@@ -49,7 +44,6 @@ struct AstNode *ast_make_spec_match(
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_MATCH;
     result->data.special.data.match.expr = expr;
@@ -63,7 +57,6 @@ struct AstNode *ast_make_spec_match(
 }
 
 struct AstNode *ast_make_spec_if(
-        struct SourceLocation *loc,
         struct AstNode *test,
         struct AstNode *true_expr,
         struct AstNode *false_expr)
@@ -72,7 +65,6 @@ struct AstNode *ast_make_spec_if(
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_IF;
     result->data.special.data.iff.test = test;
@@ -87,7 +79,6 @@ struct AstNode *ast_make_spec_if(
 }
 
 struct AstNode *ast_make_spec_while(
-        struct SourceLocation *loc,
         struct AstNode *test,
         struct AstNode *expr)
 {
@@ -95,7 +86,6 @@ struct AstNode *ast_make_spec_while(
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_WHILE;
     result->data.special.data.whilee.test = test;
@@ -108,36 +98,28 @@ struct AstNode *ast_make_spec_while(
 }
 
 struct AstNode *ast_make_spec_func_def(
-        struct SourceLocation *loc,
         struct Pattern *formal_args,
-        struct SourceLocation *arg_locs,
-        int arg_count,
         struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_FUNC_DEF;
     result->data.special.data.func_def.formal_args = formal_args;
-    result->data.special.data.func_def.arg_locs = arg_locs;
-    result->data.special.data.func_def.arg_count = arg_count;
     result->data.special.data.func_def.expr = expr;
 
     return result;
 }
 
 struct AstNode *ast_make_spec_and(
-        struct SourceLocation *loc,
         struct AstNode *exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_AND;
     result->data.special.data.andd.exprs = exprs;
@@ -146,14 +128,12 @@ struct AstNode *ast_make_spec_and(
 }
 
 struct AstNode *ast_make_spec_or(
-        struct SourceLocation *loc,
         struct AstNode *exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_OR;
     result->data.special.data.orr.exprs = exprs;
@@ -162,7 +142,6 @@ struct AstNode *ast_make_spec_or(
 }
 
 struct AstNode *ast_make_spec_bind(
-        struct SourceLocation *loc,
         struct Pattern *pattern,
         struct AstNode *expr)
 {
@@ -170,7 +149,6 @@ struct AstNode *ast_make_spec_bind(
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_BIND;
     result->data.special.data.bind.pattern = pattern;
@@ -180,14 +158,12 @@ struct AstNode *ast_make_spec_bind(
 }
 
 struct AstNode *ast_make_spec_ref(
-        struct SourceLocation *loc,
         struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_REF;
     result->data.special.data.ref.expr = expr;
@@ -196,14 +172,12 @@ struct AstNode *ast_make_spec_ref(
 }
 
 struct AstNode *ast_make_spec_peek(
-        struct SourceLocation *loc,
         struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_PEEK;
     result->data.special.data.peek.expr = expr;
@@ -212,7 +186,6 @@ struct AstNode *ast_make_spec_peek(
 }
 
 struct AstNode *ast_make_spec_poke(
-        struct SourceLocation *loc,
         struct AstNode *reference,
         struct AstNode *value)
 {
@@ -220,7 +193,6 @@ struct AstNode *ast_make_spec_poke(
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_POKE;
     result->data.special.data.poke.reference = reference;
@@ -233,14 +205,12 @@ struct AstNode *ast_make_spec_poke(
 }
 
 struct AstNode *ast_make_spec_begin(
-        struct SourceLocation *loc,
         struct AstNode *collection)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_BEGIN;
     result->data.special.data.begin.collection = collection;
@@ -249,14 +219,12 @@ struct AstNode *ast_make_spec_begin(
 }
 
 struct AstNode *ast_make_spec_end(
-        struct SourceLocation *loc,
         struct AstNode *collection)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_END;
     result->data.special.data.end.collection = collection;
@@ -265,14 +233,12 @@ struct AstNode *ast_make_spec_end(
 }
 
 struct AstNode *ast_make_spec_inc(
-        struct SourceLocation *loc,
         struct AstNode *reference)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_INC;
     result->data.special.data.inc.reference = reference;
@@ -281,14 +247,12 @@ struct AstNode *ast_make_spec_inc(
 }
 
 struct AstNode *ast_make_spec_succ(
-        struct SourceLocation *loc,
         struct AstNode *reference)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
-    result->loc = *loc;
 
     result->data.special.type = AST_SPEC_SUCC;
     result->data.special.data.succ.reference = reference;
@@ -297,7 +261,6 @@ struct AstNode *ast_make_spec_succ(
 }
 
 struct AstNode *ast_make_func_call(
-    struct SourceLocation *loc,
     struct AstNode *func,
     struct AstNode *args)
 {
@@ -305,7 +268,6 @@ struct AstNode *ast_make_func_call(
 
     result->next = NULL;
     result->type = AST_FUNCTION_CALL;
-    result->loc = *loc;
 
     result->data.func_call.func = func;
     result->data.func_call.actual_args = args;
@@ -317,7 +279,6 @@ struct AstNode *ast_make_func_call(
 }
 
 struct AstNode *ast_make_literal_compound(
-        struct SourceLocation *loc,
         enum AstLiteralCompoundType type,
         struct AstNode *exprs)
 {
@@ -325,7 +286,6 @@ struct AstNode *ast_make_literal_compound(
 
     result->next = NULL;
     result->type = AST_LITERAL_COMPOUND;
-    result->loc = *loc;
 
     result->data.literal_compound.type = type;
     result->data.literal_compound.exprs = exprs;
@@ -333,23 +293,21 @@ struct AstNode *ast_make_literal_compound(
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_unit(struct SourceLocation *loc)
+struct AstNode *ast_make_literal_atomic_unit(void)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
     result->next = NULL;
     result->type = AST_LITERAL_ATOMIC;
-    result->loc = *loc;
     result->data.literal_atomic.type = AST_LIT_ATOM_UNIT;
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_bool(struct SourceLocation *loc, int value)
+struct AstNode *ast_make_literal_atomic_bool(int value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_LITERAL_ATOMIC;
-    result->loc = *loc;
 
     result->data.literal_atomic.type = AST_LIT_ATOM_BOOL;
     result->data.literal_atomic.data.boolean = value;
@@ -357,7 +315,7 @@ struct AstNode *ast_make_literal_atomic_bool(struct SourceLocation *loc, int val
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_string(struct SourceLocation *loc, char *value)
+struct AstNode *ast_make_literal_atomic_string(char *value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -367,7 +325,6 @@ struct AstNode *ast_make_literal_atomic_string(struct SourceLocation *loc, char 
 
     result->next = NULL;
     result->type = AST_LITERAL_ATOMIC;
-    result->loc = *loc;
 
     result->data.literal_atomic.type = AST_LIT_ATOM_STRING;
     result->data.literal_atomic.data.string = copy;
@@ -375,13 +332,12 @@ struct AstNode *ast_make_literal_atomic_string(struct SourceLocation *loc, char 
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_character(struct SourceLocation *loc, char value)
+struct AstNode *ast_make_literal_atomic_character(char value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_LITERAL_ATOMIC;
-    result->loc = *loc;
 
     result->data.literal_atomic.type = AST_LIT_ATOM_CHAR;
     result->data.literal_atomic.data.character = value;
@@ -389,13 +345,12 @@ struct AstNode *ast_make_literal_atomic_character(struct SourceLocation *loc, ch
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_int(struct SourceLocation *loc, long value)
+struct AstNode *ast_make_literal_atomic_int(long value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_LITERAL_ATOMIC;
-    result->loc = *loc;
 
     result->data.literal_atomic.type = AST_LIT_ATOM_INT;
     result->data.literal_atomic.data.integer = value;
@@ -403,13 +358,12 @@ struct AstNode *ast_make_literal_atomic_int(struct SourceLocation *loc, long val
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_real(struct SourceLocation *loc, double value)
+struct AstNode *ast_make_literal_atomic_real(double value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_LITERAL_ATOMIC;
-    result->loc = *loc;
 
     result->data.literal_atomic.type = AST_LIT_ATOM_REAL;
     result->data.literal_atomic.data.real = value;
@@ -449,7 +403,6 @@ static void ast_special_while_free(struct AstSpecWhile *whilee)
 static void ast_special_func_def_free(struct AstSpecFuncDef *func_def)
 {
     pattern_free(func_def->formal_args);
-    mem_free(func_def->arg_locs);
     ast_node_free(func_def->expr);
 }
 

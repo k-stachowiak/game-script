@@ -1,23 +1,14 @@
-/* Copyright (C) 2015 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2015 Krzysztof Stachowiak */
 
 #ifndef SRC_ITER_H
 #define SRC_ITER_H
 
 #include <stdbool.h>
 
-enum SourceLocationType {
-    SRC_LOC_NORMAL,
-    SRC_LOC_VIRTUAL
-};
-
 struct SourceLocation {
-    enum SourceLocationType type;
     int line;
     int column;
 };
-
-struct SourceLocation src_loc_normal(int line, int column);
-struct SourceLocation src_loc_virtual(void);
 
 struct SourceIter {
     char *first;

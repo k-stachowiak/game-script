@@ -1,5 +1,10 @@
-# TODO #
+# TODO
 - track the source location information propagation in the error reporting.
+- revise error messages - improve with the new source location tracking mechanism
+    - Are the source locations available wherever possible?
+- add another debug map, this time address -> source location for runtime values
+- eval_dispach and eval_special may be implemented in term of function table
+- store dom node begin and node end location in the dom nodes
 - Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
 - migrate from cmake to make; think of carving out libraries such as a parser, runtime, semantics (AST, etc.), etc.
 - A bind should create "references", i.e. a tuples of address and type.
