@@ -8,16 +8,19 @@
 #include "memory.h"
 #include "log.h"
 
-#define STR_TEMP_BUFFER_SIZE 1024
+#define STR_TEMP_BUFFER_SIZE 1024 * 10
 
 #define str_append(TXT, FORMAT, ...)\
     do {\
-        char _buffer_[STR_TEMP_BUFFER_SIZE];\
+        char *_buffer_; \
         int _old_len_, _new_len_;\
         char *_new_text_;\
+	_buffer_ = mem_malloc(STR_TEMP_BUFFER_SIZE); \
         _new_len_ = sprintf(_buffer_, FORMAT, ##__VA_ARGS__);\
         if (_new_len_ >= (STR_TEMP_BUFFER_SIZE) - 1) {\
-            LOG_ERROR("Memory corruption while appending string.");\
+            LOG_ERROR("Buffer of %d not enough for %d bytes.", \
+                STR_TEMP_BUFFER_SIZE, \
+		_new_len_); \
             exit(2);\
         }\
         if (!(TXT)) {\
@@ -29,8 +32,9 @@
             memcpy(_new_text_, (TXT), _old_len_);\
             memcpy(_new_text_ + _old_len_, _buffer_, _new_len_ + 1);\
             mem_free((TXT));\
-        }\
-        (TXT) = _new_text_;\
+        } \
+        (TXT) = _new_text_; \
+	mem_free(_buffer_); \
     } while(0)
 
 #define str_append_range(TXT, FIRST, LAST)\
