@@ -1,4 +1,6 @@
 # TODO
+- merge ast and pattern trees!
+- parser will now take the ast-loc-map as an argument and fill in if not null (also pattern map?)
 - track the source location information propagation in the error reporting.
 - revise error messages - improve with the new source location tracking mechanism
     - Are the source locations available wherever possible?

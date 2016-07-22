@@ -1,6 +1,6 @@
-csources = $(shell find . -name '*.c' | grep -v 'build\|REPL\|TEST\|LIB')
-cxxsources = $(shell find . -name '*.cpp' | grep -v 'build\|REPL\|TEST\|LIB')
-headers = $(shell find . -name '*.h' | grep -v 'build\|REPL\|TEST')
+csources = $(shell find . -name '*.c' | grep -v 'REPL\|TEST\|LIB')
+cxxsources = $(shell find . -name '*.cpp' | grep -v 'REPL\|TEST\|LIB')
+headers = $(shell find . -name '*.h' | grep -v 'REPL\|TEST')
 
 sources = $(csources) $(cxxsources)
 
@@ -9,7 +9,7 @@ cxxobjects = $(cxxsources:.cpp=.o)
 objects = $(cobjects) $(cxxobjects)
 
 COMMON_FLAGS = -Wall -Wextra -g -O0 -fPIC
-COMMON_FLAGS += -I. -I./common -I./front -I./runtime -I./util -I./LIB
+COMMON_FLAGS += -I. -I./ast -I./front -I./runtime -I./util -I./LIB
 COMMON_FLAGS += -DNO_TIMER_STACK
 
 CFLAGS = $(COMMON_FLAGS) -std=c11
@@ -50,4 +50,4 @@ include $(cxxsources:.cpp=.d)
 
 clean:
 	rm -rf libmoon.a mnrepl mntest
-	find . -name '*.o' -o -name '*.d' | xargs rm -f
+	find . -name '*.o' -o -name '*.d*' | xargs rm -f
