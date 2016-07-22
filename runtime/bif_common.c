@@ -1,4 +1,4 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #include "bif.h"
 #include "bif_detail.h"

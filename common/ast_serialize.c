@@ -1,4 +1,6 @@
-﻿#include <assert.h>
+﻿/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
+
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 

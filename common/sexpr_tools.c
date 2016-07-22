@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #include <ctype.h>
 #include <stdlib.h>

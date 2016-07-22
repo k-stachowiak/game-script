@@ -1,3 +1,5 @@
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
+
 #include "src_iter.h"
 
 void si_init(struct SourceIter *si, char *first, char *last)

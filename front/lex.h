@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #ifndef LEX_H
 #define LEX_H

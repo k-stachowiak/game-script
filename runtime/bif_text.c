@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #include <stdio.h>
 #include <inttypes.h>

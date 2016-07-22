@@ -1,4 +1,4 @@
-/* Copyright (C) 2014-2015 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #ifndef SRC_ITER_H
 #define SRC_ITER_H

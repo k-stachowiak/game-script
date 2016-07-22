@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2016 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #include "test_helpers.h"
 #include "sexpr_tools.h"

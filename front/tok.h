@@ -1,4 +1,4 @@
-/* Copyright (C) 2014,2015 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #ifndef TOK_H
 #define TOK_H

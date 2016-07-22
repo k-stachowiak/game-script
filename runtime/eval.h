@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Krzysztof Stachowiak */
+/* Copyright (C) 2014-2016 Krzysztof Stachowiak */
 
 #ifndef EVAL_H
 #define EVAL_H
