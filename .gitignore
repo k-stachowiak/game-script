@@ -37,3 +37,7 @@ build/
 *.tlog
 *.xml
 TAGS
+*.o
+*.d
+mnrepl
+mntest
