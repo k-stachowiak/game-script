@@ -501,9 +501,9 @@ static struct Pattern *parse_pattern(
         (!err_state() && (result = parse_pattern_literal_atomic(dom))) ||
         (!err_state() && (result = parse_pattern_literal_compound(dom, state))) ||
         (!err_state() && (result = parse_pattern_datatype(dom, state)))) {
-	if (state->pcb) {
-	    state->pcb(state->data, result, &dom->loc);
-	}
+    if (state->pcb) {
+        state->pcb(state->data, result, &dom->loc);
+    }
         return result;
     } else {
         return NULL;
@@ -957,7 +957,7 @@ static struct AstNode *parse_min_nary(
     int min_args,
     enum Reserved keyword,
     struct AstNode *(*constructor)(
-	struct AstNode *args),
+    struct AstNode *args),
     struct ParserState *state)
 {
     struct DomNode *child = NULL;
@@ -1261,16 +1261,16 @@ static struct AstNode *parse_one(
         (!err_state() && (node = parse_special(dom, state))) ||
         (!err_state() && (node = parse_func_call(dom, state))) ||
         (!err_state() && (node = parse_literal_compound(dom, state)))) {
-	if (state->acb) {
-	    state->acb(state->data, node, &dom->loc);
-	}
+    if (state->acb) {
+        state->acb(state->data, node, &dom->loc);
+    }
         return node;
 
     } else {
         err_push_src(
-	    "PARSE",
-	    &dom->loc,
-	    "Failed parsing DOM node");
+        "PARSE",
+        &dom->loc,
+        "Failed parsing DOM node");
         return NULL;
     }
 }
@@ -1311,7 +1311,7 @@ struct AstNode *parse_source(
     dom = lex(source);
     if (err_state()) {
         err_push("PARSE", "Failed parsing source");
-	return NULL;
+    return NULL;
     }
 
     ast = parse_list(dom, &state);
@@ -1348,8 +1348,8 @@ struct AstNode *parse_source_build_alm(
     struct AstLocMap *alm)
 {
     return parse_source(
-	source,
-	alm,
-	parse_source_on_ast,
-	parse_source_on_pat);
+    source,
+    alm,
+    parse_source_on_ast,
+    parse_source_on_pat);
 }

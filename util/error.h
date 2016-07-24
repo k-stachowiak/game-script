@@ -34,12 +34,12 @@ void err_report(void);
         struct ErrFrame *_frame_ = mem_malloc(sizeof(*_frame_)); \
         _frame_->module = (MODULE); \
         _frame_->message = NULL; \
-	if (SRC_LOC) { \
-	    _frame_->src_loc = mem_malloc(sizeof(*_frame_->src_loc)); \
-	    *_frame_->src_loc = (*(struct SourceLocation*)SRC_LOC); \
-	} else { \
-	    _frame_->src_loc = NULL; \
-	} \
+    if (SRC_LOC) { \
+        _frame_->src_loc = mem_malloc(sizeof(*_frame_->src_loc)); \
+        *_frame_->src_loc = (*(struct SourceLocation*)SRC_LOC); \
+    } else { \
+        _frame_->src_loc = NULL; \
+    } \
         _frame_->next = NULL; \
         str_append(_frame_->message, FORMAT, ##__VA_ARGS__); \
         LIST_APPEND(_frame_, &err_stack, &err_stack_end); \

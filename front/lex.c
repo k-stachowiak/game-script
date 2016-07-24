@@ -203,10 +203,10 @@ static struct Token *tokenize(
 
         if (!tok) {
             err_push_src(
-		"LEX",
-		&current.loc,
-		"Failed reading token at %s",
-		begin.first);
+        "LEX",
+        &current.loc,
+        "Failed reading token at %s",
+        begin.first);
             tok_free(result);
             return NULL;
         }
@@ -277,9 +277,9 @@ static struct DomNode *dom_parse_compound_node(struct Token **current)
     }
 
     err_push_src(
-	"LEX",
-	&first->loc,
-	"undelimited compound DOM node");
+    "LEX",
+    &first->loc,
+    "undelimited compound DOM node");
 
 fail:
     dom_free(children);
@@ -301,9 +301,9 @@ static struct DomNode *dom_parse_node(struct Token **current)
 
     } else if (tok_is_close_paren(*current)) {
         err_push_src(
-	    "LEX",
-	    &(*current)->loc,
-	    "closing unopened compound node");
+        "LEX",
+        &(*current)->loc,
+        "closing unopened compound node");
         return NULL;
 
     } else if (tok_is_open_paren(*current)) {

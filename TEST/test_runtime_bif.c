@@ -171,41 +171,41 @@ static void test_runtime_bif_parse_serialize(
 {
     size_t i;
     char *valid_expressions[] = {
-	"false",
-	"1",
-	"2.0",
-	"'3'",
-	"{ 1 2.0 [ '3' ] }",
-	"[ { 1 2 } { 3 4 } ]"
+    "false",
+    "1",
+    "2.0",
+    "'3'",
+    "{ 1 2.0 [ '3' ] }",
+    "[ { 1 2 } { 3 4 } ]"
     };
 
     test_eval_source_fail(tc, rt, "(parse 1)", "Parse nonstring argument");
 
     for (i = 0; i < sizeof(valid_expressions)/sizeof(*valid_expressions); ++i) {
-	char *source = NULL;
-	char *message = NULL;
-	str_append(source, "(parse \"%s\")", valid_expressions[i]);
-	str_append(message, "Parsing value: \"%s\"", valid_expressions[i]);
-	test_eval_source_succeed(tc, rt, source, message);
-	mem_free(message);
-	mem_free(source);
+    char *source = NULL;
+    char *message = NULL;
+    str_append(source, "(parse \"%s\")", valid_expressions[i]);
+    str_append(message, "Parsing value: \"%s\"", valid_expressions[i]);
+    test_eval_source_succeed(tc, rt, source, message);
+    mem_free(message);
+    mem_free(source);
     }
 
     for (i = 0; i < sizeof(valid_expressions)/sizeof(*valid_expressions); ++i) {
-	char *source = NULL;
-	char *message = NULL;
-	str_append(
-	    source,
-	    "(eq %s (parse (to_string %s)))",
-	    valid_expressions[i],
-	    valid_expressions[i]);
-	str_append(
-	    message,
-	    "Testing parse/serialize: %s",
-	    valid_expressions[i]);
-	test_eval_source_succeed(tc, rt, source, message);
-	mem_free(message);
-	mem_free(source);
+    char *source = NULL;
+    char *message = NULL;
+    str_append(
+        source,
+        "(eq %s (parse (to_string %s)))",
+        valid_expressions[i],
+        valid_expressions[i]);
+    str_append(
+        message,
+        "Testing parse/serialize: %s",
+        valid_expressions[i]);
+    test_eval_source_succeed(tc, rt, source, message);
+    mem_free(message);
+    mem_free(source);
     }
 
     test_eval_source_expect(tc, rt,

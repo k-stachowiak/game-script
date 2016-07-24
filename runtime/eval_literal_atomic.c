@@ -10,7 +10,7 @@ void eval_literal_atomic(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     char *string;
     int string_len;

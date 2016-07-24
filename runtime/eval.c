@@ -17,7 +17,7 @@ static void eval_symbol(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     struct SymMapNode *smn;
     struct AstSymbol *symbol_node = &node->data.symbol;
@@ -37,7 +37,7 @@ VAL_LOC_T eval_dispatch(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     /* It is possible that the debugger flag will change during evaluation. */
     bool debug_begin_called = false;
@@ -85,7 +85,7 @@ VAL_LOC_T eval_dispatch(
         }
 
         err_push_src("EVAL", alm_get_ast(alm, node), "Failed evaluating expression");
-	LOG_TRACE("eval_impl END(error)");
+    LOG_TRACE("eval_impl END(error)");
         return ret_val;
 
     } else {
@@ -94,7 +94,7 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, begin, false);
         }
 
-	LOG_TRACE("eval_impl END(result=%td)", begin);
+    LOG_TRACE("eval_impl END(result=%td)", begin);
         return begin;
     }
 }

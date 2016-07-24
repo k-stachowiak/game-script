@@ -13,14 +13,14 @@ void alm_init(struct AstLocMap *alm)
 void alm_deinit(struct AstLocMap *alm)
 {
     while (alm->ast_root) {
-	struct AstLocMapAstNode *next = alm->ast_root->next;
-	free(alm->ast_root);
-	alm->ast_root = next;
+    struct AstLocMapAstNode *next = alm->ast_root->next;
+    free(alm->ast_root);
+    alm->ast_root = next;
     }
     while (alm->pat_root) {
-	struct AstLocMapPatNode *next = alm->pat_root->next;
-	free(alm->pat_root);
-	alm->pat_root = next;
+    struct AstLocMapPatNode *next = alm->pat_root->next;
+    free(alm->pat_root);
+    alm->pat_root = next;
     }
 }
 
@@ -54,7 +54,7 @@ struct AstLocMapAstNode *alm_find_ast(
 {
     struct AstLocMapAstNode *map_node = alm->ast_root;
     while (map_node && map_node->node != node) {
-	map_node = map_node->next;
+    map_node = map_node->next;
     }
     return map_node;
 }
@@ -65,9 +65,9 @@ struct SourceLocation *alm_get_ast(
 {
     struct AstLocMapAstNode *found = alm_find_ast(alm, node);
     if (!found) {
-	return NULL;
+    return NULL;
     } else {
-	return &found->loc;
+    return &found->loc;
     }
 }
 
@@ -77,7 +77,7 @@ struct AstLocMapPatNode *alm_find_pat(
 {
     struct AstLocMapPatNode *map_node = alm->pat_root;
     while (map_node && map_node->pattern != pattern) {
-	map_node = map_node->next;
+    map_node = map_node->next;
     }
     return map_node;
 }
@@ -88,8 +88,8 @@ struct SourceLocation *alm_get_pat(
 {
     struct AstLocMapPatNode *found = alm_find_pat(alm, pattern);
     if (!found) {
-	return NULL;
+    return NULL;
     } else {
-	return &found->loc;
+    return &found->loc;
     }
 }

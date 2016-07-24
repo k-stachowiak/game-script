@@ -79,14 +79,14 @@ struct MoonValue *mn_exec_command(struct MoonContext *ctx, const char *source)
     expr = parse_source_build_alm((char*)source, &alm);
     if (err_state()) {
         err_push("LIB", "Failed executing command: %s", source);
-	alm_deinit(&alm);
+    alm_deinit(&alm);
         return NULL;
     }
 
     rt_consume_one(ctx->rt, expr, &alm, &result_loc, NULL);
     if (err_state()) {
         err_push("LIB", "Failed executing command: %s", source);
-	alm_deinit(&alm);
+    alm_deinit(&alm);
         return NULL;
     }
 

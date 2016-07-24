@@ -29,7 +29,7 @@ static bool efc_evaluate_currently_applied(
         struct SymMap *sym_map,
         struct AstNode *args,
         struct LocArray *result,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     while (args) {
         VAL_LOC_T loc = eval_dispatch(args, rt, sym_map, alm);
@@ -51,23 +51,23 @@ static bool efc_evaluate_arg(
         struct AstNode *arg_node,
         struct Pattern *pattern,
         VAL_LOC_T *location,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     *location = eval_dispatch(arg_node, rt, caller_sym_map, alm);
     if (err_state()) {
         err_push_src(
-	    "EVAL",
-	    alm_get_ast(alm, arg_node),
-	    "Failed evaluating function argument expression");
+        "EVAL",
+        alm_get_ast(alm, arg_node),
+        "Failed evaluating function argument expression");
         return false;
     }
 
     eval_special_bind_pattern(pattern, *location, rt, new_sym_map, alm);
     if (err_state()) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Failed registering function argument in the local scope");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Failed registering function argument in the local scope");
         return false;
     }
 
@@ -83,7 +83,7 @@ static void efc_curry_on(
         struct SymMap *sym_map,
         struct AstNode *actual_args,
         struct ValueFuncData *func_data,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     VAL_LOC_T current_loc, size_loc, data_begin;
     VAL_SIZE_T i, arg_count;
@@ -121,9 +121,9 @@ static void efc_curry_on(
         eval_dispatch(actual_args, rt, sym_map, alm);
         if (err_state()) {
             err_push_src(
-		"EVAL",
-		alm_get_ast(alm, actual_args),
-		"Failed evaluating function argument");
+        "EVAL",
+        alm_get_ast(alm, actual_args),
+        "Failed evaluating function argument");
             break;
         }
     }
@@ -138,7 +138,7 @@ static void efc_evaluate_ast(
         struct SymMap *sym_map,
         struct AstNode *actual_args,
         struct ValueFuncData *func_data,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     VAL_SIZE_T i;
 
@@ -189,9 +189,9 @@ static void efc_evaluate_ast(
     for (; actual_args; actual_args = actual_args->next) {
         VAL_LOC_T actual_loc;
         if (efc_evaluate_arg(
-		rt, sym_map, &args_sym_map,
-		actual_args, formal_args,
-		&actual_loc, alm)) {
+        rt, sym_map, &args_sym_map,
+        actual_args, formal_args,
+        &actual_loc, alm)) {
             formal_args = formal_args->next;
         } else {
             goto cleanup;
@@ -218,7 +218,7 @@ static void efc_evaluate_bif(
         struct SymMap *sym_map,
         struct AstNode *actual_args,
         struct ValueFuncData *func_data,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
@@ -344,7 +344,7 @@ static void efc_evaluate_clif(
         struct SymMap *sym_map,
         struct AstNode *actual_args,
         struct ValueFuncData *func_data,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     struct LocArray arg_locs = { NULL, 0, 0 };
     VAL_LOC_T temp_begin, temp_end;
@@ -378,7 +378,7 @@ void eval_func_call(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     VAL_LOC_T temp_begin, temp_end;
     struct AstFuncCall *fcall = &node->data.func_call;
@@ -394,17 +394,17 @@ void eval_func_call(
     temp_end = rt->stack.top;
     if (err_state()) {
         err_push_src(
-	    "EVAL",
-	    alm_get_ast(alm, func),
-	    "Failed evaluating function identity");
+        "EVAL",
+        alm_get_ast(alm, func),
+        "Failed evaluating function identity");
         return;
     }
 
     if (rt_val_peek_type(&rt->stack, func_loc) != VAL_FUNCTION) {
         err_push_src(
-	    "EVAL",
-	    alm_get_ast(alm, func),
-	    "Function call key doesn't evaluate to a function");
+        "EVAL",
+        alm_get_ast(alm, func),
+        "Function call key doesn't evaluate to a function");
         return;
     }
 

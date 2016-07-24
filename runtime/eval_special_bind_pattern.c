@@ -9,13 +9,13 @@ static void eval_bind_pattern_datatype(
         struct Runtime *rt,
         struct SymMap *sym_map,
         VAL_LOC_T location,
-	struct AstLocMap *alm);
+    struct AstLocMap *alm);
 
 static void eval_bind_pattern_literal_atomic(
         struct Pattern *pattern,
         struct Runtime *rt,
         VAL_LOC_T location,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
     VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
@@ -64,9 +64,9 @@ static void eval_bind_pattern_literal_atomic(
 
             if (str_len != arr_len) {
                 err_push_src(
-		    "EVAL",
-		    alm_get_pat(alm, pattern),
-		    "Failed matching string literal");
+            "EVAL",
+            alm_get_pat(alm, pattern),
+            "Failed matching string literal");
                 return;
             }
 
@@ -74,9 +74,9 @@ static void eval_bind_pattern_literal_atomic(
             while (arr_len) {
                 if (*str_pat != rt_val_peek_char(rt, current_loc)) {
                     err_push_src(
-			"EVAL",
-			alm_get_pat(alm, pattern),
-			"Failed matching string literal");
+            "EVAL",
+            alm_get_pat(alm, pattern),
+            "Failed matching string literal");
                     return;
                 }
                 current_loc = rt_val_next_loc(rt, current_loc);
@@ -89,9 +89,9 @@ static void eval_bind_pattern_literal_atomic(
     }
 
     err_push_src(
-	"EVAL",
-	alm_get_pat(alm, pattern),
-	"Literal_atomic value pattern mismatch");
+    "EVAL",
+    alm_get_pat(alm, pattern),
+    "Literal_atomic value pattern mismatch");
 }
 
 static void eval_bind_pattern_literal_compound(
@@ -99,7 +99,7 @@ static void eval_bind_pattern_literal_compound(
         struct Runtime *rt,
         struct SymMap *sym_map,
         VAL_LOC_T location,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     struct PatternLiteralCompound *literal_compound = &pattern->data.literal_compound;
     VAL_LOC_T current_loc = rt_val_cpd_first_loc(location);
@@ -114,17 +114,17 @@ static void eval_bind_pattern_literal_compound(
     if (!(val_type == VAL_ARRAY && pat_type == PATTERN_LIT_CPD_ARRAY) &&
         !(val_type == VAL_TUPLE && pat_type == PATTERN_LIT_CPD_TUPLE)) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Compound value and pattern type mismatch");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Compound value and pattern type mismatch");
             return;
     }
 
     if (val_len != pat_len) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Compound value and pattern length mismatch");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Compound value and pattern length mismatch");
         return;
     }
 
@@ -132,9 +132,9 @@ static void eval_bind_pattern_literal_compound(
         eval_special_bind_pattern(current_pat, current_loc, rt, sym_map, alm);
         if (err_state()) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, current_pat),
-		"Failed matching one of the compound pattern elements");
+        "EVAL",
+        alm_get_pat(alm, current_pat),
+        "Failed matching one of the compound pattern elements");
             return;
         }
         current_pat = current_pat->next;
@@ -148,7 +148,7 @@ static void eval_bind_pattern_datatype_array(
         struct SymMap *sym_map,
         VAL_LOC_T location,
         enum ValueType value_type,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     int arr_length, pat_length;
     VAL_LOC_T first_loc;
@@ -157,9 +157,9 @@ static void eval_bind_pattern_datatype_array(
 
     if (value_type != VAL_ARRAY) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Failed matching array pattern");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Failed matching array pattern");
         return;
     }
 
@@ -172,18 +172,18 @@ static void eval_bind_pattern_datatype_array(
     pat_length = pattern_list_len(datatype->children);
     if (pat_length != 1) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Failed matching array pattern");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Failed matching array pattern");
         return;
     }
 
     child = datatype->children;
     if (child->type != PATTERN_DATATYPE) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Failed matching array pattern");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Failed matching array pattern");
         return;
     }
 
@@ -197,7 +197,7 @@ static void eval_bind_pattern_datatype_reference(
         struct SymMap *sym_map,
         VAL_LOC_T location,
         enum ValueType value_type,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     int length;
     VAL_LOC_T refered_loc;
@@ -206,27 +206,27 @@ static void eval_bind_pattern_datatype_reference(
 
     if (value_type != VAL_REF) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Failed matching reference pattern");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Failed matching reference pattern");
         return;
     }
 
     length = pattern_list_len(datatype->children);
     if (length != 1) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, pattern),
-	    "Failed matching reference pattern");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Failed matching reference pattern");
         return;
     }
 
     child = datatype->children;
     if (child->type != PATTERN_DATATYPE) {
         err_push_src(
-	    "EVAL",
-	    alm_get_pat(alm, child),
-	    "Failed matching reference pattern");
+        "EVAL",
+        alm_get_pat(alm, child),
+        "Failed matching reference pattern");
         return;
     }
 
@@ -239,7 +239,7 @@ static void eval_bind_pattern_datatype(
         struct Runtime *rt,
         struct SymMap *sym_map,
         VAL_LOC_T location,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     struct PatternDataType *datatype = &pattern->data.datatype;
     enum ValueType value_type = rt_val_peek_type(&rt->stack, location);
@@ -248,63 +248,63 @@ static void eval_bind_pattern_datatype(
     case PATTERN_DATATYPE_UNIT:
         if (value_type != VAL_UNIT) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Match failure expected unit");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Match failure expected unit");
         }
         break;
     case PATTERN_DATATYPE_BOOLEAN:
         if (value_type != VAL_BOOL) {
             err_push_src(
-		"EVAL", 
-		alm_get_pat(alm, pattern),
-		"Match failure expected boolean");
+        "EVAL", 
+        alm_get_pat(alm, pattern),
+        "Match failure expected boolean");
         }
         break;
     case PATTERN_DATATYPE_INTEGER:
         if (value_type != VAL_INT) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Match failure expected integer");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Match failure expected integer");
         }
         break;
     case PATTERN_DATATYPE_REAL:
         if (value_type != VAL_REAL) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Match failure expected real");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Match failure expected real");
         }
         break;
     case PATTERN_DATATYPE_CHARACTER:
         if (value_type != VAL_CHAR) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Match failure expected character");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Match failure expected character");
         }
         break;
     case PATTERN_DATATYPE_FUNCTION:
         if (value_type != VAL_FUNCTION) {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Match failure expected function");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Match failure expected function");
         } else {
             err_push_src(
-		"EVAL",
-		alm_get_pat(alm, pattern),
-		"Matched function value, but it is not supported yet");
+        "EVAL",
+        alm_get_pat(alm, pattern),
+        "Matched function value, but it is not supported yet");
         }
         break;
     case PATTERN_DATATYPE_ARRAY_OF:
         eval_bind_pattern_datatype_array(
-	    pattern, rt, sym_map, location, value_type, alm);
+        pattern, rt, sym_map, location, value_type, alm);
         break;
     case PATTERN_DATATYPE_REFERENCE_TO:
         eval_bind_pattern_datatype_reference(
-	    pattern, rt, sym_map, location, value_type, alm);
+        pattern, rt, sym_map, location, value_type, alm);
         break;
     }
 }
@@ -314,7 +314,7 @@ void eval_special_bind_pattern(
         VAL_LOC_T location,
         struct Runtime *rt,
         struct SymMap *sym_map,
-	struct AstLocMap *alm)
+    struct AstLocMap *alm)
 {
     switch (pattern->type) {
     case PATTERN_DONT_CARE:

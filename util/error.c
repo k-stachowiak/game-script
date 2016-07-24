@@ -39,10 +39,10 @@ char *err_msg(void)
         str_append(message_line, "%d: [%s] ", i++, frame->module);
         if (frame->src_loc) {
             str_append(
-		message_line,
-		"(%d,%d) ",
-		frame->src_loc->line,
-		frame->src_loc->column);
+        message_line,
+        "(%d,%d) ",
+        frame->src_loc->line,
+        frame->src_loc->column);
         }
         str_append(message_line, ": %s\n", frame->message);
         str_append(result, "\t%s", message_line);

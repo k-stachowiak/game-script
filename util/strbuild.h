@@ -15,12 +15,12 @@
         char *_buffer_; \
         int _old_len_, _new_len_;\
         char *_new_text_;\
-	_buffer_ = mem_malloc(STR_TEMP_BUFFER_SIZE); \
+    _buffer_ = mem_malloc(STR_TEMP_BUFFER_SIZE); \
         _new_len_ = sprintf(_buffer_, FORMAT, ##__VA_ARGS__);\
         if (_new_len_ >= (STR_TEMP_BUFFER_SIZE) - 1) {\
             LOG_ERROR("Buffer of %d not enough for %d bytes.", \
                 STR_TEMP_BUFFER_SIZE, \
-		_new_len_); \
+        _new_len_); \
             exit(2);\
         }\
         if (!(TXT)) {\
@@ -34,7 +34,7 @@
             mem_free((TXT));\
         } \
         (TXT) = _new_text_; \
-	mem_free(_buffer_); \
+    mem_free(_buffer_); \
     } while(0)
 
 #define str_append_range(TXT, FIRST, LAST)\

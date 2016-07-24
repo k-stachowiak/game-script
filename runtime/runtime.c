@@ -139,7 +139,7 @@ void rt_register_clif_handler(
 bool rt_consume_one(
         struct Runtime *rt,
         struct AstNode *ast,
-	struct AstLocMap *alm,
+    struct AstLocMap *alm,
         VAL_LOC_T *loc,
         struct AstNode **next)
 {
@@ -176,7 +176,7 @@ bool rt_consume_one(
 bool rt_consume_list(
         struct Runtime *rt,
         struct AstNode *ast_list,
-	struct AstLocMap *alm,
+    struct AstLocMap *alm,
         VAL_LOC_T *last_loc)
 {
     struct AstNode *next;
