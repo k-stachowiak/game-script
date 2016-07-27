@@ -35,9 +35,9 @@ void eval_literal_compound(
         elem_loc = eval_dispatch(current, rt, sym_map, alm);
         if (err_state()) {
             err_push_src(
-        "EVAL",
-        alm_get_ast(alm, current),
-        "Failed evaluating literal compound expression element");
+                "EVAL",
+                alm_get(alm, current),
+                "Failed evaluating literal compound expression element");
             return;
         } else {
             current = current->next;
@@ -53,9 +53,9 @@ void eval_literal_compound(
             first_elem_loc = elem_loc;
         } else if (!rt_val_pair_homo(rt, first_elem_loc, elem_loc)) {
             err_push_src(
-        "EVAL",
-        alm_get_ast(alm, current),
-        "Heterogenous array literal evaluated");
+                "EVAL",
+                alm_get(alm, current),
+                "Heterogenous array literal evaluated");
             return;
         }
     }

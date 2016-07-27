@@ -34,7 +34,7 @@ void test_parse_literal_fail(struct TestContext *tc,
     do { \
         struct AstNode *node; \
         err_reset(); \
-        node = parse_source(SRC, NULL, NULL, NULL); \
+        node = parse_source(SRC, NULL, NULL); \
         if (!node) { \
             tc_record(TC, NAME, false); \
             break; \
@@ -87,7 +87,7 @@ void test_eval_source_expect_string(
     do { \
         VAL_LOC_T result[1]; \
         if (!test_eval_source(RT, SRC, result)) { \
-                tc_record(TC, NAME, false); \
+            tc_record(TC, NAME, false); \
             rt_reset(RT); \
             break; \
         } \

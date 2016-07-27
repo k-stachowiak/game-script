@@ -7,8 +7,8 @@
 #include "eval_detail.h"
 
 void eval_error_not_found_src(
-    char *symbol,
-    struct SourceLocation *loc)
+        char *symbol,
+        struct SourceLocation *loc)
 {
     err_push_src("EVAL", loc, "Symbol \"%s\" not found", symbol);
 }
@@ -17,7 +17,7 @@ static void eval_symbol(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     struct SymMapNode *smn;
     struct AstSymbol *symbol_node = &node->data.symbol;
@@ -26,7 +26,7 @@ static void eval_symbol(
     LOG_TRACE_FUNC;
 
     if (!(smn = sym_map_find(sym_map, symbol))) {
-        eval_error_not_found_src(symbol, alm_get_ast(alm, node));
+        eval_error_not_found_src(symbol, alm_get(alm, node));
         return;
     }
 
@@ -37,7 +37,7 @@ VAL_LOC_T eval_dispatch(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     /* It is possible that the debugger flag will change during evaluation. */
     bool debug_begin_called = false;
@@ -75,6 +75,10 @@ VAL_LOC_T eval_dispatch(
     case AST_LITERAL_ATOMIC:
         eval_literal_atomic(node, rt, sym_map, alm);
         break;
+
+    case AST_DATATYPE:
+        err_push_src("EVAL", alm_get(alm, node), "Direct evaluation of datatype not supported yet");
+        break;
     }
 
     if (err_state()) {
@@ -84,8 +88,8 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, ret_val, true);
         }
 
-        err_push_src("EVAL", alm_get_ast(alm, node), "Failed evaluating expression");
-    LOG_TRACE("eval_impl END(error)");
+        err_push_src("EVAL", alm_get(alm, node), "Failed evaluating expression");
+        LOG_TRACE("eval_impl END(error)");
         return ret_val;
 
     } else {

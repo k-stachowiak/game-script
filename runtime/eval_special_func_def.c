@@ -90,6 +90,9 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 
     case AST_LITERAL_ATOMIC:
         return NULL;
+
+    case AST_DATATYPE:
+        return node->data.datatype.children;
     }
 
     LOG_ERROR("Unhandled AST node type.");
@@ -144,7 +147,7 @@ static void efd_push_captures_rec(
 
     /* Store a capture from the current node if necessary and possible. */
     if (efd_refers_to_symbol(node, &symbol) &&
-            !pattern_list_contains_symbol(func_def->formal_args, symbol) &&
+            !ast_list_contains_symbol(func_def->formal_args, symbol) &&
             efd_is_non_global(symbol, sym_map, &cap_location)) {
         struct CaptureCandidate capture_candidate = { symbol, level, cap_location };
         ARRAY_APPEND(*capture_candidates, capture_candidate);
@@ -213,14 +216,14 @@ static void efd_push_captures(
 }
 
 void eval_special_func_def(
-    struct AstNode* node,
-    struct Runtime *rt,
-    struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstNode* node,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstLocMap *alm)
 {
     VAL_LOC_T size_loc, data_begin;
     struct AstSpecFuncDef *func_def = &node->data.special.data.func_def;
-    VAL_SIZE_T arity = pattern_list_len(func_def->formal_args);
+    VAL_SIZE_T arity = ast_list_len(func_def->formal_args);
     (void)alm;
     rt_val_push_func_init(&rt->stack, &size_loc, &data_begin, arity, VAL_FUNC_AST, (void*)node);
     efd_push_captures(func_def, &rt->stack, sym_map);

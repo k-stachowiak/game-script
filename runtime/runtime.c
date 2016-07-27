@@ -157,7 +157,7 @@ bool rt_consume_one(
     }
 
     if (err_state()) {
-        err_push_src("RUNTIME", alm_get_ast(alm, ast), "Failed consuming AST node");
+        err_push_src("RUNTIME", alm_get(alm, ast), "Failed consuming AST node");
         ast_node_free_one(ast);
         return false;
 

@@ -14,7 +14,6 @@
 #include "tok.h"
 #include "lex.h"
 #include "dom.h"
-#include "pattern.h"
 #include "ast_loc_map.h"
 
 /* Algorithms.
@@ -236,201 +235,37 @@ static bool parse_real(char *string, double *result)
 struct ParserState {
     void *data;
     ParserAstCallback acb;
-    ParserPatCallback pcb;
 };
 
-/* Pattern parsing.
- * ================
+/* Parsing algorithm.
+ * ==================
  */
 
-static struct Pattern *parse_pattern(struct DomNode *dom, struct ParserState *state);
+static struct AstNode *parse_one(struct DomNode *dom, struct ParserState *state);
+static struct AstNode *parse_list(struct DomNode *dom, struct ParserState *state);
 
-static struct Pattern *parse_pattern_list(struct DomNode *dom, struct ParserState *state)
-{
-    struct Pattern *result = NULL, *result_end = NULL;
-    while (dom) {
-        struct Pattern *item = parse_pattern(dom, state);
-        if (!item) {
-            pattern_free(result);
-            return NULL;
-        }
-        LIST_APPEND(item, &result, &result_end);
-        dom = dom->next;
-    }
-    return result;
-}
-
-static struct Pattern *parse_pattern_dont_care(struct DomNode *dom)
-{
-    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_DONT_CARE)) {
-        return pattern_make_dont_care();
-    } else {
-        return NULL;
-    }
-}
-
-static struct Pattern *parse_pattern_symbol(struct DomNode *dom)
-{
-    char *symbol;
-    if ((symbol = dom_node_parse_symbol(dom))) {
-        struct Pattern *result = pattern_make_symbol(symbol);
-        mem_free(symbol);
-        return result;
-    } else {
-        return NULL;
-    }
-}
-
-static struct Pattern *parse_pattern_literal_atomic_unit(struct DomNode *dom)
-{
-    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_UNIT)) {
-        return pattern_make_literal_atomic_unit();
-    } else {
-        return NULL;
-    }
-}
-
-static struct Pattern *parse_pattern_literal_atomic_bool(struct DomNode *dom)
-{
-    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TRUE)) {
-        return pattern_make_literal_atomic_bool(1);
-    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_FALSE)) {
-        return pattern_make_literal_atomic_bool(0);
-    } else {
-        return NULL;
-    }
-}
-
-static struct Pattern *parse_pattern_literal_atomic_int(struct DomNode *dom)
-{
-    long value;
-
-    if (!dom_node_is_atom(dom)) {
-        return NULL;
-    }
-
-    if (!parse_int(dom->atom, &value)) {
-        return NULL;
-    }
-
-    return pattern_make_literal_atomic_int(value);
-}
-
-static struct Pattern *parse_pattern_literal_atomic_real(struct DomNode *dom)
-{
-    double value;
-
-    if (!dom_node_is_atom(dom)) {
-        return NULL;
-    }
-
-    if (!parse_real(dom->atom, &value)) {
-        return NULL;
-    }
-
-    return pattern_make_literal_atomic_real(value);
-}
-
-static struct Pattern *parse_pattern_literal_atomic_char(struct DomNode *dom)
-{
-    char value;
-
-    if (!dom_node_is_atom(dom)) {
-        return NULL;
-    }
-
-    if (!parse_char(dom->atom, &value)) {
-        return NULL;
-    }
-
-    return pattern_make_literal_atomic_character(value);
-}
-
-static struct Pattern *parse_pattern_literal_atomic_string(struct DomNode *dom)
-{
-    char *value;
-    struct Pattern *result;
-
-    if (!dom_node_is_atom(dom)) {
-        return NULL;
-    }
-
-    if (!parse_string(dom->atom, &value)) {
-        return NULL;
-    }
-
-    result = pattern_make_literal_atomic_string(value);
-    mem_free(value);
-    return result;
-}
-
-static struct Pattern *parse_pattern_literal_atomic(struct DomNode *dom)
-{
-    struct Pattern *result;
-    if ((!err_state() && (result = parse_pattern_literal_atomic_unit(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atomic_bool(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atomic_int(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atomic_real(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atomic_char(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atomic_string(dom)))) {
-        return result;
-    } else {
-        return NULL;
-    }
-}
-
-static struct Pattern *parse_pattern_literal_compound(
-    struct DomNode *dom,
-    struct ParserState *state)
-{
-    if (dom_node_is_spec_compound(dom, DOM_CPD_ARRAY)) {
-        struct Pattern *children = parse_pattern_list(dom->cpd_children, state);
-        if (!children) {
-            return NULL;
-        } else {
-            return pattern_make_literal_compound_array(children);
-        }
-    } else if (dom_node_is_spec_compound(dom, DOM_CPD_TUPLE)) {
-        struct Pattern *children = parse_pattern_list(dom->cpd_children, state);
-        if (!children) {
-            return NULL;
-        } else {
-            return pattern_make_literal_compound_tuple(children);
-        }
-    } else {
-        return NULL;
-    }
-}
-
-static struct Pattern *parse_pattern_datatype_atomic(struct DomNode *dom)
+static struct AstNode *parse_datatype_atomic(struct DomNode *dom)
 {
     if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TUNIT)) {
-        return pattern_make_datatype_unit();
-
+        return ast_make_datatype_unit();
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_BOOLEAN)) {
-        return pattern_make_datatype_bool();
-
+        return ast_make_datatype_bool();
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_INTEGER)) {
-        return pattern_make_datatype_int();
-
+        return ast_make_datatype_int();
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_REAL)) {
-        return pattern_make_datatype_real();
-
+        return ast_make_datatype_real();
     } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_CHARACTER)) {
-        return pattern_make_datatype_character();
-
+        return ast_make_datatype_character();
     } else {
         return NULL;
-
     }
 }
 
-static struct Pattern *parse_pattern_datatype_compound(
-    struct DomNode *dom,
+static struct AstNode *parse_datatype_compound( struct DomNode *dom,
     struct ParserState *state)
 {
     struct DomNode *child = NULL;
-    struct Pattern *pattern_children = NULL;
+    struct AstNode *pattern_children = NULL;
 
     /* 1. Is compound CORE */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -447,27 +282,27 @@ static struct Pattern *parse_pattern_datatype_compound(
     if (dom_node_is_spec_reserved_atom(child, DOM_RES_ARRAY_OF) &&
             dom_list_length(child) == 2) {
         /* 3.a) Array of - only one pattern argument allowed */
-        pattern_children = parse_pattern(child->next, state);
+        pattern_children = parse_one(child->next, state);
         if (pattern_children) {
-            return pattern_make_datatype_array_of(pattern_children);
+            return ast_make_datatype_array_of(pattern_children);
         } else {
             return NULL;
         }
     } else if (dom_node_is_spec_reserved_atom(child, DOM_RES_TREFERENCE) &&
             dom_list_length(child) == 2) {
         /* 3.b) Reference to - only one pattern argument allowed */
-        pattern_children = parse_pattern(child->next, state);
+        pattern_children = parse_one(child->next, state);
         if (pattern_children) {
-            return pattern_make_datatype_reference_to(pattern_children);
+            return ast_make_datatype_reference_to(pattern_children);
         } else {
             return NULL;
         }
     } else if (dom_node_is_spec_reserved_atom(child, DOM_RES_TFUNC) &&
             dom_list_length(child) >= 2) {
         /* 3.c) Function - at least two additional pattern arguments required */
-        pattern_children = parse_pattern_list(child->next, state);
+        pattern_children = parse_list(child->next, state);
         if (pattern_children) {
-            return pattern_make_datatype_function(pattern_children);
+            return ast_make_datatype_function(pattern_children);
         } else {
             return NULL;
         }
@@ -476,46 +311,19 @@ static struct Pattern *parse_pattern_datatype_compound(
     }
 }
 
-static struct Pattern *parse_pattern_datatype(
-    struct DomNode *dom,
-    struct ParserState *state)
+static struct AstNode *parse_datatype(
+        struct DomNode *dom,
+        struct ParserState *state)
 {
-    struct Pattern *result = NULL;
+    struct AstNode *result = NULL;
 
-    if ((!err_state() && (result = parse_pattern_datatype_atomic(dom))) ||
-        (!err_state() && (result = parse_pattern_datatype_compound(dom, state)))) {
+    if ((!err_state() && (result = parse_datatype_atomic(dom))) ||
+        (!err_state() && (result = parse_datatype_compound(dom, state)))) {
         return result;
     } else {
         return NULL;
     }
 }
-
-static struct Pattern *parse_pattern(
-    struct DomNode *dom,
-    struct ParserState *state)
-{
-    struct Pattern *result = NULL;
-
-    if ((!err_state() && (result = parse_pattern_dont_care(dom))) ||
-        (!err_state() && (result = parse_pattern_symbol(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_atomic(dom))) ||
-        (!err_state() && (result = parse_pattern_literal_compound(dom, state))) ||
-        (!err_state() && (result = parse_pattern_datatype(dom, state)))) {
-    if (state->pcb) {
-        state->pcb(state->data, result, &dom->loc);
-    }
-        return result;
-    } else {
-        return NULL;
-    }
-}
-
-/* Regular AST parsing.
- * ====================
- */
-
-static struct AstNode *parse_one(struct DomNode *dom, struct ParserState *state);
-static struct AstNode *parse_list(struct DomNode *dom, struct ParserState *state);
 
 static struct AstNode *parse_literal_unit(struct DomNode *dom)
 {
@@ -601,8 +409,8 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
 }
 
 static struct AstNode *parse_literal_atomic(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct AstNode *result;
 
@@ -622,8 +430,8 @@ static struct AstNode *parse_literal_atomic(
 }
 
 static struct AstNode *parse_symbol(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     char *symbol;
 
@@ -638,8 +446,8 @@ static struct AstNode *parse_symbol(
 }
 
 static struct AstNode *parse_do_block(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct AstNode *exprs = NULL;
     struct DomNode *child = NULL;
@@ -671,12 +479,12 @@ static struct AstNode *parse_do_block(
 }
 
 static struct AstNode *parse_match(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
     struct AstNode *expr = NULL;
-    struct Pattern *keys = NULL, *keys_end = NULL;
+    struct AstNode *keys = NULL, *keys_end = NULL;
     struct AstNode *values = NULL, *values_end = NULL;
 
     /* 1. Is compound CORE. */
@@ -706,7 +514,7 @@ static struct AstNode *parse_match(
     /* 3.3. Has at least one matching expression. */
     while (child) {
         struct DomNode *match_child = NULL;
-        struct Pattern *key = NULL;
+        struct AstNode *key = NULL;
         struct AstNode *value = NULL;
 
         /* 3.3.1. Is compound CORE. */
@@ -721,7 +529,7 @@ static struct AstNode *parse_match(
         match_child = child->cpd_children;
 
         /* 3.3.3. 1st child is a pattern. */
-        if (!(key = parse_pattern(match_child, state))) {
+        if (!(key = parse_one(match_child, state))) {
             goto fail;
         }
         match_child = match_child->next;
@@ -743,7 +551,7 @@ fail:
     ast_node_free(expr);
 
     if (keys) {
-        pattern_free(keys);
+        ast_node_free(keys);
     }
 
     if (values) {
@@ -754,8 +562,8 @@ fail:
 }
 
 static struct AstNode *parse_if(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
     struct AstNode *test = NULL;
@@ -804,8 +612,8 @@ static struct AstNode *parse_if(
 }
 
 static struct AstNode *parse_while(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
     struct AstNode *test = NULL;
@@ -845,15 +653,15 @@ static struct AstNode *parse_while(
 }
 
 static struct AstNode *parse_func_def(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct AstNode *expr = NULL;
 
     struct DomNode *child = NULL;
     struct DomNode *arg_child = NULL;
 
-    struct Pattern *formal_args = NULL, *formal_args_end = NULL;
+    struct AstNode *formal_args = NULL, *formal_args_end = NULL;
 
     /* 1. Is compound CORE. */
     if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
@@ -883,10 +691,9 @@ static struct AstNode *parse_func_def(
     /* Argument list may be empty. */
     if (arg_child) {
         while (arg_child) {
-            struct Pattern *pattern;
-            if (!(pattern = parse_pattern(arg_child, state))) {
+            struct AstNode *pattern;
+            if (!(pattern = parse_one(arg_child, state))) {
                 goto fail;
-
             } else {
                 LIST_APPEND(pattern, &formal_args, &formal_args_end);
             }
@@ -905,18 +712,18 @@ static struct AstNode *parse_func_def(
 
 fail:
     if (formal_args) {
-        pattern_free(formal_args);
+        ast_node_free(formal_args);
     }
 
     return NULL;
 }
 
 static struct AstNode *parse_bind(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
-    struct Pattern *pattern = NULL;
+    struct AstNode *pattern = NULL;
     struct AstNode *expr = NULL;
 
     /* 1. Is compound CORE */
@@ -938,14 +745,14 @@ static struct AstNode *parse_bind(
     child = child->next;
 
     /* 2.2. 2nd child is pattern. */
-    if (!(pattern = parse_pattern(child, state))) {
+    if (!(pattern = parse_one(child, state))) {
         return NULL;
     }
     child = child->next;
 
     /* 2.3 3rd child is any expression. */
     if (!(expr = parse_one(child, state))) {
-        pattern_free(pattern);
+        ast_node_free(pattern);
         return NULL;
     }
 
@@ -953,12 +760,12 @@ static struct AstNode *parse_bind(
 }
 
 static struct AstNode *parse_min_nary(
-    struct DomNode *dom,
-    int min_args,
-    enum Reserved keyword,
-    struct AstNode *(*constructor)(
-    struct AstNode *args),
-    struct ParserState *state)
+        struct DomNode *dom,
+        int min_args,
+        enum Reserved keyword,
+        struct AstNode *(*constructor)(
+            struct AstNode *args),
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
     struct AstNode *exprs = NULL;
@@ -995,7 +802,7 @@ static struct AstNode *parse_unary(
         enum Reserved keyword,
         struct AstNode *(*constructor)(
             struct AstNode *),
-    struct ParserState *state)
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
     struct AstNode *arg = NULL;
@@ -1033,7 +840,7 @@ static struct AstNode *parse_binary(
         struct AstNode *(*constructor)(
             struct AstNode *,
             struct AstNode *),
-    struct ParserState *state)
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
     struct AstNode *arg1 = NULL;
@@ -1074,8 +881,8 @@ static struct AstNode *parse_binary(
 }
 
 static struct AstNode *parse_special(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct DomNode *child = NULL;
 
@@ -1176,8 +983,8 @@ static struct AstNode *parse_special(
 }
 
 static struct AstNode *parse_func_call(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct AstNode *func = NULL;
     struct AstNode *args = NULL;
@@ -1215,8 +1022,8 @@ static struct AstNode *parse_func_call(
 }
 
 static struct AstNode *parse_literal_compound(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     enum AstLiteralCompoundType type;
     struct AstNode *exprs = NULL;
@@ -1251,8 +1058,8 @@ static struct AstNode *parse_literal_compound(
 }
 
 static struct AstNode *parse_one(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     err_reset();
     struct AstNode *node;
@@ -1260,24 +1067,25 @@ static struct AstNode *parse_one(
         (!err_state() && (node = parse_symbol(dom, state))) ||
         (!err_state() && (node = parse_special(dom, state))) ||
         (!err_state() && (node = parse_func_call(dom, state))) ||
-        (!err_state() && (node = parse_literal_compound(dom, state)))) {
-    if (state->acb) {
-        state->acb(state->data, node, &dom->loc);
-    }
+        (!err_state() && (node = parse_literal_compound(dom, state))) ||
+        (!err_state() && (node = parse_datatype(dom, state)))) {
+        if (state->acb) {
+            state->acb(state->data, node, &dom->loc);
+        }
         return node;
 
     } else {
         err_push_src(
-        "PARSE",
-        &dom->loc,
-        "Failed parsing DOM node");
+            "PARSE",
+            &dom->loc,
+            "Failed parsing DOM node");
         return NULL;
     }
 }
 
 static struct AstNode *parse_list(
-    struct DomNode *dom,
-    struct ParserState *state)
+        struct DomNode *dom,
+        struct ParserState *state)
 {
     struct AstNode *node;
     struct AstNode *result = NULL;
@@ -1298,20 +1106,19 @@ static struct AstNode *parse_list(
 }
 
 struct AstNode *parse_source(
-    char *source,
-    void *data,
-    ParserAstCallback acb,
-    ParserPatCallback pcb)
+        char *source,
+        void *data,
+        ParserAstCallback acb)
 {
     struct DomNode *dom;
     struct AstNode *ast;
 
-    struct ParserState state = { data, acb, pcb };
+    struct ParserState state = { data, acb };
 
     dom = lex(source);
     if (err_state()) {
         err_push("PARSE", "Failed parsing source");
-    return NULL;
+        return NULL;
     }
 
     ast = parse_list(dom, &state);
@@ -1326,30 +1133,18 @@ struct AstNode *parse_source(
 }
 
 void parse_source_on_ast(
-    void *data,
-    struct AstNode *node,
-    struct SourceLocation *loc)
+        void *data,
+        struct AstNode *node,
+        struct SourceLocation *loc)
 {
     struct AstLocMap *alm = (struct AstLocMap *)data;
-    alm_put_ast(alm, node, loc);
-}
-
-void parse_source_on_pat(
-    void *data,
-    struct Pattern *pattern,
-    struct SourceLocation *loc)
-{
-    struct AstLocMap *alm = (struct AstLocMap *)data;
-    alm_put_pat(alm, pattern, loc);
+    alm_put(alm, node, loc);
 }
 
 struct AstNode *parse_source_build_alm(
-    char *source,
-    struct AstLocMap *alm)
+        char *source,
+        struct AstLocMap *alm)
 {
-    return parse_source(
-    source,
-    alm,
-    parse_source_on_ast,
-    parse_source_on_pat);
+    return parse_source(source, alm, parse_source_on_ast);
 }
+

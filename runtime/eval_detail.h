@@ -18,7 +18,7 @@ void eval_special_func_def(
     struct AstLocMap *alm);
 
 void eval_special_bind_pattern(
-    struct Pattern *pattern,
+    struct AstNode *pattern,
     VAL_LOC_T location,
     struct Runtime *rt,
     struct SymMap *sym_map,

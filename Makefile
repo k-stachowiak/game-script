@@ -1,3 +1,6 @@
+CC = gcc
+CXX = g++
+
 csources = $(shell find . -name '*.c' | grep -v 'REPL\|TEST\|LIB')
 cxxsources = $(shell find . -name '*.cpp' | grep -v 'REPL\|TEST\|LIB')
 headers = $(shell find . -name '*.h' | grep -v 'REPL\|TEST')
@@ -10,12 +13,11 @@ objects = $(cobjects) $(cxxobjects)
 
 COMMON_FLAGS = -Wall -Wextra -g -O0 -fPIC
 COMMON_FLAGS += -I. -I./ast -I./front -I./runtime -I./util -I./LIB
-COMMON_FLAGS += -DNO_TIMER_STACK
 
 CFLAGS = $(COMMON_FLAGS) -std=c11
 CXXFLAGS = $(COMMON_FLAGS) -std=c++11
 
-EXEFLAGS = -L. -lmoon -lm
+EXEFLAGS = -L. -lmoon -lm -lstdc++
 LIBFLAGS = -shared -lstdc++
 
 all : mntest mnrepl
@@ -27,7 +29,7 @@ mnrepl : REPL/main.c libmoon.a
 	$(CC) -o $@ $< $(CFLAGS) $(LDFLAGS) $(EXEFLAGS)
 
 libmoon.a : LIB/*.c LIB/*.h $(objects)
-	$(CC) -o libmoon.a LIB/*.c $(objects) $(CFLAGS) $(LDFLAGS) $(LIBFLAGS)
+	$(CC) -o libmoon.a LIB/*.c $(LIBFLAGS) $(objects) $(CFLAGS) $(LDFLAGS)
 
 include $(csources:.c=.d)
 include $(cxxsources:.cpp=.d)

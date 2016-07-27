@@ -1,10 +1,12 @@
 # TODO
-* merge ast and pattern trees!
-* parser will now take the ast-loc-map as an argument and fill in if not null (also pattern map?)
-* track the source location information propagation in the error reporting.
+* Make datatype expressions literals?
+* validate AST structure in the node constructors
+* parser will now take the ast-loc-map as an argument and fill in if not null
+* the mapping between the semantic and terminal symbols such as "UNIT" or "func" must be
+  identical in the serialization and the parsing algorithms.
 * revise error messages - improve with the new source location tracking mechanism
     * Are the source locations available wherever possible?
-* add another debug map, this time address -> source location for runtime values
+* add another debug map: address -> source location for runtime values
 * store dom node begin and node end location in the dom nodes
 * revise parser and runtime tests
 * Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)

@@ -37,7 +37,7 @@ struct AstNode *ast_make_spec_do(
 
 struct AstNode *ast_make_spec_match(
         struct AstNode *expr,
-        struct Pattern *keys,
+        struct AstNode *keys,
         struct AstNode *values)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -98,7 +98,7 @@ struct AstNode *ast_make_spec_while(
 }
 
 struct AstNode *ast_make_spec_func_def(
-        struct Pattern *formal_args,
+        struct AstNode *formal_args,
         struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -142,7 +142,7 @@ struct AstNode *ast_make_spec_or(
 }
 
 struct AstNode *ast_make_spec_bind(
-        struct Pattern *pattern,
+        struct AstNode *pattern,
         struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -371,6 +371,110 @@ struct AstNode *ast_make_literal_atomic_real(double value)
     return result;
 }
 
+struct AstNode *ast_make_datatype_unit(void)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_UNIT;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_bool(void)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_BOOLEAN;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_int(void)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_INTEGER;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_real(void)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_REAL;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_character(void)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_CHARACTER;
+    result->data.datatype.children = NULL;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_array_of(struct AstNode *child)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_ARRAY_OF;
+    result->data.datatype.children = child;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_reference_to(struct AstNode *child)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_REFERENCE_TO;
+    result->data.datatype.children = child;
+
+    return result;
+}
+
+struct AstNode *ast_make_datatype_function(struct AstNode *children)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->type = AST_DATATYPE;
+    result->next = NULL;
+
+    result->data.datatype.type = AST_DATATYPE_FUNCTION;
+    result->data.datatype.children = children;
+
+    return result;
+}
+
 static void ast_symbol_free(struct AstSymbol *symbol)
 {
     mem_free(symbol->symbol);
@@ -384,7 +488,7 @@ static void ast_special_do_free(struct AstSpecDo *doo)
 static void ast_special_match_free(struct AstSpecMatch *match)
 {
     ast_node_free(match->expr);
-    pattern_free(match->keys);
+    ast_node_free(match->keys);
     /* The expression node is linked with the values list. */
 }
 
@@ -402,7 +506,7 @@ static void ast_special_while_free(struct AstSpecWhile *whilee)
 
 static void ast_special_func_def_free(struct AstSpecFuncDef *func_def)
 {
-    pattern_free(func_def->formal_args);
+    ast_node_free(func_def->formal_args);
     ast_node_free(func_def->expr);
 }
 
@@ -418,7 +522,7 @@ static void ast_special_or_free(struct AstSpecOr *orr)
 
 static void ast_special_bind_free(struct AstSpecBind *bind)
 {
-    pattern_free(bind->pattern);
+    ast_node_free(bind->pattern);
     ast_node_free_one(bind->expr);
 }
 
@@ -541,6 +645,11 @@ static void ast_literal_atomic_free(struct AstLiteralAtomic *lit_atom)
     }
 }
 
+static void ast_datatype_free(struct AstDatatype *datatype)
+{
+    ast_node_free(datatype->children);
+}
+
 void ast_node_free_one(struct AstNode *node)
 {
     switch (node->type) {
@@ -563,6 +672,10 @@ void ast_node_free_one(struct AstNode *node)
     case AST_LITERAL_ATOMIC:
         ast_literal_atomic_free(&node->data.literal_atomic);
         break;
+
+    case AST_DATATYPE:
+    ast_datatype_free(&node->data.datatype);
+    break;
     }
 
     mem_free(node);
@@ -585,4 +698,74 @@ int ast_list_len(struct AstNode *head)
         ++result;
     }
     return result;
+}
+
+bool ast_list_contains_symbol(struct AstNode *list, char *symbol)
+{
+    while (list) {
+        switch (list->type) {
+        case AST_SYMBOL:
+            return strcmp(list->data.symbol.symbol, symbol) == 0;
+
+        case AST_SPECIAL:
+            switch (list->data.special.type) {
+            case AST_SPEC_DO:
+                return ast_list_contains_symbol(list->data.special.data.doo.exprs, symbol);
+            case AST_SPEC_MATCH:
+                return
+                    ast_list_contains_symbol(list->data.special.data.match.expr, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.match.keys, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.match.values, symbol);
+            case AST_SPEC_IF:
+                return
+                    ast_list_contains_symbol(list->data.special.data.iff.test, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.iff.true_expr, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.iff.false_expr, symbol);
+            case AST_SPEC_WHILE:
+                return
+                    ast_list_contains_symbol(list->data.special.data.whilee.test, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.whilee.expr, symbol);
+            case AST_SPEC_FUNC_DEF:
+                return
+                    ast_list_contains_symbol(list->data.special.data.func_def.formal_args, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.func_def.expr, symbol);
+            case AST_SPEC_AND:
+                return ast_list_contains_symbol(list->data.special.data.andd.exprs, symbol);
+            case AST_SPEC_OR:
+                return ast_list_contains_symbol(list->data.special.data.orr.exprs, symbol);
+            case AST_SPEC_BIND:
+                return
+                    ast_list_contains_symbol(list->data.special.data.bind.pattern, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.bind.expr, symbol);
+            case AST_SPEC_REF:
+                return ast_list_contains_symbol(list->data.special.data.ref.expr, symbol);
+            case AST_SPEC_PEEK:
+                return ast_list_contains_symbol(list->data.special.data.peek.expr, symbol);
+            case AST_SPEC_POKE:
+                return
+                    ast_list_contains_symbol(list->data.special.data.poke.reference, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.poke.value, symbol);
+            case AST_SPEC_BEGIN:
+                return ast_list_contains_symbol(list->data.special.data.begin.collection, symbol);
+            case AST_SPEC_END:
+                return ast_list_contains_symbol(list->data.special.data.end.collection, symbol);
+            case AST_SPEC_INC:
+                return ast_list_contains_symbol(list->data.special.data.inc.reference, symbol);
+            case AST_SPEC_SUCC:
+                return ast_list_contains_symbol(list->data.special.data.succ.reference, symbol);
+            }
+        case AST_FUNCTION_CALL:
+            return
+                ast_list_contains_symbol(list->data.func_call.func, symbol) |
+                ast_list_contains_symbol(list->data.func_call.actual_args, symbol);
+        case AST_LITERAL_COMPOUND:
+            return ast_list_contains_symbol(list->data.literal_compound.exprs, symbol);
+        case AST_LITERAL_ATOMIC:
+        case AST_DATATYPE:
+        default:
+            return false;
+        }
+    list = list->next;
+    }
+    return false;
 }

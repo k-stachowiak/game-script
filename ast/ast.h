@@ -3,8 +3,7 @@
 #ifndef AST_H
 #define AST_H
 
-#include "src_iter.h"
-#include "pattern.h"
+#include <stdbool.h>
 
 /* Enumerations.
  * =============
@@ -15,7 +14,8 @@ enum AstNodeType {
     AST_SPECIAL,
     AST_FUNCTION_CALL,
     AST_LITERAL_COMPOUND,
-    AST_LITERAL_ATOMIC
+    AST_LITERAL_ATOMIC,
+    AST_DATATYPE
 };
 
 enum AstSpecialType {
@@ -55,6 +55,17 @@ enum AstLiteralAtomicType {
     AST_LIT_ATOM_REAL
 };
 
+enum AstDatatypeType {
+    AST_DATATYPE_UNIT,
+    AST_DATATYPE_BOOLEAN,
+    AST_DATATYPE_INTEGER,
+    AST_DATATYPE_REAL,
+    AST_DATATYPE_CHARACTER,
+    AST_DATATYPE_ARRAY_OF,
+    AST_DATATYPE_REFERENCE_TO,
+    AST_DATATYPE_FUNCTION
+};
+
 /* Partial types.
  * ==============
  */
@@ -71,7 +82,7 @@ struct AstSpecDo {
 
 struct AstSpecMatch {
     struct AstNode *expr;
-    struct Pattern *keys;
+    struct AstNode *keys;
     struct AstNode *values;
 };
 
@@ -87,7 +98,7 @@ struct AstSpecWhile {
 };
 
 struct AstSpecFuncDef {
-    struct Pattern *formal_args;
+    struct AstNode *formal_args;
     struct AstNode *expr;
 };
 
@@ -100,7 +111,7 @@ struct AstSpecOr{
 };
 
 struct AstSpecBind {
-    struct Pattern *pattern;
+    struct AstNode *pattern;
     struct AstNode *expr;
 };
 
@@ -175,6 +186,10 @@ struct AstLiteralAtomic {
     } data;
 };
 
+struct AstDatatype {
+    enum AstDatatypeType type;
+    struct AstNode *children;
+};
 
 /* Main AST node definition.
  * =========================
@@ -188,6 +203,7 @@ struct AstNode {
         struct AstFuncCall func_call;
         struct AstLiteralCompound literal_compound;
         struct AstLiteralAtomic literal_atomic;
+        struct AstDatatype datatype;
     } data;
     struct AstNode *next;
 };
@@ -204,7 +220,7 @@ struct AstNode *ast_make_spec_do(
 
 struct AstNode *ast_make_spec_match(
         struct AstNode *expr,
-        struct Pattern *keys,
+        struct AstNode *keys,
         struct AstNode *values);
 
 struct AstNode *ast_make_spec_if(
@@ -217,7 +233,7 @@ struct AstNode *ast_make_spec_while(
         struct AstNode* expr);
 
 struct AstNode *ast_make_spec_func_def(
-        struct Pattern *formal_args,
+        struct AstNode *formal_args,
         struct AstNode *expr);
 
 struct AstNode *ast_make_spec_and(
@@ -227,7 +243,7 @@ struct AstNode *ast_make_spec_or(
         struct AstNode* exprs);
 
 struct AstNode *ast_make_spec_bind(
-        struct Pattern *pattern,
+        struct AstNode *pattern,
         struct AstNode *expr);
 
 struct AstNode *ast_make_spec_ref(
@@ -267,6 +283,15 @@ struct AstNode *ast_make_literal_atomic_character(char value);
 struct AstNode *ast_make_literal_atomic_int(long value);
 struct AstNode *ast_make_literal_atomic_real(double value);
 
+struct AstNode *ast_make_datatype_unit(void);
+struct AstNode *ast_make_datatype_bool(void);
+struct AstNode *ast_make_datatype_int(void);
+struct AstNode *ast_make_datatype_real(void);
+struct AstNode *ast_make_datatype_character(void);
+struct AstNode *ast_make_datatype_array_of(struct AstNode *child);
+struct AstNode *ast_make_datatype_reference_to(struct AstNode *child);
+struct AstNode *ast_make_datatype_function(struct AstNode *children);
+
 /* Destruction.
  * ============
  */
@@ -285,5 +310,6 @@ char *ast_serialize(struct AstNode *node);
  */
 
 int ast_list_len(struct AstNode *head);
+bool ast_list_contains_symbol(struct AstNode *list, char *symbol);
 
 #endif

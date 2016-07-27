@@ -49,7 +49,6 @@ enum Reserved {
     DOM_RES_UNIT,
     DOM_RES_TRUE,
     DOM_RES_FALSE,
-    DOM_RES_DONT_CARE,
     DOM_RES_TUNIT,
     DOM_RES_BOOLEAN,
     DOM_RES_INTEGER,

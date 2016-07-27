@@ -18,8 +18,7 @@ typedef void (*ParserPatCallback)(void*, struct Pattern*, struct SourceLocation*
 struct AstNode *parse_source(
     char *source,
     void *data,
-    ParserAstCallback acb,
-    ParserPatCallback pcb);
+    ParserAstCallback acb);
 
 struct AstNode *parse_source_build_alm(
     char *source,

@@ -76,7 +76,7 @@ static char *ast_serialize_special_match(struct AstSpecMatch *match)
 {
     char *result = NULL;
     char *expr_string = NULL;
-    struct Pattern *key = match->keys;
+    struct AstNode *key = match->keys;
     struct AstNode *value = match->values;
 
     /* 0. Overview:
@@ -99,7 +99,7 @@ static char *ast_serialize_special_match(struct AstSpecMatch *match)
     assert(key && value);
     do {
         /* 2.1. The key and the value string representations are generated. */
-        char *key_string = pattern_serialize(key);
+        char *key_string = ast_serialize(key);
         char *value_string = ast_serialize(value);
 
         /* 2.2. An according pair is added to the result string releasing
@@ -141,7 +141,7 @@ static char *ast_serialize_special_func_def(struct AstSpecFuncDef *func_def)
      * with the opening parenthesis and the keyword. The temporary string is
      * released afterwards. The pattern list is optional.
      */
-    arg_string = pattern_serialize(func_def->formal_args);
+    arg_string = ast_serialize(func_def->formal_args);
     if (arg_string) {
         str_append(result, "(func (%s)", arg_string);
         mem_free(arg_string);
@@ -177,7 +177,7 @@ static char *ast_serialize_special_bind(struct AstSpecBind *bind)
     /* 2. Appends the pattern to the result assumming it is not null by
      * the bind expression definition.
      */
-    pat_string = pattern_serialize(bind->pattern);
+    pat_string = ast_serialize(bind->pattern);
     assert(pat_string);
     str_append(result, "%s", pat_string);
     mem_free(pat_string);
@@ -332,7 +332,7 @@ static char *ast_serialize_literal_compound(struct AstLiteralCompound *lit_cpd)
     return result;
 }
 
-char *ast_serialize_literal_atomic(struct AstLiteralAtomic *literal_atomic)
+static char *ast_serialize_literal_atomic(struct AstLiteralAtomic *literal_atomic)
 {
     char *result = NULL;
 
@@ -370,6 +370,62 @@ char *ast_serialize_literal_atomic(struct AstLiteralAtomic *literal_atomic)
     }
 
     /* 2. The reseult is returned along with the ownership. */
+    return result;
+}
+
+static char *ast_serialize_datatype(struct AstDatatype *data_type)
+{
+    char *result = NULL;
+    char *temp;
+
+    /* 0. Overview:
+     * The function returns the text represtntation of a given datatype node.
+     */
+
+    /* 1. Return a particular string unless it is a compound node in which case
+     * recurr the serialization algorithm accordingly.
+     */
+    switch (data_type->type)
+    {
+    case AST_DATATYPE_UNIT:
+        str_append(result, "UNIT");
+        break;
+
+    case AST_DATATYPE_BOOLEAN:
+        str_append(result, "BOOLEAN");
+        break;
+
+    case AST_DATATYPE_INTEGER:
+        str_append(result, "INTEGER");
+        break;
+
+    case AST_DATATYPE_REAL:
+        str_append(result, "REAL");
+        break;
+
+    case AST_DATATYPE_CHARACTER:
+        str_append(result, "CHARACTER");
+        break;
+
+    case AST_DATATYPE_ARRAY_OF:
+        str_append(result, "(ARRAY-OF");
+        temp = ast_serialize(data_type->children);
+        str_append(result, " %s)", temp);
+        mem_free(temp);
+        break;
+
+    case AST_DATATYPE_REFERENCE_TO:
+        str_append(result, "REFERENCE-TO");
+        temp = ast_serialize(data_type->children);
+        str_append(result, " %s)", temp);
+        mem_free(temp);
+        break;
+
+    case AST_DATATYPE_FUNCTION:
+        str_append(result, "FUNCTION");
+        break;
+    }
+
     return result;
 }
 
@@ -421,6 +477,10 @@ char *ast_serialize(struct AstNode *node)
         case AST_LITERAL_ATOMIC:
             temp = ast_serialize_literal_atomic(&node->data.literal_atomic);
             break;
+
+    case AST_DATATYPE:
+        temp = ast_serialize_datatype(&node->data.datatype);
+        break;
         }
 
         /* 2.2. The temporary string is appended to the result with a preceeding
@@ -441,4 +501,3 @@ char *ast_serialize(struct AstNode *node)
     /* 3. The result is returned along with the ownership. */
     return result;
 }
-

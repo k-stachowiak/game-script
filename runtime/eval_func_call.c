@@ -49,25 +49,25 @@ static bool efc_evaluate_arg(
         struct SymMap *caller_sym_map,
         struct SymMap *new_sym_map,
         struct AstNode *arg_node,
-        struct Pattern *pattern,
+        struct AstNode *pattern,
         VAL_LOC_T *location,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     *location = eval_dispatch(arg_node, rt, caller_sym_map, alm);
     if (err_state()) {
         err_push_src(
-        "EVAL",
-        alm_get_ast(alm, arg_node),
-        "Failed evaluating function argument expression");
+            "EVAL",
+            alm_get(alm, arg_node),
+            "Failed evaluating function argument expression");
         return false;
     }
 
     eval_special_bind_pattern(pattern, *location, rt, new_sym_map, alm);
     if (err_state()) {
         err_push_src(
-        "EVAL",
-        alm_get_pat(alm, pattern),
-        "Failed registering function argument in the local scope");
+            "EVAL",
+            alm_get(alm, pattern),
+            "Failed registering function argument in the local scope");
         return false;
     }
 
@@ -121,9 +121,9 @@ static void efc_curry_on(
         eval_dispatch(actual_args, rt, sym_map, alm);
         if (err_state()) {
             err_push_src(
-        "EVAL",
-        alm_get_ast(alm, actual_args),
-        "Failed evaluating function argument");
+                "EVAL",
+                alm_get(alm, actual_args),
+                "Failed evaluating function argument");
             break;
         }
     }
@@ -152,7 +152,7 @@ static void efc_evaluate_ast(
     struct AstNode *node = (struct AstNode *)func_data->impl;
     struct AstSpecFuncDef *fdef = &node->data.special.data.func_def;
 
-    struct Pattern *formal_args = fdef->formal_args;
+    struct AstNode *formal_args = fdef->formal_args;
 
     /* Initialize local scopes hierarchy. */
     sym_map_init_local(&captures_sym_map, sym_map);
@@ -394,17 +394,17 @@ void eval_func_call(
     temp_end = rt->stack.top;
     if (err_state()) {
         err_push_src(
-        "EVAL",
-        alm_get_ast(alm, func),
-        "Failed evaluating function identity");
+            "EVAL",
+            alm_get(alm, func),
+            "Failed evaluating function identity");
         return;
     }
 
     if (rt_val_peek_type(&rt->stack, func_loc) != VAL_FUNCTION) {
         err_push_src(
-        "EVAL",
-        alm_get_ast(alm, func),
-        "Function call key doesn't evaluate to a function");
+            "EVAL",
+            alm_get(alm, func),
+            "Function call key doesn't evaluate to a function");
         return;
     }
 

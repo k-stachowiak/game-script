@@ -33,7 +33,6 @@ static char *reserved[] = {
     "unit",
     "true",
     "false",
-    "_",
     "UNIT",
     "BOOL",
     "INT",
