@@ -1,6 +1,8 @@
 # TODO
-* Make datatype expressions literals?
-* validate AST structure in the node constructors
+* Make datatype expressions literals and add type descriptors to the runtime values that include:
+    * The full bit -> abstraction mapping description (the binary pattern)
+    * Id to distinguish between types of equivalent patterns
+* validate AST structure in the node constructors (add parser tests here)
 * parser will now take the ast-loc-map as an argument and fill in if not null
 * the mapping between the semantic and terminal symbols such as "UNIT" or "func" must be
   identical in the serialization and the parsing algorithms.
