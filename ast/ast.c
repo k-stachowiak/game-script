@@ -8,21 +8,23 @@
 #include "memory.h"
 #include "ast.h"
 
-struct AstNode *ast_make_symbol(
-        char *symbol)
+struct AstNode *ast_make_symbol(char *symbol)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
+
+    int length = strlen(symbol);
+    char *symbol_copy = mem_malloc(length + 1);
+    memcpy(symbol_copy, symbol, length + 1);
 
     result->next = NULL;
     result->type = AST_SYMBOL;
 
-    result->data.symbol.symbol = symbol;
+    result->data.symbol.symbol = symbol_copy;
 
     return result;
 }
 
-struct AstNode *ast_make_spec_do(
-        struct AstNode* exprs)
+struct AstNode *ast_make_spec_do(struct AstNode* exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -113,30 +115,150 @@ struct AstNode *ast_make_spec_func_def(
     return result;
 }
 
-struct AstNode *ast_make_spec_and(
-        struct AstNode *exprs)
+struct AstNode *ast_make_spec_bool_and(struct AstNode *exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
 
-    result->data.special.type = AST_SPEC_AND;
-    result->data.special.data.andd.exprs = exprs;
+    result->data.special.type = AST_SPEC_BOOL_AND;
+    result->data.special.data.bool_and.exprs = exprs;
 
     return result;
 }
 
-struct AstNode *ast_make_spec_or(
-        struct AstNode *exprs)
+struct AstNode *ast_make_spec_bool_or(struct AstNode *exprs)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
 
-    result->data.special.type = AST_SPEC_OR;
-    result->data.special.data.orr.exprs = exprs;
+    result->data.special.type = AST_SPEC_BOOL_OR;
+    result->data.special.data.bool_or.exprs = exprs;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_set_of(struct AstNode *types)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_SET_OF;
+    result->data.special.data.set_of.types = types;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_range_of(struct AstNode *type)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_RANGE_OF;
+    result->data.special.data.range_of.type = type;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_array_of(struct AstNode *type)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_ARRAY_OF;
+    result->data.special.data.array_of.type = type;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_tuple_of(struct AstNode *types)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_TUPLE_OF;
+    result->data.special.data.tuple_of.types = types;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_pointer_to(struct AstNode *type)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_POINTER_TO;
+    result->data.special.data.pointer_to.type = type;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_function_type(struct AstNode *types)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_FUNCTION_TYPE;
+    result->data.special.data.function_type.types = types;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_type_product(struct AstNode *args)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_TYPE_PRODUCT;
+    result->data.special.data.type_product.args = args;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_type_union(struct AstNode *args)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_TYPE_UNION;
+    result->data.special.data.type_union.args = args;
+
+    return result;
+}
+
+struct AstNode *ast_make_spec_tagged_type(char *tag, struct AstNode *type)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+
+    int length = strlen(tag);
+    char *tag_copy = mem_malloc(length + 1);
+    memcpy(tag_copy, tag, length + 1);
+
+    result->next = NULL;
+    result->type = AST_SPECIAL;
+
+    result->data.special.type = AST_SPEC_TYPE_UNION;
+    result->data.special.data.tagged_type.tag = tag_copy;
+    result->data.special.data.tagged_type.type = type;
 
     return result;
 }
@@ -157,8 +279,7 @@ struct AstNode *ast_make_spec_bind(
     return result;
 }
 
-struct AstNode *ast_make_spec_ref(
-        struct AstNode *expr)
+struct AstNode *ast_make_spec_ref(struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -171,8 +292,7 @@ struct AstNode *ast_make_spec_ref(
     return result;
 }
 
-struct AstNode *ast_make_spec_peek(
-        struct AstNode *expr)
+struct AstNode *ast_make_spec_peek(struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -204,8 +324,7 @@ struct AstNode *ast_make_spec_poke(
     return result;
 }
 
-struct AstNode *ast_make_spec_begin(
-        struct AstNode *collection)
+struct AstNode *ast_make_spec_begin(struct AstNode *collection)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -218,8 +337,7 @@ struct AstNode *ast_make_spec_begin(
     return result;
 }
 
-struct AstNode *ast_make_spec_end(
-        struct AstNode *collection)
+struct AstNode *ast_make_spec_end(struct AstNode *collection)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -232,8 +350,7 @@ struct AstNode *ast_make_spec_end(
     return result;
 }
 
-struct AstNode *ast_make_spec_inc(
-        struct AstNode *reference)
+struct AstNode *ast_make_spec_inc(struct AstNode *reference)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -246,8 +363,7 @@ struct AstNode *ast_make_spec_inc(
     return result;
 }
 
-struct AstNode *ast_make_spec_succ(
-        struct AstNode *reference)
+struct AstNode *ast_make_spec_succ(struct AstNode *reference)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -293,6 +409,15 @@ struct AstNode *ast_make_literal_compound(
     return result;
 }
 
+struct AstNode *ast_make_literal_atomic_void(void)
+{
+    struct AstNode *result = mem_malloc(sizeof(*result));
+    result->next = NULL;
+    result->type = AST_LITERAL_ATOMIC;
+    result->data.literal_atomic.type = AST_LIT_ATOM_VOID;
+    return result;
+}
+
 struct AstNode *ast_make_literal_atomic_unit(void)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -311,23 +436,6 @@ struct AstNode *ast_make_literal_atomic_bool(int value)
 
     result->data.literal_atomic.type = AST_LIT_ATOM_BOOL;
     result->data.literal_atomic.data.boolean = value;
-
-    return result;
-}
-
-struct AstNode *ast_make_literal_atomic_string(char *value)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    int length = strlen(value);
-    char *copy = mem_malloc(length + 1);
-    memcpy(copy, value, length + 1);
-
-    result->next = NULL;
-    result->type = AST_LITERAL_ATOMIC;
-
-    result->data.literal_atomic.type = AST_LIT_ATOM_STRING;
-    result->data.literal_atomic.data.string = copy;
 
     return result;
 }
@@ -371,106 +479,32 @@ struct AstNode *ast_make_literal_atomic_real(double value)
     return result;
 }
 
-struct AstNode *ast_make_datatype_unit(void)
+struct AstNode *ast_make_literal_atomic_string(char *value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
-    result->type = AST_DATATYPE;
-    result->next = NULL;
+    int length = strlen(value);
+    char *copy = mem_malloc(length + 1);
+    memcpy(copy, value, length + 1);
 
-    result->data.datatype.type = AST_DATATYPE_UNIT;
-    result->data.datatype.children = NULL;
+    result->next = NULL;
+    result->type = AST_LITERAL_ATOMIC;
+
+    result->data.literal_atomic.type = AST_LIT_ATOM_STRING;
+    result->data.literal_atomic.data.string = copy;
 
     return result;
 }
 
-struct AstNode *ast_make_datatype_bool(void)
+struct AstNode *ast_make_literal_atomic_datatype(enum AstLiteralAtomicDataType type)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
-    result->type = AST_DATATYPE;
     result->next = NULL;
+    result->type = AST_LITERAL_ATOMIC;
 
-    result->data.datatype.type = AST_DATATYPE_BOOLEAN;
-    result->data.datatype.children = NULL;
-
-    return result;
-}
-
-struct AstNode *ast_make_datatype_int(void)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    result->type = AST_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = AST_DATATYPE_INTEGER;
-    result->data.datatype.children = NULL;
-
-    return result;
-}
-
-struct AstNode *ast_make_datatype_real(void)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    result->type = AST_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = AST_DATATYPE_REAL;
-    result->data.datatype.children = NULL;
-
-    return result;
-}
-
-struct AstNode *ast_make_datatype_character(void)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    result->type = AST_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = AST_DATATYPE_CHARACTER;
-    result->data.datatype.children = NULL;
-
-    return result;
-}
-
-struct AstNode *ast_make_datatype_array_of(struct AstNode *child)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    result->type = AST_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = AST_DATATYPE_ARRAY_OF;
-    result->data.datatype.children = child;
-
-    return result;
-}
-
-struct AstNode *ast_make_datatype_reference_to(struct AstNode *child)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    result->type = AST_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = AST_DATATYPE_REFERENCE_TO;
-    result->data.datatype.children = child;
-
-    return result;
-}
-
-struct AstNode *ast_make_datatype_function(struct AstNode *children)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    result->type = AST_DATATYPE;
-    result->next = NULL;
-
-    result->data.datatype.type = AST_DATATYPE_FUNCTION;
-    result->data.datatype.children = children;
+    result->data.literal_atomic.type = AST_LIT_ATOM_DATATYPE;
+    result->data.literal_atomic.data.datatype = type;
 
     return result;
 }
@@ -510,14 +544,60 @@ static void ast_special_func_def_free(struct AstSpecFuncDef *func_def)
     ast_node_free(func_def->expr);
 }
 
-static void ast_special_and_free(struct AstSpecAnd *andd)
+static void ast_special_bool_and_free(struct AstSpecBoolAnd *bool_and)
 {
-    ast_node_free(andd->exprs);
+    ast_node_free(bool_and->exprs);
 }
 
-static void ast_special_or_free(struct AstSpecOr *orr)
+static void ast_special_bool_or_free(struct AstSpecBoolOr *bool_or)
 {
-    ast_node_free(orr->exprs);
+    ast_node_free(bool_or->exprs);
+}
+
+static void ast_special_set_of_free(struct AstSpecSetOf *set_of)
+{
+    ast_node_free(set_of->types);
+}
+
+static void ast_special_range_of_free(struct AstSpecRangeOf *range_of)
+{
+    ast_node_free(range_of->type);
+}
+
+static void ast_special_array_of_free(struct AstSpecArrayOf *array_of)
+{
+    ast_node_free(array_of->type);
+}
+
+static void ast_special_tuple_of_free(struct AstSpecTupleOf *tuple_of)
+{
+    ast_node_free(tuple_of->types);
+}
+
+static void ast_special_pointer_to_free(struct AstSpecPointerTo *pointer_to)
+{
+    ast_node_free(pointer_to->type);
+}
+
+static void ast_special_function_type_free(struct AstSpecFunctionType *function_type)
+{
+    ast_node_free(function_type->types);
+}
+
+static void ast_special_type_product_free(struct AstSpecTypeProduct *type_product)
+{
+    ast_node_free(type_product->args);
+}
+
+static void ast_special_type_union_free(struct AstSpecTypeUnion *type_union)
+{
+    ast_node_free(type_union->args);
+}
+
+static void ast_special_tagged_type_free(struct AstSpecTaggedType *tagged_type)
+{
+    mem_free(tagged_type->tag);
+    ast_node_free(tagged_type->type);
 }
 
 static void ast_special_bind_free(struct AstSpecBind *bind)
@@ -585,12 +665,48 @@ static void ast_special_free(struct AstSpecial *special)
         ast_special_func_def_free(&special->data.func_def);
         break;
 
-    case AST_SPEC_AND:
-        ast_special_and_free(&special->data.andd);
+    case AST_SPEC_BOOL_AND:
+        ast_special_bool_and_free(&special->data.bool_and);
         break;
 
-    case AST_SPEC_OR:
-        ast_special_or_free(&special->data.orr);
+    case AST_SPEC_BOOL_OR:
+        ast_special_bool_or_free(&special->data.bool_or);
+        break;
+
+    case AST_SPEC_SET_OF:
+        ast_special_set_of_free(&special->data.set_of);
+        break;
+
+    case AST_SPEC_RANGE_OF:
+        ast_special_range_of_free(&special->data.range_of);
+        break;
+
+    case AST_SPEC_ARRAY_OF:
+        ast_special_array_of_free(&special->data.array_of);
+        break;
+
+    case AST_SPEC_TUPLE_OF:
+        ast_special_tuple_of_free(&special->data.tuple_of);
+        break;
+
+    case AST_SPEC_POINTER_TO:
+        ast_special_pointer_to_free(&special->data.pointer_to);
+        break;
+
+    case AST_SPEC_FUNCTION_TYPE:
+        ast_special_function_type_free(&special->data.function_type);
+        break;
+
+    case AST_SPEC_TYPE_PRODUCT:
+        ast_special_type_product_free(&special->data.type_product);
+        break;
+
+    case AST_SPEC_TYPE_UNION:
+        ast_special_type_union_free(&special->data.type_union);
+        break;
+
+    case AST_SPEC_TAGGED_TYPE:
+        ast_special_tagged_type_free(&special->data.tagged_type);
         break;
 
     case AST_SPEC_BIND:
@@ -645,11 +761,6 @@ static void ast_literal_atomic_free(struct AstLiteralAtomic *lit_atom)
     }
 }
 
-static void ast_datatype_free(struct AstDatatype *datatype)
-{
-    ast_node_free(datatype->children);
-}
-
 void ast_node_free_one(struct AstNode *node)
 {
     switch (node->type) {
@@ -672,10 +783,6 @@ void ast_node_free_one(struct AstNode *node)
     case AST_LITERAL_ATOMIC:
         ast_literal_atomic_free(&node->data.literal_atomic);
         break;
-
-    case AST_DATATYPE:
-    ast_datatype_free(&node->data.datatype);
-    break;
     }
 
     mem_free(node);
@@ -729,10 +836,28 @@ bool ast_list_contains_symbol(struct AstNode *list, char *symbol)
                 return
                     ast_list_contains_symbol(list->data.special.data.func_def.formal_args, symbol) |
                     ast_list_contains_symbol(list->data.special.data.func_def.expr, symbol);
-            case AST_SPEC_AND:
-                return ast_list_contains_symbol(list->data.special.data.andd.exprs, symbol);
-            case AST_SPEC_OR:
-                return ast_list_contains_symbol(list->data.special.data.orr.exprs, symbol);
+            case AST_SPEC_BOOL_AND:
+                return ast_list_contains_symbol(list->data.special.data.bool_and.exprs, symbol);
+            case AST_SPEC_BOOL_OR:
+                return ast_list_contains_symbol(list->data.special.data.bool_or.exprs, symbol);
+            case AST_SPEC_SET_OF:
+                return ast_list_contains_symbol(list->data.special.data.set_of.types, symbol);
+            case AST_SPEC_RANGE_OF:
+                return ast_list_contains_symbol(list->data.special.data.range_of.type, symbol);
+            case AST_SPEC_ARRAY_OF:
+                return ast_list_contains_symbol(list->data.special.data.array_of.type, symbol);
+            case AST_SPEC_TUPLE_OF:
+                return ast_list_contains_symbol(list->data.special.data.tuple_of.type, symbol);
+            case AST_SPEC_POINTER_TO:
+                return ast_list_contains_symbol(list->data.special.data.pointer_to.type, symbol);
+            case AST_SPEC_FUNCTION_TYPE:
+                return ast_list_contains_symbol(list->data.special.data.function_type.types, symbol);
+            case AST_SPEC_TYPE_PRODUCT:
+                return ast_list_contains_symbol(list->data.special.data.type_product.args, symbol);
+            case AST_SPEC_TYPE_UNION:
+                return ast_list_contains_symbol(list->data.special.data.type_union.args, symbol);
+            case AST_SPEC_TAGGED_TYPE:
+                return ast_list_contains_symbol(list->data.special.data.tagged_type.type, symbol);
             case AST_SPEC_BIND:
                 return
                     ast_list_contains_symbol(list->data.special.data.bind.pattern, symbol) |
@@ -761,11 +886,11 @@ bool ast_list_contains_symbol(struct AstNode *list, char *symbol)
         case AST_LITERAL_COMPOUND:
             return ast_list_contains_symbol(list->data.literal_compound.exprs, symbol);
         case AST_LITERAL_ATOMIC:
-        case AST_DATATYPE:
         default:
             return false;
         }
-    list = list->next;
+        list = list->next;
     }
     return false;
 }
+

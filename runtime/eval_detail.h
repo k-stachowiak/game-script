@@ -24,6 +24,55 @@ void eval_special_bind_pattern(
     struct SymMap *sym_map,
     struct AstLocMap *alm);
 
+void eval_special_set_of(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
+void eval_special_range_of(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
+void eval_special_array_of(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
+void eval_special_tuple_of(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
+void eval_special_pointer_to(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
+void eval_special_function_type(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
+void eval_special_type_op(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm,
+    bool is_product);
+
+void eval_special_tagged_type(
+    struct AstNode *node,
+    struct Runtime *rt,
+    struct SymMap *sym_map,
+    struct AstLocMap *alm);
+
 void eval_func_call(
     struct AstNode *node,
     struct Runtime *rt,

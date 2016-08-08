@@ -249,6 +249,34 @@ static void bif_parse_any_ast_literal_atomic(
     case AST_LIT_ATOM_REAL:
         rt_val_push_real(&rt->stack, literal_atomic->data.real);
         break;
+
+    case AST_LIT_ATOM_DATATYPE:
+        switch (literal_atomic->data.datatype) {
+        case AST_LIT_ATOM_DATATYPE_VOID:
+            rt_val_push_datatype_atom(&rt->stack, VAL_DATA_VOID);
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_UNIT:
+            rt_val_push_datatype_atom(&rt->stack, VAL_DATA_UNIT);
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_BOOLEAN:
+            rt_val_push_datatype_atom(&rt->stack, VAL_DATA_BOOLEAN);
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_INTEGER:
+            rt_val_push_datatype_atom(&rt->stack, VAL_DATA_INTEGER);
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_REAL:
+            rt_val_push_datatype_atom(&rt->stack, VAL_DATA_REAL);
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_CHARACTER:
+            rt_val_push_datatype_atom(&rt->stack, VAL_DATA_CHARACTER);
+            break;
+        }
+        break;
     }
 }
 
@@ -264,7 +292,6 @@ static void bif_parse_any_ast(struct Runtime *runtime, struct AstNode *ast)
         break;
 
     case AST_SPECIAL:
-    case AST_DATATYPE:
     case AST_SYMBOL:
     case AST_FUNCTION_CALL:
         bif_text_error_parse();

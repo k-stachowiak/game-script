@@ -31,7 +31,6 @@
 #define VAL_INT_BYTES sizeof(VAL_INT_T)
 #define VAL_REAL_BYTES sizeof(VAL_REAL_T)
 #define VAL_REF_BYTES sizeof(VAL_REF_T)
-#define VAL_UNIT_BYTES 0
 
 #define VAL_PTR_BYTES sizeof(void*)
 
@@ -43,6 +42,11 @@ extern VAL_HEAD_SIZE_T int_size;
 extern VAL_HEAD_SIZE_T real_size;
 extern VAL_HEAD_SIZE_T ref_size;
 extern VAL_HEAD_SIZE_T unit_size;
+extern VAL_HEAD_SIZE_T datatype_embellishment_size;
+extern VAL_HEAD_SIZE_T datatype_size;
+extern VAL_HEAD_SIZE_T datatype_total_size;
+
+extern enum ValueDataTypeEmbellishment emb_just;
 
 struct Runtime;
 struct Stack;
@@ -60,7 +64,8 @@ enum ValueType {
     VAL_TUPLE,
     VAL_FUNCTION,
     VAL_REF,
-    VAL_UNIT
+    VAL_UNIT,
+    VAL_DATATYPE
 };
 
 struct ValueHeader {
@@ -88,6 +93,28 @@ struct ValueFuncData {
     void *impl;
 };
 
+enum ValueDataTypeEmbellishment {
+    VAL_EMB_JUST,
+    VAL_EMB_SET_OF,
+    VAL_EMB_RANGE_OF,
+    VAL_EMB_ARRAY_OF,
+    VAL_EMB_TUPLE_OF,
+    VAL_EMB_PTR_TO,
+    VAL_EMB_FUNC,
+    VAL_EMB_PROD,
+    VAL_EMB_UNION,
+    VAL_EMB_TAG
+};
+
+enum ValueDataType {
+    VAL_DATA_VOID,
+    VAL_DATA_UNIT,
+    VAL_DATA_BOOLEAN,
+    VAL_DATA_INTEGER,
+    VAL_DATA_REAL,
+    VAL_DATA_CHARACTER
+};
+
 /* Writing (pushing) API.
  * ======================
  */
@@ -102,8 +129,8 @@ void rt_val_push_bool(struct Stack *stack, VAL_BOOL_T value);
 void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
-void rt_val_push_ref(struct Stack *stack, VAL_REF_T value);
 void rt_val_push_unit(struct Stack *stack);
+void rt_val_push_ref(struct Stack *stack, VAL_REF_T value);
 
 /* Compound values.
  * ----------------
@@ -117,6 +144,22 @@ void rt_val_push_cpd_final(
         VAL_SIZE_T size);
 
 void rt_val_push_string(struct Stack *stack, char *begin, char *end);
+
+/* Datatype values.
+ * ----------------
+ */
+
+void rt_val_push_datatype_init(
+        struct Stack *stack,
+        enum ValueDataTypeEmbellishment embellishment,
+        VAL_LOC_T *size_loc);
+
+void rt_val_push_datatype_atom(struct Stack *stack, enum ValueDataType type);
+
+void rt_val_push_datatype_final(
+        struct Stack *stack,
+        VAL_LOC_T size_loc,
+        VAL_SIZE_T size);
 
 /* Function values.
  * ----------------
@@ -178,8 +221,11 @@ bool rt_val_is_string(struct Runtime *rt, VAL_LOC_T loc);
  * ----------------
  */
 
-/** Counts the compount value elements and returns the value. */
+/** Counts the compound value elements. */
 int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location);
+
+/** Counts the datatype defining elements. */
+int rt_val_datatype_len(struct Runtime *rt, VAL_LOC_T location);
 
 /**
  * Advance location by:
@@ -216,6 +262,11 @@ VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc);
 
 /** Returns the location pointed by the reference. */
 VAL_LOC_T rt_val_peek_ref(struct Runtime *rt, VAL_LOC_T loc);
+
+/** Returns basic information aboud a datatype ovject. */
+enum ValueDataTypeEmbellishment rt_val_peek_datatype_embellishment(
+    struct Runtime* rt,
+    VAL_LOC_T loc);
 
 /** Returns the location of the first element of the compound value. */
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc);

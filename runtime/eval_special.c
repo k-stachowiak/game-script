@@ -9,25 +9,25 @@
 #include "rt_val.h"
 
 static void spec_error_arg_expected(
-    char *func,
-    int index,
-    char *expected,
-    struct SourceLocation *loc)
+        char *func,
+        int index,
+        char *expected,
+        struct SourceLocation *loc)
 {
     err_push_src(
-    "EVAL",
-    loc,
-    "Argument %d of special form _%s_ must be %s",
-    index,
-    func,
-    expected);
+        "EVAL",
+        loc,
+        "Argument %d of special form _%s_ must be %s",
+        index,
+        func,
+        expected);
 }
 
 static void eval_special_do(
-    struct AstNode *node,
-    struct Runtime *rt,
-    struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstNode *node,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstLocMap *alm)
 {
     struct SymMap local_sym_map;
     struct AstSpecDo *doo = &node->data.special.data.doo;
@@ -57,10 +57,10 @@ static void eval_special_do(
 }
 
 static void eval_special_match(
-    struct AstNode *node,
-    struct Runtime *rt,
-    struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstNode *node,
+        struct Runtime *rt,
+        struct SymMap *sym_map,
+        struct AstLocMap *alm)
 {
     struct AstSpecMatch *match = &node->data.special.data.match;
     struct AstNode *expr = match->expr;
@@ -118,7 +118,7 @@ static void eval_special_if(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     VAL_LOC_T test_loc, temp_begin, temp_end;
     VAL_BOOL_T test_val;
@@ -157,7 +157,7 @@ static void eval_special_while(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     struct AstSpecWhile *whilee = &node->data.special.data.whilee;
     bool done = false;
@@ -216,7 +216,7 @@ static void eval_special_logic(
         struct SymMap *sym_map,
         bool breaking_value,
         char *func_name,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     int i = 0;
     VAL_LOC_T temp_begin = rt->stack.top;
@@ -255,7 +255,7 @@ static void eval_special_bind(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     struct AstSpecBind *bind = &node->data.special.data.bind;
     VAL_LOC_T location = eval_dispatch(bind->expr, rt, sym_map, alm);
@@ -277,7 +277,7 @@ static void eval_special_ref(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     char *symbol;
     struct SymMapNode *smn;
@@ -302,7 +302,7 @@ static void eval_special_peek(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     VAL_LOC_T ref_loc, target_loc;
     VAL_LOC_T temp_begin, temp_end;
@@ -335,7 +335,7 @@ static void eval_special_poke(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     VAL_LOC_T ref_loc, source_loc, target_loc;
     VAL_LOC_T temp_begin, temp_end;
@@ -386,7 +386,7 @@ static void eval_special_begin(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     char *symbol;
     struct SymMapNode *smn;
@@ -424,7 +424,7 @@ static void eval_special_end(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     int i, cpd_len;
     char *symbol;
@@ -469,7 +469,7 @@ static void eval_special_inc(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     char *symbol;
     struct SymMapNode *smn;
@@ -511,7 +511,7 @@ static void eval_special_succ(
         struct AstNode* node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     VAL_LOC_T temp_begin, temp_end;
     VAL_LOC_T ref_loc, target_loc;
@@ -547,7 +547,7 @@ void eval_special(
         struct AstNode *node,
         struct Runtime *rt,
         struct SymMap *sym_map,
-    struct AstLocMap *alm)
+        struct AstLocMap *alm)
 {
     struct AstSpecial *special = &node->data.special;
     enum AstSpecialType type = special->type;
@@ -575,14 +575,50 @@ void eval_special(
 
     case AST_SPEC_AND:
         eval_special_logic(
-        node->data.special.data.andd.exprs,
-        rt, sym_map, false, "and", alm);
+            node->data.special.data.andd.exprs,
+            rt, sym_map, false, "and", alm);
         break;
 
     case AST_SPEC_OR:
         eval_special_logic(
-        node->data.special.data.orr.exprs,
-        rt, sym_map, true, "or", alm);
+            node->data.special.data.orr.exprs,
+            rt, sym_map, true, "or", alm);
+        break;
+
+    case AST_SPEC_SET_OF:
+        eval_special_set_of(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_RANGE_OF:
+        eval_special_range_of(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_ARRAY_OF:
+        eval_special_array_of(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_TUPLE_OF:
+        eval_special_tuple_of(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_POINTER_TO:
+        eval_special_pointer_to(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_FUNCTION_TYPE:
+        eval_special_function_type(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_TYPE_PRODUCT:
+        eval_special_type_product(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_TYPE_UNION:
+        eval_special_type_union(node, rt, sym_map, alm);
+        break;
+
+    case AST_SPEC_TAGGED_TYPE:
+        eval_special_tagged_type(node, rt, sym_map, alm);
         break;
 
     case AST_SPEC_BIND:
@@ -618,3 +654,4 @@ void eval_special(
         break;
     }
 }
+

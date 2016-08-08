@@ -17,7 +17,12 @@ VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
 VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
 VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
 VAL_HEAD_SIZE_T ref_size = VAL_REF_BYTES;
-VAL_HEAD_SIZE_T unit_size = VAL_UNIT_BYTES;
+VAL_HEAD_SIZE_T unit_size = 0;
+VAL_HEAD_SIZE_T datatype_embellishment_size = sizeof(enum ValueDataTypeEmbellishment);
+VAL_HEAD_SIZE_T datatype_size = sizeof(enum ValueDataType);
+VAL_HEAD_SIZE_T datatype_total_size = sizeof(enum ValueDataTypeEmbellishment) + sizeof(enum ValueDataType);
+
+enum ValueDataTypeEmbellishment emb_just = VAL_EMB_JUST;
 
 bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {

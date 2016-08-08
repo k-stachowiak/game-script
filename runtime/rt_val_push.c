@@ -55,19 +55,19 @@ void rt_val_push_real(struct Stack *stack, VAL_REAL_T value)
     stack_push(stack, real_size, (char*)&value);
 }
 
+void rt_val_push_unit(struct Stack *stack)
+{
+    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_UNIT;
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&unit_size);
+}
+
 void rt_val_push_ref(struct Stack *stack, VAL_REF_T value)
 {
     VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_REF;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
     stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&ref_size);
     stack_push(stack, ref_size, (char*)&value);
-}
-
-void rt_val_push_unit(struct Stack *stack)
-{
-    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_UNIT;
-    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&unit_size);
 }
 
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
@@ -85,9 +85,9 @@ void rt_val_push_tuple_init(struct Stack *stack, VAL_LOC_T *size_loc)
 }
 
 void rt_val_push_cpd_final(
-struct Stack *stack,
-    VAL_LOC_T size_loc,
-    VAL_SIZE_T size)
+        struct Stack *stack,
+        VAL_LOC_T size_loc,
+        VAL_SIZE_T size)
 {
     memcpy(stack->buffer + size_loc, &size, VAL_HEAD_SIZE_BYTES);
 }
@@ -103,13 +103,41 @@ void rt_val_push_string(struct Stack *stack, char *begin, char *end)
     rt_val_push_cpd_final(stack, size_loc, stack->top - data_begin);
 }
 
+void rt_val_push_datatype_init(
+        struct Stack *stack,
+        enum ValueDataTypeEmbellishment embellishment,
+        VAL_LOC_T *size_loc)
+{
+    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_DATATYPE;
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    *size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
+    stack_push(stack, datatype_embellishment_size, (char*)&embellishment);
+}
+
+void rt_val_push_datatype_atom(struct Stack *stack, enum ValueDataType datatype)
+{
+    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_DATATYPE;
+    stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&datatype_total_size);
+    stack_push(stack, datatype_embellishment_size, (char*)&emb_just);
+    stack_push(stack, datatype_size, (char*)&datatype);
+}
+
+void rt_val_push_datatype_final(
+        struct Stack *stack,
+        VAL_LOC_T size_loc,
+        VAL_SIZE_T size)
+{
+    memcpy(stack->buffer + size_loc, &size, VAL_HEAD_SIZE_BYTES);
+}
+
 void rt_val_push_func_init(
-    struct Stack *stack,
-    VAL_LOC_T *size_loc,
-    VAL_LOC_T *data_begin,
-    VAL_SIZE_T arity,
-    enum ValueFuncType func_type,
-    void *impl)
+        struct Stack *stack,
+        VAL_LOC_T *size_loc,
+        VAL_LOC_T *data_begin,
+        VAL_SIZE_T arity,
+        enum ValueFuncType func_type,
+        void *impl)
 {
     static VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_FUNCTION;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
@@ -120,8 +148,8 @@ void rt_val_push_func_init(
 }
 
 void rt_val_push_func_cap_init_deferred(
-    struct Stack *stack,
-    VAL_LOC_T *cap_count_loc)
+        struct Stack *stack,
+        VAL_LOC_T *cap_count_loc)
 {
     *cap_count_loc = stack_push(stack, VAL_SIZE_BYTES, (char*)&zero);
 }
@@ -149,9 +177,9 @@ void rt_val_push_func_cap_copy(struct Stack *stack, VAL_LOC_T loc)
 }
 
 void rt_val_push_func_cap_final_deferred(
-struct Stack *stack,
-    VAL_LOC_T cap_count_loc,
-    VAL_SIZE_T cap_count)
+        struct Stack *stack,
+        VAL_LOC_T cap_count_loc,
+        VAL_SIZE_T cap_count)
 {
     memcpy(stack->buffer + cap_count_loc, &cap_count, VAL_SIZE_BYTES);
 }
@@ -162,10 +190,11 @@ void rt_val_push_func_appl_init(struct Stack *stack, VAL_SIZE_T appl_count)
 }
 
 void rt_val_push_func_final(
-struct Stack *stack,
-    VAL_LOC_T size_loc,
-    VAL_SIZE_T data_begin)
+        struct Stack *stack,
+        VAL_LOC_T size_loc,
+        VAL_SIZE_T data_begin)
 {
     VAL_LOC_T data_size = stack->top - data_begin;
     memcpy(stack->buffer + size_loc, &data_size, VAL_HEAD_SIZE_BYTES);
 }
+

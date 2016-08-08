@@ -3,6 +3,10 @@
     * The full bit -> abstraction mapping description (the binary pattern)
     * Id to distinguish between types of equivalent patterns
 * Make the types set based, i.e. bool = { true, false }, then include void apart from unit
+* Rename references to pointers where appropriate
+* Replace special increment and successor with regular pointer arithmetics
+* Move special forms out of the ast
+* Reduce the number of the reference/pointer special forms. Only adress of, peek and poke are essential.
 * validate AST structure in the node constructors (add parser tests here)
 * parser will now take the ast-loc-map as an argument and fill in if not null
 * the mapping between the semantic and terminal symbols such as "UNIT" or "func" must be

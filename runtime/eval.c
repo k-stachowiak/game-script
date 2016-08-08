@@ -75,10 +75,6 @@ VAL_LOC_T eval_dispatch(
     case AST_LITERAL_ATOMIC:
         eval_literal_atomic(node, rt, sym_map, alm);
         break;
-
-    case AST_DATATYPE:
-        err_push_src("EVAL", alm_get(alm, node), "Direct evaluation of datatype not supported yet");
-        break;
     }
 
     if (err_state()) {

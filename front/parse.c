@@ -244,82 +244,30 @@ struct ParserState {
 static struct AstNode *parse_one(struct DomNode *dom, struct ParserState *state);
 static struct AstNode *parse_list(struct DomNode *dom, struct ParserState *state);
 
-static struct AstNode *parse_datatype_atomic(struct DomNode *dom)
-{
-    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TUNIT)) {
-        return ast_make_datatype_unit();
-    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_BOOLEAN)) {
-        return ast_make_datatype_bool();
-    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_INTEGER)) {
-        return ast_make_datatype_int();
-    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_REAL)) {
-        return ast_make_datatype_real();
-    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_CHARACTER)) {
-        return ast_make_datatype_character();
-    } else {
-        return NULL;
-    }
-}
-
-static struct AstNode *parse_datatype_compound( struct DomNode *dom,
-    struct ParserState *state)
-{
-    struct DomNode *child = NULL;
-    struct AstNode *pattern_children = NULL;
-
-    /* 1. Is compound CORE */
-    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
-        return NULL;
-    }
-
-    /* 2. Has at least two children */
-    if (!dom_node_is_cpd_min_size(dom, 2)) {
-        return NULL;
-    }
-
-    /* 3. Is of one of three legal types */
-    child = dom->cpd_children;
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_ARRAY_OF) &&
-            dom_list_length(child) == 2) {
-        /* 3.a) Array of - only one pattern argument allowed */
-        pattern_children = parse_one(child->next, state);
-        if (pattern_children) {
-            return ast_make_datatype_array_of(pattern_children);
-        } else {
-            return NULL;
-        }
-    } else if (dom_node_is_spec_reserved_atom(child, DOM_RES_TREFERENCE) &&
-            dom_list_length(child) == 2) {
-        /* 3.b) Reference to - only one pattern argument allowed */
-        pattern_children = parse_one(child->next, state);
-        if (pattern_children) {
-            return ast_make_datatype_reference_to(pattern_children);
-        } else {
-            return NULL;
-        }
-    } else if (dom_node_is_spec_reserved_atom(child, DOM_RES_TFUNC) &&
-            dom_list_length(child) >= 2) {
-        /* 3.c) Function - at least two additional pattern arguments required */
-        pattern_children = parse_list(child->next, state);
-        if (pattern_children) {
-            return ast_make_datatype_function(pattern_children);
-        } else {
-            return NULL;
-        }
-    } else {
-        return NULL;
-    }
-}
-
-static struct AstNode *parse_datatype(
+static struct AstNode *parse_symbol(
         struct DomNode *dom,
         struct ParserState *state)
 {
-    struct AstNode *result = NULL;
+    char *symbol;
+    struct AstNode *result;
 
-    if ((!err_state() && (result = parse_datatype_atomic(dom))) ||
-        (!err_state() && (result = parse_datatype_compound(dom, state)))) {
-        return result;
+    (void)state;
+
+    /* 1. Is a symbol. */
+    if (!(symbol = dom_node_parse_symbol(dom))) {
+        return NULL;
+    }
+
+    result = ast_make_symbol(symbol);
+    mem_free(symbol);
+
+    return result;
+}
+
+static struct AstNode *parse_literal_void(struct DomNode *dom)
+{
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_VOID)) {
+        return ast_make_literal_atomic_unit();
     } else {
         return NULL;
     }
@@ -408,6 +356,25 @@ static struct AstNode *parse_literal_real(struct DomNode *dom)
     return ast_make_literal_atomic_real(value);
 }
 
+static struct AstNode *parse_literal_datatype(struct DomNode *dom)
+{
+    if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TVOID)) {
+        return ast_make_literal_atomic_datatype(AST_LIT_ATOM_DATATYPE_VOID);
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_TUNIT)) {
+        return ast_make_literal_atomic_datatype(AST_LIT_ATOM_DATATYPE_UNIT);
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_BOOLEAN)) {
+        return ast_make_literal_atomic_datatype(AST_LIT_ATOM_DATATYPE_BOOLEAN);
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_INTEGER)) {
+        return ast_make_literal_atomic_datatype(AST_LIT_ATOM_DATATYPE_INTEGER);
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_REAL)) {
+        return ast_make_literal_atomic_datatype(AST_LIT_ATOM_DATATYPE_REAL);
+    } else if (dom_node_is_spec_reserved_atom(dom, DOM_RES_CHARACTER)) {
+        return ast_make_literal_atomic_datatype(AST_LIT_ATOM_DATATYPE_CHARACTER);
+    } else {
+        return NULL;
+    }
+}
+
 static struct AstNode *parse_literal_atomic(
         struct DomNode *dom,
         struct ParserState *state)
@@ -416,33 +383,19 @@ static struct AstNode *parse_literal_atomic(
 
     (void)state;
 
-    if ((!err_state() && (result = parse_literal_unit(dom))) ||
+    if ((!err_state() && (result = parse_literal_void(dom))) ||
+        (!err_state() && (result = parse_literal_unit(dom))) ||
         (!err_state() && (result = parse_literal_bool(dom))) ||
         (!err_state() && (result = parse_literal_char(dom))) ||
         (!err_state() && (result = parse_literal_real(dom))) ||
         (!err_state() && (result = parse_literal_int(dom))) ||
-        (!err_state() && (result = parse_literal_string(dom)))) {
+        (!err_state() && (result = parse_literal_string(dom))) ||
+        (!err_state() && (result = parse_literal_datatype(dom)))) {
         return result;
 
     } else {
         return NULL;
     }
-}
-
-static struct AstNode *parse_symbol(
-        struct DomNode *dom,
-        struct ParserState *state)
-{
-    char *symbol;
-
-    (void)state;
-
-    /* 1. Is a symbol. */
-    if (!(symbol = dom_node_parse_symbol(dom))) {
-        return NULL;
-    }
-
-    return ast_make_symbol(symbol);
 }
 
 static struct AstNode *parse_do_block(
@@ -718,6 +671,52 @@ fail:
     return NULL;
 }
 
+static struct AstNode *parse_tagged_type(
+        struct DomNode *dom,
+        struct ParserState *state)
+{
+    struct DomNode *child = NULL;
+    char *tag = NULL;
+    struct AstNode *type = NULL;
+
+    struct AstNode *result;
+
+    /* 1. Is compound CORE */
+    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+        return NULL;
+    }
+
+    /* 2. Has 3 children */
+    if (!dom_node_is_cpd_of_size(dom, 3)) {
+        return NULL;
+    }
+
+    child = dom->cpd_children;
+
+    /* 2.1. 1st child is tagged-type keyword. */
+    if (!dom_node_is_spec_reserved_atom(child, DOM_RES_TAGGED_TYPE)) {
+        return NULL;
+    }
+    child = child->next;
+
+    /* 2.2. 2nd child is tag. */
+    if (!(tag = dom_node_parse_symbol(dom))) {
+        return NULL;
+    }
+    child = child->next;
+
+    /* 2.3 3rd child is type expression. */
+    if (!(type = parse_one(child, state))) {
+        mem_free(tag);
+        return NULL;
+    }
+
+    result = ast_make_spec_tagged_type(tag, type);
+    mem_free(tag);
+
+    return result;
+}
+
 static struct AstNode *parse_bind(
         struct DomNode *dom,
         struct ParserState *state)
@@ -884,102 +883,37 @@ static struct AstNode *parse_special(
         struct DomNode *dom,
         struct ParserState *state)
 {
-    struct DomNode *child = NULL;
+    struct AstNode *result;
 
-    /* 1. Is compound CORE */
-    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
+    if ((!err_state() && (result = parse_do_block(dom, state))) ||
+        (!err_state() && (result = parse_match(dom, state))) ||
+        (!err_state() && (result = parse_if(dom, state))) ||
+        (!err_state() && (result = parse_while(dom, state))) ||
+        (!err_state() && (result = parse_func_def(dom, state))) ||
+        (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_AND, ast_make_spec_bool_and, state))) ||
+        (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_OR, ast_make_spec_bool_or, state))) ||
+        (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_SET_OF, ast_make_spec_set_of, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_RANGE_OF, ast_make_spec_range_of, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_ARRAY_OF, ast_make_spec_array_of, state))) ||
+        (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_TUPLE_OF, ast_make_spec_tuple_of, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_POINTER_TO, ast_make_spec_pointer_to, state))) ||
+        (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_FUNCTION, ast_make_spec_function_type, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_TYPE_PRODUCT, ast_make_spec_type_product, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_TYPE_UNION, ast_make_spec_type_union, state))) ||
+        (!err_state() && (result = parse_tagged_type(dom, state))) ||
+        (!err_state() && (result = parse_bind(dom, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_REF, ast_make_spec_ref, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_PEEK, ast_make_spec_peek, state))) ||
+        (!err_state() && (result = parse_binary(dom, DOM_RES_POKE, ast_make_spec_poke, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_BEGIN, ast_make_spec_begin, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_END, ast_make_spec_end, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_INC, ast_make_spec_inc, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_SUCC, ast_make_spec_succ, state)))) {
+        return result;
+
+    } else {
         return NULL;
     }
-
-    /* 2. Has 1 or more children. */
-    if (!dom_node_is_cpd_min_size(dom, 1)) {
-        return NULL;
-    }
-
-    child = dom->cpd_children;
-
-    /* 3. Switch the first child. */
-    if (!dom_node_is_atom(child)) {
-        return NULL;
-    }
-
-    /* 3.1. Case do: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_DO)) {
-        return parse_do_block(dom, state);
-    }
-
-    /* 3.2. Case match: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_MATCH)) {
-        return parse_match(dom, state);
-    }
-
-    /* 3.3. Case if: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_IF)) {
-        return parse_if(dom, state);
-    }
-
-    /* 3.4. Case while: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_WHILE)) {
-        return parse_while(dom, state);
-    }
-
-    /* 3.5. Case function definition: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_FUNC)) {
-        return parse_func_def(dom, state);
-    }
-
-    /* 3.6. Case and: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_AND)) {
-        return parse_min_nary(dom, 1, DOM_RES_AND, ast_make_spec_and, state);
-    }
-
-    /* 3.7. Case or: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_OR)) {
-        return parse_min_nary(dom, 1, DOM_RES_OR, ast_make_spec_or, state);
-    }
-
-    /* 3.8. Case bind: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_BIND)) {
-        return parse_bind(dom, state);
-    }
-
-    /* 3.9. Case ref: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_REF)) {
-        return parse_unary(dom, DOM_RES_REF, ast_make_spec_ref, state);
-    }
-
-    /* 3.10. Case peek: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_PEEK)) {
-        return parse_unary(dom, DOM_RES_PEEK, ast_make_spec_peek, state);
-    }
-
-    /* 3.11. Case poke: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_POKE)) {
-        return parse_binary(dom, DOM_RES_POKE, ast_make_spec_poke, state);
-    }
-
-    /* 3.12. Case begin: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_BEGIN)) {
-        return parse_unary(dom, DOM_RES_BEGIN, ast_make_spec_begin, state);
-    }
-
-    /* 3.13. Case end: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_END)) {
-        return parse_unary(dom, DOM_RES_END, ast_make_spec_end, state);
-    }
-
-    /* 3.14. Case inc: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_INC)) {
-        return parse_unary(dom, DOM_RES_INC, ast_make_spec_inc, state);
-    }
-
-    /* 3.15. Case succ: */
-    if (dom_node_is_spec_reserved_atom(child, DOM_RES_SUCC)) {
-        return parse_unary(dom, DOM_RES_SUCC, ast_make_spec_succ, state);
-    }
-
-    /* None of the reserved words were matched. */
-    return NULL;
 }
 
 static struct AstNode *parse_func_call(
@@ -1067,8 +1001,7 @@ static struct AstNode *parse_one(
         (!err_state() && (node = parse_symbol(dom, state))) ||
         (!err_state() && (node = parse_special(dom, state))) ||
         (!err_state() && (node = parse_func_call(dom, state))) ||
-        (!err_state() && (node = parse_literal_compound(dom, state))) ||
-        (!err_state() && (node = parse_datatype(dom, state)))) {
+        (!err_state() && (node = parse_literal_compound(dom, state)))) {
         if (state->acb) {
             state->acb(state->data, node, &dom->loc);
         }

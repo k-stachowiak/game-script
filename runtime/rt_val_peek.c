@@ -30,6 +30,17 @@ static void rt_val_to_string_compound(struct Runtime *rt, VAL_LOC_T x, char **st
     }
 }
 
+static void rt_val_to_string_datatype(struct Runtime *rt, VAL_LOC_T x, char **str)
+{
+    int i, len = rt_val_datatype_len(rt, x);
+    VAL_LOC_T item = x + VAL_HEAD_BYTES + datatype_embellishment_size;
+    for (i = 0; i < len; ++i) {
+        rt_val_to_string(rt, item, str);
+        str_append(*str, " ");
+        item = rt_val_next_loc(rt, item);
+    }
+}
+
 void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
 {
     enum ValueType type = rt_val_peek_type(&rt->stack, x);
@@ -86,6 +97,43 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
     case VAL_UNIT:
         str_append(*str, "unit");
         break;
+
+    case VAL_DATATYPE:
+        str_append(*str, "( ");
+        switch (rt_val_peek_datatype_embellishment(rt, x)) {
+        case VAL_EMB_JUST:
+            str_append(*str, "datatype");
+            break;
+        case VAL_EMB_SET_OF:
+            str_append(*str, "set-of ");
+            break;
+        case VAL_EMB_RANGE_OF:
+            str_append(*str, "range-of ");
+            break;
+        case VAL_EMB_ARRAY_OF:
+            str_append(*str, "array-of ");
+            break;
+        case VAL_EMB_TUPLE_OF:
+            str_append(*str, "tuple-of ");
+            break;
+        case VAL_EMB_PTR_TO:
+            str_append(*str, "pointer-to ");
+            break;
+        case VAL_EMB_FUNC:
+            str_append(*str, "function ");
+            break;
+        case VAL_EMB_PROD:
+            str_append(*str, "type-product ");
+            break;
+        case VAL_EMB_UNION:
+            str_append(*str, "type-union ");
+            break;
+        case VAL_EMB_TAG:
+            break;
+        }
+        rt_val_to_string_datatype(rt, x, str);
+        str_append(*str, ")");
+        break;
     }
 }
 
@@ -134,6 +182,10 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
             case VAL_UNIT:
                 str_append(buffer, "unit :: ");
                 break;
+
+            case VAL_DATATYPE:
+                str_append(buffer, "datatype :: ");
+                break;
             }
         }
     }
@@ -166,7 +218,23 @@ int rt_val_cpd_len(struct Runtime *rt, VAL_LOC_T location)
     VAL_LOC_T current, end;
     int len = 0;
 
-    current = location + VAL_HEAD_BYTES;
+    current = rt_val_cpd_first_loc(location);
+    end = current + rt_val_peek_size(&rt->stack, location);
+
+    while (current != end) {
+        current = rt_val_next_loc(rt, current);
+        ++len;
+    }
+
+    return len;
+}
+
+int rt_val_datatype_len(struct Runtime *rt, VAL_LOC_T location)
+{
+    VAL_LOC_T current, end;
+    int len = 0;
+
+    current = location + VAL_HEAD_BYTES + datatype_embellishment_size;
     end = current + rt_val_peek_size(&rt->stack, location);
 
     while (current != end) {
@@ -227,6 +295,18 @@ VAL_LOC_T rt_val_peek_ref(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_REF_T result;
     memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_REF_BYTES);
+    return result;
+}
+
+enum ValueDataTypeEmbellishment rt_val_peek_datatype_embellishment(
+        struct Runtime* rt,
+        VAL_LOC_T loc)
+{
+    enum ValueDataTypeEmbellishment result;
+    memcpy(
+        &result,
+        rt->stack.buffer + loc + VAL_HEAD_BYTES,
+        datatype_embellishment_size);
     return result;
 }
 
