@@ -25,6 +25,9 @@ struct CaptureCandidateArray {
  */
 static struct AstNode *efd_get_children(struct AstNode* node)
 {
+	/* TODO: This search makes an assumption about the AST nodes structures, e.g. that
+	 * they are internally linked together. This is no longer true for some types.
+	 */
     struct AstSpecial *special;
 
     switch (node->type) {
@@ -49,12 +52,36 @@ static struct AstNode *efd_get_children(struct AstNode* node)
         case AST_SPEC_FUNC_DEF:
             return special->data.func_def.expr;
 
-        case AST_SPEC_AND:
-            return special->data.andd.exprs;
+        case AST_SPEC_BOOL_AND:
+            return special->data.bool_and.exprs;
 
-        case AST_SPEC_OR:
-            return special->data.orr.exprs;
+        case AST_SPEC_BOOL_OR:
+            return special->data.bool_or.exprs;
 
+		case AST_SPEC_SET_OF:
+            return special->data.set_of.types;
+
+        case AST_SPEC_RANGE_OF:
+            return special->data.range_of.bound_lo;
+
+        case AST_SPEC_ARRAY_OF:
+            return special->data.array_of.type;
+
+        case AST_SPEC_TUPLE_OF:
+            return special->data.tuple_of.types;
+
+        case AST_SPEC_POINTER_TO:
+            return special->data.pointer_to.type;
+
+        case AST_SPEC_FUNCTION_TYPE:
+            return special->data.function_type.types;
+
+        case AST_SPEC_TYPE_PRODUCT:
+            return special->data.type_product.args;
+
+        case AST_SPEC_TYPE_UNION:
+            return special->data.type_union.args;
+            
         case AST_SPEC_BIND:
             return special->data.bind.expr;
 
@@ -90,9 +117,6 @@ static struct AstNode *efd_get_children(struct AstNode* node)
 
     case AST_LITERAL_ATOMIC:
         return NULL;
-
-    case AST_DATATYPE:
-        return node->data.datatype.children;
     }
 
     LOG_ERROR("Unhandled AST node type.");

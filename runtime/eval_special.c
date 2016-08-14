@@ -573,15 +573,15 @@ void eval_special(
         eval_special_func_def(node, rt, sym_map, alm);
         break;
 
-    case AST_SPEC_AND:
+    case AST_SPEC_BOOL_AND:
         eval_special_logic(
-            node->data.special.data.andd.exprs,
+            node->data.special.data.bool_and.exprs,
             rt, sym_map, false, "and", alm);
         break;
 
-    case AST_SPEC_OR:
+    case AST_SPEC_BOOL_OR:
         eval_special_logic(
-            node->data.special.data.orr.exprs,
+            node->data.special.data.bool_or.exprs,
             rt, sym_map, true, "or", alm);
         break;
 
@@ -610,15 +610,11 @@ void eval_special(
         break;
 
     case AST_SPEC_TYPE_PRODUCT:
-        eval_special_type_product(node, rt, sym_map, alm);
+        eval_special_type_op(node, rt, sym_map, alm, true);
         break;
 
     case AST_SPEC_TYPE_UNION:
-        eval_special_type_union(node, rt, sym_map, alm);
-        break;
-
-    case AST_SPEC_TAGGED_TYPE:
-        eval_special_tagged_type(node, rt, sym_map, alm);
+        eval_special_type_op(node, rt, sym_map, alm, false);
         break;
 
     case AST_SPEC_BIND:

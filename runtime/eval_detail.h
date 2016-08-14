@@ -67,12 +67,6 @@ void eval_special_type_op(
     struct AstLocMap *alm,
     bool is_product);
 
-void eval_special_tagged_type(
-    struct AstNode *node,
-    struct Runtime *rt,
-    struct SymMap *sym_map,
-    struct AstLocMap *alm);
-
 void eval_func_call(
     struct AstNode *node,
     struct Runtime *rt,

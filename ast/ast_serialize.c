@@ -221,11 +221,35 @@ static char *ast_serialize_special(struct AstSpecial *special)
     case AST_SPEC_FUNC_DEF:
         return ast_serialize_special_func_def(&special->data.func_def);
 
-    case AST_SPEC_AND:
-        return ast_serialize_special_common("and", special->data.andd.exprs);
+    case AST_SPEC_BOOL_AND:
+        return ast_serialize_special_common("and", special->data.bool_and.exprs);
 
-    case AST_SPEC_OR:
-        return ast_serialize_special_common("or", special->data.orr.exprs);
+    case AST_SPEC_BOOL_OR:
+        return ast_serialize_special_common("or", special->data.bool_or.exprs);
+
+    case AST_SPEC_SET_OF:
+        return ast_serialize_special_common("set-of", special->data.set_of.types);
+
+    case AST_SPEC_RANGE_OF:
+        return ast_serialize_special_common("range-of", special->data.range_of.bound_lo);
+
+    case AST_SPEC_ARRAY_OF:
+        return ast_serialize_special_common("array-of", special->data.array_of.type);
+
+    case AST_SPEC_TUPLE_OF:
+        return ast_serialize_special_common("tuple-of", special->data.tuple_of.types);
+
+    case AST_SPEC_POINTER_TO:
+        return ast_serialize_special_common("pointer-to", special->data.pointer_to.type);
+
+    case AST_SPEC_FUNCTION_TYPE:
+        return ast_serialize_special_common("function", special->data.function_type.types);
+
+    case AST_SPEC_TYPE_PRODUCT:
+        return ast_serialize_special_common("type-product", special->data.type_product.args);
+
+    case AST_SPEC_TYPE_UNION:
+        return ast_serialize_special_common("type-union", special->data.type_union.args);
 
     case AST_SPEC_BIND:
         return ast_serialize_special_bind(&special->data.bind);
@@ -347,85 +371,61 @@ static char *ast_serialize_literal_atomic(struct AstLiteralAtomic *literal_atomi
     case AST_LIT_ATOM_UNIT:
         str_append(result, "unit");
         break;
+
     case AST_LIT_ATOM_BOOL:
         if (literal_atomic->data.boolean) {
             str_append(result, "true");
-        }
-        else {
+        } else {
             str_append(result, "false");
         }
         break;
+
     case AST_LIT_ATOM_STRING:
         str_append(result, "%s", literal_atomic->data.string);
         break;
+
     case AST_LIT_ATOM_CHAR:
         str_append(result, "%c", literal_atomic->data.character);
         break;
+
     case AST_LIT_ATOM_INT:
         str_append(result, "%ld", literal_atomic->data.integer);
         break;
+
     case AST_LIT_ATOM_REAL:
         str_append(result, "%f", literal_atomic->data.real);
+        break;
+
+    case AST_LIT_ATOM_DATATYPE:
+        switch (literal_atomic->data.datatype) {
+        case AST_LIT_ATOM_DATATYPE_VOID:
+            str_append(result, "Void");
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_UNIT:
+            str_append(result, "Unit");
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_BOOLEAN:
+            str_append(result, "Boolean");
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_INTEGER:
+            str_append(result, "Integer");
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_REAL:
+            str_append(result, "Real");
+            break;
+
+        case AST_LIT_ATOM_DATATYPE_CHARACTER:
+            str_append(result, "Character");
+            break;
+        }
         break;
     }
 
     /* 2. The reseult is returned along with the ownership. */
-    return result;
-}
-
-static char *ast_serialize_datatype(struct AstDatatype *data_type)
-{
-    char *result = NULL;
-    char *temp;
-
-    /* 0. Overview:
-     * The function returns the text represtntation of a given datatype node.
-     */
-
-    /* 1. Return a particular string unless it is a compound node in which case
-     * recurr the serialization algorithm accordingly.
-     */
-    switch (data_type->type)
-    {
-    case AST_DATATYPE_UNIT:
-        str_append(result, "UNIT");
-        break;
-
-    case AST_DATATYPE_BOOLEAN:
-        str_append(result, "BOOLEAN");
-        break;
-
-    case AST_DATATYPE_INTEGER:
-        str_append(result, "INTEGER");
-        break;
-
-    case AST_DATATYPE_REAL:
-        str_append(result, "REAL");
-        break;
-
-    case AST_DATATYPE_CHARACTER:
-        str_append(result, "CHARACTER");
-        break;
-
-    case AST_DATATYPE_ARRAY_OF:
-        str_append(result, "(ARRAY-OF");
-        temp = ast_serialize(data_type->children);
-        str_append(result, " %s)", temp);
-        mem_free(temp);
-        break;
-
-    case AST_DATATYPE_REFERENCE_TO:
-        str_append(result, "REFERENCE-TO");
-        temp = ast_serialize(data_type->children);
-        str_append(result, " %s)", temp);
-        mem_free(temp);
-        break;
-
-    case AST_DATATYPE_FUNCTION:
-        str_append(result, "FUNCTION");
-        break;
-    }
-
     return result;
 }
 
@@ -477,10 +477,6 @@ char *ast_serialize(struct AstNode *node)
         case AST_LITERAL_ATOMIC:
             temp = ast_serialize_literal_atomic(&node->data.literal_atomic);
             break;
-
-    case AST_DATATYPE:
-        temp = ast_serialize_datatype(&node->data.datatype);
-        break;
         }
 
         /* 2.2. The temporary string is appended to the result with a preceeding

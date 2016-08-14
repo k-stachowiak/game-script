@@ -671,52 +671,6 @@ fail:
     return NULL;
 }
 
-static struct AstNode *parse_tagged_type(
-        struct DomNode *dom,
-        struct ParserState *state)
-{
-    struct DomNode *child = NULL;
-    char *tag = NULL;
-    struct AstNode *type = NULL;
-
-    struct AstNode *result;
-
-    /* 1. Is compound CORE */
-    if (!dom_node_is_spec_compound(dom, DOM_CPD_CORE)) {
-        return NULL;
-    }
-
-    /* 2. Has 3 children */
-    if (!dom_node_is_cpd_of_size(dom, 3)) {
-        return NULL;
-    }
-
-    child = dom->cpd_children;
-
-    /* 2.1. 1st child is tagged-type keyword. */
-    if (!dom_node_is_spec_reserved_atom(child, DOM_RES_TAGGED_TYPE)) {
-        return NULL;
-    }
-    child = child->next;
-
-    /* 2.2. 2nd child is tag. */
-    if (!(tag = dom_node_parse_symbol(dom))) {
-        return NULL;
-    }
-    child = child->next;
-
-    /* 2.3 3rd child is type expression. */
-    if (!(type = parse_one(child, state))) {
-        mem_free(tag);
-        return NULL;
-    }
-
-    result = ast_make_spec_tagged_type(tag, type);
-    mem_free(tag);
-
-    return result;
-}
-
 static struct AstNode *parse_bind(
         struct DomNode *dom,
         struct ParserState *state)
@@ -893,14 +847,13 @@ static struct AstNode *parse_special(
         (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_AND, ast_make_spec_bool_and, state))) ||
         (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_OR, ast_make_spec_bool_or, state))) ||
         (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_SET_OF, ast_make_spec_set_of, state))) ||
-        (!err_state() && (result = parse_unary(dom, DOM_RES_RANGE_OF, ast_make_spec_range_of, state))) ||
+        (!err_state() && (result = parse_binary(dom, DOM_RES_RANGE_OF, ast_make_spec_range_of, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_ARRAY_OF, ast_make_spec_array_of, state))) ||
         (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_TUPLE_OF, ast_make_spec_tuple_of, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_POINTER_TO, ast_make_spec_pointer_to, state))) ||
         (!err_state() && (result = parse_min_nary(dom, 1, DOM_RES_FUNCTION, ast_make_spec_function_type, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_TYPE_PRODUCT, ast_make_spec_type_product, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_TYPE_UNION, ast_make_spec_type_union, state))) ||
-        (!err_state() && (result = parse_tagged_type(dom, state))) ||
         (!err_state() && (result = parse_bind(dom, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_REF, ast_make_spec_ref, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_PEEK, ast_make_spec_peek, state))) ||

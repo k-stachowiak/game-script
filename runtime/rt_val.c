@@ -63,11 +63,8 @@ bool rt_val_pair_homo(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
 {
     enum ValueType xtype, ytype;
+    VAL_SIZE_T xsize, ysize;
     int xlen, ylen;
-
-    if (rt_val_peek_size(&rt->stack, x) != rt_val_peek_size(&rt->stack, y)) {
-        return false;
-    }
 
     xtype = rt_val_peek_type(&rt->stack, x);
     ytype = rt_val_peek_type(&rt->stack, y);
@@ -75,6 +72,9 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     if (xtype != ytype) {
         return false;
     }
+
+    xsize = rt_val_peek_size(&rt->stack, x);
+    ysize = rt_val_peek_size(&rt->stack, y);
 
     switch (xtype) {
     case VAL_BOOL:
@@ -115,6 +115,26 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
         return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));
 
     case VAL_UNIT:
+        return true;
+
+    case VAL_DATATYPE:
+        if (rt_val_peek_datatype_embellishment(rt, x) !=
+            rt_val_peek_datatype_embellishment(rt, y)) {
+            return false;
+        }
+        xlen = rt_val_datatype_len(rt, x);
+        ylen = rt_val_datatype_len(rt, y);
+        if (xlen != ylen) {
+            return false;
+        }
+        x = rt_val_datatype_first_loc(x);
+        y = rt_val_datatype_first_loc(y);
+        while (xlen) {
+            if (!rt_val_eq_rec(rt, x, y)) {
+                return false;
+            }
+            --xlen;
+        }
         return true;
     }
 

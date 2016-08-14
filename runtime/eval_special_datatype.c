@@ -43,17 +43,18 @@ void eval_special_range_of(
 {
     VAL_LOC_T size_loc, data_begin, data_size, from_loc, to_loc;
     struct AstSpecRangeOf *range_of = &node->data.special.data.range_of;
-    struct AstNode *bound = range_of->bounds;
+    struct AstNode *bound_lo = range_of->bound_lo;
+    struct AstNode *bound_hi = range_of->bound_hi;
 
     rt_val_push_datatype_init(&rt->stack, VAL_EMB_RANGE_OF, &size_loc);
 
     data_begin = rt->stack.top;
 
-    from_loc = eval_dispatch(bound, rt, sym_map, alm);
+    from_loc = eval_dispatch(bound_lo, rt, sym_map, alm);
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound),
+            alm_get(alm, bound_lo),
             "Failed evaluating from bound in range_of constructor");
         return;
     }
@@ -61,18 +62,16 @@ void eval_special_range_of(
     if (rt_val_peek_type(&rt->stack, from_loc) != VAL_INT) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound),
+            alm_get(alm, bound_lo),
             "Non-integral from bound in range_of constructor");
         return;
     }
 
-    bound = bound->next;
-
-    to_loc = eval_dispatch(bound, rt, sym_map, alm);
+    to_loc = eval_dispatch(bound_hi, rt, sym_map, alm);
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound),
+            alm_get(alm, bound_hi),
             "Failed evaluating to bound in range_of constructor");
         return;
     }
@@ -80,7 +79,7 @@ void eval_special_range_of(
     if (rt_val_peek_type(&rt->stack, to_loc) != VAL_INT) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound),
+            alm_get(alm, bound_hi),
             "Non-integral to bound in range_of constructor");
         return;
     }
@@ -275,51 +274,3 @@ void eval_special_type_op(
     data_size = rt->stack.top - data_begin;
     rt_val_push_datatype_final(&rt->stack, size_loc, data_size);
 }
-
-void eval_special_tagged_type(
-        struct AstNode *node,
-        struct Runtime *rt,
-        struct SymMap *sym_map,
-        struct AstLocMap *alm)
-{
-    VAL_LOC_T size_loc, data_begin, data_size, elem_loc;
-    struct AstSpecTaggedType *tagged_type = &node->data.special.data.tagged_type;
-    char *tag = tagged_type->tag;
-    struct AstNode *type = tagged_type->type;
-
-    rt_val_push_datatype_init(&rt->stack, VAL_EMB_TAG, &size_loc);
-
-    data_begin = rt->stack.top;
-
-    rt_val_push_string(&rt->stack, tag, tag + strlen(tag));
-
-    if (err_state()) {
-        err_push_src(
-            "EVAL",
-            alm_get(alm, node),
-            "Failed pushing tag string");
-        return;
-    }
-
-    elem_loc = eval_dispatch(type, rt, sym_map, alm);
-
-    if (err_state()) {
-        err_push_src(
-            "EVAL",
-            alm_get(alm, type),
-            "Failed evaluating type in tagged type");
-        return;
-    }
-
-    if (rt_val_peek_type(&rt->stack, elem_loc) != VAL_DATATYPE) {
-        err_push_src(
-            "EVAL",
-            alm_get(alm, type),
-            "Non-type item in tagged type");
-        return;
-    }
-
-    data_size = rt->stack.top - data_begin;
-    rt_val_push_datatype_final(&rt->stack, size_loc, data_size);
-}
-

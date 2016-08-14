@@ -315,6 +315,11 @@ VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc)
     return loc + VAL_HEAD_BYTES;
 }
 
+VAL_LOC_T rt_val_datatype_first_loc(VAL_LOC_T loc)
+{
+    return loc + VAL_HEAD_BYTES + datatype_embellishment_size;
+}
+
 char* rt_val_peek_cpd_as_string(struct Runtime *rt, VAL_LOC_T loc)
 {
     VAL_LOC_T current = rt_val_cpd_first_loc(loc);

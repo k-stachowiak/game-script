@@ -24,6 +24,8 @@ static char *reserved[] = {
     "or",
     "set-of",
     "range-of",
+    "array-of",
+    "tuple-of",
     "pointer-to",
     "function",
     "tprod",

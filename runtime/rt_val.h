@@ -271,6 +271,9 @@ enum ValueDataTypeEmbellishment rt_val_peek_datatype_embellishment(
 /** Returns the location of the first element of the compound value. */
 VAL_LOC_T rt_val_cpd_first_loc(VAL_LOC_T loc);
 
+/** Returns the location of the first element of the datatype value. */
+VAL_LOC_T rt_val_datatype_first_loc(VAL_LOC_T loc);
+
 /**
  * Peek an array of char as a string.
  * NOTE that the client is responsible for releasing the string buffer.

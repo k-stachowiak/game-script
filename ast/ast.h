@@ -38,7 +38,6 @@ enum AstSpecialType {
     AST_SPEC_FUNCTION_TYPE,
     AST_SPEC_TYPE_PRODUCT,
     AST_SPEC_TYPE_UNION,
-    AST_SPEC_TAGGED_TYPE,
 
     /* Variables manipulation */
     AST_SPEC_BIND,
@@ -124,7 +123,8 @@ struct AstSpecSetOf {
 };
 
 struct AstSpecRangeOf {
-    struct AstNode *bounds;
+    struct AstNode *bound_lo;
+    struct AstNode *bound_hi;
 };
 
 struct AstSpecArrayOf {
@@ -149,11 +149,6 @@ struct AstSpecTypeProduct {
 
 struct AstSpecTypeUnion {
     struct AstNode *args;
-};
-
-struct AstSpecTaggedType {
-    char *tag;
-    struct AstNode *type;
 };
 
 struct AstSpecBind {
@@ -208,7 +203,6 @@ struct AstSpecial {
         struct AstSpecFunctionType function_type;
         struct AstSpecTypeProduct type_product;
         struct AstSpecTypeUnion type_union;
-        struct AstSpecTaggedType tagged_type;
         struct AstSpecBind bind;
         struct AstSpecRef ref;
         struct AstSpecPeek peek;
@@ -290,7 +284,9 @@ struct AstNode *ast_make_spec_bool_or(struct AstNode* exprs);
 
 struct AstNode *ast_make_spec_set_of(struct AstNode *types);
 
-struct AstNode *ast_make_spec_range_of(struct AstNode *type);
+struct AstNode *ast_make_spec_range_of(
+        struct AstNode *bound_lo,
+        struct AstNode *bound_hi);
 
 struct AstNode *ast_make_spec_array_of(struct AstNode *type);
 
@@ -303,8 +299,6 @@ struct AstNode *ast_make_spec_function_type(struct AstNode *types);
 struct AstNode *ast_make_spec_type_product(struct AstNode *args);
 
 struct AstNode *ast_make_spec_type_union(struct AstNode *args);
-
-struct AstNode *ast_make_spec_tagged_type(char *tag, struct AstNode *type);
 
 struct AstNode *ast_make_spec_bind(
         struct AstNode *pattern,
@@ -334,7 +328,6 @@ struct AstNode *ast_make_literal_compound(
         enum AstLiteralCompoundType type,
         struct AstNode *exprs);
 
-struct AstNode *ast_make_literal_atomic_void(void);
 struct AstNode *ast_make_literal_atomic_unit(void);
 struct AstNode *ast_make_literal_atomic_bool(int value);
 struct AstNode *ast_make_literal_atomic_character(char value);

@@ -154,7 +154,9 @@ struct AstNode *ast_make_spec_set_of(struct AstNode *types)
     return result;
 }
 
-struct AstNode *ast_make_spec_range_of(struct AstNode *type)
+struct AstNode *ast_make_spec_range_of(
+        struct AstNode *bound_lo,
+        struct AstNode *bound_hi)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -162,7 +164,10 @@ struct AstNode *ast_make_spec_range_of(struct AstNode *type)
     result->type = AST_SPECIAL;
 
     result->data.special.type = AST_SPEC_RANGE_OF;
-    result->data.special.data.range_of.type = type;
+    result->data.special.data.range_of.bound_lo = bound_lo;
+    result->data.special.data.range_of.bound_hi = bound_hi;
+
+    bound_lo->next = bound_hi;
 
     return result;
 }
@@ -241,24 +246,6 @@ struct AstNode *ast_make_spec_type_union(struct AstNode *args)
 
     result->data.special.type = AST_SPEC_TYPE_UNION;
     result->data.special.data.type_union.args = args;
-
-    return result;
-}
-
-struct AstNode *ast_make_spec_tagged_type(char *tag, struct AstNode *type)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-
-    int length = strlen(tag);
-    char *tag_copy = mem_malloc(length + 1);
-    memcpy(tag_copy, tag, length + 1);
-
-    result->next = NULL;
-    result->type = AST_SPECIAL;
-
-    result->data.special.type = AST_SPEC_TYPE_UNION;
-    result->data.special.data.tagged_type.tag = tag_copy;
-    result->data.special.data.tagged_type.type = type;
 
     return result;
 }
@@ -409,15 +396,6 @@ struct AstNode *ast_make_literal_compound(
     return result;
 }
 
-struct AstNode *ast_make_literal_atomic_void(void)
-{
-    struct AstNode *result = mem_malloc(sizeof(*result));
-    result->next = NULL;
-    result->type = AST_LITERAL_ATOMIC;
-    result->data.literal_atomic.type = AST_LIT_ATOM_VOID;
-    return result;
-}
-
 struct AstNode *ast_make_literal_atomic_unit(void)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -561,7 +539,7 @@ static void ast_special_set_of_free(struct AstSpecSetOf *set_of)
 
 static void ast_special_range_of_free(struct AstSpecRangeOf *range_of)
 {
-    ast_node_free(range_of->type);
+    ast_node_free(range_of->bound_lo);
 }
 
 static void ast_special_array_of_free(struct AstSpecArrayOf *array_of)
@@ -592,12 +570,6 @@ static void ast_special_type_product_free(struct AstSpecTypeProduct *type_produc
 static void ast_special_type_union_free(struct AstSpecTypeUnion *type_union)
 {
     ast_node_free(type_union->args);
-}
-
-static void ast_special_tagged_type_free(struct AstSpecTaggedType *tagged_type)
-{
-    mem_free(tagged_type->tag);
-    ast_node_free(tagged_type->type);
 }
 
 static void ast_special_bind_free(struct AstSpecBind *bind)
@@ -703,10 +675,6 @@ static void ast_special_free(struct AstSpecial *special)
 
     case AST_SPEC_TYPE_UNION:
         ast_special_type_union_free(&special->data.type_union);
-        break;
-
-    case AST_SPEC_TAGGED_TYPE:
-        ast_special_tagged_type_free(&special->data.tagged_type);
         break;
 
     case AST_SPEC_BIND:
@@ -843,11 +811,11 @@ bool ast_list_contains_symbol(struct AstNode *list, char *symbol)
             case AST_SPEC_SET_OF:
                 return ast_list_contains_symbol(list->data.special.data.set_of.types, symbol);
             case AST_SPEC_RANGE_OF:
-                return ast_list_contains_symbol(list->data.special.data.range_of.type, symbol);
+                return ast_list_contains_symbol(list->data.special.data.range_of.bound_lo, symbol);
             case AST_SPEC_ARRAY_OF:
                 return ast_list_contains_symbol(list->data.special.data.array_of.type, symbol);
             case AST_SPEC_TUPLE_OF:
-                return ast_list_contains_symbol(list->data.special.data.tuple_of.type, symbol);
+                return ast_list_contains_symbol(list->data.special.data.tuple_of.types, symbol);
             case AST_SPEC_POINTER_TO:
                 return ast_list_contains_symbol(list->data.special.data.pointer_to.type, symbol);
             case AST_SPEC_FUNCTION_TYPE:
@@ -856,8 +824,6 @@ bool ast_list_contains_symbol(struct AstNode *list, char *symbol)
                 return ast_list_contains_symbol(list->data.special.data.type_product.args, symbol);
             case AST_SPEC_TYPE_UNION:
                 return ast_list_contains_symbol(list->data.special.data.type_union.args, symbol);
-            case AST_SPEC_TAGGED_TYPE:
-                return ast_list_contains_symbol(list->data.special.data.tagged_type.type, symbol);
             case AST_SPEC_BIND:
                 return
                     ast_list_contains_symbol(list->data.special.data.bind.pattern, symbol) |
