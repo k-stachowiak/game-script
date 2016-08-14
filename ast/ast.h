@@ -41,7 +41,7 @@ enum AstSpecialType {
 
     /* Variables manipulation */
     AST_SPEC_BIND,
-    AST_SPEC_REF,
+    AST_SPEC_PTR,
     AST_SPEC_PEEK,
     AST_SPEC_POKE,
     AST_SPEC_BEGIN,
@@ -156,7 +156,7 @@ struct AstSpecBind {
     struct AstNode *expr;
 };
 
-struct AstSpecRef {
+struct AstSpecPtr {
     struct AstNode *expr;
 };
 
@@ -165,7 +165,7 @@ struct AstSpecPeek {
 };
 
 struct AstSpecPoke {
-    struct AstNode *reference;
+    struct AstNode *pointer;
     struct AstNode *value;
 };
 
@@ -178,11 +178,11 @@ struct AstSpecEnd {
 };
 
 struct AstSpecInc {
-    struct AstNode *reference;
+    struct AstNode *pointer;
 };
 
 struct AstSpecSucc {
-    struct AstNode *reference;
+    struct AstNode *pointer;
 };
 
 struct AstSpecial {
@@ -204,7 +204,7 @@ struct AstSpecial {
         struct AstSpecTypeProduct type_product;
         struct AstSpecTypeUnion type_union;
         struct AstSpecBind bind;
-        struct AstSpecRef ref;
+        struct AstSpecPtr pointer;
         struct AstSpecPeek peek;
         struct AstSpecPoke poke;
         struct AstSpecBegin begin;
@@ -304,21 +304,21 @@ struct AstNode *ast_make_spec_bind(
         struct AstNode *pattern,
         struct AstNode *expr);
 
-struct AstNode *ast_make_spec_ref(struct AstNode* expr);
+struct AstNode *ast_make_spec_ptr(struct AstNode* expr);
 
 struct AstNode *ast_make_spec_peek(struct AstNode* expr);
 
 struct AstNode *ast_make_spec_poke(
-        struct AstNode* reference,
+        struct AstNode* pointer,
         struct AstNode* value);
 
 struct AstNode *ast_make_spec_begin(struct AstNode* collection);
 
 struct AstNode *ast_make_spec_end(struct AstNode* collection);
 
-struct AstNode *ast_make_spec_inc(struct AstNode* reference);
+struct AstNode *ast_make_spec_inc(struct AstNode* pointer);
 
-struct AstNode *ast_make_spec_succ(struct AstNode* reference);
+struct AstNode *ast_make_spec_succ(struct AstNode* pointer);
 
 struct AstNode *ast_make_func_call(
         struct AstNode *func,

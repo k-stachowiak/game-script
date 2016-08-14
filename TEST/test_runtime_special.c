@@ -27,20 +27,20 @@ static void test_special_if(struct TestContext *tc, struct Runtime *rt)
     rt_reset(rt);
 }
 
-static void test_special_references_basic(struct TestContext *tc, struct Runtime *rt)
+static void test_special_pointers_basic(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
             "(bind x 1)\n"
-            "(bind x^ (ref x))\n"
+            "(bind x^ (ptr x))\n"
             "(bind y (peek x^))\n"
             "(poke x^ 2)",
-            "Mutate atomic value through reference");
-    test_eval_source_expect(tc, rt, "x", "Value mutated through reference", INT, 2);
-    test_eval_source_expect(tc, rt, "y", "Copy through reference persisted", INT, 1);
+            "Mutate atomic value through pointer");
+    test_eval_source_expect(tc, rt, "x", "Value mutated through pointer", INT, 2);
+    test_eval_source_expect(tc, rt, "y", "Copy through pointer persisted", INT, 1);
     rt_reset(rt);
 }
 
-static void test_special_references_iteration(struct TestContext *tc, struct Runtime *rt)
+static void test_special_pointers_iteration(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
             "(bind vec [ 1 2 3 ])\n"
@@ -57,13 +57,13 @@ static void test_special_references_iteration(struct TestContext *tc, struct Run
     rt_reset(rt);
 }
 
-static void test_special_references_poke_type(struct TestContext *tc, struct Runtime *rt)
+static void test_special_pointers_poke_type(struct TestContext *tc, struct Runtime *rt)
 {
     test_eval_source_succeed(tc, rt,
             "(bind v [ 1 2 3 ])\n"
-            "(bind v^ (ref v))\n"
+            "(bind v^ (ptr v))\n"
             "(bind x 4.0)\n"
-            "(bind x^ (ref x))",
+            "(bind x^ (ptr x))",
             "Mutate different types of objects");
 
     test_eval_source_fail(tc, rt, "(poke v^ [ 1 2 ])", "Fail on poking array with size mismatch");
@@ -87,8 +87,8 @@ void test_runtime_special(struct TestContext *tc)
     struct Runtime *rt = rt_make();
     test_runtime_special_logic(tc, rt);
     test_special_if(tc, rt);
-    test_special_references_basic(tc, rt);
-    test_special_references_iteration(tc, rt);
-    test_special_references_poke_type(tc, rt);
+    test_special_pointers_basic(tc, rt);
+    test_special_pointers_iteration(tc, rt);
+    test_special_pointers_poke_type(tc, rt);
     rt_free(rt);
 }

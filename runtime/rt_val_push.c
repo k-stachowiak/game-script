@@ -62,12 +62,12 @@ void rt_val_push_unit(struct Stack *stack)
     stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&unit_size);
 }
 
-void rt_val_push_ref(struct Stack *stack, VAL_REF_T value)
+void rt_val_push_ptr(struct Stack *stack, VAL_PTR_T value)
 {
-    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_REF;
+    VAL_HEAD_TYPE_T type = (VAL_HEAD_TYPE_T)VAL_PTR;
     stack_push(stack, VAL_HEAD_TYPE_BYTES, (char*)&type);
-    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&ref_size);
-    stack_push(stack, ref_size, (char*)&value);
+    stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&ptr_size);
+    stack_push(stack, ptr_size, (char*)&value);
 }
 
 void rt_val_push_array_init(struct Stack *stack, VAL_LOC_T *size_loc)
@@ -144,7 +144,7 @@ void rt_val_push_func_init(
     *size_loc = stack_push(stack, VAL_HEAD_SIZE_BYTES, (char*)&zero);
     *data_begin = stack_push(stack, VAL_SIZE_BYTES, (char*)&arity);
     stack_push(stack, VAL_TYPE_BYTES, (char*)&func_type);
-    stack_push(stack, VAL_PTR_BYTES, (char*)&impl);
+    stack_push(stack, VAL_HW_PTR_BYTES, (char*)&impl);
 }
 
 void rt_val_push_func_cap_init_deferred(

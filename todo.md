@@ -1,6 +1,13 @@
 # TODO
-* Rename references to pointers where appropriate
-* Replace special increment and successor with regular pointer arithmetics
+* Change sizes encoding scheme. No longer encode sizes along each value but:
+   * for regular values store size when performing bind
+   * for array elements - encode element size into array value
+   * for tuples encode the sequence of the element sizes into the tuple value
+* A bind should create "references", i.e. a tuples of address and type.
+  This should be a common concept also used by the reference varaibles. Once
+  the references are implemented in terms of address+size the metadata may start
+  being removed from the stack. There may be optional boxed values for generic
+  implementations...
 * Move special forms out of the ast
 * Match AST structure is bifurcated, thus the search in the evaluate function definition will skip the keys list
     * all the operations on ast should be based on the centralized generic ast algorithms like find or visit
@@ -14,12 +21,7 @@
 * add another debug map: address -> source location for runtime values
 * store dom node begin and node end location in the dom nodes
 * revise parser and runtime tests
-* Consider type requirements in the pattern (WHAT SHOULD BE THE SYNTAX FOR THIS???)
-* A bind should create "references", i.e. a tuples of address and type.
-  This should be a common concept also used by the reference varaibles. Once
-  the references are implemented in terms of address+size the metadata may start
-  being removed from the stack. There may be optional boxed values for generic
-  implementations...
+* Consider type requirements in the pattern. How to say (bind (type-constraint x (array-of Integer)))?
 * If type expressions are present, Implement function overloading so that more than one function is allowed
   to be bound to a single symbol and it is not an error to fail binding to the formal arguments if there
   is yet another overload to be considered

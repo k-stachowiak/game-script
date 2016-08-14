@@ -16,7 +16,7 @@ VAL_HEAD_SIZE_T bool_size = VAL_BOOL_BYTES;
 VAL_HEAD_SIZE_T char_size = VAL_CHAR_BYTES;
 VAL_HEAD_SIZE_T int_size = VAL_INT_BYTES;
 VAL_HEAD_SIZE_T real_size = VAL_REAL_BYTES;
-VAL_HEAD_SIZE_T ref_size = VAL_REF_BYTES;
+VAL_HEAD_SIZE_T ptr_size = VAL_PTR_BYTES;
 VAL_HEAD_SIZE_T unit_size = 0;
 VAL_HEAD_SIZE_T datatype_embellishment_size = sizeof(enum ValueDataTypeEmbellishment);
 VAL_HEAD_SIZE_T datatype_size = sizeof(enum ValueDataType);
@@ -111,8 +111,8 @@ bool rt_val_eq_rec(struct Runtime *rt, VAL_LOC_T x, VAL_LOC_T y)
     case VAL_FUNCTION:
         return false;
 
-    case VAL_REF:
-        return rt_val_eq_rec(rt, rt_val_peek_ref(rt, x), rt_val_peek_ref(rt, y));
+    case VAL_PTR:
+        return rt_val_eq_rec(rt, rt_val_peek_ptr(rt, x), rt_val_peek_ptr(rt, y));
 
     case VAL_UNIT:
         return true;

@@ -61,7 +61,7 @@ static void rt_init_bif(struct Runtime *rt, struct SymMap *sm)
     sym_map_insert(sm, "is_array", eval_bif(rt, bif_is_array, 1));
     sym_map_insert(sm, "is_tuple", eval_bif(rt, bif_is_tuple, 1));
     sym_map_insert(sm, "is_function", eval_bif(rt, bif_is_function, 1));
-    sym_map_insert(sm, "is_reference", eval_bif(rt, bif_is_reference, 1));
+    sym_map_insert(sm, "is_pointer", eval_bif(rt, bif_is_pointer, 1));
 }
 
 static void rt_init(struct Runtime *rt)

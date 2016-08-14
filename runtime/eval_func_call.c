@@ -333,7 +333,7 @@ static void efc_push_client_result(struct Runtime *rt, struct MoonValue *value)
         break;
 
     case MN_REFERENCE:
-        err_push("EVAL", "CLIF returned a reference");
+        err_push("EVAL", "CLIF returned a pointer");
         break;
     }
 }

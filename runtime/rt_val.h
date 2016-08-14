@@ -24,15 +24,15 @@
 #define VAL_CHAR_T char
 #define VAL_INT_T int64_t
 #define VAL_REAL_T double
-#define VAL_REF_T VAL_LOC_T
+#define VAL_PTR_T VAL_LOC_T
 
 #define VAL_BOOL_BYTES sizeof(VAL_BOOL_T)
 #define VAL_CHAR_BYTES sizeof(VAL_CHAR_T)
 #define VAL_INT_BYTES sizeof(VAL_INT_T)
 #define VAL_REAL_BYTES sizeof(VAL_REAL_T)
-#define VAL_REF_BYTES sizeof(VAL_REF_T)
+#define VAL_PTR_BYTES sizeof(VAL_PTR_T)
 
-#define VAL_PTR_BYTES sizeof(void*)
+#define VAL_HW_PTR_BYTES sizeof(void*)
 
 /* Allocate variables of significant values to copy from. */
 extern VAL_HEAD_SIZE_T zero;
@@ -40,7 +40,7 @@ extern VAL_HEAD_SIZE_T bool_size;
 extern VAL_HEAD_SIZE_T char_size;
 extern VAL_HEAD_SIZE_T int_size;
 extern VAL_HEAD_SIZE_T real_size;
-extern VAL_HEAD_SIZE_T ref_size;
+extern VAL_HEAD_SIZE_T ptr_size;
 extern VAL_HEAD_SIZE_T unit_size;
 extern VAL_HEAD_SIZE_T datatype_embellishment_size;
 extern VAL_HEAD_SIZE_T datatype_size;
@@ -63,7 +63,7 @@ enum ValueType {
     VAL_ARRAY,
     VAL_TUPLE,
     VAL_FUNCTION,
-    VAL_REF,
+    VAL_PTR,
     VAL_UNIT,
     VAL_DATATYPE
 };
@@ -130,7 +130,7 @@ void rt_val_push_char(struct Stack *stack, VAL_CHAR_T value);
 void rt_val_push_int(struct Stack *stack, VAL_INT_T value);
 void rt_val_push_real(struct Stack *stack, VAL_REAL_T value);
 void rt_val_push_unit(struct Stack *stack);
-void rt_val_push_ref(struct Stack *stack, VAL_REF_T value);
+void rt_val_push_ptr(struct Stack *stack, VAL_PTR_T value);
 
 /* Compound values.
  * ----------------
@@ -198,7 +198,7 @@ void rt_val_push_func_final(
  */
 
 void rt_val_poke_bool(struct Stack *stack, VAL_LOC_T loc, VAL_BOOL_T value);
-void rt_val_poke_ref(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src);
+void rt_val_poke_ptr(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src);
 void rt_val_poke_copy(struct Stack *stack, VAL_LOC_T dst, VAL_LOC_T src);
 
 /* Reading (peeking) API.
@@ -260,8 +260,8 @@ VAL_INT_T rt_val_peek_int(struct Runtime *rt, VAL_LOC_T loc);
 /** Peek a real value at the given location. */
 VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc);
 
-/** Returns the location pointed by the reference. */
-VAL_LOC_T rt_val_peek_ref(struct Runtime *rt, VAL_LOC_T loc);
+/** Returns the location pointed by the pointer. */
+VAL_LOC_T rt_val_peek_ptr(struct Runtime *rt, VAL_LOC_T loc);
 
 /** Returns basic information aboud a datatype ovject. */
 enum ValueDataTypeEmbellishment rt_val_peek_datatype_embellishment(

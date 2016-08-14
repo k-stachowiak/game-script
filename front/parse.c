@@ -855,7 +855,7 @@ static struct AstNode *parse_special(
         (!err_state() && (result = parse_unary(dom, DOM_RES_TYPE_PRODUCT, ast_make_spec_type_product, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_TYPE_UNION, ast_make_spec_type_union, state))) ||
         (!err_state() && (result = parse_bind(dom, state))) ||
-        (!err_state() && (result = parse_unary(dom, DOM_RES_REF, ast_make_spec_ref, state))) ||
+        (!err_state() && (result = parse_unary(dom, DOM_RES_PTR, ast_make_spec_ptr, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_PEEK, ast_make_spec_peek, state))) ||
         (!err_state() && (result = parse_binary(dom, DOM_RES_POKE, ast_make_spec_poke, state))) ||
         (!err_state() && (result = parse_unary(dom, DOM_RES_BEGIN, ast_make_spec_begin, state))) ||

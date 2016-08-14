@@ -85,14 +85,14 @@ static struct AstNode *efd_get_children(struct AstNode* node)
         case AST_SPEC_BIND:
             return special->data.bind.expr;
 
-        case AST_SPEC_REF:
-            return special->data.ref.expr;
+        case AST_SPEC_PTR:
+            return special->data.pointer.expr;
 
         case AST_SPEC_PEEK:
             return special->data.peek.expr;
 
         case AST_SPEC_POKE:
-            return special->data.poke.reference;
+            return special->data.poke.pointer;
 
         case AST_SPEC_BEGIN:
             return special->data.begin.collection;
@@ -101,10 +101,10 @@ static struct AstNode *efd_get_children(struct AstNode* node)
             return special->data.end.collection;
 
         case AST_SPEC_INC:
-            return special->data.inc.reference;
+            return special->data.inc.pointer;
 
         case AST_SPEC_SUCC:
-            return special->data.succ.reference;
+            return special->data.succ.pointer;
         }
         LOG_ERROR("Unhandled special AST node type.");
         exit(1);

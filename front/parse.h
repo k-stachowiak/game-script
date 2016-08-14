@@ -10,7 +10,6 @@ struct Pattern;
 struct AstLocMap;
 
 typedef void (*ParserAstCallback)(void*, struct AstNode*, struct SourceLocation*);
-typedef void (*ParserPatCallback)(void*, struct Pattern*, struct SourceLocation*);
 
 /**
  * Parses source code to produce an abstract syntax tree.

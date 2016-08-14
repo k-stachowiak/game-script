@@ -254,14 +254,14 @@ static char *ast_serialize_special(struct AstSpecial *special)
     case AST_SPEC_BIND:
         return ast_serialize_special_bind(&special->data.bind);
 
-    case AST_SPEC_REF:
-        return ast_serialize_special_common("ref", special->data.ref.expr);
+    case AST_SPEC_PTR:
+        return ast_serialize_special_common("ptr", special->data.pointer.expr);
 
     case AST_SPEC_PEEK:
         return ast_serialize_special_common("peek", special->data.peek.expr);
 
     case AST_SPEC_POKE:
-        return ast_serialize_special_common("poke", special->data.poke.reference);
+        return ast_serialize_special_common("poke", special->data.poke.pointer);
 
     case AST_SPEC_BEGIN:
         return ast_serialize_special_common("begin", special->data.begin.collection);
@@ -270,10 +270,10 @@ static char *ast_serialize_special(struct AstSpecial *special)
         return ast_serialize_special_common("end", special->data.end.collection);
 
     case AST_SPEC_INC:
-        return ast_serialize_special_common("inc", special->data.inc.reference);
+        return ast_serialize_special_common("inc", special->data.inc.pointer);
 
     case AST_SPEC_SUCC:
-        return ast_serialize_special_common("succ", special->data.succ.reference);
+        return ast_serialize_special_common("succ", special->data.succ.pointer);
     }
 
     /* 2. The result is returned passing the ownership. */

@@ -32,7 +32,7 @@ struct MoonValue {
         double real;
         char *string;
         struct MoonValue *compound;
-        int64_t reference;
+        int64_t pointer;
     } data;
     struct MoonValue *next;
 };

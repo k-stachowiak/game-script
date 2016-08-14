@@ -266,15 +266,15 @@ struct AstNode *ast_make_spec_bind(
     return result;
 }
 
-struct AstNode *ast_make_spec_ref(struct AstNode *expr)
+struct AstNode *ast_make_spec_ptr(struct AstNode *expr)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
     result->next = NULL;
     result->type = AST_SPECIAL;
 
-    result->data.special.type = AST_SPEC_REF;
-    result->data.special.data.ref.expr = expr;
+    result->data.special.type = AST_SPEC_PTR;
+    result->data.special.data.pointer.expr = expr;
 
     return result;
 }
@@ -293,7 +293,7 @@ struct AstNode *ast_make_spec_peek(struct AstNode *expr)
 }
 
 struct AstNode *ast_make_spec_poke(
-        struct AstNode *reference,
+        struct AstNode *pointer,
         struct AstNode *value)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
@@ -302,11 +302,11 @@ struct AstNode *ast_make_spec_poke(
     result->type = AST_SPECIAL;
 
     result->data.special.type = AST_SPEC_POKE;
-    result->data.special.data.poke.reference = reference;
+    result->data.special.data.poke.pointer = pointer;
     result->data.special.data.poke.value = value;
 
     /* Link to ease releasing */
-    reference->next = value;
+    pointer->next = value;
 
     return result;
 }
@@ -337,7 +337,7 @@ struct AstNode *ast_make_spec_end(struct AstNode *collection)
     return result;
 }
 
-struct AstNode *ast_make_spec_inc(struct AstNode *reference)
+struct AstNode *ast_make_spec_inc(struct AstNode *pointer)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -345,12 +345,12 @@ struct AstNode *ast_make_spec_inc(struct AstNode *reference)
     result->type = AST_SPECIAL;
 
     result->data.special.type = AST_SPEC_INC;
-    result->data.special.data.inc.reference = reference;
+    result->data.special.data.inc.pointer = pointer;
 
     return result;
 }
 
-struct AstNode *ast_make_spec_succ(struct AstNode *reference)
+struct AstNode *ast_make_spec_succ(struct AstNode *pointer)
 {
     struct AstNode *result = mem_malloc(sizeof(*result));
 
@@ -358,7 +358,7 @@ struct AstNode *ast_make_spec_succ(struct AstNode *reference)
     result->type = AST_SPECIAL;
 
     result->data.special.type = AST_SPEC_SUCC;
-    result->data.special.data.succ.reference = reference;
+    result->data.special.data.succ.pointer = pointer;
 
     return result;
 }
@@ -578,9 +578,9 @@ static void ast_special_bind_free(struct AstSpecBind *bind)
     ast_node_free_one(bind->expr);
 }
 
-static void ast_special_ref_free(struct AstSpecRef *ref)
+static void ast_special_ptr_free(struct AstSpecPtr *pointer)
 {
-    ast_node_free(ref->expr);
+    ast_node_free(pointer->expr);
 }
 
 static void ast_special_peek_free(struct AstSpecPeek *peek)
@@ -590,7 +590,7 @@ static void ast_special_peek_free(struct AstSpecPeek *peek)
 
 static void ast_special_poke_free(struct AstSpecPoke *poke)
 {
-    ast_node_free(poke->reference);
+    ast_node_free(poke->pointer);
     /* All the nodes in the poke object are linked together. */
 }
 
@@ -606,12 +606,12 @@ static void ast_special_end_free(struct AstSpecEnd *end)
 
 static void ast_special_inc_free(struct AstSpecInc *inc)
 {
-    ast_node_free(inc->reference);
+    ast_node_free(inc->pointer);
 }
 
 static void ast_special_succ_free(struct AstSpecSucc *succ)
 {
-    ast_node_free(succ->reference);
+    ast_node_free(succ->pointer);
 }
 
 static void ast_special_free(struct AstSpecial *special)
@@ -681,8 +681,8 @@ static void ast_special_free(struct AstSpecial *special)
         ast_special_bind_free(&special->data.bind);
         break;
 
-    case AST_SPEC_REF:
-        ast_special_ref_free(&special->data.ref);
+    case AST_SPEC_PTR:
+        ast_special_ptr_free(&special->data.pointer);
         break;
 
     case AST_SPEC_PEEK:
@@ -828,22 +828,22 @@ bool ast_list_contains_symbol(struct AstNode *list, char *symbol)
                 return
                     ast_list_contains_symbol(list->data.special.data.bind.pattern, symbol) |
                     ast_list_contains_symbol(list->data.special.data.bind.expr, symbol);
-            case AST_SPEC_REF:
-                return ast_list_contains_symbol(list->data.special.data.ref.expr, symbol);
+            case AST_SPEC_PTR:
+                return ast_list_contains_symbol(list->data.special.data.pointer.expr, symbol);
             case AST_SPEC_PEEK:
                 return ast_list_contains_symbol(list->data.special.data.peek.expr, symbol);
             case AST_SPEC_POKE:
                 return
-                    ast_list_contains_symbol(list->data.special.data.poke.reference, symbol) |
+                    ast_list_contains_symbol(list->data.special.data.poke.pointer, symbol) |
                     ast_list_contains_symbol(list->data.special.data.poke.value, symbol);
             case AST_SPEC_BEGIN:
                 return ast_list_contains_symbol(list->data.special.data.begin.collection, symbol);
             case AST_SPEC_END:
                 return ast_list_contains_symbol(list->data.special.data.end.collection, symbol);
             case AST_SPEC_INC:
-                return ast_list_contains_symbol(list->data.special.data.inc.reference, symbol);
+                return ast_list_contains_symbol(list->data.special.data.inc.pointer, symbol);
             case AST_SPEC_SUCC:
-                return ast_list_contains_symbol(list->data.special.data.succ.reference, symbol);
+                return ast_list_contains_symbol(list->data.special.data.succ.pointer, symbol);
             }
         case AST_FUNCTION_CALL:
             return

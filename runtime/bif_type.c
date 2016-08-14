@@ -52,10 +52,10 @@ void bif_is_function(struct Runtime *rt, VAL_LOC_T x_loc)
         rt_val_peek_type(&rt->stack, x_loc) == VAL_FUNCTION);
 }
 
-void bif_is_reference(struct Runtime *rt, VAL_LOC_T x_loc)
+void bif_is_pointer(struct Runtime *rt, VAL_LOC_T x_loc)
 {
     rt_val_push_bool(
         &rt->stack,
-        rt_val_peek_type(&rt->stack, x_loc) == VAL_REF);
+        rt_val_peek_type(&rt->stack, x_loc) == VAL_PTR);
 }
 

@@ -67,6 +67,6 @@ void bif_is_char(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_is_array(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_is_tuple(struct Runtime *rt, VAL_LOC_T x_loc);
 void bif_is_function(struct Runtime *rt, VAL_LOC_T x_loc);
-void bif_is_reference(struct Runtime *rt, VAL_LOC_T x_loc);
+void bif_is_pointer(struct Runtime *rt, VAL_LOC_T x_loc);
 
 #endif

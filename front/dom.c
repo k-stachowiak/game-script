@@ -28,10 +28,9 @@ static char *reserved[] = {
     "tuple-of",
     "pointer-to",
     "function",
-    "tprod",
-    "tunion",
-    "ttag",
-    "ref",
+    "product",
+    "union",
+    "ptr",
     "peek",
     "poke",
     "begin",
@@ -46,9 +45,9 @@ static char *reserved[] = {
     "Void",
     "Unit",
     "Bool",
-    "Int",
+    "Integer",
     "Real",
-    "Char",
+    "Character",
 };
 
 static int reserved_count = sizeof(reserved) / sizeof(reserved[0]);

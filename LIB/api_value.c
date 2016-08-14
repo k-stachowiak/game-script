@@ -52,9 +52,9 @@ struct MoonValue *mn_make_api_value(struct Runtime *rt, VAL_LOC_T loc)
         result->type = MN_FUNCTION;
         break;
 
-    case VAL_REF:
+    case VAL_PTR:
         result->type = MN_REFERENCE;
-        result->data.reference = rt_val_peek_ref(rt, loc);
+        result->data.pointer = rt_val_peek_ptr(rt, loc);
         break;
 
     case VAL_UNIT:

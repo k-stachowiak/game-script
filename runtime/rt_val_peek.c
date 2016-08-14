@@ -90,8 +90,8 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
         str_append(*str, "function");
         break;
 
-    case VAL_REF:
-        str_append(*str, "reference");
+    case VAL_PTR:
+        str_append(*str, "pointer");
         break;
 
     case VAL_UNIT:
@@ -175,8 +175,8 @@ void rt_val_print(struct Runtime *rt, VAL_LOC_T loc, bool annotate)
                 str_append(buffer, "function :: ");
                 break;
 
-            case VAL_REF:
-                str_append(buffer, "reference :: ");
+            case VAL_PTR:
+                str_append(buffer, "pointer :: ");
                 break;
 
             case VAL_UNIT:
@@ -291,10 +291,10 @@ VAL_REAL_T rt_val_peek_real(struct Runtime *rt, VAL_LOC_T loc)
     return result;
 }
 
-VAL_LOC_T rt_val_peek_ref(struct Runtime *rt, VAL_LOC_T loc)
+VAL_LOC_T rt_val_peek_ptr(struct Runtime *rt, VAL_LOC_T loc)
 {
-    VAL_REF_T result;
-    memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_REF_BYTES);
+    VAL_PTR_T result;
+    memcpy(&result, rt->stack.buffer + loc + VAL_HEAD_BYTES, VAL_PTR_BYTES);
     return result;
 }
 
@@ -352,7 +352,7 @@ struct ValueFuncData rt_val_function_data(struct Runtime *rt, VAL_LOC_T loc)
     loc += VAL_TYPE_BYTES;
 
     result.impl_loc = loc;
-    loc += VAL_PTR_BYTES;
+    loc += VAL_HW_PTR_BYTES;
 
     cap_count_loc = loc;
     result.cap_start = cap_count_loc + VAL_SIZE_BYTES;
