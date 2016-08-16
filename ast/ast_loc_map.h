@@ -32,4 +32,17 @@ struct SourceLocation *alm_get(
     struct AstLocMap *alm,
     struct AstNode *node);
 
+void alm_try_put(
+    struct AstLocMap *alm,
+    struct AstNode *node,
+    struct SourceLocation *loc);
+
+struct AstLocMapAstNode *alm_try_find(
+    struct AstLocMap *alm,
+    struct AstNode *node);
+
+struct SourceLocation *alm_try_get(
+    struct AstLocMap *alm,
+    struct AstNode *node);
+
 #endif

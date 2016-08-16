@@ -1024,7 +1024,7 @@ void parse_source_on_ast(
         struct SourceLocation *loc)
 {
     struct AstLocMap *alm = (struct AstLocMap *)data;
-    alm_put(alm, node, loc);
+    alm_try_put(alm, node, loc);
 }
 
 struct AstNode *parse_source_build_alm(

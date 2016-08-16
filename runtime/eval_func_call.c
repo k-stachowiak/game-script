@@ -57,7 +57,7 @@ static bool efc_evaluate_arg(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, arg_node),
+            alm_try_get(alm, arg_node),
             "Failed evaluating function argument expression");
         return false;
     }
@@ -66,7 +66,7 @@ static bool efc_evaluate_arg(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, pattern),
+            alm_try_get(alm, pattern),
             "Failed registering function argument in the local scope");
         return false;
     }
@@ -122,7 +122,7 @@ static void efc_curry_on(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, actual_args),
+                alm_try_get(alm, actual_args),
                 "Failed evaluating function argument");
             break;
         }
@@ -395,7 +395,7 @@ void eval_func_call(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, func),
+            alm_try_get(alm, func),
             "Failed evaluating function identity");
         return;
     }
@@ -403,7 +403,7 @@ void eval_func_call(
     if (rt_val_peek_type(&rt->stack, func_loc) != VAL_FUNCTION) {
         err_push_src(
             "EVAL",
-            alm_get(alm, func),
+            alm_try_get(alm, func),
             "Function call key doesn't evaluate to a function");
         return;
     }

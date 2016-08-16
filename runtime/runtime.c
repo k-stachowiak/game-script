@@ -139,7 +139,7 @@ void rt_register_clif_handler(
 bool rt_consume_one(
         struct Runtime *rt,
         struct AstNode *ast,
-    struct AstLocMap *alm,
+        struct AstLocMap *alm,
         VAL_LOC_T *loc,
         struct AstNode **next)
 {
@@ -157,7 +157,7 @@ bool rt_consume_one(
     }
 
     if (err_state()) {
-        err_push_src("RUNTIME", alm_get(alm, ast), "Failed consuming AST node");
+        err_push_src("RUNTIME", alm_try_get(alm, ast), "Failed consuming AST node");
         ast_node_free_one(ast);
         return false;
 
@@ -190,8 +190,8 @@ bool rt_consume_list(
             * no nodes that have already been consumed will be freed.
             * They have actually been freed upon success of the consume function.
             */
-            if (ast_list->next) {
-                ast_node_free(ast_list->next);
+            if (next) {
+                ast_node_free(next);
             }
             return false;
         }

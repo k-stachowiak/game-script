@@ -10,7 +10,7 @@
  * http://stackoverflow.com/questions/314401/how-to-read-a-line-from-the-console-in-c
  * It has been slightly modified to fit into the program, e.g. error handling.
  */
-char *my_getline(bool *eof)
+char *my_getline(FILE *file, bool *eof)
 {
     char *line = mem_malloc(100);
     char *linep = line;
@@ -19,7 +19,7 @@ char *my_getline(bool *eof)
     int c;
 
     for (;;) {
-        c = fgetc(stdin);
+        c = fgetc(file);
         if (c == EOF) {
             *eof = true;
             break;

@@ -43,7 +43,7 @@ static void eval_special_do(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, expr),
+                alm_try_get(alm, expr),
                 "Failed evaluating do expression");
             break;
         } else {
@@ -73,7 +73,7 @@ static void eval_special_match(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, expr),
+            alm_try_get(alm, expr),
             "Failed evaluating match expression");
         return;
     }
@@ -107,7 +107,7 @@ static void eval_special_match(
     /* No match found. */
     err_push_src(
         "EVAL",
-        alm_get(alm, node),
+        alm_try_get(alm, node),
         "None of the cases were matched in match expression");
 
 end:
@@ -132,13 +132,13 @@ static void eval_special_if(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, iff->test),
+            alm_try_get(alm, iff->test),
             "Failed evaluating if test");
         return;
     }
 
     if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-        spec_error_arg_expected("if", 1, "boolean", alm_get(alm, iff->test));
+        spec_error_arg_expected("if", 1, "boolean", alm_try_get(alm, iff->test));
         stack_collapse(&rt->stack, temp_begin, temp_end);
         return;
     }
@@ -174,13 +174,13 @@ static void eval_special_while(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, whilee->test),
+                alm_try_get(alm, whilee->test),
                 "Failed evaluating while test");
             return;
         }
 
         if (rt_val_peek_type(&rt->stack, test_loc) != VAL_BOOL) {
-            spec_error_arg_expected("while", 1, "boolean", alm_get(alm, whilee->test));
+            spec_error_arg_expected("while", 1, "boolean", alm_try_get(alm, whilee->test));
             stack_collapse(&rt->stack, temp_begin, temp_end);
             return;
         }
@@ -191,7 +191,7 @@ static void eval_special_while(
             if (err_state()) {
                 err_push_src(
                     "EVAL",
-                    alm_get(alm, whilee->expr),
+                    alm_try_get(alm, whilee->expr),
                     "Failed evaluating while expression");
                 stack_collapse(&rt->stack, temp_begin, temp_end);
                 return;
@@ -228,13 +228,13 @@ static void eval_special_logic(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, exprs),
+                alm_try_get(alm, exprs),
                 "Failed evaluating logic special form element");
             return;
         }
 
         if (rt_val_peek_type(&rt->stack, loc) != VAL_BOOL) {
-            spec_error_arg_expected(func_name, i, "boolean", alm_get(alm, exprs));
+            spec_error_arg_expected(func_name, i, "boolean", alm_try_get(alm, exprs));
             return;
         }
 
@@ -263,7 +263,7 @@ static void eval_special_bind(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bind->expr),
+            alm_try_get(alm, bind->expr),
             "Failed evaluating bind expression");
         return;
     }
@@ -284,14 +284,14 @@ static void eval_special_ptr(
     struct AstSpecPtr *pointer = &node->data.special.data.pointer;
 
     if (pointer->expr->type != AST_SYMBOL) {
-        spec_error_arg_expected("ptr", 1, "symbol", alm_get(alm, pointer->expr));
+        spec_error_arg_expected("ptr", 1, "symbol", alm_try_get(alm, pointer->expr));
         return;
     }
     symbol = pointer->expr->data.symbol.symbol;
     smn = sym_map_find(sym_map, symbol);
 
     if (!smn) {
-        eval_error_not_found_src(symbol, alm_get(alm, pointer->expr));
+        eval_error_not_found_src(symbol, alm_try_get(alm, pointer->expr));
         return;
     }
 
@@ -315,14 +315,14 @@ static void eval_special_peek(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, peek->expr),
+            alm_try_get(alm, peek->expr),
             "Failed evaluating _peek_ pointer argument");
         return;
     }
 
     ptr_type = rt_val_peek_type(&rt->stack, ptr_loc);
     if (ptr_type != VAL_PTR) {
-        spec_error_arg_expected("peek", 1, "pointer", alm_get(alm, peek->expr));
+        spec_error_arg_expected("peek", 1, "pointer", alm_try_get(alm, peek->expr));
         return;
     }
 
@@ -347,14 +347,14 @@ static void eval_special_poke(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, poke->pointer),
+            alm_try_get(alm, poke->pointer),
             "Failed evaluating _poke_ pointer argument");
         return;
     }
 
     ptr_type = rt_val_peek_type(&rt->stack, ptr_loc);
     if (ptr_type != VAL_PTR) {
-        spec_error_arg_expected("poke", 1, "pointer", alm_get(alm, poke->pointer));
+        spec_error_arg_expected("poke", 1, "pointer", alm_try_get(alm, poke->pointer));
         return;
     }
 
@@ -365,7 +365,7 @@ static void eval_special_poke(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, poke->value),
+            alm_try_get(alm, poke->value),
             "Failed evaluating _poke_ source argument");
         return;
     }
@@ -373,7 +373,7 @@ static void eval_special_poke(
     if (!rt_val_pair_homo(rt, source_loc, target_loc)) {
         err_push_src(
             "EVAL",
-            alm_get(alm, poke->value),
+            alm_try_get(alm, poke->value),
             "Attempted to _poke_ value of mismatched type");
         return;
     }
@@ -397,14 +397,14 @@ static void eval_special_begin(
     if (begin->collection->type != AST_SYMBOL) {
         spec_error_arg_expected(
             "begin", 1, "symbol",
-            alm_get(alm, begin->collection));
+            alm_try_get(alm, begin->collection));
         return;
     }
     symbol = begin->collection->data.symbol.symbol;
     smn = sym_map_find(sym_map, symbol);
 
     if (!smn) {
-        eval_error_not_found_src(symbol, alm_get(alm, begin->collection));
+        eval_error_not_found_src(symbol, alm_try_get(alm, begin->collection));
         return;
     }
 
@@ -413,7 +413,7 @@ static void eval_special_begin(
     if (ptr_type != VAL_ARRAY && ptr_type != VAL_TUPLE) {
         spec_error_arg_expected(
             "begin", 1, "pointer to compound object",
-            alm_get(alm, begin->collection));
+            alm_try_get(alm, begin->collection));
         return;
     }
 
@@ -436,14 +436,14 @@ static void eval_special_end(
     if (end->collection->type != AST_SYMBOL) {
         spec_error_arg_expected(
             "end", 1, "symbol",
-            alm_get(alm, end->collection));
+            alm_try_get(alm, end->collection));
         return;
     }
     symbol = end->collection->data.symbol.symbol;
     smn = sym_map_find(sym_map, symbol);
 
     if (!smn) {
-        eval_error_not_found_src(symbol, alm_get(alm, end->collection));
+        eval_error_not_found_src(symbol, alm_try_get(alm, end->collection));
         return;
     }
 
@@ -452,7 +452,7 @@ static void eval_special_end(
     if (ptr_type != VAL_ARRAY && ptr_type != VAL_TUPLE) {
         spec_error_arg_expected(
         "end", 1, "pointer to compound object",
-        alm_get(alm, end->collection));
+        alm_try_get(alm, end->collection));
         return;
     }
 
@@ -480,14 +480,14 @@ static void eval_special_inc(
     if (inc->pointer->type != AST_SYMBOL) {
         spec_error_arg_expected(
             "inc", 1, "symbol",
-            alm_get(alm, inc->pointer));
+            alm_try_get(alm, inc->pointer));
         return;
     }
     symbol = inc->pointer->data.symbol.symbol;
 
     smn = sym_map_find(sym_map, symbol);
     if (!smn) {
-        eval_error_not_found_src(symbol, alm_get(alm, inc->pointer));
+        eval_error_not_found_src(symbol, alm_try_get(alm, inc->pointer));
         return;
     }
     ptr_loc = smn->stack_loc;
@@ -496,7 +496,7 @@ static void eval_special_inc(
     if (ptr_type != VAL_PTR) {
         spec_error_arg_expected(
             "inc", 1, "pointer to pointer",
-            alm_get(alm, inc->pointer));
+            alm_try_get(alm, inc->pointer));
         return;
     }
 
@@ -524,7 +524,7 @@ static void eval_special_succ(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, succ->pointer),
+            alm_try_get(alm, succ->pointer),
             "Failed evaluating _succ_ pointer argument");
         return;
     }
@@ -533,7 +533,7 @@ static void eval_special_succ(
     if (ptr_type != VAL_PTR) {
         spec_error_arg_expected(
             "succ", 1, "pointer",
-            alm_get(alm, succ->pointer));
+            alm_try_get(alm, succ->pointer));
         return;
     }
 

@@ -26,7 +26,7 @@ static void eval_symbol(
     LOG_TRACE_FUNC;
 
     if (!(smn = sym_map_find(sym_map, symbol))) {
-        eval_error_not_found_src(symbol, alm_get(alm, node));
+        eval_error_not_found_src(symbol, alm_try_get(alm, node));
         return;
     }
 
@@ -84,7 +84,7 @@ VAL_LOC_T eval_dispatch(
             dbg_call_end(&rt->debugger, rt, ret_val, true);
         }
 
-        err_push_src("EVAL", alm_get(alm, node), "Failed evaluating expression");
+        err_push_src("EVAL", alm_try_get(alm, node), "Failed evaluating expression");
         LOG_TRACE("eval_impl END(error)");
         return ret_val;
 

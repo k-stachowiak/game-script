@@ -86,7 +86,7 @@ bool test_eval_source(
         rt_consume_one(rt, ast_list, &alm, locs + (i++), &next);
         if (err_state()) {
             ast_node_free(next);
-        alm_deinit(&alm);
+            alm_deinit(&alm);
             return false;
         }
         ast_list = next;

@@ -24,7 +24,7 @@ static void eval_bind_pattern_literal_compound(
         !(val_type == VAL_TUPLE && pat_type == AST_LIT_CPD_TUPLE)) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, pattern),
+                alm_try_get(alm, pattern),
                 "Compound value and pattern type mismatch");
             return;
     }
@@ -34,7 +34,7 @@ static void eval_bind_pattern_literal_compound(
     if (val_len != pat_len) {
         err_push_src(
             "EVAL",
-            alm_get(alm, pattern),
+            alm_try_get(alm, pattern),
             "Compound value and pattern length mismatch");
         return;
     }
@@ -45,7 +45,7 @@ static void eval_bind_pattern_literal_compound(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, current_pat),
+                alm_try_get(alm, current_pat),
                 "Failed matching one of the compound pattern elements");
             return;
         }
@@ -77,7 +77,7 @@ void eval_special_bind_pattern_evaluable(
     if (!rt_val_eq_rec(rt, test_loc, location)) {
         err_push_src(
             "EVAL",
-            alm_get(alm, pattern),
+            alm_try_get(alm, pattern),
             "Failed matching pattern against a value");
     }
 

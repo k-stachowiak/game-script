@@ -4,8 +4,9 @@
 #define TERM_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
-char *my_getline(bool *eof);
+char *my_getline(FILE *file, bool *eof);
 char *my_getfile(char *filename);
 
 #endif

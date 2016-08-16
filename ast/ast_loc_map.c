@@ -53,3 +53,34 @@ struct SourceLocation *alm_get(
     }
 }
 
+void alm_try_put(
+    struct AstLocMap *alm,
+    struct AstNode *node,
+    struct SourceLocation *loc)
+{
+    if (alm) {
+        alm_put(alm, node, loc);
+    }
+}
+
+struct AstLocMapAstNode *alm_try_find(
+    struct AstLocMap *alm,
+    struct AstNode *node)
+{
+    if (alm) {
+        return alm_find(alm, node);
+    } else {
+        return NULL;
+    }
+}
+
+struct SourceLocation *alm_try_get(
+    struct AstLocMap *alm,
+    struct AstNode *node)
+{
+    if (alm) {
+        return alm_get(alm, node);
+    } else {
+        return NULL;
+    }
+}

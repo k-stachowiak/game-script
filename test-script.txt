@@ -1,0 +1,25 @@
+TEST Evaluate simple literals
+"\t"
+EXPECT string "	"
+true
+EXPECT bool true
+false
+EXPECT bool false
+'a'
+EXPECT char a
+1
+EXPECT int 1
++2
+EXPECT int 2
+-3
+EXPECT int -3
+1.0
+EXPECT real 1
++2.0
+EXPECT real 2
+-3.0
+EXPECT real -3
+""
+EXPECT string ""
+"str"
+EXPECT string "str"

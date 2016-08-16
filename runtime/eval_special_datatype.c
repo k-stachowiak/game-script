@@ -23,7 +23,7 @@ void eval_special_set_of(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Failed evaluating type in set_of constructor");
             return;
         } else {
@@ -54,7 +54,7 @@ void eval_special_range_of(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound_lo),
+            alm_try_get(alm, bound_lo),
             "Failed evaluating from bound in range_of constructor");
         return;
     }
@@ -62,7 +62,7 @@ void eval_special_range_of(
     if (rt_val_peek_type(&rt->stack, from_loc) != VAL_INT) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound_lo),
+            alm_try_get(alm, bound_lo),
             "Non-integral from bound in range_of constructor");
         return;
     }
@@ -71,7 +71,7 @@ void eval_special_range_of(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound_hi),
+            alm_try_get(alm, bound_hi),
             "Failed evaluating to bound in range_of constructor");
         return;
     }
@@ -79,7 +79,7 @@ void eval_special_range_of(
     if (rt_val_peek_type(&rt->stack, to_loc) != VAL_INT) {
         err_push_src(
             "EVAL",
-            alm_get(alm, bound_hi),
+            alm_try_get(alm, bound_hi),
             "Non-integral to bound in range_of constructor");
         return;
     }
@@ -106,7 +106,7 @@ void eval_special_array_of(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, type),
+            alm_try_get(alm, type),
             "Failed evaluating type in array_of constructor");
         return;
     }
@@ -114,7 +114,7 @@ void eval_special_array_of(
     if (rt_val_peek_type(&rt->stack, elem_loc) != VAL_DATATYPE) {
         err_push_src(
             "EVAL",
-            alm_get(alm, type),
+            alm_try_get(alm, type),
             "Non-type item in array_of constructor");
         return;
     }
@@ -141,13 +141,13 @@ void eval_special_tuple_of(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Failed evaluating type in tuple_of constructor");
             return;
         } else if (rt_val_peek_type(&rt->stack, elem_loc) != VAL_DATATYPE) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Non-type item in tuple_of constructor");
             return;
         } else {
@@ -177,7 +177,7 @@ void eval_special_pointer_to(
     if (err_state()) {
         err_push_src(
             "EVAL",
-            alm_get(alm, type),
+            alm_try_get(alm, type),
             "Failed evaluating type in pointer_to constructor");
         return;
     }
@@ -185,7 +185,7 @@ void eval_special_pointer_to(
     if (rt_val_peek_type(&rt->stack, elem_loc) != VAL_DATATYPE) {
         err_push_src(
             "EVAL",
-            alm_get(alm, type),
+            alm_try_get(alm, type),
             "Non-type item in pointer_to constructor");
         return;
     }
@@ -212,13 +212,13 @@ void eval_special_function_type(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Failed evaluating type in tuple_of constructor");
             return;
         } else if (rt_val_peek_type(&rt->stack, elem_loc) != VAL_DATATYPE) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Non-type item in tuple_of constructor");
             return;
         } else {
@@ -257,13 +257,13 @@ void eval_special_type_op(
         if (err_state()) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Failed evaluating type in type operator args");
             return;
         } else if (rt_val_peek_type(&rt->stack, elem_loc) != VAL_DATATYPE) {
             err_push_src(
                 "EVAL",
-                alm_get(alm, type),
+                alm_try_get(alm, type),
                 "Non-type item in type operator args");
             return;
         } else {
