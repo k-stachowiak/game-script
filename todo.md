@@ -3,6 +3,7 @@
    * for regular values store size when performing bind
    * for array elements - encode element size into array value
    * for tuples encode the sequence of the element sizes into the tuple value
+* rt_val_is_string treats empty array and empty string equally
 * A bind should create "references", i.e. a tuples of address and type.
   This should be a common concept also used by the reference varaibles. Once
   the references are implemented in terms of address+size the metadata may start

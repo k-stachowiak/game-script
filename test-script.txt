@@ -1,6 +1,15 @@
+# Syntax:
+# =======
+# * comments start with hash
+# * empty lines ignored
+# * TEST {any string} - resets the runtime and sets the "current test" string
+# * EXPECT {type} {value} - tests if the last result is of a given type and value
+# * Any other line is fed directly to the runtime as a source to be executed
+
+# Basic syntax:
+# -------------
+
 TEST Evaluate simple literals
-"\t"
-EXPECT string "	"
 true
 EXPECT bool true
 false
@@ -23,3 +32,415 @@ EXPECT real -3
 EXPECT string ""
 "str"
 EXPECT string "str"
+"\t"
+EXPECT string "	"
+
+TEST Compound evaluation
+[ 1.0 \"two\"]
+EXPECT FAILURE
+[ [ 1.0 ]  [ \"two\" ] ]
+EXPECT FAILURE
+[ \"tic\"  \"tack\" ]
+EXPECT FAILURE
+[ { 1 } { 2 3 } ]
+EXPECT FAILURE
+[]
+EXPECT SUCCESS
+[ 1 2 ]
+EXPECT SUCCESS
+[ [ 1 2 ] [ 3 4 ] ]
+EXPECT SUCCESS
+[ { 1 2 } { 3 4 } ]
+EXPECT SUCCESS
+{}
+EXPECT SUCCESS
+{ 1 2 }
+EXPECT SUCCESS
+{ 1 [] }
+EXPECT SUCCESS
+
+TEST Symbol reference
+x
+EXPECT FAILURE
+(do (bind y 3) y)
+EXPECT SUCCESS
+EXPECT int 3
+
+# Special forms:
+# --------------
+
+TEST Special do
+(do)
+EXPECT FAILURE
+(do 1 2 3)
+EXPECT int 3
+
+TEST Special bind basic
+(bind)
+EXPECT FAILURE
+(bind x)
+EXPECT FAILURE
+(bind "x" 1)
+EXPECT FAILURE
+(bind {} 1.0)
+EXPECT FAILURE
+(bind { a [] } 1.0 [ 1 2 ])
+EXPECT FAILURE
+(bind 1 2)
+EXPECT FAILURE
+(bind [ 1 2 ] [ 2 1 ])
+EXPECT FAILURE
+(bind { a } [ 1.0 ])
+EXPECT FAILURE
+(bind { b } { 1 2 })
+EXPECT FAILURE
+(bind [ c d ] [ 1 ])
+EXPECT FAILURE
+(bind x 1.0)
+EXPECT real 1
+(bind y (+ 1 2))
+EXPECT int 3
+(bind 1.0 1.0)
+EXPECT real 1
+(bind [ 2 3 ] [ (+ 1 1) 3 ])
+EXPECT SUCCESS
+(bind "asd" [ 'a' 's' 'd' ])
+EXPECT string "asd"
+(bind [ 'a' 's' 'd' ] "asd")
+EXPECT string "asd"
+(bind { e f } { 1 2 })
+EXPECT SUCCESS
+(bind [ g ] [ 1.0 ])
+EXPECT SUCCESS
+(do (bind { s _ } { 1.0 2.0 }) s)
+EXPECT real 1
+(do (bind { _ t } { 1.0 2.0 }) t)
+EXPECT real 2
+
+TEST Special match
+(match)
+EXPECT FAILURE
+(match 1)
+EXPECT FAILURE
+(match 1 (2 2.0) (3 3.0))
+EXPECT FAILURE
+(match (+ 2 2) (3 'a') (4 'b'))
+EXPECT char b
+(match "asd" (3 'a') ("asd" 'c'))
+EXPECT char c
+(match [ 'a' 's' 'd' ] (3 'a') ("asd" 'd'))
+EXPECT char d
+(match 1 (2 2.0) (3 3.0) (_ 4.0))
+EXPECT real 4
+(match 1 (2 2.0) (_ 3.0) (1 4.0))
+EXPECT real 3
+
+TEST Special boolean operators
+(and)
+EXPECT FAILURE
+(or)
+EXPECT FAILURE
+(and true)
+EXPECT bool true
+(and false)
+EXPECT bool false
+(or true)
+EXPECT bool true
+(or false)
+EXPECT bool false
+(and true true)
+EXPECT bool true
+(and false true)
+EXPECT bool false
+(or false true)
+EXPECT bool true
+(or false false)
+EXPECT bool false
+
+TEST Special if
+(if)
+EXPECT FAILURE
+(if a)
+EXPECT FAILURE
+(if a b)
+EXPECT FAILURE
+(if true 1.0 2.0)
+EXPECT real 1
+(if false "a" "b")
+EXPECT string b
+
+TEST Special pointers basic
+(bind x 1)
+(bind x^ (ptr x))
+(bind y (peek x^))
+(poke x^ 2)
+x
+EXPECT int 2
+y
+EXPECT int 1
+
+TEST Special pointers manual iteration
+(bind vec [ 1 2 3 ])
+(bind x^ (begin vec))
+(peek x^)
+EXPECT int 1
+(bind y^ (succ x^))
+(peek y^)
+EXPECT int 2
+(bind z^ (succ y^))
+(peek z^)
+EXPECT int 3
+
+TEST Special pointers peeking abd poking
+(bind v [ 1 2 3 ])
+(bind v^ (ptr v))
+(bind x 4.0)
+(bind x^ (ptr x))
+EXPECT SUCCESS
+(poke v^ [ 1 2 ])
+EXPECT FAILURE
+(poke v^ [ 'a' 'b' 'c' ])
+EXPECT FAILURE
+(poke v^ 1.0)
+EXPECT FAILURE
+(poke v^ [ 3 2 1 ])
+EXPECT SUCCESS
+(peek (begin v))
+EXPECT int 3
+
+# Built-in-functions:
+# -------------------
+
+TEST Arythmetic
+(+ 2 -)
+EXPECT FAILURE
+(- + 2)
+EXPECT FAILURE
+(+ 2 2)
+EXPECT int 4
+(/ 2.0 2.0)
+EXPECT real 1
+(- 2.0 (* 2.0 2.0))
+EXPECT real -2
+(* 2.0 (+ 2.0 2.0))
+EXPECT real 8
+(+ (/ 7 2) (% 7 2))
+EXPECT int 4
+(+ (/ 7.0 2.0) (% 7.0 2.0))
+EXPECT real 4.5
+(sqrt (+ (* 3.0 3.0) (* 4.0 4.0)))
+EXPECT real 5
+(- 2.0 2)
+EXPECT real 0
+(* 2.0 2)
+EXPECT real 4
+(floor -3.5)
+EXPECT int -4
+(ceil -3.5)
+EXPECT int -3
+(round 3.5)
+EXPECT int 4
+
+TEST Comparison operators
+(eq 2 2)
+EXPECT bool true
+(eq 12.0 23.0)
+EXPECT bool false
+(lt 12.0 23.0)
+EXPECT bool true
+(lt 2 2)
+EXPECT bool false
+
+TEST Logic operators
+(xor false true)
+EXPECT bool true
+(xor true true)
+EXPECT bool false
+(not false)
+EXPECT bool true
+(not true)
+EXPECT bool false
+
+TEST Push front and back
+(eq (push_front [] 3) [ 3 ])
+EXPECT bool true
+(eq (push_front { 2 3 } 1) { 1 2 3 })
+EXPECT bool true
+(eq (push_back {} 3) { 3 })
+EXPECT bool true
+(eq (push_back [ 2 3 ] 1) [ 2 3 1 ])
+EXPECT bool true
+(eq (push_back "" 'a') "a")
+EXPECT bool true
+(eq (push_back "as" 'd') "asd")
+EXPECT bool true
+
+TEST Concatenation
+(cat 1 2)
+EXPECT FAILURE
+(cat [ 1 ] 2)
+EXPECT FAILURE
+(cat 1 [ 2 ])
+EXPECT FAILURE
+(cat [ 1.0 ] [ 2 ])
+EXPECT FAILURE
+(cat [ 1 ] { 2 })
+EXPECT FAILURE
+(cat { 1 } [ 2 ])
+EXPECT FAILURE
+(cat [ 1 ] { 2.0 })
+EXPECT FAILURE
+(eq (cat [] []) [])
+EXPECT bool true
+(eq (cat {} {}) {})
+EXPECT bool true
+(eq (cat "" "") "")
+EXPECT bool true
+(eq (cat [ "" ] []) [ "" ])
+EXPECT bool true
+(eq (cat { "" } {}) { "" })
+EXPECT bool true
+(eq (cat "asdf" "") "asdf")
+EXPECT bool true
+(eq (cat [ 'a' ] [ 'b' 'c' ]) [ 'a' 'b' 'c' ])
+EXPECT bool true
+(eq (cat { 1 } { 2.0 "three" }) { 1 2.0 "three" })
+EXPECT bool true
+(eq (cat "a" "sd") "asd")
+EXPECT bool true
+
+TEST Length check
+(length [])
+EXPECT int 0
+(length [ 'a' 'b' 'c' ])
+EXPECT int 3
+(length {})
+EXPECT int 0
+(length { 1 2.0 "three" })
+EXPECT int 3
+(length "")
+EXPECT int 0
+(length 'x')
+EXPECT FAILURE
+
+TEST Accessing specific collection element
+(at [ 1 ] 0 0)
+EXPECT FAILURE
+(at {} 1.0)
+EXPECT FAILURE
+(at 1.0 1)
+EXPECT FAILURE
+(at [ "alpha" "beta" "gamma" ] -1)
+EXPECT FAILURE
+(at { "alpha" "beta" "gamma" } 3)
+EXPECT FAILURE
+(at [ "alpha" "beta" "gamma" ] 300)
+EXPECT FAILURE
+(at [ 1 2 3 ] 0)
+EXPECT int 1
+(at { 1 2.0 "three" } 1)
+EXPECT real 2
+(at "asd" 1)
+EXPECT char s
+
+TEST Collection slice
+(slice [ 1 2 3 ] -1 0)
+EXPECT FAILURE
+(slice { 1 2 3 } 1 0)
+EXPECT FAILURE
+(slice [ 1 2 3 ] 1 4)
+EXPECT FAILURE
+(eq (slice [ 1 2 3 ] 1 3) [ 2 3 ])
+EXPECT bool true
+(eq (slice [ 1 2 3 ] 2 2) [])
+EXPECT bool true
+(eq (slice { 1 2.0 "three"} 1 3) { 2.0 "three" })
+EXPECT bool true
+(eq (slice "asdf" 1 3) "sd")
+EXPECT bool true
+(eq (slice { 1 2.0 "three" } 2 2) {})
+EXPECT bool true
+
+TEST String formatting
+(format "%d%f" { 1 })
+EXPECT FAILURE
+(format "%d" { 1.0 })
+EXPECT FAILURE
+(format "%d" { 1 1.0 })
+EXPECT FAILURE
+(format "%s, %s!" { "Hello" "World" } )
+EXPECT string "Hello, World!"
+(format "%d%d" { 1 2 })
+EXPECT string "12"
+
+TEST Parsing and stringifying
+(do (bind { x _ } (parse "2.0")) x)
+EXPECT bool true
+(do (bind { _ y } (parse "2.0")) y)
+EXPECT real 2
+(eq { true false } (parse (to_string false)))
+EXPECT bool true
+(eq { true 1 } (parse (to_string 1)))
+EXPECT bool true
+(eq { true 2.0 } (parse (to_string 2.0)))
+EXPECT bool true
+(eq { true '3' } (parse (to_string '3')))
+EXPECT bool true
+(eq { true { 1 2.0 [ true ] } } (parse (to_string { 1 2.0 [ true ] })))
+EXPECT bool true
+(eq { true [ { 1 2 } { 3 4 } ] } (parse (to_string [ { 1 2 } { 3 4 } ])))
+EXPECT bool true
+(do (bind { z _ } (parse "[ { 1 2 } { 3 } ]")) z)
+EXPECT bool false
+(do (bind { s _ } (parse "[ 1 2 asdf ]")) s)
+EXPECT bool false
+
+TEST Simple functions
+(bind x 1.0)
+(x)
+EXPECT FAILURE
+(bind sqr (func (x) (* x x)))
+(bind select (func (cond x y) (if cond (sqr x) (sqr y))))
+(select true 2 3)
+EXPECT int 4
+(select false 2 3)
+EXPECT int 9
+
+TEST Recursive functions
+(bind gcd (func (x y) (if (eq y 0) x (gcd y (% x y)) ) ))
+(bind lcm (func (x y) (* (/ x (gcd x y)) y ) ))
+(gcd 54 24)
+EXPECT int 6
+(lcm 21 6)
+EXPECT int 42
+
+TEST Function with capture
+(bind mkmul (func (x) (do (bind lhs x)(func (rhs) (* lhs rhs)))))
+(bind doubler (mkmul 2))
+(bind tripler (mkmul 3))
+(doubler 4)
+EXPECT int 8
+(tripler 4)
+EXPECT int 12
+
+TEST Nested currying
+(bind point (func (f g x) (g (f x))))
+(bind times2 (* 2))
+(bind times4 (point times2 times2))
+(bind times8 (point times2 times4))
+(times8 3)
+EXPECT int 24
+
+TEST Complex call expression
+(bind x ((+ 2) 2))
+(bind custom_mul (func (x y z) (* (* x y) z)))
+(bind y (((custom_mul 1.0) 2.0 ) 3.0))
+x
+EXPECT int 4
+y
+EXPECT real 6
+
+TEST Scope stacking
+(bind foo (func (x y) (do (bind bar (func (x y z) (if (eq y 0) z (bar x (- y 1) (push_back z (x)))))) (bar x y []))))
+(foo (func () (rand_ur 0.0 100.0)) 1)
+EXPECT SUCCESS

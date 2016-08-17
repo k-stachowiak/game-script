@@ -1,0 +1,3 @@
+TEST Current Critical Issue
+(to_string [ 'a' ])
+EXPECT string "[ 'a' ]"

@@ -63,7 +63,7 @@ void rt_val_to_string(struct Runtime *rt, VAL_LOC_T x, char **str)
         break;
 
     case VAL_CHAR:
-        str_append(*str, "%c", rt_val_peek_char(rt, x));
+        str_append(*str, "'%c'", rt_val_peek_char(rt, x));
         break;
 
     case VAL_INT:
